@@ -8,22 +8,22 @@ Created on Mon Feb 27 13:33:40 2017
 import h5py,os,glob,win32com.client,cv
 import numpy as np
 
-mainpath = 'E:/20161216/Kinect data _ h5 and pkl file/'
-savepath  = 'D:/20170224/Kinect/avi/'
+src_psth = 'H:/20170306/Kinect/'
+dst_psth = 'D:/20170306/Kinect/avi/'
 
 fps = 30
 
 
-def folder_retarget(mainpath,shortcut):  
+def folder_retarget(src_psth,shortcut):  
     shell = win32com.client.Dispatch("WScript.Shell")    
-    return str(shell.CreateShortCut(mainpath+shortcut).Targetpath)
+    return str(shell.CreateShortCut(src_psth+shortcut).Targetpath)
 
-for subfolder in os.listdir(mainpath):   
+for subfolder in os.listdir(src_psth):   
     if '.lnk' in subfolder:
-        path = folder_retarget(mainpath,subfolder)
+        path = folder_retarget(src_psth,subfolder)
         filelist = glob.glob(os.path.join(path, '*.h5') ) # find all pkl files        
     else:
-        filelist = glob.glob(os.path.join(mainpath+subfolder, '*.h5') ) # find all pkl files        
+        filelist = glob.glob(os.path.join(src_psth+subfolder, '*.h5') ) # find all pkl files        
         
     for infile in filelist:
         print infile

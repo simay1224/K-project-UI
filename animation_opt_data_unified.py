@@ -39,12 +39,12 @@ from mpl_toolkits.mplot3d import Axes3D
 ###########################
 
 
-data_all = pk.load(file('./data/Motion and Kinect/Unified_MData/Dawn_2016-12-16 02.26.38 PM_FPS30_motion_unified_ex4.pkl'))
-mdata = pk.load(file('test3.pkl'))
-kdata_all = pk.load(file('./data/Motion and Kinect/Unified_KData/Dawn_12161426_Kinect_unified_ex4.pkl'))
+#data_all = pk.load(file('./data/Motion and Kinect/Unified_MData/Dawn_2016-12-16 02.26.38 PM_FPS30_motion_unified_ex4.pkl'))
+#mdata = pk.load(file('test3.pkl'))
+#kdata_all = pk.load(file('./data/Motion and Kinect/Unified_KData/Dawn_12161426_Kinect_unified_ex4.pkl'))
 
-#data_all = pk.load(file('./data/Motion and Kinect/Unified_MData/qingyuan_2016-12-15 03.37.16 PM_FPS30_motion_unified_ex4.pkl'))
-#kdata_all = pk.load(file('./data/Motion and Kinect/Unified_KData/Qingyuan_12151536_Kinect_unified_ex4.pkl'))
+data_all  = pk.load(file('D:/Project/K_project/data/Motion and Kinect/Unified_MData/Andy_2017-03-06 02.02.43 PM_ex1_FPS30_motion_unified.pkl'))
+kdata_all = pk.load(file('D:/Project/K_project/data/Motion and Kinect/Unified_KData/Andy_data0306140136_unified_ex1.pkl'))
 
 
 NUM_LABELS = len(data_all)  # total number of the joints
@@ -60,7 +60,7 @@ ax.set_xlabel('Z axis')
 ax.set_ylabel('X axis')
 ax.set_zlabel('Y axis')
     
-for frame_no in xrange(min(kNUM_FRAMES,NUM_FRAMES)):
+for frame_no in xrange(50,200):#min(kNUM_FRAMES,NUM_FRAMES)):
     plt.cla()
     
     xs = []
@@ -77,9 +77,9 @@ for frame_no in xrange(min(kNUM_FRAMES,NUM_FRAMES)):
         xs.append(data_all[joint_idx][0][frame_no])
         ys.append(data_all[joint_idx][1][frame_no])
         zs.append(data_all[joint_idx][2][frame_no])
-        mxs.append(mdata[joint_idx][0][frame_no])
-        mys.append(mdata[joint_idx][1][frame_no])
-        mzs.append(mdata[joint_idx][2][frame_no])        
+#        mxs.append(mdata[joint_idx][0][frame_no])
+#        mys.append(mdata[joint_idx][1][frame_no])
+#        mzs.append(mdata[joint_idx][2][frame_no])        
         
         kxs.append(kdata_all[joint_idx][0][frame_no])
         kys.append(kdata_all[joint_idx][1][frame_no])

@@ -37,7 +37,7 @@ ax = Axes3D(fig, elev=-150, azim=110)
 
       
 for idx,infile in enumerate(dataname):
-    data = cPickle.load(file(path+infile,'rb'))
+    data = cPickle.load(file(path+infile,'r'))
     
     for i in [0,1,2,3,4,5,6,8,9,10,20]:
         if i == 0:

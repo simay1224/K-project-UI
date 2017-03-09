@@ -3,6 +3,8 @@
 Created on Tue Dec 06 15:50:02 2016
 
 @author: Dawnknight
+
+define the data convert formula ofrom Motion camera markers to Kinect joints
 """
 import numpy as np
 
@@ -98,7 +100,7 @@ JointType_HandTipRight = 23
 JointType_ThumbRight = 24
 
 
-def Mocam2Kinect25(pts):
+def Mocam2Kinect(pts):
      
      body = pts['rcpos']
      result = {}
@@ -138,35 +140,24 @@ def Mocam2Kinect25(pts):
      Rshoulder_z = (body[Chest_1*3+z]+body[Chest_4*3+z])/2     
      Rshoulder = np.vstack([Rshoulder_x,Rshoulder_y,Rshoulder_z])
      
-     Lelbow_x = body[LUArm_1*3+x]*2-body[LUArm_2*3+x]
+     Lelbow_x = body[LUArm_1*3+x]
      Lelbow_y = body[LUArm_2*3+y]
-     Lelbow_z = body[LUArm_1*3+z]*2-body[LUArm_2*3+z]
+     Lelbow_z = body[LUArm_1*3+z]
      Lelbow = np.vstack([Lelbow_x,Lelbow_y,Lelbow_z])
      
-     Relbow_x = body[RUArm_1*3+x]*2-body[RUArm_2*3+x]
+     Relbow_x = body[RUArm_1*3+x]
      Relbow_y = body[RUArm_2*3+y]
-     Relbow_z = body[RUArm_1*3+z]*2-body[RUArm_2*3+z]
+     Relbow_z = body[RUArm_1*3+z]
      Relbow = np.vstack([Relbow_x,Relbow_y,Relbow_z])
      
-     
-     
-     
-     
-#     Lwrist_x = body[LHand_2*3+x]
-#     Lwrist_y = body[LHand_2*3+y]
-#     Lwrist_z = body[LHand_2*3+z]
-     Lwrist_x = (body[LHand_3*3+x]+body[LHand_2*3+x])/2
-     Lwrist_y = (body[LHand_3*3+y]+body[LHand_2*3+y])/2
-     Lwrist_z = (body[LHand_3*3+z]+body[LHand_2*3+z])/2
+     Lwrist_x = body[LHand_3*3+x]
+     Lwrist_y = body[LHand_3*3+y]
+     Lwrist_z = body[LHand_3*3+z]
      Lwrist = np.vstack([Lwrist_x,Lwrist_y,Lwrist_z])
      
-     Rwrist_x = (body[RHand_3*3+x]+body[RHand_2*3+x])/2
-     Rwrist_y = (body[RHand_3*3+y]+body[RHand_2*3+y])/2
-     Rwrist_z = (body[RHand_3*3+z]+body[RHand_2*3+z])/2
-#     Rwrist_x = body[RHand_2*3+x]
-#     Rwrist_y = body[RHand_2*3+y]
-#     Rwrist_z = body[RHand_2*3+z]
-#    
+     Rwrist_x = body[RHand_3*3+x]
+     Rwrist_y = body[RHand_3*3+y]
+     Rwrist_z = body[RHand_3*3+z]     
      Rwrist = np.vstack([Rwrist_x,Rwrist_y,Rwrist_z])
      
      
