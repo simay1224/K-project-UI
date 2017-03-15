@@ -7,11 +7,12 @@ Created on Tue Feb 28 14:02:05 2017
 
 import os
 
-path = 'D:/Project/PyKinect2-master/Kproject/data/Motion and Kinect/Unified_KData'
+path = 'I:/Unified_MData'
 
 for filename in os.listdir(path):
-    if 'unified' not in filename:
+    if '_unified.pkl' in filename:
         print filename
-        name = filename.split('\\')[-1].split('ex')
-        fname = name[0]+'unified_ex'+name[1]
+        name = filename.split('_')
+        fname = name[0]+'_'+name[1]+ '_'+name[2]+ '_'+name[3]+ '_'+name[5][:-4]+ '_'+name[4]+ '.pkl'
+#        fname = name[0]+'unified_ex'+name[1]
         os.rename(filename, fname)

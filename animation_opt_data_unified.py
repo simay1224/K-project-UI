@@ -43,8 +43,11 @@ from mpl_toolkits.mplot3d import Axes3D
 #mdata = pk.load(file('test3.pkl'))
 #kdata_all = pk.load(file('./data/Motion and Kinect/Unified_KData/Dawn_12161426_Kinect_unified_ex4.pkl'))
 
-data_all  = pk.load(file('D:/Project/K_project/data/Motion and Kinect/Unified_MData/Andy_2017-03-06 02.02.43 PM_ex1_FPS30_motion_unified.pkl'))
-kdata_all = pk.load(file('D:/Project/K_project/data/Motion and Kinect/Unified_KData/Andy_data0306140136_unified_ex1.pkl'))
+#data_all  = pk.load(file('D:/Project/K_project/data/Motion and Kinect/Unified_MData/Andy_2017-03-06 02.02.43 PM_ex1_FPS30_motion_unified.pkl'))
+#kdata_all = pk.load(file('D:/Project/K_project/data/Motion and Kinect/Unified_KData/Andy_data0306140136_unified_ex1.pkl'))
+
+data_all  = pk.load(file('C:/Users/Dawnknight/Documents/GitHub/Kproject/data/Motion and Kinect/Dawn_2016-12-16 02.26.38 PM_FPS30_motion_unified_ex4.pkl'))
+kdata_all = pk.load(file('C:/Users/Dawnknight/Documents/GitHub/Kproject/data/Motion and Kinect/Dawn_12161426_Kinect_unified_ex4.pkl'))
 
 
 NUM_LABELS = len(data_all)  # total number of the joints
