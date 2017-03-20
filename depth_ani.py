@@ -39,8 +39,11 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
 
-f = h5py.File('F:/Kinect Project/20170306/Angela/Angela_data0306091154_ex4.h5','r')
-kdata=pkl.load(file('F:/Kinect Project/20170306/Angela/Angela_data0306091154_ex4.pkl','r'))
+src_path = 'F:/Kinect Project/20170306/Sophia/'
+f = h5py.File(src_path + 'Sophia_data0306104952_ex4.h5','r')
+kdata=pkl.load(file(src_path + 'Sophia_data0306104952_ex4.pkl','r'))
+
+
 
 depth_data = f['imgs']['dimgs']
 
@@ -63,7 +66,7 @@ ax = fig.gca(projection='3d')
 Zpts = np.arange(2200,2400)
 kernel = np.ones(200)
 
-for frame_idx in range(120,200):
+for frame_idx in range(150,190):
     
     depth_frame = depth_data['d_'+repr(frame_idx).zfill(4)][:,:,0]
     Rwx = kdata[frame_idx]['depth_jointspts'][JointType_WristRight].x

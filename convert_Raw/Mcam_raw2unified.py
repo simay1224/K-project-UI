@@ -21,13 +21,13 @@ key_list_25 = ['LShoulder_1','RUArm_2','LShoulder_2',
             'RHand_3', 'RHand_2']
 
 # Raw data set up            
-src_psth = 'H:/20170306/CSV/'
-dst_path = 'H:/20170306/Converted_Data/'
+src_path = 'F:/Kinect Project/20170224/MoCam/30/'
+dst_path = 'F:/Kinect Project/20170224/MoCam/Converted_Data/'
 
 # unified data set up
 uni_src_path = dst_path
-uni_dst_path30  = 'H:/20170306/Unified_MData/30/'
-uni_dst_path120 = 'H:/20170306/Unified_MData/120/'
+uni_dst_path30  = 'H:/20170224/Unified_MData/30/'
+uni_dst_path120 = 'H:/20170224/Unified_MData/120/'
     
 def findKeys(orig_keys, standard_key_list):
     keys_dict = {}
@@ -92,12 +92,12 @@ Markernum = 25
 
 # =================== extract from csv, rotate the body, save as numpy array  ================= 
 
-for subfolder in os.listdir(src_psth)[:2]: 
+for subfolder in os.listdir(src_path): 
     if '30' in subfolder:
         dst_fps = '_FPS30_'
     else:
         dst_fps = '_FPS120_'
-    filelist = glob.glob(os.path.join(src_psth+subfolder, '*.csv') ) # find all csv files
+    filelist = glob.glob(os.path.join(src_path+subfolder, '*.csv') ) # find all csv files
     
     for infile in filelist:
 
