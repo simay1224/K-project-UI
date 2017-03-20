@@ -16,7 +16,7 @@ from scipy.ndimage.filters import gaussian_filter1d as gf
 
 
 src_path = 'H:/20170306/Andy/'
-dst_path = 'D:/Project/K_project/data/Motion and Kinect/Unified_KData/'
+dst_path = 'D:/Project/K_project/data/Motion and Kinect/Unified_KData_preprocess/'
 jidx = [0,1,2,3,4,5,6,8,9,10,20]
 
 def folder_retarget(src_path,shortcut):  
