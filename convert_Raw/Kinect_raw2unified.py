@@ -9,13 +9,13 @@ from Human_mod import *
 from rawK2array import *
 import cPickle
 import numpy as np
-import glob,os,win32com.client
+import glob,os,win32com.client,pdb
     
 
 
 
-src_path = 'H:/20170306/Andy/'
-dst_path = 'D:/Project/K_project/data/Motion and Kinect/Unified_KData/'
+src_path = 'I:/Kinect Project/20170306/Kinect data _ h5 and pkl file/'
+dst_path = 'I:/Kinect Project/Motion and Kinect unified/Andy0306/Unified_KData/'
 jidx = [0,1,2,3,4,5,6,8,9,10,20]
 
 def folder_retarget(src_path,shortcut):  
@@ -23,13 +23,13 @@ def folder_retarget(src_path,shortcut):
     return str(shell.CreateShortCut(src_path+shortcut).Targetpath)
 
 
-for subfolder in os.listdir(src_path):   
+for subfolder in os.listdir(src_path)[0:1]:   
     if '.lnk' in subfolder:
         path = folder_retarget(src_path,subfolder)
         filelist = glob.glob(os.path.join(path, '*.pkl') ) # find all pkl files
     else:
         filelist = glob.glob(os.path.join(src_path+subfolder, '*.pkl') ) # find all pkl files
-    
+#    pdb.set_trace()
     for infile in filelist:
         print infile
         data = cPickle.load(file(infile,'rb'))
