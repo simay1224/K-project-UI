@@ -14,8 +14,8 @@ import glob,os,win32com.client,pdb
 
 
 
-src_path = 'I:/Kinect Project/20170306/Kinect data _ h5 and pkl file/'
-dst_path = 'I:/Kinect Project/Motion and Kinect unified/Andy0306/Unified_KData/'
+src_path = 'F:/AllData_0322/raw data/20161216/pkl/'
+dst_path = 'F:/AllData_0322/1216/'
 jidx = [0,1,2,3,4,5,6,8,9,10,20]
 
 def folder_retarget(src_path,shortcut):  
@@ -23,7 +23,7 @@ def folder_retarget(src_path,shortcut):
     return str(shell.CreateShortCut(src_path+shortcut).Targetpath)
 
 
-for subfolder in os.listdir(src_path)[0:1]:   
+for subfolder in os.listdir(src_path):   
     if '.lnk' in subfolder:
         path = folder_retarget(src_path,subfolder)
         filelist = glob.glob(os.path.join(path, '*.pkl') ) # find all pkl files

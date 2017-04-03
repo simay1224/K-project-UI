@@ -21,13 +21,13 @@ key_list_25 = ['LShoulder_1','RUArm_2','LShoulder_2',
             'RHand_3', 'RHand_2']
 
 # Raw data set up            
-src_path = 'F:/Kinect Project/20170224/MoCam/30/'
-dst_path = 'F:/Kinect Project/20170224/MoCam/Converted_Data/'
+src_path = 'F:/AllData_0322/raw data/20161216/MoCam/30/'
+dst_path = 'F:/AllData_0322/1216/'
 
 # unified data set up
 uni_src_path = dst_path
-uni_dst_path30  = 'H:/20170224/Unified_MData/30/'
-uni_dst_path120 = 'H:/20170224/Unified_MData/120/'
+uni_dst_path30  = 'F:/AllData_0322/1216/30/'
+uni_dst_path120 = 'F:/AllData_0322/1216/120/'
     
 def findKeys(orig_keys, standard_key_list):
     keys_dict = {}

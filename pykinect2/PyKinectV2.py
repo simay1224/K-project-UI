@@ -2873,7 +2873,7 @@ from comtypes import _check_version; _check_version('')
 KINECT_SKELETON_COUNT = 6
 
 class DefaultKinectSensor: 
-    _kinect20 = ctypes.WinDLL('C:/Windows/SysWOW64/Kinect20.dll')
+    _kinect20 = ctypes.WinDLL('Kinect20.dll')
     _GetDefaultKinectSensorProto = _kinect20.GetDefaultKinectSensor
     _GetDefaultKinectSensorProto.argtypes = [ctypes.POINTER(ctypes.POINTER(IKinectSensor))]
     _GetDefaultKinectSensorProto.restype = ctypes.HRESULT 
