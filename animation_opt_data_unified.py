@@ -43,11 +43,11 @@ from mpl_toolkits.mplot3d import Axes3D
 #mdata = pk.load(file('test3.pkl'))
 #kdata_all = pk.load(file('./data/Motion and Kinect/Unified_KData/Dawn_12161426_Kinect_unified_ex4.pkl'))
 
-#data_all  = pk.load(file('D:/Project/K_project/data/Motion and Kinect/Unified_MData/Andy_2017-03-06 02.02.43 PM_ex1_FPS30_motion_unified.pkl'))
-#kdata_all = pk.load(file('D:/Project/K_project/data/Motion and Kinect/Unified_KData/Andy_data0306140136_unified_ex1.pkl'))
+data_all  = pk.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
+kdata_all = pk.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_KData/Andy_data12151615_unified_ex4.pkl'))
 
-data_all  = pk.load(file('I:/Kinect Project/Motion and Kinect unified/Unified_MData/Tynisia_2017-03-06 10.08.27 AM_ex5_FPS30_motion_unified.pkl'))
-kdata_all = pk.load(file('I:/Kinect Project/Motion and Kinect unified/Unified_KData/Tynisia_data0306100804_unified_ex5.pkl'))
+#data_all  = pk.load(file('I:/K_project/data/Motion and Kinect unified/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
+#kdata_all = pk.load(file('I:/K_project/data/Motion and Kinect unified/Unified_KData/Andy_data12151615_unified_ex4.pkl'))
 
 
 NUM_LABELS = len(data_all)  # total number of the joints
@@ -63,7 +63,7 @@ ax.set_xlabel('Z axis')
 ax.set_ylabel('X axis')
 ax.set_zlabel('Y axis')
     
-for frame_no in xrange(50,200):#min(kNUM_FRAMES,NUM_FRAMES)):
+for frame_no in xrange(250,500):#min(kNUM_FRAMES,NUM_FRAMES)):
     plt.cla()
     
     xs = []
