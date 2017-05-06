@@ -44,7 +44,7 @@ from mpl_toolkits.mplot3d import Axes3D
 #kdata_all = pk.load(file('./data/Motion and Kinect/Unified_KData/Dawn_12161426_Kinect_unified_ex4.pkl'))
 
 data_all  = pk.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
-kdata_all = pk.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_KData/Andy_data12151615_unified_ex4.pkl'))
+kdata_all = pk.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
 
 #data_all  = pk.load(file('I:/K_project/data/Motion and Kinect unified/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
 #kdata_all = pk.load(file('I:/K_project/data/Motion and Kinect unified/Unified_KData/Andy_data12151615_unified_ex4.pkl'))
