@@ -15,7 +15,7 @@ from typetext import *
 from reliability import *
 from Human_mod import *
 from skel import *
-
+from DAE  import *
 
 
 import pygame,h5py,datetime
@@ -43,7 +43,14 @@ SKELETON_COLORS = [pygame.color.THECOLORS["red"],
                   pygame.color.THECOLORS["yellow"], 
                   pygame.color.THECOLORS["violet"]]
 
-
+W1  = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['W1' ][:]
+W2  = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['W2' ][:]
+Wp1 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['Wp1'][:]
+Wp2 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['Wp2'][:]
+be1 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['be1'][:]
+be2 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['be2'][:]
+bd1 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['bd1'][:]
+bd2 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['bd2'][:]
 
 
 class BodyGameRuntime(object):
@@ -248,6 +255,10 @@ class BodyGameRuntime(object):
                     Jps = self._kinect.body_joints_to_color_space(joints) #joint points in color domain
                     dJps =self._kinect.body_joints_to_depth_space(joints) #joint points in depth domain
                     
+
+
+                    
+                    
                     #   ====   fingers detection  ====
                     if self._handmode: 
                         #finger detect and draw
@@ -270,16 +281,24 @@ class BodyGameRuntime(object):
                         Rk[jj].append(rk[ii])
                         
                     Rel = rel_rate(Rb,Rk,Rt,self.jorder)
-  
-                    #print Rk                      
+                    # =======  kinect data reconstruct  =======
+                    # =======  DAE process  ======
+                    modJoints, modJary = human_mod_pts(joints,True)
+                    Mprime = DAE(modJary,W1,W2,Wp1,Wp2,be1,be2,bd1,bd2) 
+                    # ===  GPR ===
                     
-                    #draw skel
+                    
+                    
+                    
+                    pdb.set_trace()                      
+                    
+                    # === draw skel  ===
                     draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface)
                     draw_Rel_joints(Jps,Rel,self._frame_surface)
                     
                     #draw unify human model
                     if self.model_draw:
-                        modJoints = human_mod_pts(joints)
+#                        modJoints = human_mod_pts(joints)
                         
                         if not self.model_frame :
                             fig = plt.figure() 
