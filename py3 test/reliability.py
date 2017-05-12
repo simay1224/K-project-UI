@@ -28,6 +28,7 @@ gw = 1/(2*np.pi)**2/sigma*np.exp(-0.5*a**2/sigma**2)
 gw = gw*(1/sum(gw))
 #initail reliability 
 rel = {}
+
 jord = [0,1,2,3,4,5,6,8,9,10,20]
 for i in jord:
     rel[i]=0
@@ -96,6 +97,7 @@ def rel_trk(joints): # tracking term
     return trkrel
     
 def rel_rate(Rb,Rk,Rt,order,flen = 6):
+    Relary = np.zeros(21)
     if (len(Rb[0])>=flen) & (len(Rk[0])>=flen) & (len(Rt[0])>=flen) :
         Rel = copy.copy(rel)
         
@@ -103,11 +105,12 @@ def rel_rate(Rb,Rk,Rt,order,flen = 6):
             for j in order:
                 for i in range(flen):
                     Rel[j] += gw[i]*min(Rb[j][-(i+1)],Rk[j][-(i+1)],Rt[j][-(i+1)])
+                    Relary[j] += gw[i]*min(Rb[j][-(i+1)],Rk[j][-(i+1)],Rt[j][-(i+1)])
         else:
             print ('joints order not match !!')
     else:
-        return rel
-    return Rel
+        return rel,[]
+    return Rel,Relary
 #def rel_rate(Rb,Rk,Rt,order,flen = 6):
 #    if (len(Rb[0])>=flen) &  (len(Rt[0])>=flen) :
 #        Rel = copy.copy(rel)

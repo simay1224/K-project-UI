@@ -28,7 +28,9 @@ from mpl_toolkits.mplot3d import Axes3D
 #    import _thread as thread
 #else:
 #    import thread
+
 fps = 30
+limbidx = [4,5,6,8,9,10]
 
 bkimg = np.zeros([1080,1920])
 bdjoints = []
@@ -43,14 +45,21 @@ SKELETON_COLORS = [pygame.color.THECOLORS["red"],
                   pygame.color.THECOLORS["yellow"], 
                   pygame.color.THECOLORS["violet"]]
 
+gp = cPickle.load(open('model_G.pkl','rb'))
+
+src_path = '../../TF/Concatenate_Data/'
+dst_path = '../../TF/data/FC/'
+date_ext = '_0322'
+test_ext = ''
+
 W1  = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['W1' ][:]
 W2  = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['W2' ][:]
 Wp1 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['Wp1'][:]
 Wp2 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['Wp2'][:]
-be1 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['be1'][:]
-be2 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['be2'][:]
-bd1 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['bd1'][:]
-bd2 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['bd2'][:]
+be1 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['b1' ][:]
+be2 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['b2' ][:]
+bd1 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['bp1'][:]
+bd2 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['bp2'][:]
 
 
 class BodyGameRuntime(object):
@@ -138,7 +147,7 @@ class BodyGameRuntime(object):
             #ST = time.clock()
             bddic={}
             Jdic ={}
-            Jpf = []
+
 
             
 
@@ -280,17 +289,23 @@ class BodyGameRuntime(object):
                         Rt[jj].append(rt[ii])
                         Rk[jj].append(rk[ii])
                         
-                    Rel = rel_rate(Rb,Rk,Rt,self.jorder)
+                    Rel,Relary = rel_rate(Rb,Rk,Rt,self.jorder)
                     # =======  kinect data reconstruct  =======
-                    # =======  DAE process  ======
-                    modJoints, modJary = human_mod_pts(joints,True)
-                    Mprime = DAE(modJary,W1,W2,Wp1,Wp2,be1,be2,bd1,bd2) 
-                    # ===  GPR ===
+                    if Relary!=[]:                        
+                        if not all(ii>0.75 for ii in Relary[limbidx]): # check if contains unreliable joint
+                            # =======  DAE process  ======
+                            modJoints, modJary = human_mod_pts(joints,True)
+                            Mprime = DAE(modJary,W1,W2,Wp1,Wp2,be1,be2,bd1,bd2) 
+                            # ===  GPR ===
+                            reconJ, _ = gp.predict(Mprime, return_std=True)
+                            pdb.set_trace()
+                            unrelidx = np.where(Relary[limbidx]<0.75)[0]
+                               
+                            # =================================
+                            diff = np.roll(reconJ,-3)-reconJ   
+                            tmp = [(sum([diff[:,i*3]**2,diff[:,i*3+1]**2,diff[:,i*3+2]**2]))**0.5 for i in range(6)]
                     
-                    
-                    
-                    
-                    pdb.set_trace()                      
+                   
                     
                     # === draw skel  ===
                     draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface)
