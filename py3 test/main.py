@@ -96,6 +96,12 @@ class BodyGameRuntime(object):
         # here we will store skeleton data 
         self._bodies = None
         self.jorder  = [0,1,2,3,4,5,6,8,9,10,20] #joints order we care
+        self.Jlen ={}   # joint to joint length
+        self.Jlen[5]  = []
+        self.Jlen[6]  = []
+        self.Jlen[9]  = []
+        self.Jlen[10] = []
+
         time.sleep(5)
 
 
@@ -106,7 +112,9 @@ class BodyGameRuntime(object):
             print ('extract bg....')
         else:
             print ('failed to extract.....')
-                              
+
+            
+            
 
 
     def draw_color_frame(self, frame, target_surface):
@@ -290,21 +298,52 @@ class BodyGameRuntime(object):
                         Rk[jj].append(rk[ii])
                         
                     Rel,Relary = rel_rate(Rb,Rk,Rt,self.jorder)
+                    
+                    
+                    
+                    
                     # =======  kinect data reconstruct  =======
-                    if Relary!=[]:                        
+                    if Relary!=[]:    
+                        len5  = ((Jdic[5].Position.x-Jdic[4 ].Position.x)**2+(Jdic[5].Position.y-Jdic[4 ].Position.y)**2+(Jdic[5].Position.z-Jdic[4 ].Position.z)**2)**0.5
+                        len6  = ((Jdic[5].Position.x-Jdic[6 ].Position.x)**2+(Jdic[5].Position.y-Jdic[6 ].Position.y)**2+(Jdic[5].Position.z-Jdic[6 ].Position.z)**2)**0.5
+                        len9  = ((Jdic[9].Position.x-Jdic[8 ].Position.x)**2+(Jdic[9].Position.y-Jdic[8 ].Position.y)**2+(Jdic[9].Position.z-Jdic[8 ].Position.z)**2)**0.5
+                        len10 = ((Jdic[9].Position.x-Jdic[10].Position.x)**2+(Jdic[9].Position.y-Jdic[10].Position.y)**2+(Jdic[9].Position.z-Jdic[10].Position.z)**2)**0.5
+
+
+                        self.Jlen[5].append(len5)
+                        self.Jlen[6].append(len6) 
+                        self.Jlen[9].append(len9) 
+                        self.Jlen[10].append(len10) 
+                        
                         if not all(ii>0.75 for ii in Relary[limbidx]): # check if contains unreliable joint
-                            # =======  DAE process  ======
+                            # ===== DAE process ======
                             modJoints, modJary = human_mod_pts(joints,True)
                             Mprime = DAE(modJary,W1,W2,Wp1,Wp2,be1,be2,bd1,bd2) 
-                            # ===  GPR ===
+                            # ===== GPR =====
                             reconJ, _ = gp.predict(Mprime, return_std=True)
                             pdb.set_trace()
                             unrelidx = np.where(Relary[limbidx]<0.75)[0]
                                
-                            # =================================
-                            diff = np.roll(reconJ,-3)-reconJ   
-                            tmp = [(sum([diff[:,i*3]**2,diff[:,i*3+1]**2,diff[:,i*3+2]**2]))**0.5 for i in range(6)]
-                    
+                            # ===== recon =====
+                            diff = np.roll(Mprime,-3)-reconJ   # compensation back to Mprime domain
+                            dnmntr = [(sum([diff[:,i*3]**2,diff[:,i*3+1]**2,diff[:,i*3+2]**2]))**0.5 for i in range(6)]
+                            veccmp = {}
+                            for Lidx in unrelidx:   # compensation uni-vector
+                                if not Lidx in [0,3]:
+                                    curLidx =  limbidx[Lidx]     
+                                    veccmp[curLidx] = [diff[:,Lidx*3:Lidx*3+3]/dnmntr[Lidx]]   
+                                    self.Jlen[curLidx].pop()
+                            
+##################################################################
+
+                                    # update coordinate 
+                                    joints[curLidx].Position.x = joints[curLidx-1].Position.x + veccmp[curLidx][0]*np.mean(self.Jlen[curLidx])
+                                    joints[curLidx].Position.y = joints[curLidx-1].Position.y + veccmp[curLidx][1]*np.mean(self.Jlen[curLidx])
+                                    joints[curLidx].Position.z = joints[curLidx-1].Position.z + veccmp[curLidx][2]*np.mean(self.Jlen[curLidx])
+
+##################################################################
+
+        
                    
                     
                     # === draw skel  ===
