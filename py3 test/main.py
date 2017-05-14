@@ -49,7 +49,7 @@ gp = cPickle.load(open('model_G.pkl','rb'))
 
 src_path = '../../TF/Concatenate_Data/'
 dst_path = '../../TF/data/FC/'
-date_ext = '_0322'
+date_ext = '_REL0504'
 test_ext = ''
 
 W1  = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['W1' ][:]
@@ -101,7 +101,9 @@ class BodyGameRuntime(object):
         self.Jlen[6]  = []
         self.Jlen[9]  = []
         self.Jlen[10] = []
-
+        self.initial_flag = False   # whether initial skel setting is done or not
+        self.hasunrel     = False 
+        
         time.sleep(5)
 
 
@@ -299,8 +301,8 @@ class BodyGameRuntime(object):
                         
                     Rel,Relary = rel_rate(Rb,Rk,Rt,self.jorder)
                     
-                    
-                    
+                    # ==== draw skel  ===
+                    draw_body(joints, Jps, SKELETON_COLORS[5],self._frame_surface)
                     
                     # =======  kinect data reconstruct  =======
                     if Relary!=[]:    
@@ -316,30 +318,61 @@ class BodyGameRuntime(object):
                         self.Jlen[10].append(len10) 
                         
                         if not all(ii>0.75 for ii in Relary[limbidx]): # check if contains unreliable joint
-                            # ===== DAE process ======
-                            modJoints, modJary = human_mod_pts(joints,True)
-                            Mprime = DAE(modJary,W1,W2,Wp1,Wp2,be1,be2,bd1,bd2) 
-                            # ===== GPR =====
-                            reconJ, _ = gp.predict(Mprime, return_std=True)
-                            pdb.set_trace()
-                            unrelidx = np.where(Relary[limbidx]<0.75)[0]
-                               
-                            # ===== recon =====
-                            diff = np.roll(Mprime,-3)-reconJ   # compensation back to Mprime domain
-                            dnmntr = [(sum([diff[:,i*3]**2,diff[:,i*3+1]**2,diff[:,i*3+2]**2]))**0.5 for i in range(6)]
-                            veccmp = {}
-                            for Lidx in unrelidx:   # compensation uni-vector
-                                if not Lidx in [0,3]:
-                                    curLidx =  limbidx[Lidx]     
-                                    veccmp[curLidx] = [diff[:,Lidx*3:Lidx*3+3]/dnmntr[Lidx]]   
-                                    self.Jlen[curLidx].pop()
                             
-##################################################################
+                            
+                            if self.initial_flag:
+#                                modjoints = copy.copy(joints)
+                                # ===== DAE process ======
+                                modJoints, modJary = human_mod_pts(joints,True)
+                                Mprime = DAE(modJary,W1,W2,Wp1,Wp2,be1,be2,bd1,bd2)
+#                                reconJ = DAE(modJary,W1,W2,Wp1,Wp2,be1,be2,bd1,bd2) 
+                                # ===== GPR =====
 
-                                    # update coordinate 
-                                    joints[curLidx].Position.x = joints[curLidx-1].Position.x + veccmp[curLidx][0]*np.mean(self.Jlen[curLidx])
-                                    joints[curLidx].Position.y = joints[curLidx-1].Position.y + veccmp[curLidx][1]*np.mean(self.Jlen[curLidx])
-                                    joints[curLidx].Position.z = joints[curLidx-1].Position.z + veccmp[curLidx][2]*np.mean(self.Jlen[curLidx])
+                                reconJ, _ = gp.predict(Mprime, return_std=True)
+
+                                unrelidx = np.where(Relary[limbidx]<0.6)[0]
+ 
+                                # ===== recon =====
+                                diff = np.roll(Mprime,-3)-reconJ   # compensation back to Mprime domain
+                                dnmntr = [(sum([diff[:,i*3]**2,diff[:,i*3+1]**2,diff[:,i*3+2]**2]))**0.5 for i in range(6)]
+                                veccmp = {}
+                                JJJ    = {}
+                                for Lidx in unrelidx:   # compensation uni-vector
+                                    if  Lidx in [2,5]:
+
+                                        self.hasunrel = True                                        
+                                        curLidx =  limbidx[Lidx]     
+                                        veccmp[curLidx] = diff[0,Lidx*3:Lidx*3+3]/dnmntr[Lidx]   
+                                        self.Jlen[curLidx].pop()
+                                
+    ##################################################################
+    
+                                        JJJ[curLidx] = [joints[curLidx-1].Position.x + veccmp[curLidx][0]*np.mean(self.Jlen[curLidx]),\
+                                                        joints[curLidx-1].Position.y + veccmp[curLidx][1]*np.mean(self.Jlen[curLidx]),\
+                                                        joints[curLidx-1].Position.z + veccmp[curLidx][2]*np.mean(self.Jlen[curLidx])]
+
+
+                                        # update coordinate 
+#                                        joints[curLidx].Position.x = joints[curLidx-1].Position.x + veccmp[curLidx][0]*np.mean(self.Jlen[curLidx])
+#                                        joints[curLidx].Position.y = joints[curLidx-1].Position.y + veccmp[curLidx][1]*np.mean(self.Jlen[curLidx])
+#                                        joints[curLidx].Position.z = joints[curLidx-1].Position.z + veccmp[curLidx][2]*np.mean(self.Jlen[curLidx])
+
+
+                                                                                  
+                                          
+   
+#                                        modJps = self._kinect.body_joints_to_color_space(joints)
+#                                        
+#                                        start = (modJps[curLidx-1].x, modJps[curLidx-1].y)
+#                                        end   = (modJps[curLidx  ].x, modJps[curLidx  ].y)
+#                                        pygame.draw.line(self._frame_surface, SKELETON_COLORS[3], start, end, 8)
+                                    
+                        else:
+                        
+                             self.initial_flag = True
+                            
+
+
 
 ##################################################################
 
@@ -347,23 +380,28 @@ class BodyGameRuntime(object):
                    
                     
                     # === draw skel  ===
-                    draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface)
+
                     draw_Rel_joints(Jps,Rel,self._frame_surface)
                     
                     #draw unify human model
                     if self.model_draw:
-#                        modJoints = human_mod_pts(joints)
-                        
+                        modJ,_ = human_mod_pts(joints)
+
                         if not self.model_frame :
                             fig = plt.figure() 
                             ax = fig.add_subplot(111, projection='3d')
-                            keys = modJoints.keys()
+                            keys = modJ.keys()
                             self.model_frame = True
                         else:
                             plt.cla()
-                        
-                        draw_human_mod_pts(modJoints,ax,keys)
-                        
+
+                        draw_human_mod_pts(modJ,ax,keys)
+#                        pdb.set_trace()
+                        if self.hasunrel == True:
+                           JJJkeys = [i for i in JJJ.keys()]
+                           draw_human_mod_pts(JJJ,ax,JJJkeys,'blue')
+                           self.hasunrel = False
+                           
                         #pdb.set_trace()
                     
                     bddic['timestamp'] = TimeS
@@ -380,18 +418,20 @@ class BodyGameRuntime(object):
                     
             cur_frame+=1
             
-            if self.vid_rcd == True:
-                typetext(self._frame_surface,'Video Recording' ,(1550,20),(255,0,0))
-                
-                self.cimgs.create_dataset('img_'+repr(self.fno).zfill(4), data = frame)
-                self.bdimgs.create_dataset('bd_'+repr(self.fno).zfill(4), data = np.dstack((bodyidx,bodyidx,bodyidx)))
-                self.dimgs.create_dataset('d_'+repr(self.fno).zfill(4), data = np.dstack((dframe,dframe,dframe)))
-                #self.timestamp.create_dataset('t_'+repr(self.fno).zfill(4),data =TimeS)
-                self.fno += 1
-                bdjoints.append(bddic)
-            else:
-                typetext(self._frame_surface,'Not Recording' ,(1550,20),(0,255,0))
+#            if self.vid_rcd == True:
+#                typetext(self._frame_surface,'Video Recording' ,(1550,20),(255,0,0))
+#                
+#                self.cimgs.create_dataset('img_'+repr(self.fno).zfill(4), data = frame)
+#                self.bdimgs.create_dataset('bd_'+repr(self.fno).zfill(4), data = np.dstack((bodyidx,bodyidx,bodyidx)))
+#                self.dimgs.create_dataset('d_'+repr(self.fno).zfill(4), data = np.dstack((dframe,dframe,dframe)))
+#                #self.timestamp.create_dataset('t_'+repr(self.fno).zfill(4),data =TimeS)
+#                self.fno += 1
+#                bdjoints.append(bddic)
+#            else:
+#                typetext(self._frame_surface,'Not Recording' ,(1550,20),(0,255,0))
             
+            
+                
 
             #   ====   Shoulder action detection  ====                    
 #            if (shld_flag and closest_ID!=-1):
@@ -402,7 +442,8 @@ class BodyGameRuntime(object):
                     
 
                 
-                
+            if   self.model_frame == True: 
+                typetext(self._frame_surface,'Model on' ,(1550,20),(255,0,0))    
                     
                     
             h_to_w = float(self._frame_surface.get_height()) / self._frame_surface.get_width()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Nov 15 10:27:23 2016
+Created on Sun May 14 17:43:04 2017
 
 @author: medialab
 """
@@ -14,6 +14,7 @@ from Kfunc.finger import *
 from Kfunc.shlder import *
 from Kfunc.skel import *
 from Kfunc.model import *
+from DAE import *
 import QKNTshlder_1 as SDTP
 import ctypes
 import pygame,h5py,datetime
@@ -40,7 +41,21 @@ SKELETON_COLORS = [pygame.color.THECOLORS["red"],
                   pygame.color.THECOLORS["yellow"], 
                   pygame.color.THECOLORS["violet"]]
 
+gp = cPickle.load(file('model_G.pkl','rb'))
 
+src_path = '../TF/Concatenate_Data/'
+dst_path = '../TF/data/FC/'
+date_ext = '_REL0504'
+test_ext = ''
+
+W1  = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['W1' ][:]
+W2  = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['W2' ][:]
+Wp1 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['Wp1'][:]
+Wp2 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['Wp2'][:]
+be1 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['b1' ][:]
+be2 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['b2' ][:]
+bd1 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['bp1'][:]
+bd2 = h5py.File(dst_path+'model'+date_ext+test_ext+'.h5','r')['bp2'][:]
 
 
 class BodyGameRuntime(object):
@@ -66,8 +81,8 @@ class BodyGameRuntime(object):
         self._done = False
         self._handmode = False
         self.vid_rcd = False
-        self.model_draw = False
-        self.model_frame = False
+        self.model_draw = True
+        self.model_frame = True
         self.clipNo = 0
         #self.cntno = 0
         # Kinect runtime object, we want only color and body frames 
@@ -77,6 +92,14 @@ class BodyGameRuntime(object):
         # here we will store skeleton data 
         self._bodies = None
         self.jorder  = [0,1,2,3,4,5,6,8,9,10,20] #joints order we care
+        self.Jlen ={}   # joint to joint length
+        self.Jlen[5]  = []
+        self.Jlen[6]  = []
+        self.Jlen[9]  = []
+        self.Jlen[10] = []
+        self.initial_flag = False   # whether initial skel setting is done or not
+        self.hasunrel     = False 
+        
         time.sleep(5)
 
 
@@ -86,8 +109,10 @@ class BodyGameRuntime(object):
       
             print ('extract bg....')
         else:
-            print 'failed to extract.....'
-                              
+            print ('failed to extract.....')
+
+            
+            
 
 
     def draw_color_frame(self, frame, target_surface):
@@ -105,8 +130,8 @@ class BodyGameRuntime(object):
         global video
         
         cur_frame=0
-        rec_Rshld=SDTP.ShoulderTops()   #recording the shoudler movements(record data)
-        pro_Rshld=SDTP.ShoulderRoll()   #detecting the shoulder movements(processing data)
+#        rec_Rshld=SDTP.ShoulderTops()   #recording the shoudler movements(record data)
+#        pro_Rshld=SDTP.ShoulderRoll()   #detecting the shoulder movements(processing data)
         Rb = {}
         Rt = {}
         Rk = {}
@@ -115,19 +140,20 @@ class BodyGameRuntime(object):
             Rk[ii]=[]
             Rt[ii]=[]
             Rb[ii]=[]
-        
+
         #-all the number in variable names below indicates:        
         shld_flag=False #flag to start processing the shoulder when press some key
         
         #-for key pressing
         wait_key_count=3
         # -------- Main Program Loop -----------
+
         while not self._done:
             
             #ST = time.clock()
             bddic={}
             Jdic ={}
-            Jpf = []
+
 
             
 
@@ -154,7 +180,7 @@ class BodyGameRuntime(object):
                         self.model_draw = True
                         
                 if press[49]==1:  #.#1 open/close shoulder detection
-                    print 'I am innnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'
+                    print ('I am innnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn')
                     if shld_flag==True:
                         shld_flag=False
                     else: 
@@ -209,7 +235,9 @@ class BodyGameRuntime(object):
 
             if self._kinect.has_new_depth_frame():
                 dframe,oridframe = self._kinect.get_last_depth_frame()
-                dframe=dframe.reshape((424,512))                                
+                dframe=dframe.reshape((424,512)) 
+                              
+            
             
             if self._bodies is not None:
                 
@@ -235,12 +263,16 @@ class BodyGameRuntime(object):
 
                     
                     
-                    for ii in xrange(25):
+                    for ii in range(25):
                         Jdic[ii] = joints[ii]
 
-                    
+                    #pdb.set_trace()
                     Jps = self._kinect.body_joints_to_color_space(joints) #joint points in color domain
                     dJps =self._kinect.body_joints_to_depth_space(joints) #joint points in depth domain
+                    
+
+
+                    
                     
                     #   ====   fingers detection  ====
                     if self._handmode: 
@@ -263,18 +295,94 @@ class BodyGameRuntime(object):
                         Rt[jj].append(rt[ii])
                         Rk[jj].append(rk[ii])
                         
-                    Rel = rel_rate(Rb,Rk,Rt,self.jorder)
-  
-                    #print Rk                      
+                    Rel,Relary = rel_rate(Rb,Rk,Rt,self.jorder)
                     
-                    #draw skel
-                    draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface)
+                    # ==== draw skel  ===
+                    draw_body(joints, Jps, SKELETON_COLORS[5],self._frame_surface)
+                    
+                    # =======  kinect data reconstruct  =======
+                    if Relary!=[]:    
+                        len5  = ((Jdic[5].Position.x-Jdic[4 ].Position.x)**2+(Jdic[5].Position.y-Jdic[4 ].Position.y)**2+(Jdic[5].Position.z-Jdic[4 ].Position.z)**2)**0.5
+                        len6  = ((Jdic[5].Position.x-Jdic[6 ].Position.x)**2+(Jdic[5].Position.y-Jdic[6 ].Position.y)**2+(Jdic[5].Position.z-Jdic[6 ].Position.z)**2)**0.5
+                        len9  = ((Jdic[9].Position.x-Jdic[8 ].Position.x)**2+(Jdic[9].Position.y-Jdic[8 ].Position.y)**2+(Jdic[9].Position.z-Jdic[8 ].Position.z)**2)**0.5
+                        len10 = ((Jdic[9].Position.x-Jdic[10].Position.x)**2+(Jdic[9].Position.y-Jdic[10].Position.y)**2+(Jdic[9].Position.z-Jdic[10].Position.z)**2)**0.5
+
+
+                        self.Jlen[5].append(len5)
+                        self.Jlen[6].append(len6) 
+                        self.Jlen[9].append(len9) 
+                        self.Jlen[10].append(len10) 
+                        
+                        if not all(ii>0.75 for ii in Relary[limbidx]): # check if contains unreliable joint
+                            
+                            
+                            if self.initial_flag:
+#                                modjoints = copy.copy(joints)
+                                # ===== DAE process ======
+                                modJoints, modJary = human_mod_pts(joints,True)
+                                Mprime = DAE(modJary,W1,W2,Wp1,Wp2,be1,be2,bd1,bd2)
+#                                reconJ = DAE(modJary,W1,W2,Wp1,Wp2,be1,be2,bd1,bd2) 
+                                # ===== GPR =====
+#                                st = time.clock()
+                                reconJ, _ = gp.predict(Mprime, return_std=True)
+#                                print(time.clock()-st)
+                                unrelidx = np.where(Relary[limbidx]<0.6)[0]
+ 
+                                # ===== recon =====
+                                diff = np.roll(Mprime,-3)-reconJ   # compensation back to Mprime domain
+                                dnmntr = [(sum([diff[:,i*3]**2,diff[:,i*3+1]**2,diff[:,i*3+2]**2]))**0.5 for i in range(6)]
+                                veccmp = {}
+                                JJJ    = {}
+                                for Lidx in unrelidx:   # compensation uni-vector
+                                    if  Lidx in [2,5]:
+#                                        pdb.set_trace()
+                                        self.hasunrel = True                                        
+                                        curLidx =  limbidx[Lidx]     
+                                        veccmp[curLidx] = diff[0,Lidx*3:Lidx*3+3]/dnmntr[Lidx]   
+                                        self.Jlen[curLidx].pop()
+                                
+    ##################################################################
+    
+                                        JJJ[curLidx] = [joints[curLidx-1].Position.x + veccmp[curLidx][0]*np.mean(self.Jlen[curLidx]),\
+                                                        joints[curLidx-1].Position.y + veccmp[curLidx][1]*np.mean(self.Jlen[curLidx]),\
+                                                        joints[curLidx-1].Position.z + veccmp[curLidx][2]*np.mean(self.Jlen[curLidx])]
+                                        pdb.set_trace()
+#                                        pdb.set_trace()
+                                        # update coordinate 
+#                                        joints[curLidx].Position.x = joints[curLidx-1].Position.x + veccmp[curLidx][0]*np.mean(self.Jlen[curLidx])
+#                                        joints[curLidx].Position.y = joints[curLidx-1].Position.y + veccmp[curLidx][1]*np.mean(self.Jlen[curLidx])
+#                                        joints[curLidx].Position.z = joints[curLidx-1].Position.z + veccmp[curLidx][2]*np.mean(self.Jlen[curLidx])
+
+
+                                                                                  
+                                          
+   
+#                                        modJps = self._kinect.body_joints_to_color_space(joints)
+#                                        
+#                                        start = (modJps[curLidx-1].x, modJps[curLidx-1].y)
+#                                        end   = (modJps[curLidx  ].x, modJps[curLidx  ].y)
+#                                        pygame.draw.line(self._frame_surface, SKELETON_COLORS[3], start, end, 8)
+                                    
+                        else:
+                        
+                             self.initial_flag = True
+                            
+
+
+
+##################################################################
+
+        
+                   
+                    
+                    # === draw skel  ===
+
                     draw_Rel_joints(Jps,Rel,self._frame_surface)
                     
                     #draw unify human model
                     if self.model_draw:
                         modJoints = human_mod_pts(joints)
-                        pdb.set_trace()
+                        
                         if not self.model_frame :
                             fig = plt.figure() 
                             ax = fig.add_subplot(111, projection='3d')
@@ -283,8 +391,13 @@ class BodyGameRuntime(object):
                         else:
                             plt.cla()
                         
-                        draw_human_mod_pts(modJoints,ax,keys,color)
+                        draw_human_mod_pts(modJoints,ax,keys)
                         
+                        if self.hasunrel == True:
+                           JJJkeys = JJJ.keys()
+                           draw_human_mod_pts(JJJ,ax,JJJkeys,'blue')
+                           self.hasunrel = False
+                           
                         #pdb.set_trace()
                     
                     bddic['timestamp'] = TimeS
@@ -315,11 +428,11 @@ class BodyGameRuntime(object):
             
 
             #   ====   Shoulder action detection  ====                    
-            if (shld_flag and closest_ID!=-1):
-                Jpf = rec_Rshld.findShouderTops(self._kinect,bodyidx,dJps,joints,dframe,closest_ID)[2:4]
-                if Jpf!=[]:
-                    shld_act(joints,Jpf,pro_Rshld,cur_frame)                    
-                shld_text(pro_Rshld,rec_Rshld,self._frame_surface)
+#            if (shld_flag and closest_ID!=-1):
+#                Jpf = rec_Rshld.findShouderTops(self._kinect,bodyidx,dJps,joints,dframe,closest_ID)[2:4]
+#                if Jpf!=[]:
+#                    shld_act(joints,Jpf,pro_Rshld,cur_frame)                    
+#                shld_text(pro_Rshld,rec_Rshld,self._frame_surface)
                     
 
                 

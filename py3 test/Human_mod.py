@@ -170,16 +170,17 @@ def human_mod_pts(Body,array= False, limb = True):
         return J,[]
 
 
-def draw_human_mod_pts(Joints,surface,keys):
+def draw_human_mod_pts(Joints,surface,keys,color = 'red'):
     x=[]
     y=[]
     z=[]
+
     for i in  keys:
         x.append(Joints[i][0])
         y.append(Joints[i][1])
         z.append(Joints[i][2])
         
-    surface.scatter(z, x, y, c = 'red', s = 100)    
+    surface.scatter(z, x, y, c = color, s = 100)    
     surface.set_xlim(-200,200)
     surface.set_ylim(-400,400)
     surface.set_zlim(100,500)
