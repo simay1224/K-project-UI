@@ -130,8 +130,6 @@ class BodyGameRuntime(object):
         global video
         
         cur_frame=0
-#        rec_Rshld=SDTP.ShoulderTops()   #recording the shoudler movements(record data)
-#        pro_Rshld=SDTP.ShoulderRoll()   #detecting the shoulder movements(processing data)
         Rb = {}
         Rt = {}
         Rk = {}
@@ -241,7 +239,6 @@ class BodyGameRuntime(object):
             
             if self._bodies is not None:
                 
-                #self._kinect.testtable()
                 closest_ID=-1
                 cSS_dist=20 #closest SpineShoulder distance
                 

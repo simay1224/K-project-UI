@@ -162,7 +162,7 @@ def human_mod_pts(Body,array= False, limb = True):
             else:
                 Jary = np.hstack([Jary, J[i]])
         if limb:
-            return J,(Jary[12:30])
+            return J,Jary[12:30]
         else:
             return J,Jary
                 
