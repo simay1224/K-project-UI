@@ -20,13 +20,13 @@ mdst_path = 'D:/Project/K_project/data/Motion and Kinect unified array/Unified_M
 
 group_size = 30 # sample number per group
 jnum = 11      # joint number per sample; *3 (xyz)
-index = 0
+
 
 
 for idx,(kinfile,minfile)  in enumerate(zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),\
                                             glob.glob(os.path.join(src_path+Mfolder,'*ex4_FPS30_motion_unified.pkl')))):
     
-    print('group_'+str(index+1)+'......')
+
     print(kinfile)
     print(minfile)  
     print('==================================\n\n\n')    
