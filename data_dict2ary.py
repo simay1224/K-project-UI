@@ -8,13 +8,17 @@ import os , glob , cPickle
 import numpy as np
 
 
-#src_path = 'I:/AllData_0327/unified data/'
-src_path = 'D:/Project/K_project/data/Motion and Kinect unified/'
-Kfolder  = 'Unified_KData/'
-Mfolder  = 'Unified_MData/'
+src_path  = 'I:/AllData_0327/unified data/'
+dst_path  = 'I:/AllData_0327/unified data array/'
 
-kdst_path = 'D:/Project/K_project/data/Motion and Kinect unified array/Unified_KData/'
-mdst_path = 'D:/Project/K_project/data/Motion and Kinect unified array/Unified_MData/'
+#src_path  = 'D:/Project/K_project/data/Motion and Kinect unified/'
+#dst_path  = 'D:/Project/K_project/data/Motion and Kinect unified array/
+Kfolder   = 'Unified_KData/'
+Mfolder   = 'Unified_MData/'
+
+
+
+
 
 
 
@@ -41,8 +45,8 @@ for idx,(kinfile,minfile)  in enumerate(zip(glob.glob(os.path.join(src_path+Kfol
         Kary[3*kidx:3*(kidx+1),:] = kdata[i]
         Mary[3*kidx:3*(kidx+1),:] = mdata[i]  
              
-    kname = kdst_path + kinfile.split('\\')[-1]
-    mname = mdst_path + minfile.split('\\')[-1] 
+    kname = dst_path+Kfolder + kinfile.split('\\')[-1]
+    mname = dst_path+Mfolder + minfile.split('\\')[-1] 
 
     cPickle.dump(Kary,file(kname,'wb'))
     cPickle.dump(Mary,file(mname,'wb'))
