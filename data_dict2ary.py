@@ -8,21 +8,14 @@ import os , glob , cPickle
 import numpy as np
 
 
-src_path  = 'I:/AllData_0327/unified data/'
-dst_path  = 'I:/AllData_0327/unified data array/'
+#src_path  = 'I:/AllData_0327/unified data/'
+#dst_path  = 'I:/AllData_0327/unified data array/'
 
-#src_path  = 'D:/Project/K_project/data/Motion and Kinect unified/'
-#dst_path  = 'D:/Project/K_project/data/Motion and Kinect unified array/
+src_path  = 'D:/Project/K_project/data/Motion and Kinect unified/'
+dst_path  = 'D:/Project/K_project/data/Motion and Kinect unified array/'
 Kfolder   = 'Unified_KData/'
 Mfolder   = 'Unified_MData/'
 Rfolder   = 'reliability/'
-
-
-
-
-
-
-
 
 group_size = 30 # sample number per group
 jnum = 11      # joint number per sample; *3 (xyz)
