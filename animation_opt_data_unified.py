@@ -30,7 +30,9 @@ JointType_ThumbLeft = 22
 JointType_HandTipRight = 23
 JointType_ThumbRight = 24
 
-import cPickle as pk
+import cPickle,h5py
+import numpy as np
+import glob,os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -39,21 +41,27 @@ from mpl_toolkits.mplot3d import Axes3D
 ###########################
 
 
-#data_all = pk.load(file('./data/Motion and Kinect/Unified_MData/Dawn_2016-12-16 02.26.38 PM_FPS30_motion_unified_ex4.pkl'))
-#mdata = pk.load(file('test3.pkl'))
-#kdata_all = pk.load(file('./data/Motion and Kinect/Unified_KData/Dawn_12161426_Kinect_unified_ex4.pkl'))
 
-data_all  = pk.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
-kdata_all = pk.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
+#mpdata_all  = h5py.File('D:/Project/K_project/data/unified GPR/Andy_data201612151615_unified_ex4.h5')['data'][:]
+mpdata_all  = h5py.File('D:/Project/K_project/data/unified Kprime smooth/Andy_data201612151615_unified_ex4.h5')['data'][:]
 
-#data_all  = pk.load(file('I:/K_project/data/Motion and Kinect unified/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
-#kdata_all = pk.load(file('I:/K_project/data/Motion and Kinect unified/Unified_KData/Andy_data12151615_unified_ex4.pkl'))
+#mpdata_all = cPickle.load(file('D:/Project/K_project/data/unified GPR/Andy_data201612151615_unified_ex4.pkl'))
+#data_all = cPickle.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
+
+kdata_all = cPickle.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
 
 
-NUM_LABELS = len(data_all)  # total number of the joints
-NUM_FRAMES = len(data_all[0][1])   # total number of the frames
-kNUM_FRAMES = len(kdata_all[0][1]) 
-print 'The total frames: ', NUM_FRAMES
+
+#Rfile  = glob.glob(os.path.join('D:/Project/K_project/data/unified data array/reliability/','*ex4.pkl'))[0]
+#rdata   = cPickle.load(file(Rfile,'rb'))
+#Rel_th    =  0.7
+#R  = rdata[4:10 ,:954]
+#relidx = np.where(np.sum((R<Rel_th)*1,0)==0)[0] 
+
+#NUM_LABELS = len(data_all)  # total number of the joints
+#NUM_FRAMES = len(data_all[0][1])   # total number of the frames
+#kNUM_FRAMES = len(kdata_all[0][1]) 
+#print 'The total frames: ', NUM_FRAMES
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
@@ -63,23 +71,26 @@ ax.set_xlabel('Z axis')
 ax.set_ylabel('X axis')
 ax.set_zlabel('Y axis')
     
-for frame_no in xrange(250,500):#min(kNUM_FRAMES,NUM_FRAMES)):
+for frame_no in xrange(900):#min(kNUM_FRAMES,NUM_FRAMES)):
     plt.cla()
     
-    xs = []
-    ys = []
-    zs = []
-    mxs = []
-    mys = []
-    mzs = []
+    mpxs = mpdata_all[0::3,frame_no]
+    mpys = mpdata_all[1::3,frame_no]
+    mpzs = mpdata_all[2::3,frame_no]
+
+#    xs = []
+#    ys = []
+#    zs = []
+
     kxs = []
     kys = []
     kzs = []
 
-    for joint_idx in  data_all.keys() :
-        xs.append(data_all[joint_idx][0][frame_no])
-        ys.append(data_all[joint_idx][1][frame_no])
-        zs.append(data_all[joint_idx][2][frame_no])
+
+    for joint_idx in  kdata_all.keys() :
+#        xs.append(data_all[joint_idx][0][frame_no])
+#        ys.append(data_all[joint_idx][1][frame_no])
+#        zs.append(data_all[joint_idx][2][frame_no])
 #        mxs.append(mdata[joint_idx][0][frame_no])
 #        mys.append(mdata[joint_idx][1][frame_no])
 #        mzs.append(mdata[joint_idx][2][frame_no])        
@@ -87,10 +98,12 @@ for frame_no in xrange(250,500):#min(kNUM_FRAMES,NUM_FRAMES)):
         kxs.append(kdata_all[joint_idx][0][frame_no])
         kys.append(kdata_all[joint_idx][1][frame_no])
         kzs.append(kdata_all[joint_idx][2][frame_no])
+        
 
-    ax.scatter(kzs, kxs, kys, c = 'red', s = 100,label='Kinect Joints')    
-    ax.scatter(zs, xs, ys,c = 'green',s = 50,alpha=.4,label='MoCam Joints')
-#    ax.scatter(mzs, mxs, mys,c = 'blue',s = 50,alpha=.4,label='MoCam modified')
+
+    ax.scatter(kzs, kxs, kys, c = 'red', s = 10,label='Kinect Joints')    
+#    ax.scatter(zs, xs, ys,c = 'green',s = 10,alpha=.4,label='MoCam Joints')
+    ax.scatter(mpzs, mpxs, mpys,c = 'blue',s = 10,alpha=.4,label='kprime modified')
     ax.set_xlim(-300,300)
     ax.set_ylim(-200,400)
     ax.set_zlim(50,600)
