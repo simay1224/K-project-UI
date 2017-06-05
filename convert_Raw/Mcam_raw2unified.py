@@ -21,8 +21,8 @@ key_list_25 = ['LShoulder_1','RUArm_2','LShoulder_2',
             'RHand_3', 'RHand_2']
 
 # Raw data set up            
-src_path = 'F:/AllData_0322/raw data/20161216/MoCam/30/'
-dst_path = 'F:/AllData_0322/1216/'
+src_path = 'I:/AllData_0327/raw data/20161216/MoCam/30/'
+dst_path = 'I:/AllData_0327/1216/'
 
 # unified data set up
 uni_src_path = dst_path
@@ -197,26 +197,37 @@ for subfolder in os.listdir(src_path):
         
 
 
-
-filelist = glob.glob(os.path.join(uni_src_path, '*.pkl'))
-
-
-
-for infile in filelist:
-    print infile   
-    data = cPickle.load(file(infile,'r'))
-    pos_Kinect = Mocam2Kinect(data)
-    Pos_Unified = human_mod(pos_Kinect)
-    if 'FPS30' in infile:
-        fname = uni_dst_path30+infile.split('\\')[-1][:-4]+ '_unified.pkl'
-    else:
-        fname = uni_dst_path120+infile.split('\\')[-1][:-4]+ '_unified.pkl'
-        
-    cPickle.dump(Pos_Unified,file(fname,'wb'))
-
-
+#
+#filelist = glob.glob(os.path.join(uni_src_path, '*.pkl'))
+#
+#
+#
+#for infile in filelist:
+#    print infile   
+#    data = cPickle.load(file(infile,'r'))
+#    pos_Kinect = Mocam2Kinect(data)
+#    Pos_Unified = human_mod(pos_Kinect)
+#    if 'FPS30' in infile:
+#        fname = uni_dst_path30+infile.split('\\')[-1][:-4]+ '_unified.pkl'
+#    else:
+#        fname = uni_dst_path120+infile.split('\\')[-1][:-4]+ '_unified.pkl'
+#        
+#    cPickle.dump(Pos_Unified,file(fname,'wb'))
 
 
+
+
+Kinfile = 'I:/AllData_0327/raw data/20161216/pkl/Andy/Andy_data12151615_ex4.pkl'
+Minfile = 'I:/AllData_0327/1216/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion.pkl'
+jidx = [0,1,2,3,4,5,6,8,9,10,20]
+
+mdata = cPickle.load(file(Minfile,'r'))
+kdata = rawK2ary(cPickle.load(file(Kinfile,'r')),jidx)[20]
+pos_Kinect = Mocam2Kinect(data)
+Pos_Unified = human_mod_Mocam(pos_Kinect,kdata )
+fname = uni_dst_path30+infile.split('\\')[-1][:-4]+ '_mk.pkl'
+ 
+cPickle.dump(pos_Kinect,file(fname,'wb'))
 
 
 

@@ -328,7 +328,7 @@ class BodyGameRuntime(object):
                     
             h_to_w = float(self._frame_surface.get_height()) / self._frame_surface.get_width()
             target_height = int(h_to_w * self._screen.get_width())    
-            surface_to_draw = pygame.transform.scale(self._frame_surface, (self._screen.get_width(), target_height));
+            surface_to_draw = pygame.transform.scale(self._frame_surface, (self._screen.get_width(), target_height))
             
             self._screen.blit(surface_to_draw, (0,0))
             surface_to_draw = None

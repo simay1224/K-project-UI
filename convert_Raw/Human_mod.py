@@ -173,7 +173,38 @@ def draw_human_mod_pts(Joints,surface,keys):
     plt.draw()
     plt.pause(1.0/120)
 
+def human_mod_Mocam(Body,Kpos):
+    # Body : include all joints 3D position
+    #pdb.set_trace()
+    #Kpos : kinect spinshoulder position
+    
+    oripos = Body[JointType_SpineShoulder]
 
+    Vec00 = Body[JointType_SpineBase]     - oripos  
+    Vec01 = Body[JointType_SpineMid]      - oripos
+    Vec02 = Body[JointType_Neck]          - oripos
+    Vec03 = Body[JointType_Head]          - oripos
+    Vec04 = Body[JointType_ShoulderLeft]  - oripos
+    Vec05 = Body[JointType_ElbowLeft]     - oripos
+    Vec06 = Body[JointType_WristLeft]     - oripos   
+    Vec08 = Body[JointType_ShoulderRight] - oripos
+    Vec09 = Body[JointType_ElbowRight]    - oripos
+    Vec10 = Body[JointType_WristRight]    - oripos
+    Vec20 = Body[JointType_SpineShoulder] - oripos    
+    
+    J[JointType_SpineBase]     = Vec00 *100 + Kpos
+    J[JointType_SpineMid]      = Vec01 *100 + Kpos
+    J[JointType_SpineShoulder] = Vec20 *100 + Kpos
+    J[JointType_Neck]          = Vec02 *100 + Kpos
+    J[JointType_Head]          = Vec03 *100 + Kpos
+    J[JointType_ShoulderLeft]  = Vec04 *100 + Kpos
+    J[JointType_ElbowLeft]     = Vec05 *100 + Kpos
+    J[JointType_WristLeft]     = Vec06 *100 + Kpos
+    J[JointType_ShoulderRight] = Vec08 *100 + Kpos
+    J[JointType_ElbowRight]    = Vec09 *100 + Kpos
+    J[JointType_WristRight]    = Vec10 *100 + Kpos
+
+    return J
        
     
 #import cPickle 
