@@ -49,7 +49,7 @@ mpdata_all  = h5py.File('D:/Project/K_project/data/unified Kprime smooth/Andy_da
 #data_all = cPickle.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
 
 kdata_all = cPickle.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
-
+data_all = cPickle.load(file('I:/AllData_0327/1216/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion.pkl'))
 
 
 #Rfile  = glob.glob(os.path.join('D:/Project/K_project/data/unified data array/reliability/','*ex4.pkl'))[0]
