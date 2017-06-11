@@ -71,13 +71,14 @@ Lapmtx[:] = degmtx - adjmtx
 
 
 def func(X,Y):
-    x = X.reshape(12,3)
-    y = Y.reshape(12,3)
-    return sum(x-y)
+#    x = X.reshape((12,3))
+#    y = Y.reshape((12,3))
+    return sum(X-Y)
 
 def func(X,u,Y,R,L):
-
-    
+    Y = Y.reshape((12,3))
+    X = X.reshape((12,3))
+    L = L.reshape((12,12))
     
     return   (np.matmul(np.matmul((X[:,0]-Y[:,0]).T,np.diag(R)), (X[:,0]-Y[:,0]))**2+\
               np.matmul(np.matmul((X[:,1]-Y[:,1]).T,np.diag(R)), (X[:,1]-Y[:,1]))**2+\
@@ -111,10 +112,10 @@ for frame_idx in  relidx:
     X_init = np.vstack([Xtm1_init,Xt_init])
          
           
-    x =  optimize.fmin(func, X_init ,args = (0.001,Y,Rel,Lapmtx,) ) 
+    x =  optimize.fmin_bfgs(func, X_init.flatten() ,args = (0.001,Y.flatten(),Rel,Lapmtx.flatten(),)) 
     
     
-x =  optimize.fmin(func, X_init ,args = (Y,) )
+x =  optimize.fmin(func, X_init.flatten() ,args = (Y.flatten(),) )
 
   
     
@@ -128,19 +129,20 @@ x =  optimize.fmin(func, X_init ,args = (Y,) )
 
 
 
-#
+
 from scipy import optimize
 import numpy as np
+
 def func(x,Y):
-    
-    a = x[0]-Y[0]
-    return sum(a**2)
-    
-y = np.array([1,2])
-w = optimize.fmin(func, x0 = np.random.rand(2),args =(y,))
+    return sum((x[:-1]-Y[:-1])**2+(x[1:]-Y[1:])**2)
+   
+y = np.array([1,2,3])
+w = optimize.fmin(func, x0 = np.random.rand(3),args =(y,))
 
 print w
-#        
+
+
+        
 #    
 #from scipy import optimize
 #import numpy as np
@@ -153,7 +155,7 @@ print w
 #idx = np.arange(n)
 #
 #def func(w, beta, lam):
-#    pdb.set_trace()
+##    pdb.set_trace()
 #    w = w.reshape(n, n)
 #    w2 = np.abs(w)
 #    w2[idx, idx] = 0
@@ -164,7 +166,7 @@ print w
 #w[idx, idx] = 0
 #w = np.abs(w)
 #print w            
-
-            
-
-
+#
+#            
+#
+#
