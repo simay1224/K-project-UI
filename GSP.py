@@ -21,7 +21,7 @@ Kdata = cPickle.load(file(src_path+Kfolder+'Andy_data201612151615_unified_ex4.pk
 Rdata = cPickle.load(file(src_path+Rfolder+'Andy_data201612151615_Rel_ex4.pkl','rb'))[4:10]
 
 Jnum   = 6   # joint number
-Tnum   = 2   # time interval
+Tnum   = 1   # time interval
 sigma  = 20
 Rel_th = 0.7
 
