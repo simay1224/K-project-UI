@@ -110,9 +110,9 @@ corrmtx_y  = np.mean(corrmtx3,axis = 3)[:,:,1]
 corrmtx_z  = np.mean(corrmtx3,axis = 3)[:,:,2]
    
 adjmtx[:]    = np.mean(distmtx,axis=2)+ corrmtx
-adjmtx_x     = np.mean(distmtx3,axis=3)[:,:,0]+ corrmtx_x
-adjmtx_y     = np.mean(distmtx3,axis=3)[:,:,1]+ corrmtx_y
-adjmtx_z     = np.mean(distmtx3,axis=3)[:,:,2]+ corrmtx_z
+adjmtx_x     = np.mean(distmtx3,axis=3)[:,:,0]* corrmtx_x
+adjmtx_y     = np.mean(distmtx3,axis=3)[:,:,1]* corrmtx_y
+adjmtx_z     = np.mean(distmtx3,axis=3)[:,:,2]* corrmtx_z
 
 adjmtx_th[:]  = adjmtx*thmtx
 adjmtx_xth = adjmtx_x*thmtx
@@ -214,20 +214,20 @@ for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob
         corKdata[1::3,idx] = fy
         corKdata[2::3,idx] = fz
 
-    foldername = 'cor_'+cor_th+'_gam_'+gamma+'_adj_'+adj_type+'_relb_'+rel_Btype
-    #cor_th : threshold of correlation 
-    #gamma  : gamma value
-    # adj type : whether it is adjmtx or adjmtx_th
-    # relb     : reliability in binary or original value
-
-    if not os.path.isdir('./data/GSP/'+foldername+'/'):
-        os.makedirs('./data/GSP/'+foldername+'/')
-        
-        
-    fname ='./data/GSP/'+foldername+'/' +Kfile.split('\\')[-1][:-3]+'h5'
-    f = h5py.File(fname,'w')
-    f.create_dataset('data',data = corKdata)
-    f.close()
+#    foldername = 'cor_'+cor_th+'_gam_'+gamma+'_adj_'+adj_type+'_relb_'+rel_Btype
+#    #cor_th : threshold of correlation 
+#    #gamma  : gamma value
+#    # adj type : whether it is adjmtx or adjmtx_th
+#    # relb     : reliability in binary or original value
+#
+#    if not os.path.isdir('./data/GSP/'+foldername+'/'):
+#        os.makedirs('./data/GSP/'+foldername+'/')
+#        
+#        
+#    fname ='./data/GSP/'+foldername+'/' +Kfile.split('\\')[-1][:-3]+'h5'
+#    f = h5py.File(fname,'w')
+#    f.create_dataset('data',data = corKdata)
+#    f.close()
 
     
     
