@@ -13,8 +13,8 @@ from numpy.linalg import eig
 from scipy.linalg import eig as seig
 from numpy.linalg import norm
 
-src_path = 'I:/AllData_0327/unified data array/'
-#src_path = './data/unified data array/'
+#src_path = 'I:/AllData_0327/unified data array/'
+src_path = './data/unified data array/'
 Mfolder  = 'Unified_MData/'
 Kfolder  = 'Unified_KData/'
 Rfolder  = 'reliability/'
@@ -25,6 +25,9 @@ Jnum   = 6   # joint number
 Tnum   = 1   # time interval
 sigma  = 20
 Rel_th = 0.7
+cor_th = 0.1
+
+
 
 distmtx    = np.zeros((Jnum*Tnum,Jnum*Tnum,len(Mfile)))
 distmtx3   = np.zeros((Jnum*Tnum,Jnum*Tnum,3,len(Mfile)))
@@ -83,7 +86,7 @@ for midx,mfile in enumerate(Mfile):
         Diff_abs = abs(Diff)
         L2   = np.mean((np.sum(Diff**2,axis = 1))**0.5,axis = 1)
         W    = np.exp(-L2/sigma**2)
-        W_abs = np.mean(np.exp(-Diff_abs/sigma**2),axis = 2)
+        W_abs = np.mean(np.exp(-Diff_abs**2/sigma**2),axis = 2)
         for Lidx,(i,j) in enumerate(zip(Cidx,curRidx)):
             col = min(i,j)
             row = max(i,j)
@@ -93,9 +96,13 @@ for midx,mfile in enumerate(Mfile):
             distmtx3[col,row,2,midx] = W_abs[Lidx,2]
 
 
-corrmtx3[0,3,2,:][np.isnan(corrmtx3[0,3,2,:])] = 1  # L and R should in Z axis's correlation
+
+
+
+
+corrmtx3[0,3,2,:][np.isnan(corrmtx3[0,3,2,:])] = 1  # L and R shoulder in Z axis's correlation
 corrmtx3[np.isnan(corrmtx3)] = 0
-corrmtx3[corrmtx3<.1] = 0
+corrmtx3[corrmtx3<cor_th] = 0
 
 corrmtx[:] = np.mean(np.sum(corrmtx3**2,axis=2)**0.5,axis = 2)        
 corrmtx_x  = np.mean(corrmtx3,axis = 3)[:,:,0]
@@ -127,8 +134,8 @@ adjmtx_xth   = adjmtx_zth + adjmtx_zth.T
 for i in range(Jnum*Tnum):
     degmtx[i,i]    = sum(adjmtx[i,:])
     degmtx_x[i,i]  = sum(adjmtx_x[i,:])
-    degmtx_y[i,i]  = sum(adjmtx_z[i,:])
-    degmtx_z[i,i]  = sum(adjmtx_y[i,:])
+    degmtx_y[i,i]  = sum(adjmtx_y[i,:])
+    degmtx_z[i,i]  = sum(adjmtx_z[i,:])
 
     degmtx_th[i,i]  = sum(adjmtx_th[i,:]) 
     degmtx_xth[i,i] = sum(adjmtx_xth[i,:])
@@ -158,6 +165,8 @@ Eval_zth,Evec_zth = eig(Lapmtx_zth)
     
 
 Rel_th = 0.7
+gamma = 0
+
 
 for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob.glob(os.path.join(src_path+Rfolder,'*ex4.pkl'))):
     print Kfile
@@ -167,84 +176,144 @@ for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob
     corKdata = np.zeros(Kdata.shape)
     corKdata += Kdata 
     
+    
+    
     for idx in unrelidx:
         x_coef = []
         y_coef = []
-        z_coef = []    
+        z_coef = [] 
+        wn_x = []
+        wn_y = []
+        wn_z = []   
+        R = Rdata[:,idx]
 
         for i in range(Jnum*Tnum):
-            x_coef.append(sum(Kdata[0::3,idx]*Evec_xth[:,i])/norm(Evec_xth[:,i]))   
-            y_coef.append(sum(Kdata[1::3,idx]*Evec_yth[:,i])/norm(Evec_yth[:,i]))
-            z_coef.append(sum(Kdata[2::3,idx]*Evec_zth[:,i])/norm(Evec_zth[:,i]))
+            wn_x.append(sum((R*Evec_x[:,i])**2))
+            wn_y.append(sum((R*Evec_y[:,i])**2))
+            wn_z.append(sum((R*Evec_z[:,i])**2))
+
+
+        for i in range(Jnum*Tnum):
+        
+            x_coef.append(sum(Kdata[0::3,idx]*Evec_x[:,i]*R**2)/norm(Evec_x[:,i]))   
+            y_coef.append(sum(Kdata[1::3,idx]*Evec_y[:,i]*R**2)/norm(Evec_y[:,i]))
+            z_coef.append(sum(Kdata[2::3,idx]*Evec_z[:,i]*R**2)/norm(Evec_z[:,i]))
+                
         
         
-        gamma = 0
         fx = np.zeros(6)
         fy = np.zeros(6)
         fz = np.zeros(6)
         
         for i in range(Jnum*Tnum):
-            fx += (1/(1+gamma*Eval_xth)*x_coef)[i]*Evec_xth[:,i]
-            fy += (1/(1+gamma*Eval_yth)*y_coef)[i]*Evec_yth[:,i]
-            fz += (1/(1+gamma*Eval_zth)*z_coef)[i]*Evec_zth[:,i]    
+            fx += 1/(1+gamma*Eval_x[i])*x_coef[i]/wn_x[i]*Evec_x[:,i]
+            fy += 1/(1+gamma*Eval_y[i])*y_coef[i]/wn_y[i]*Evec_y[:,i]
+            fz += 1/(1+gamma*Eval_z[i])*z_coef[i]/wn_z[i]*Evec_z[:,i] 
           
         corKdata[0::3,idx] = fx
         corKdata[1::3,idx] = fy
         corKdata[2::3,idx] = fz
 
-    fname ='./data/GSP/original/' +Kfile.split('\\')[-1][:-3]+'h5'
+    foldername = 'cor_'+cor_th+'_gam_'+gamma+'_adj_'+adj_type+'_relb_'+rel_Btype
+    #cor_th : threshold of correlation 
+    #gamma  : gamma value
+    # adj type : whether it is adjmtx or adjmtx_th
+    # relb     : reliability in binary or original value
+
+    if not os.path.isdir('./data/GSP/'+foldername+'/'):
+        os.makedirs('./data/GSP/'+foldername+'/')
+        
+        
+    fname ='./data/GSP/'+foldername+'/' +Kfile.split('\\')[-1][:-3]+'h5'
     f = h5py.File(fname,'w')
     f.create_dataset('data',data = corKdata)
     f.close()
 
-
-
+    
+    
+    
+#for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob.glob(os.path.join(src_path+Rfolder,'*ex4.pkl'))):
+#    print Kfile
+#    Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]
+#    Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
+#    unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
+#    corKdata = np.zeros(Kdata.shape)
+#    corKdata += Kdata 
+#    
+#    for idx in unrelidx:
+#        x_coef = []
+#        y_coef = []
+#        z_coef = []    
+#
+#        for i in range(Jnum*Tnum):
+#            x_coef.append(sum(Kdata[0::3,idx]*Evec_x[:,i])/norm(Evec_x[:,i]))   
+#            y_coef.append(sum(Kdata[1::3,idx]*Evec_y[:,i])/norm(Evec_y[:,i]))
+#            z_coef.append(sum(Kdata[2::3,idx]*Evec_z[:,i])/norm(Evec_z[:,i]))
+#        
+#        
+#        gamma = 0
+#        fx = np.zeros(6)
+#        fy = np.zeros(6)
+#        fz = np.zeros(6)
+#        
+#        for i in range(Jnum*Tnum):
+#            fx += (1/(1+gamma*Eval_x)*x_coef)[i]*Evec_xth[:,i]
+#            fy += (1/(1+gamma*Eval_y)*y_coef)[i]*Evec_yth[:,i]
+#            fz += (1/(1+gamma*Eval_z)*z_coef)[i]*Evec_zth[:,i]    
+#          
+#        corKdata[0::3,idx] = fx
+#        corKdata[1::3,idx] = fy
+#        corKdata[2::3,idx] = fz
+#
+#    fname ='./data/GSP/original/' +Kfile.split('\\')[-1][:-3]+'h5'
+#    f = h5py.File(fname,'w')
+#    f.create_dataset('data',data = corKdata)
+#    f.close()    
+    
+    
+    
+    
   
-Mdata = cPickle.load(file(src_path+Mfolder+'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl','rb'))[12:30,:]    
-Kdata = cPickle.load(file(src_path+Kfolder+'Andy_data201612151615_unified_ex4.pkl','rb'))[12:30,:]
-Rdata = cPickle.load(file(src_path+Rfolder+'Andy_data201612151615_Rel_ex4.pkl','rb'))[4:10]
-
-    
-idx = 128
-x_coef = []
-y_coef = []
-z_coef = []
-
-R = Rdata[:,idx]#np.array([0,1,1,1,1,1])
-wn_x = []
-wn_y = []
-wn_z = []
-
-for i in range(Jnum*Tnum):
-    wn_x.append(sum((R*Evec_x[:,i])**2))
-    wn_y.append(sum((R*Evec_y[:,i])**2))
-    wn_z.append(sum((R*Evec_z[:,i])**2))
-    
-#    wn_x +=  sum(((R*Evec_x)[:,i])**2)
-#    wn_y +=  sum(((R*Evec_y)[:,i])**2)
-#    wn_z +=  sum(((R*Evec_z)[:,i])**2)
-
-for i in range(Jnum*Tnum):
-    sum(Kdata[0::3,idx]*Evec_x[:,i]*R**2)/norm(Evec_x[:,i])
-    
-    
+#Mdata = cPickle.load(file(src_path+Mfolder+'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl','rb'))[12:30,:]    
+#Kdata = cPickle.load(file(src_path+Kfolder+'Andy_data201612151615_unified_ex4.pkl','rb'))[12:30,:]
+#Rdata = cPickle.load(file(src_path+Rfolder+'Andy_data201612151615_Rel_ex4.pkl','rb'))[4:10]
+#
+#    
+#idx = 128
+#x_coef = []
+#y_coef = []
+#z_coef = []
+#
+#R = np.array([1,1,1,1,1,1])#Rdata[:,idx]#
+#wn_x = []
+#wn_y = []
+#wn_z = []
+#
+#for i in range(Jnum*Tnum):
+#    wn_x.append(sum((R*Evec_x[:,i])**2))
+#    wn_y.append(sum((R*Evec_y[:,i])**2))
+#    wn_z.append(sum((R*Evec_z[:,i])**2))
+#    
+##    wn_x +=  sum(((R*Evec_x)[:,i])**2)
+##    wn_y +=  sum(((R*Evec_y)[:,i])**2)
+##    wn_z +=  sum(((R*Evec_z)[:,i])**2)
+#
+#for i in range(Jnum*Tnum):
+#
 #    x_coef.append(sum(Kdata[0::3,idx]*Evec_x[:,i]*R**2)/norm(Evec_x[:,i]))   
 #    y_coef.append(sum(Kdata[1::3,idx]*Evec_y[:,i]*R**2)/norm(Evec_y[:,i]))
 #    z_coef.append(sum(Kdata[2::3,idx]*Evec_z[:,i]*R**2)/norm(Evec_z[:,i]))
-    x_coef.append(sum(Kdata[0::3,idx]*Evec_x[:,i]*R**2)/norm(Evec_x[:,i]))   
-    y_coef.append(sum(Kdata[1::3,idx]*Evec_y[:,i]*R**2)/norm(Evec_y[:,i]))
-    z_coef.append(sum(Kdata[2::3,idx]*Evec_z[:,i]*R**2)/norm(Evec_z[:,i]))
-
-gamma = 0.01
-fx = np.zeros(6)
-fy = np.zeros(6)
-fz = np.zeros(6)
-
-for i in range(Jnum*Tnum):
-    fx += 1/(1+gamma*Eval_x)*x_coef[i]/wn_x[i]*Evec_x[:,i]
-    fy += 1/(1+gamma*Eval_y)*y_coef[i]/wn_y[i]*Evec_y[:,i]
-    fz += 1/(1+gamma*Eval_z)*z_coef[i]/wn_z[i]*Evec_z[:,i]
-
+#
+#gamma = 0.1
+#fx = np.zeros(6)
+#fy = np.zeros(6)
+#fz = np.zeros(6)
+#
+#for i in range(Jnum*Tnum):
+#    fx += 1/(1+gamma*Eval_x[i])*x_coef[i]/wn_x[i]*Evec_x[:,i]
+#    fy += 1/(1+gamma*Eval_y[i])*y_coef[i]/wn_y[i]*Evec_y[:,i]
+#    fz += 1/(1+gamma*Eval_z[i])*z_coef[i]/wn_z[i]*Evec_z[:,i]
+#
 
 
 #for i in range(Jnum*Tnum):

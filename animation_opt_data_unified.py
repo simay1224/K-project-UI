@@ -42,7 +42,10 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 
-mpdata_all  = h5py.File('./data/GSP/original/Andy_data201612151615_unified_ex4.h5')['data'][:]
+mpdata_all  = h5py.File('./data/GSP/R1_cor_0.1_gam_0.001_adj_1_relb_F/Andy_data201612151615_unified_ex4.h5')['data'][:]
+data_all    = h5py.File('./data/GSP/R1_cor_0.1_gam_0.001_adj_0_relb_F/Andy_data201612151615_unified_ex4.h5')['data'][:]
+
+
 #kdata_all  = h5py.File('D:/Project/K_project/data/unified GPR_K2M/Andy_data201612151615_unified_ex4.h5')['data'][:]
 #mpdata_all  = h5py.File('D:/Project/K_project/data/unified Kprime smooth/Andy_data201612151615_unified_ex4.h5')['data'][:]
 
@@ -82,6 +85,11 @@ for frame_no in xrange(150,500):#min(kNUM_FRAMES,NUM_FRAMES)):
     kxs = kdata_all[0::3,frame_no]
     kys = kdata_all[1::3,frame_no]
     kzs = kdata_all[2::3,frame_no] 
+
+    xs = data_all[0::3,frame_no]
+    ys = data_all[1::3,frame_no]
+    zs = data_all[2::3,frame_no] 
+
    
 #    xs = []
 #    ys = []
@@ -107,8 +115,8 @@ for frame_no in xrange(150,500):#min(kNUM_FRAMES,NUM_FRAMES)):
 
 
     ax.scatter(kzs, kxs, kys, c = 'red', s = 30,label='Kinect Joints')    
-#    ax.scatter(zs, xs, ys,c = 'green',s = 10,alpha=.4,label='MoCam Joints')
-    ax.scatter(mpzs, mpxs, mpys,c = 'blue',s = 20,alpha=.4,label='GSP modified')
+    ax.scatter(zs, xs, ys,c = 'green',s = 35,alpha=.4,label='GSP relb')
+    ax.scatter(mpzs, mpxs, mpys,c = 'blue',s =50,alpha=.4,label='GSP ')
     ax.set_xlim(-300,300)
     ax.set_ylim(-200,400)
     ax.set_zlim(50,600)
@@ -122,5 +130,5 @@ for frame_no in xrange(150,500):#min(kNUM_FRAMES,NUM_FRAMES)):
     ax.set_zlabel('Y axis')
     plt.legend( loc=1)
     plt.draw()
-    plt.pause(1.0/120)
+    plt.pause(1.0/40)
 
