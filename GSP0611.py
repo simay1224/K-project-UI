@@ -10,10 +10,11 @@ import numpy as np
 import glob,os
 from scipy.stats import pearsonr
 from numpy.linalg import eig
+from scipy.linalg import eig as seig
 from numpy.linalg import norm
 
-#src_path = 'I:/AllData_0327/unified data array/'
-src_path = './data/unified data array/'
+src_path = 'I:/AllData_0327/unified data array/'
+#src_path = './data/unified data array/'
 Mfolder  = 'Unified_MData/'
 Kfolder  = 'Unified_KData/'
 Rfolder  = 'reliability/'
@@ -204,26 +205,35 @@ Kdata = cPickle.load(file(src_path+Kfolder+'Andy_data201612151615_unified_ex4.pk
 Rdata = cPickle.load(file(src_path+Rfolder+'Andy_data201612151615_Rel_ex4.pkl','rb'))[4:10]
 
     
-idx = 127
+idx = 128
 x_coef = []
 y_coef = []
 z_coef = []
 
-
-wn_x = 0
-wn_y = 0
-wn_z = 0
-
-for i in range(6):
-    wn_x +=  sum(((0.9*Evec_x)[:,i])**2)
-    wn_y +=  sum(((0.9*Evec_y)[:,i])**2)
-    wn_z +=  sum(((0.9*Evec_z)[:,i])**2)
+R = Rdata[:,idx]#np.array([0,1,1,1,1,1])
+wn_x = []
+wn_y = []
+wn_z = []
 
 for i in range(Jnum*Tnum):
-    x_coef.append(sum(Kdata[0::3,idx]*Evec_x[:,i]*.9**2)/norm(Evec_x[:,i])/wn_x)   
-    y_coef.append(sum(Kdata[1::3,idx]*Evec_y[:,i]*.9**2)/norm(Evec_y[:,i])/wn_y)
-    z_coef.append(sum(Kdata[2::3,idx]*Evec_z[:,i]*.9**2)/norm(Evec_z[:,i])/wn_z)
+    wn_x.append(sum((R*Evec_x[:,i])**2))
+    wn_y.append(sum((R*Evec_y[:,i])**2))
+    wn_z.append(sum((R*Evec_z[:,i])**2))
+    
+#    wn_x +=  sum(((R*Evec_x)[:,i])**2)
+#    wn_y +=  sum(((R*Evec_y)[:,i])**2)
+#    wn_z +=  sum(((R*Evec_z)[:,i])**2)
 
+for i in range(Jnum*Tnum):
+    sum(Kdata[0::3,idx]*Evec_x[:,i]*R**2)/norm(Evec_x[:,i])
+    
+    
+#    x_coef.append(sum(Kdata[0::3,idx]*Evec_x[:,i]*R**2)/norm(Evec_x[:,i]))   
+#    y_coef.append(sum(Kdata[1::3,idx]*Evec_y[:,i]*R**2)/norm(Evec_y[:,i]))
+#    z_coef.append(sum(Kdata[2::3,idx]*Evec_z[:,i]*R**2)/norm(Evec_z[:,i]))
+    x_coef.append(sum(Kdata[0::3,idx]*Evec_x[:,i]*R**2)/norm(Evec_x[:,i]))   
+    y_coef.append(sum(Kdata[1::3,idx]*Evec_y[:,i]*R**2)/norm(Evec_y[:,i]))
+    z_coef.append(sum(Kdata[2::3,idx]*Evec_z[:,i]*R**2)/norm(Evec_z[:,i]))
 
 gamma = 0.01
 fx = np.zeros(6)
@@ -231,11 +241,9 @@ fy = np.zeros(6)
 fz = np.zeros(6)
 
 for i in range(Jnum*Tnum):
-    fx += (1/(1+gamma*Eval_x)*x_coef)[i]*Evec_x[:,i]
-    fy += (1/(1+gamma*Eval_y)*y_coef)[i]*Evec_y[:,i]
-    fz += (1/(1+gamma*Eval_z)*z_coef)[i]*Evec_z[:,i]
-
-
+    fx += 1/(1+gamma*Eval_x)*x_coef[i]/wn_x[i]*Evec_x[:,i]
+    fy += 1/(1+gamma*Eval_y)*y_coef[i]/wn_y[i]*Evec_y[:,i]
+    fz += 1/(1+gamma*Eval_z)*z_coef[i]/wn_z[i]*Evec_z[:,i]
 
 
 
