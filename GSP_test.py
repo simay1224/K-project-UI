@@ -100,7 +100,7 @@ st = time.clock()
 corrmtx3[0,3,2,:][np.isnan(corrmtx3[0,3,2,:])] = 1  # L and R shoulder in Z axis's correlation
 corrmtx3[np.isnan(corrmtx3)] = 0
          
-for cor_th in [0.1]:#[0,0.25,0.5]:  # ============================================================#
+for cor_th in [0,0.25,0.5]:  # ============================================================#
     
     corrmtx3[corrmtx3<cor_th] = 0
     
