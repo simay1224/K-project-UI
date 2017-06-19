@@ -220,7 +220,7 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                         corKdata[1::3,idx] = x[:,1]
                         corKdata[2::3,idx] = x[:,2]
                 
-                    foldername = 'cor_'+repr(cor_th)+'_gam_'+repr(gamma)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
+                    foldername = 'opt_cor_'+repr(cor_th)+'_gam_'+repr(gamma)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
                     #cor_th : threshold of correlation 
                     #gamma  : gamma value
                     # adj type : whether it is adjmtx or adjmtx_th
