@@ -185,8 +185,8 @@ for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob
         wn_x = []
         wn_y = []
         wn_z = []   
-        R = Rdata[:,idx]
-
+        #R = Rdata[:,idx]
+        R = np.array([1,1,1,1,1,1])
         for i in range(Jnum*Tnum):
             wn_x.append(sum((R*Evec_x[:,i])**2))
             wn_y.append(sum((R*Evec_y[:,i])**2))
@@ -214,12 +214,13 @@ for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob
         corKdata[1::3,idx] = fy
         corKdata[2::3,idx] = fz
 
+
 #    foldername = 'cor_'+cor_th+'_gam_'+gamma+'_adj_'+adj_type+'_relb_'+rel_Btype
 #    #cor_th : threshold of correlation 
 #    #gamma  : gamma value
 #    # adj type : whether it is adjmtx or adjmtx_th
 #    # relb     : reliability in binary or original value
-#
+
 #    if not os.path.isdir('./data/GSP/'+foldername+'/'):
 #        os.makedirs('./data/GSP/'+foldername+'/')
 #        
@@ -228,6 +229,8 @@ for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob
 #    f = h5py.File(fname,'w')
 #    f.create_dataset('data',data = corKdata)
 #    f.close()
+    
+
 
     
     
@@ -279,7 +282,7 @@ Kdata = cPickle.load(file(src_path+Kfolder+'Andy_data201612151615_unified_ex4.pk
 Rdata = cPickle.load(file(src_path+Rfolder+'Andy_data201612151615_Rel_ex4.pkl','rb'))[4:10]
 
     
-idx = 128
+idx = 219
 x_coef = []
 y_coef = []
 z_coef = []
@@ -315,6 +318,13 @@ for i in range(Jnum*Tnum):
     fz += 1/(1+gamma*Eval_z[i])*z_coef[i]/wn_z[i]*Evec_z[:,i]
 
 
+
+np.sum(((fx -Kdata[0::3,idx])*R)**2)**0.5
+np.matmul(np.matmul(fx.reshape(-1,6),Lapmtx_x),fx.reshape(6,-1))
+
+
+
+
 #
 #for i in range(Jnum*Tnum):
 #    x_coef.append(sum(Kdata[0::3,idx]*Evec_x[:,i])/norm(Evec_x[:,i]))   
@@ -340,13 +350,67 @@ for i in range(Jnum*Tnum):
 #f.create_dataset('data_z',data=Evec_z)    
 #f.close()    
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+#============================================================================   
+#
+#from scipy import optimize
+#Mdata = cPickle.load(file(src_path+Mfolder+'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl','rb'))[12:30,:]    
+#Kdata = cPickle.load(file(src_path+Kfolder+'Andy_data201612151615_unified_ex4.pkl','rb'))[12:30,:]
+#Rdata = cPickle.load(file(src_path+Rfolder+'Andy_data201612151615_Rel_ex4.pkl','rb'))[4:10]
+#
+#    
+#idx = 219    
+#    
+#def func(X,u,Y,R,R_b,Lx,Ly,Lz):
+#    Y  = Y.reshape((6,3))
+#    X  = X.reshape((6,3))
+#    Lx = Lx.reshape((6,6))
+#    Ly = Ly.reshape((6,6))
+#    Lz = Lz.reshape((6,6))
+#    return   (np.matmul(np.matmul((X[:,0]-Y[:,0]).T,np.diag(R_b)), (X[:,0]-Y[:,0]))**2+\
+#              np.matmul(np.matmul((X[:,1]-Y[:,1]).T,np.diag(R_b)), (X[:,1]-Y[:,1]))**2+\
+#              np.matmul(np.matmul((X[:,2]-Y[:,2]).T,np.diag(R_b)), (X[:,2]-Y[:,2]))**2)**0.5+\
+#          u*((np.matmul(np.matmul(np.matmul(X[:,0].T,Lx),(2-np.diag(R))),X[:,0])**2+\
+#              np.matmul(np.matmul(np.matmul(X[:,1].T,Ly),(2-np.diag(R))),X[:,1])**2+\
+#              np.matmul(np.matmul(np.matmul(X[:,2].T,Lz),(2-np.diag(R))),X[:,2])**2)**0.5)
+#          
+##    return   (np.matmul(np.matmul((X[:,0]-Y[:,0]).T,np.diag(R)), (X[:,0]-Y[:,0]))**2+\
+##              np.matmul(np.matmul((X[:,1]-Y[:,1]).T,np.diag(R)), (X[:,1]-Y[:,1]))**2+\
+##              np.matmul(np.matmul((X[:,2]-Y[:,2]).T,np.diag(R)), (X[:,2]-Y[:,2]))**2)**0.5+\
+##          u*((np.matmul(np.matmul(X[:,0].T,Lx),X[:,0])**2+\
+##              np.matmul(np.matmul(X[:,1].T,Ly),X[:,1])**2+\
+##              np.matmul(np.matmul(X[:,2].T,Lz),X[:,2])**2)**0.5)
+#    
+#    
+#def pos_est(fidx,Kv,Ka,Kdata):
+#    return Kdata[:,:,fidx]+Kv[:,:,fidx]+Ka[:,:,fidx] 
+#
+#Kdata3 = Kdata.reshape((-1,3,Kdata.shape[1]))    
+#Kv    = Kdata3 - np.roll(Kdata3,1,axis = 2) 
+#Ka    = Kv - np.roll(Kv,1,axis = 2)    
+#    
+#R = Rdata[:,idx]# np.array([1,1,0,1,1,1])#  
+#R_b = np.zeros(R.shape) 
+#Rel_th = 0.7    
+#R_b[R>=Rel_th] = 1     
+# 
+#
+#X_init   = pos_est(idx,Kv,Ka,Kdata3)
+#x =  optimize.fmin_bfgs(func, X_init.flatten() ,args = (0.001,Kdata[:,idx].flatten(),R,R_b,Lapmtx_x.flatten(),Lapmtx_y.flatten(),Lapmtx_z.flatten(),)) 
+#
+#x = x.reshape(-1,3)  
+#
+#xx =  optimize.fmin_bfgs(func, X_init.flatten() ,args = (0.001,Kdata[:,idx].flatten(),R,R_b,Lapmtx_xth.flatten(),Lapmtx_yth.flatten(),Lapmtx_zth.flatten(),)) 
+#
+#xx = xx.reshape(-1,3)
+#
+#print Kdata[0::3,idx]
+#print x[:,0]
+#print xx[:,0]
+#
+#
+#
+#
+#
+#
+#
+#

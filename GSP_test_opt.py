@@ -7,13 +7,13 @@ Created on Sun Jun 18 18:44:53 2017
 
 
 
-import cPickle,h5py,time
+import cPickle,h5py,time,pdb
 import numpy as np
 import glob,os
 from scipy.stats import pearsonr
 from numpy.linalg import eig
-from scipy.linalg import eig as seig
-from numpy.linalg import norm
+from numpy.linalg import norm,inv
+
 from scipy import optimize
 
 #src_path = 'I:/AllData_0327/unified data array/'
@@ -30,30 +30,30 @@ sigma  = 20
 Rel_th = 0.7
 cor_th = 0.1
 
-
-def func(X,u,Y,R,Lx,Ly,Lz):
-    Y  = Y.reshape((6,3))
-    X  = X.reshape((6,3))
-    Lx = Lx.reshape((6,6))
-    Ly = Ly.reshape((6,6))
-    Lz = Lz.reshape((6,6))
-    return   (np.matmul(np.matmul((X[:,0]-Y[:,0]).T,np.diag(R)), (X[:,0]-Y[:,0]))**2+\
-              np.matmul(np.matmul((X[:,1]-Y[:,1]).T,np.diag(R)), (X[:,1]-Y[:,1]))**2+\
-              np.matmul(np.matmul((X[:,2]-Y[:,2]).T,np.diag(R)), (X[:,2]-Y[:,2]))**2)**0.5+\
-          u*((np.matmul(np.matmul(np.matmul(X[:,0].T,Lx),(2-np.diag(R))) ,X[:,0])**2+\
-              np.matmul(np.matmul(np.matmul(X[:,1].T,Ly),(2-np.diag(R))),X[:,1])**2+\
-              np.matmul(np.matmul(np.matmul(X[:,2].T,Lz),(2-np.diag(R))),X[:,2])**2)**0.5)
-          
+#
+#def func(X,u,Y,R,Lx,Ly,Lz):
+#    Y  = Y.reshape((6,3))
+#    X  = X.reshape((6,3))
+#    Lx = Lx.reshape((6,6))
+#    Ly = Ly.reshape((6,6))
+#    Lz = Lz.reshape((6,6))
 #    return   (np.matmul(np.matmul((X[:,0]-Y[:,0]).T,np.diag(R)), (X[:,0]-Y[:,0]))**2+\
 #              np.matmul(np.matmul((X[:,1]-Y[:,1]).T,np.diag(R)), (X[:,1]-Y[:,1]))**2+\
 #              np.matmul(np.matmul((X[:,2]-Y[:,2]).T,np.diag(R)), (X[:,2]-Y[:,2]))**2)**0.5+\
-#          u*((np.matmul(np.matmul(X[:,0].T,Lx),X[:,0])**2+\
-#              np.matmul(np.matmul(X[:,1].T,Ly),X[:,1])**2+\
-#              np.matmul(np.matmul(X[:,2].T,Lz),X[:,2])**2)**0.5)
-    
-    
-def pos_est(fidx,Kv,Ka,Kdata):
-    return Kdata[:,:,fidx]+Kv[:,:,fidx]+Ka[:,:,fidx]     
+#          u*((np.matmul(np.matmul(np.matmul(X[:,0].T,Lx),(2-np.diag(R))) ,X[:,0])**2+\
+#              np.matmul(np.matmul(np.matmul(X[:,1].T,Ly),(2-np.diag(R))),X[:,1])**2+\
+#              np.matmul(np.matmul(np.matmul(X[:,2].T,Lz),(2-np.diag(R))),X[:,2])**2)**0.5)
+#          
+##    return   (np.matmul(np.matmul((X[:,0]-Y[:,0]).T,np.diag(R)), (X[:,0]-Y[:,0]))**2+\
+##              np.matmul(np.matmul((X[:,1]-Y[:,1]).T,np.diag(R)), (X[:,1]-Y[:,1]))**2+\
+##              np.matmul(np.matmul((X[:,2]-Y[:,2]).T,np.diag(R)), (X[:,2]-Y[:,2]))**2)**0.5+\
+##          u*((np.matmul(np.matmul(X[:,0].T,Lx),X[:,0])**2+\
+##              np.matmul(np.matmul(X[:,1].T,Ly),X[:,1])**2+\
+##              np.matmul(np.matmul(X[:,2].T,Lz),X[:,2])**2)**0.5)
+#    
+#    
+#def pos_est(fidx,Kv,Ka,Kdata):
+#    return Kdata[:,:,fidx]+Kv[:,:,fidx]+Ka[:,:,fidx]     
 
 distmtx    = np.zeros((Jnum*Tnum,Jnum*Tnum,len(Mfile)))
 distmtx3   = np.zeros((Jnum*Tnum,Jnum*Tnum,3,len(Mfile)))
@@ -184,49 +184,58 @@ for cor_th in [0,0.25,0.5]:  # =================================================
         
         for rel_Btype in [True,False]:                        # ============================================================#
             for gamma in [0,0.001,0.005,0.01,0.05,0.1,0.5]:   # ============================================================# 
-                                           
-                for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob.glob(os.path.join(src_path+Rfolder,'*ex4.pkl'))):
-                    
+            
+                foldername = 'opt_cor_'+repr(cor_th)+'_gam_'+repr(gamma)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
+                #cor_th : threshold of correlation 
+                #gamma  : gamma value
+                # adj type : whether it is adjmtx or adjmtx_th
+                # relb     : reliability in binary or original value  
+                print '==================================\n\n\n'
+                print foldername
+                print '\n\n\n=================================='                                         
+
+#                for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob.glob(os.path.join(src_path+Rfolder,'*ex4.pkl'))):
+                if 1:
+                    Kfile = glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl'))[0]
+                    Rfile = glob.glob(os.path.join(src_path+Rfolder,'*ex4.pkl'))[0]
                     print Kfile.split('\\')[-1][:-3]
-                    print 'opt_cor_'+repr(cor_th)+'_gam_'+repr(gamma)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
-                    print '=================================='
+    
                     
-#                    Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]
-#                    Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
-#                    unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
-#                    corKdata = np.zeros(Kdata.shape)
-#                    corKdata += Kdata 
-#                    
-#                    Kdata3 = Kdata.reshape((-1,3,Kdata.shape[1]))    
+                    Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]
+                    Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
+                    unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
+                    corKdata = np.zeros(Kdata.shape)
+                    corKdata += Kdata 
+                    
+                    Kdata = Kdata.reshape((-1,3,Kdata.shape[1]))    
 #                    Kv    = Kdata3 - np.roll(Kdata3,1,axis = 2) 
 #                    Ka    = Kv - np.roll(Kv,1,axis = 2) 
-#                    
-#                    for idx in unrelidx:
-# 
-#                        R = Rdata[:,idx]
-#
-#                        if rel_Btype == True: #binary the realibility
-#                           R[R>=Rel_th] = 1 
-#                           R[R< Rel_th] = 0
-#
+                    
+                    for idx in unrelidx:
+     
+                        R = Rdata[:,idx].reshape(-1,6)
+    
+                        if rel_Btype == True: #binary the realibility
+                           R[R>=Rel_th] = 1 
+                           R[R< Rel_th] = 0
+    
 #                        X_init   = pos_est(idx,Kv,Ka,Kdata3)
-#
+#    
 #                        x =  optimize.fmin_bfgs(func, X_init.flatten() ,args = (0.001,Kdata[:,idx].flatten(),R,Lapmtx_x.flatten(),Lapmtx_y.flatten(),Lapmtx_z.flatten(),)) 
 #                        x = x.reshape(-1,3)  
-#               
-#
-#                          
-#                        corKdata[0::3,idx] = x[:,0]
-#                        corKdata[1::3,idx] = x[:,1]
-#                        corKdata[2::3,idx] = x[:,2]
+                        
+                        x = np.matmul(inv(gamma*Lapmtx_x+np.matmul(R.T,R)),np.matmul(np.matmul(R.T,R), Kdata[:,0,idx]))
+                        
+                          
+                        corKdata[0::3,idx] = x[:,0]
+                        corKdata[1::3,idx] = x[:,1]
+                        corKdata[2::3,idx] = x[:,2]
                 
-                    foldername = 'opt_cor_'+repr(cor_th)+'_gam_'+repr(gamma)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
-                    #cor_th : threshold of correlation 
-                    #gamma  : gamma value
-                    # adj type : whether it is adjmtx or adjmtx_th
-                    # relb     : reliability in binary or original value
-                
+
+
+#                    pdb.set_trace()
                     if not os.path.isdir('./data/GSP/'+foldername+'/'):
+                        print('\n\n\n')
                         os.makedirs('./data/GSP/'+foldername+'/')
                         
                         
@@ -234,7 +243,7 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                     f = h5py.File(fname,'w')
                     f.create_dataset('data',data = corKdata)
                     f.close()
-            
+#            
                 
 print('computation time is ' + repr(time.clock()-st))        
             

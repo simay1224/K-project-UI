@@ -42,9 +42,9 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 
-mpdata_all  = h5py.File('./data/GSP/cor_0_gam_0.1_adj_1_relb_F/Andy_data201612151615_unified_ex4.h5')['data'][:]
-data_all    = h5py.File('./data/GSP/cor_0_gam_0.1_adj_1_relb_T/Andy_data201612151615_unified_ex4.h5')['data'][:]
-
+mpdata_all  = h5py.File('./data/GSP/opt_cor_0_gam_0.5_adj_0_relb_F/Andy_data201612151615_unified_ex4.h5')['data'][:]
+data_all    = h5py.File('./data/GSP/opt_cor_0_gam_0.005_adj_0_relb_F/Andy_data201612151615_unified_ex4.h5')['data'][:]
+#data_all    = h5py.File('test123.h5')['data'][:]
 
 #kdata_all  = h5py.File('D:/Project/K_project/data/unified GPR_K2M/Andy_data201612151615_unified_ex4.h5')['data'][:]
 #mpdata_all  = h5py.File('D:/Project/K_project/data/unified Kprime smooth/Andy_data201612151615_unified_ex4.h5')['data'][:]
@@ -75,7 +75,7 @@ ax.set_xlabel('Z axis')
 ax.set_ylabel('X axis')
 ax.set_zlabel('Y axis')
     
-for frame_no in xrange(150,500):#min(kNUM_FRAMES,NUM_FRAMES)):
+for frame_no in xrange(120,250):#min(kNUM_FRAMES,NUM_FRAMES)):
     plt.cla()
     
     mpxs = mpdata_all[0::3,frame_no]
@@ -115,7 +115,7 @@ for frame_no in xrange(150,500):#min(kNUM_FRAMES,NUM_FRAMES)):
 
 
     ax.scatter(kzs, kxs, kys, c = 'red', s = 30,label='Kinect Joints')    
-    ax.scatter(zs, xs, ys,c = 'green',s = 35,alpha=.4,label='M')
+    ax.scatter(zs, xs, ys,c = 'green',s = 100,alpha=.4,label='M')
     ax.scatter(mpzs, mpxs, mpys,c = 'blue',s =50,alpha=.4,label='MP ')
     ax.set_xlim(-300,300)
     ax.set_ylim(-200,400)
