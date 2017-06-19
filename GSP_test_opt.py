@@ -191,34 +191,34 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                     print 'opt_cor_'+repr(cor_th)+'_gam_'+repr(gamma)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
                     print '=================================='
                     
-                    Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]
-                    Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
-                    unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
-                    corKdata = np.zeros(Kdata.shape)
-                    corKdata += Kdata 
-                    
-                    Kdata3 = Kdata.reshape((-1,3,Kdata.shape[1]))    
-                    Kv    = Kdata3 - np.roll(Kdata3,1,axis = 2) 
-                    Ka    = Kv - np.roll(Kv,1,axis = 2) 
-                    
-                    for idx in unrelidx:
- 
-                        R = Rdata[:,idx]
-
-                        if rel_Btype == True: #binary the realibility
-                           R[R>=Rel_th] = 1 
-                           R[R< Rel_th] = 0
-
-                        X_init   = pos_est(idx,Kv,Ka,Kdata3)
-
-                        x =  optimize.fmin_bfgs(func, X_init.flatten() ,args = (0.001,Kdata[:,idx].flatten(),R,Lapmtx_x.flatten(),Lapmtx_y.flatten(),Lapmtx_z.flatten(),)) 
-                        x = x.reshape(-1,3)  
-               
-
-                          
-                        corKdata[0::3,idx] = x[:,0]
-                        corKdata[1::3,idx] = x[:,1]
-                        corKdata[2::3,idx] = x[:,2]
+#                    Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]
+#                    Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
+#                    unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
+#                    corKdata = np.zeros(Kdata.shape)
+#                    corKdata += Kdata 
+#                    
+#                    Kdata3 = Kdata.reshape((-1,3,Kdata.shape[1]))    
+#                    Kv    = Kdata3 - np.roll(Kdata3,1,axis = 2) 
+#                    Ka    = Kv - np.roll(Kv,1,axis = 2) 
+#                    
+#                    for idx in unrelidx:
+# 
+#                        R = Rdata[:,idx]
+#
+#                        if rel_Btype == True: #binary the realibility
+#                           R[R>=Rel_th] = 1 
+#                           R[R< Rel_th] = 0
+#
+#                        X_init   = pos_est(idx,Kv,Ka,Kdata3)
+#
+#                        x =  optimize.fmin_bfgs(func, X_init.flatten() ,args = (0.001,Kdata[:,idx].flatten(),R,Lapmtx_x.flatten(),Lapmtx_y.flatten(),Lapmtx_z.flatten(),)) 
+#                        x = x.reshape(-1,3)  
+#               
+#
+#                          
+#                        corKdata[0::3,idx] = x[:,0]
+#                        corKdata[1::3,idx] = x[:,1]
+#                        corKdata[2::3,idx] = x[:,2]
                 
                     foldername = 'opt_cor_'+repr(cor_th)+'_gam_'+repr(gamma)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
                     #cor_th : threshold of correlation 
