@@ -16,8 +16,8 @@ from numpy.linalg import norm,inv
 
 from scipy import optimize
 
-#src_path = 'I:/AllData_0327/unified data array/'
-src_path = './data/unified data array/'
+src_path = 'I:/AllData_0327/unified data array/'
+#src_path = './data/unified data array/'
 Mfolder  = 'Unified_MData/'
 Kfolder  = 'Unified_KData/'
 Rfolder  = 'reliability/'
@@ -211,7 +211,7 @@ for cor_th in [0,0.25,0.5]:  # =================================================
 #                    Kv    = Kdata3 - np.roll(Kdata3,1,axis = 2) 
 #                    Ka    = Kv - np.roll(Kv,1,axis = 2) 
                     
-                    for idx in unrelidx:
+                    for idx in #unrelidx:
      
                         R = Rdata[:,idx].reshape(-1,6)
     

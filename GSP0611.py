@@ -11,10 +11,10 @@ import glob,os
 from scipy.stats import pearsonr
 from numpy.linalg import eig
 from scipy.linalg import eig as seig
-from numpy.linalg import norm
+from numpy.linalg import norm,inv
 
-#src_path = 'I:/AllData_0327/unified data array/'
-src_path = './data/unified data array/'
+src_path = 'I:/AllData_0327/unified data array/'
+#src_path = './data/unified data array/'
 Mfolder  = 'Unified_MData/'
 Kfolder  = 'Unified_KData/'
 Rfolder  = 'reliability/'
@@ -283,44 +283,77 @@ Rdata = cPickle.load(file(src_path+Rfolder+'Andy_data201612151615_Rel_ex4.pkl','
 
     
 idx = 219
-x_coef = []
-y_coef = []
-z_coef = []
 
-R = np.array([1,1,0,1,1,1])#Rdata[:,idx]#
-wn_x = []
-wn_y = []
-wn_z = []
+Kdata = Kdata.reshape((-1,3,Kdata.shape[1])) 
+R = np.array([1,1,0,1,1,1]).reshape(-1,6)#Rdata[:,idx]#
 
-for i in range(Jnum*Tnum):
-    wn_x.append(sum((R*Evec_x[:,i])**2))
-    wn_y.append(sum((R*Evec_y[:,i])**2))
-    wn_z.append(sum((R*Evec_z[:,i])**2))
+XX = []
+for i in range(1,1000):
+    print i 
+    gamma = i *0.01
     
-#    wn_x +=  sum(((R*Evec_x)[:,i])**2)
-#    wn_y +=  sum(((R*Evec_y)[:,i])**2)
-#    wn_z +=  sum(((R*Evec_z)[:,i])**2)
+    try:
+        x = np.matmul(inv(gamma*Lapmtx_x+np.matmul(R.T,R)),np.matmul(np.matmul(R.T,R), Kdata[:,0,idx]))
+        XX.append(x[2])
+    except:        
+        XX.append(-99.)
 
-for i in range(Jnum*Tnum):
+XX= np.array(XX)
 
-    x_coef.append(sum(Kdata[0::3,idx]*Evec_x[:,i]*R**2)/norm(Evec_x[:,i]))   
-    y_coef.append(sum(Kdata[1::3,idx]*Evec_y[:,i]*R**2)/norm(Evec_y[:,i]))
-    z_coef.append(sum(Kdata[2::3,idx]*Evec_z[:,i]*R**2)/norm(Evec_z[:,i]))
-
-gamma = 0.1
-fx = np.zeros(6)
-fy = np.zeros(6)
-fz = np.zeros(6)
-
-for i in range(Jnum*Tnum):
-    fx += 1/(1+gamma*Eval_x[i])*x_coef[i]/wn_x[i]*Evec_x[:,i]
-    fy += 1/(1+gamma*Eval_y[i])*y_coef[i]/wn_y[i]*Evec_y[:,i]
-    fz += 1/(1+gamma*Eval_z[i])*z_coef[i]/wn_z[i]*Evec_z[:,i]
+import matplotlib.pyplot as plt
+x = np.arange(1,10000)
+plt.plot(x*0.01,XX)
+plt.show()
 
 
 
-np.sum(((fx -Kdata[0::3,idx])*R)**2)**0.5
-np.matmul(np.matmul(fx.reshape(-1,6),Lapmtx_x),fx.reshape(6,-1))
+
+
+
+
+
+
+
+
+#
+#
+#
+#x_coef = []
+#y_coef = []
+#z_coef = []
+#wn_x = []
+#wn_y = []
+#wn_z = []
+#
+#for i in range(Jnum*Tnum):
+#    wn_x.append(sum((R*Evec_x[:,i])**2))
+#    wn_y.append(sum((R*Evec_y[:,i])**2))
+#    wn_z.append(sum((R*Evec_z[:,i])**2))
+#    
+##    wn_x +=  sum(((R*Evec_x)[:,i])**2)
+##    wn_y +=  sum(((R*Evec_y)[:,i])**2)
+##    wn_z +=  sum(((R*Evec_z)[:,i])**2)
+#
+#for i in range(Jnum*Tnum):
+#
+#    x_coef.append(sum(Kdata[0::3,idx]*Evec_x[:,i]*R**2)/norm(Evec_x[:,i]))   
+#    y_coef.append(sum(Kdata[1::3,idx]*Evec_y[:,i]*R**2)/norm(Evec_y[:,i]))
+#    z_coef.append(sum(Kdata[2::3,idx]*Evec_z[:,i]*R**2)/norm(Evec_z[:,i]))
+#
+#gamma = 0.1
+#fx = np.zeros(6)
+#fy = np.zeros(6)
+#fz = np.zeros(6)
+#
+#for i in range(Jnum*Tnum):
+#    fx += 1/(1+gamma*Eval_x[i])*x_coef[i]/wn_x[i]*Evec_x[:,i]
+#    fy += 1/(1+gamma*Eval_y[i])*y_coef[i]/wn_y[i]*Evec_y[:,i]
+#    fz += 1/(1+gamma*Eval_z[i])*z_coef[i]/wn_z[i]*Evec_z[:,i]
+#
+#
+#
+#np.sum(((fx -Kdata[0::3,idx])*R)**2)**0.5
+#np.matmul(np.matmul(fx.reshape(-1,6),Lapmtx_x),fx.reshape(6,-1))
 
 
 
