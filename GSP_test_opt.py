@@ -16,8 +16,8 @@ from numpy.linalg import norm,inv
 
 from scipy import optimize
 
-src_path = 'I:/AllData_0327/unified data array/'
-#src_path = './data/unified data array/'
+#src_path = 'I:/AllData_0327/unified data array/'
+src_path = './data/unified data array/'
 Mfolder  = 'Unified_MData/'
 Kfolder  = 'Unified_KData/'
 Rfolder  = 'reliability/'
@@ -29,6 +29,9 @@ Tnum   = 1   # time interval
 sigma  = 20
 Rel_th = 0.7
 cor_th = 0.1
+sigma_x = 150
+sigma_y = 6
+sigma_z = 17
 
 #
 #def func(X,u,Y,R,Lx,Ly,Lz):
@@ -109,17 +112,19 @@ for midx,mfile in enumerate(Mfile):
         
         curRidx = np.roll(Ridx,-idx) 
         Diff = M - np.roll(M,-idx,axis = 0)
-        Diff_abs = abs(Diff)
+
         L2   = np.mean((np.sum(Diff**2,axis = 1))**0.5,axis = 1)
         W    = np.exp(-L2/sigma**2)
-        W_abs = np.mean(np.exp(-Diff_abs**2/sigma**2),axis = 2)
+        W_x = np.mean(np.exp(-Diff[:,0,:]**2/sigma_x**2),axis = 1)
+        W_y = np.mean(np.exp(-Diff[:,1,:]**2/sigma_y**2),axis = 1)
+        W_z = np.mean(np.exp(-Diff[:,2,:]**2/sigma_z**2),axis = 1)
         for Lidx,(i,j) in enumerate(zip(Cidx,curRidx)):
             col = min(i,j)
             row = max(i,j)
             distmtx[col,row,midx]    = W[Lidx]
-            distmtx3[col,row,0,midx] = W_abs[Lidx,0]
-            distmtx3[col,row,1,midx] = W_abs[Lidx,1]
-            distmtx3[col,row,2,midx] = W_abs[Lidx,2]
+            distmtx3[col,row,0,midx] = W_x[Lidx]
+            distmtx3[col,row,1,midx] = W_y[Lidx]
+            distmtx3[col,row,2,midx] = W_z[Lidx]
 
 Rel_th = 0.7
 st = time.clock()
@@ -183,7 +188,7 @@ for cor_th in [0,0.25,0.5]:  # =================================================
         
         
         for rel_Btype in [True,False]:                        # ============================================================#
-            for gamma in [0,0.001,0.005,0.01,0.05,0.1,0.5]:   # ============================================================# 
+            for gamma in [0.001,0.005,0.01,0.05,0.1,0.5]:   # ============================================================# 
             
                 foldername = 'opt_cor_'+repr(cor_th)+'_gam_'+repr(gamma)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
                 #cor_th : threshold of correlation 
@@ -211,7 +216,7 @@ for cor_th in [0,0.25,0.5]:  # =================================================
 #                    Kv    = Kdata3 - np.roll(Kdata3,1,axis = 2) 
 #                    Ka    = Kv - np.roll(Kv,1,axis = 2) 
                     
-                    for idx in #unrelidx:
+                    for idx in unrelidx:
      
                         R = Rdata[:,idx].reshape(-1,6)
     
@@ -226,7 +231,7 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                         
                         x = np.matmul(inv(gamma*Lapmtx_x+np.matmul(R.T,R)),np.matmul(np.matmul(R.T,R), Kdata[:,0,idx]))
                         
-                          
+                        pdb.set_trace()  
                         corKdata[0::3,idx] = x[:,0]
                         corKdata[1::3,idx] = x[:,1]
                         corKdata[2::3,idx] = x[:,2]

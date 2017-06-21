@@ -42,8 +42,8 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 
-mpdata_all  = h5py.File('./data/GSP/opt_cor_0_gam_0.5_adj_0_relb_F/Andy_data201612151615_unified_ex4.h5')['data'][:]
-data_all    = h5py.File('./data/GSP/opt_cor_0_gam_0.005_adj_0_relb_F/Andy_data201612151615_unified_ex4.h5')['data'][:]
+#mpdata_all  = h5py.File('./data/GSP/opt_cor_0_gam_0.5_adj_0_relb_F/Andy_data201612151615_unified_ex4.h5')['data'][:]
+#data_all    = h5py.File('./data/GSP/opt_cor_0_gam_0.005_adj_0_relb_F/Andy_data201612151615_unified_ex4.h5')['data'][:]
 #data_all    = h5py.File('test123.h5')['data'][:]
 
 #kdata_all  = h5py.File('D:/Project/K_project/data/unified GPR_K2M/Andy_data201612151615_unified_ex4.h5')['data'][:]
@@ -53,7 +53,7 @@ data_all    = h5py.File('./data/GSP/opt_cor_0_gam_0.005_adj_0_relb_F/Andy_data20
 #data_all = cPickle.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
 
 kdata_all = cPickle.load(file('./data/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
-#data_all  = cPickle.load(file('D:/Project/K_project/data/Andy_2016-12-15 04.15.27 PM_FPS30_motion_mk.pkl'))
+data_all  = cPickle.load(file('D:/Project/K_project/data/unified data array/Unified_MData/Andy_2017-03-06 02.19.08 PM_ex4_FPS30_motion_unified.pkl'))
 
 
 #Rfile  = glob.glob(os.path.join('D:/Project/K_project/data/unified data array/reliability/','*ex4.pkl'))[0]
@@ -75,12 +75,12 @@ ax.set_xlabel('Z axis')
 ax.set_ylabel('X axis')
 ax.set_zlabel('Y axis')
     
-for frame_no in xrange(120,250):#min(kNUM_FRAMES,NUM_FRAMES)):
+for frame_no in xrange(1,10):#min(kNUM_FRAMES,NUM_FRAMES)):
     plt.cla()
     
-    mpxs = mpdata_all[0::3,frame_no]
-    mpys = mpdata_all[1::3,frame_no]
-    mpzs = mpdata_all[2::3,frame_no]
+#    mpxs = mpdata_all[0::3,frame_no]
+#    mpys = mpdata_all[1::3,frame_no]
+#    mpzs = mpdata_all[2::3,frame_no]
 
     kxs = kdata_all[0::3,frame_no]
     kys = kdata_all[1::3,frame_no]
@@ -114,9 +114,9 @@ for frame_no in xrange(120,250):#min(kNUM_FRAMES,NUM_FRAMES)):
         
 
 
-    ax.scatter(kzs, kxs, kys, c = 'red', s = 30,label='Kinect Joints')    
+#    ax.scatter(kzs, kxs, kys, c = 'red', s = 30,label='Kinect Joints')    
     ax.scatter(zs, xs, ys,c = 'green',s = 100,alpha=.4,label='M')
-    ax.scatter(mpzs, mpxs, mpys,c = 'blue',s =50,alpha=.4,label='MP ')
+#    ax.scatter(mpzs, mpxs, mpys,c = 'blue',s =50,alpha=.4,label='MP ')
     ax.set_xlim(-300,300)
     ax.set_ylim(-200,400)
     ax.set_zlim(50,600)

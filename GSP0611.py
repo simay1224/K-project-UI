@@ -5,7 +5,7 @@ Created on Sun Jun 11 16:25:26 2017
 @author: Dawnknight
 """
 
-import cPickle,h5py
+import cPickle,h5py,pdb
 import numpy as np
 import glob,os
 from scipy.stats import pearsonr
@@ -13,8 +13,8 @@ from numpy.linalg import eig
 from scipy.linalg import eig as seig
 from numpy.linalg import norm,inv
 
-src_path = 'I:/AllData_0327/unified data array/'
-#src_path = './data/unified data array/'
+#src_path = 'I:/AllData_0327/unified data array/'
+src_path = './data/unified data array/'
 Mfolder  = 'Unified_MData/'
 Kfolder  = 'Unified_KData/'
 Rfolder  = 'reliability/'
@@ -23,7 +23,11 @@ Mfile = glob.glob(os.path.join(src_path+Mfolder,'*.pkl'))
 
 Jnum   = 6   # joint number
 Tnum   = 1   # time interval
-sigma  = 20
+sigma  = 2
+sigma_x = 150
+sigma_y = 6
+sigma_z = 17
+
 Rel_th = 0.7
 cor_th = 0.1
 
@@ -82,18 +86,21 @@ for midx,mfile in enumerate(Mfile):
     for idx in range(1,Jnum*Tnum/2+1):   # precisely should be np.round((Jnum*Tnum-1)/2.).astype('int')+1
         
         curRidx = np.roll(Ridx,-idx) 
-        Diff = M - np.roll(M,-idx,axis = 0)
-        Diff_abs = abs(Diff)
+        Diff = abs(M - np.roll(M,-idx,axis = 0))
+
         L2   = np.mean((np.sum(Diff**2,axis = 1))**0.5,axis = 1)
         W    = np.exp(-L2/sigma**2)
-        W_abs = np.mean(np.exp(-Diff_abs**2/sigma**2),axis = 2)
+        W_x = np.mean(np.exp(-Diff[:,0,:]**2/sigma_x**2),axis = 1)
+        W_y = np.mean(np.exp(-Diff[:,1,:]**2/sigma_y**2),axis = 1)
+        W_z = np.mean(np.exp(-Diff[:,2,:]**2/sigma_z**2),axis = 1)
+        
         for Lidx,(i,j) in enumerate(zip(Cidx,curRidx)):
             col = min(i,j)
             row = max(i,j)
             distmtx[col,row,midx]    = W[Lidx]
-            distmtx3[col,row,0,midx] = W_abs[Lidx,0]
-            distmtx3[col,row,1,midx] = W_abs[Lidx,1]
-            distmtx3[col,row,2,midx] = W_abs[Lidx,2]
+            distmtx3[col,row,0,midx] = W_x[Lidx]
+            distmtx3[col,row,1,midx] = W_y[Lidx]
+            distmtx3[col,row,2,midx] = W_z[Lidx]
 
 
 
@@ -119,7 +126,7 @@ adjmtx_xth = adjmtx_x*thmtx
 adjmtx_yth = adjmtx_y*thmtx
 adjmtx_zth = adjmtx_z*thmtx
 
-
+pdb.set_trace()
 adjmtx[:] = adjmtx + adjmtx.T
 adjmtx_x  = adjmtx_x + adjmtx_x.T
 adjmtx_y  = adjmtx_y + adjmtx_y.T
@@ -127,8 +134,8 @@ adjmtx_z  = adjmtx_z + adjmtx_z.T
 
 adjmtx_th[:] = adjmtx_th + adjmtx_th.T
 adjmtx_xth   = adjmtx_xth + adjmtx_xth.T
-adjmtx_xth   = adjmtx_yth + adjmtx_yth.T
-adjmtx_xth   = adjmtx_zth + adjmtx_zth.T
+adjmtx_yth   = adjmtx_yth + adjmtx_yth.T
+adjmtx_zth   = adjmtx_zth + adjmtx_zth.T
         
 
 for i in range(Jnum*Tnum):
@@ -285,31 +292,83 @@ Rdata = cPickle.load(file(src_path+Rfolder+'Andy_data201612151615_Rel_ex4.pkl','
 idx = 219
 
 Kdata = Kdata.reshape((-1,3,Kdata.shape[1])) 
-R = np.array([1,1,0,1,1,1]).reshape(-1,6)#Rdata[:,idx]#
-
-XX = []
-for i in range(1,1000):
-    print i 
-    gamma = i *0.01
-    
-    try:
-        x = np.matmul(inv(gamma*Lapmtx_x+np.matmul(R.T,R)),np.matmul(np.matmul(R.T,R), Kdata[:,0,idx]))
-        XX.append(x[2])
-    except:        
-        XX.append(-99.)
-
-XX= np.array(XX)
-
-import matplotlib.pyplot as plt
-x = np.arange(1,10000)
-plt.plot(x*0.01,XX)
-plt.show()
+R = np.array([1.,1.,0.,1.,1.,1.])#Rdata[:,idx]#
 
 
 
+#print sum(R*Evec_x[:,i])**2
+#print np.matmul(np.matmul(np.matmul(Evec_x[:,i].T,R.reshape(-1,6).T),R.reshape(-1,6)),Evec_x[:,i])
+gamma = 0.1
+
+w = np.matmul(R,Evec_x)**2
+y_proj_x = np.matmul(Kdata[:,0,idx],Evec_x)
+#y_proj_y = np.matmul(Kdata[:,1,idx],Evec_y)
+#y_proj_z = np.matmul(Kdata[:,2,idx],Evec_z)
+x = np.sum(w/(w+gamma*Eval_x)*y_proj_x*Evec_x,axis = 1)
+#y = np.sum(w/(w+gamma*Eval_y)*y_proj_y*Evec_y,axis = 1)
+#z = np.sum(w/(w+gamma*Eval_z)*y_proj_z*Evec_z,axis = 1)
+print x
+
+x =np.zeros(6)
+for i in range(6):
+    x +=  w[i]/(w[i]+Eval_x[i]*gamma)*sum(Kdata[:,0,idx]*Evec_x[:,i])*Evec_x[:,i]      
+
+print x
+
+
+W = R.reshape(-1,6)
+y = Kdata[:,0,idx].reshape(6,-1) 
+WtW = np.matmul(W.T,W)
+
+h = np.matmul(inv(WtW+gamma*Lapmtx_x),WtW)
+
+x_opt = np.matmul(h,y)
+
+#x_opt = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_x),np.matmul(W.T,W)),Kdata[:,0,idx].reshape(6,-1))
+
+print x_opt
+          
 
 
 
+
+
+
+#=======================================================================
+
+#XX = []
+#for i in range(1,1000):
+#    print i 
+#    gamma = i *0.01
+#    
+#    try:
+#        x = np.matmul(inv(gamma*Lapmtx_x+np.matmul(R.T,R)),np.matmul(np.matmul(R.T,R), Kdata[:,0,idx]))
+#        XX.append(x[2])
+#    except:        
+#        XX.append(-99.)
+#
+#XX= np.array(XX)
+#
+#import matplotlib.pyplot as plt
+#x = np.arange(1,1000,10)
+#y = np.ones(len(x))*Kdata[2,0,idx]
+#
+##XX[XX>10]=10
+##XX[XX<-70]=-70
+#
+##plt.plot(x*0.1,XX[0::10])
+##plt.plot(x*0.1,y,color='red')
+#
+#plt.scatter(x*0.1,XX[0::10])
+#plt.plot(x*0.1,y,color='red')
+#plt.ylim([-60,10])
+#plt.show()
+
+
+
+
+
+#=======================================================================
 
 
 
