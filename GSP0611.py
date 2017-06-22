@@ -13,8 +13,8 @@ from numpy.linalg import eig
 from scipy.linalg import eig as seig
 from numpy.linalg import norm,inv
 
-src_path = 'I:/AllData_0327/unified data array/'
-#src_path = './data/unified data array/'
+#src_path = 'I:/AllData_0327/unified data array/'
+src_path = './data/unified data array/'
 Mfolder  = 'Unified_MData/'
 Kfolder  = 'Unified_KData/'
 Rfolder  = 'reliability/'
