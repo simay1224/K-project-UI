@@ -257,9 +257,11 @@ Z = []
 Xth = []
 Yth = []
 Zth = []
+N = 1000
+scale = 0.01
 
-for i in range(1,1000):
-    gamma = i/100.
+for i in range(1,N):
+    gamma = i*scale
     w_x = np.matmul(R,Evec_x)**2
     w_y = np.matmul(R,Evec_y)**2
     w_z = np.matmul(R,Evec_z)**2
@@ -298,17 +300,38 @@ for i in range(1,1000):
 import matplotlib.pyplot as plt
 plt.figure(1)
 plt.title('normal')
-plt.xlabel('gamma value')
-plt.plot(np.arange(999)*0.01,X,color = 'blue')
-plt.plot(np.arange(999)*0.01,Y,color = 'red')
-plt.plot(np.arange(99)*0.01,Z,color = 'green')
+ax1 = plt.subplot(3,1,1)
+ax1.set_title('X')
+plt.plot(np.arange(N-1)*scale,X,color = 'blue')
+plt.plot(np.arange(N-1)*scale,np.ones(N-1)*Kdata[2,0,idx],color = 'red')
+plt.plot(np.arange(N-1)*scale,np.ones(N-1)*-25,color = 'green')
+
+ax2 = plt.subplot(3,1,2)
+ax2.set_title('Y')
+plt.plot(np.arange(N-1)*scale,Y,color = 'blue')
+plt.plot(np.arange(N-1)*scale,np.ones(N-1)*Kdata[2,1,idx],color = 'red')
+plt.plot(np.arange(N-1)*scale,np.ones(N-1)*347,color = 'green')
+
+
+ax3 = plt.subplot(3,1,3)
+ax3.set_title('Z')
+plt.plot(np.arange(N-1)*scale,Z,color = 'blue')
+plt.plot(np.arange(N-1)*scale,np.ones(N-1)*Kdata[2,2,idx],color = 'red')
+plt.plot(np.arange(N-1)*scale,np.ones(N-1)*-148.5,color = 'green')
+plt.show()
+
+#plt.xlabel('gamma value')
+#plt.plot(np.arange(N-1)*0.01,X,color = 'blue')
+#plt.plot(np.arange(N-1)*0.01,np.ones(N-1)*Kdata[2,0,idx],color = 'red')
+#plt.plot(np.arange(N-1)*0.01,Y,color = 'red')
+#plt.plot(np.arange(N-1)*0.01,Z,color = 'green')
 
 plt.figure(2)
 plt.title('only connected joint')
 plt.xlabel('gamma value')
-plt.plot(np.arange(99)*0.01,Xth,color = 'blue')
-plt.plot(np.arange(99)*0.01,Yth,color = 'red')
-plt.plot(np.arange(99)*0.01,Zth,color = 'green')
+plt.plot(np.arange(N-1)*0.01,Xth,color = 'blue')
+plt.plot(np.arange(N-1)*0.01,Yth,color = 'red')
+plt.plot(np.arange(N-1)*0.01,Zth,color = 'green')
 
 plt.show()
 
@@ -327,7 +350,7 @@ print x
 
 
 
-W = R.reshape(-1,6)
+W = np.diag(R)
 y = Kdata[:,0,idx].reshape(6,-1) 
 WtW = np.matmul(W.T,W)
 
