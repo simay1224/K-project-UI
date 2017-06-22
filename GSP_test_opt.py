@@ -33,30 +33,17 @@ sigma_x = 150
 sigma_y = 6
 sigma_z = 17
 
-#
-#def func(X,u,Y,R,Lx,Ly,Lz):
-#    Y  = Y.reshape((6,3))
-#    X  = X.reshape((6,3))
-#    Lx = Lx.reshape((6,6))
-#    Ly = Ly.reshape((6,6))
-#    Lz = Lz.reshape((6,6))
-#    return   (np.matmul(np.matmul((X[:,0]-Y[:,0]).T,np.diag(R)), (X[:,0]-Y[:,0]))**2+\
-#              np.matmul(np.matmul((X[:,1]-Y[:,1]).T,np.diag(R)), (X[:,1]-Y[:,1]))**2+\
-#              np.matmul(np.matmul((X[:,2]-Y[:,2]).T,np.diag(R)), (X[:,2]-Y[:,2]))**2)**0.5+\
-#          u*((np.matmul(np.matmul(np.matmul(X[:,0].T,Lx),(2-np.diag(R))) ,X[:,0])**2+\
-#              np.matmul(np.matmul(np.matmul(X[:,1].T,Ly),(2-np.diag(R))),X[:,1])**2+\
-#              np.matmul(np.matmul(np.matmul(X[:,2].T,Lz),(2-np.diag(R))),X[:,2])**2)**0.5)
-#          
-##    return   (np.matmul(np.matmul((X[:,0]-Y[:,0]).T,np.diag(R)), (X[:,0]-Y[:,0]))**2+\
-##              np.matmul(np.matmul((X[:,1]-Y[:,1]).T,np.diag(R)), (X[:,1]-Y[:,1]))**2+\
-##              np.matmul(np.matmul((X[:,2]-Y[:,2]).T,np.diag(R)), (X[:,2]-Y[:,2]))**2)**0.5+\
-##          u*((np.matmul(np.matmul(X[:,0].T,Lx),X[:,0])**2+\
-##              np.matmul(np.matmul(X[:,1].T,Ly),X[:,1])**2+\
-##              np.matmul(np.matmul(X[:,2].T,Lz),X[:,2])**2)**0.5)
-#    
-#    
-#def pos_est(fidx,Kv,Ka,Kdata):
-#    return Kdata[:,:,fidx]+Kv[:,:,fidx]+Ka[:,:,fidx]     
+def corr(A,B):
+    ma = np.mean(A)
+    mb = np.mean(B)
+    sa = np.std(A)
+    sb = np.std(B)
+    if ((sa ==0)&(sb ==0)):
+        return 1.
+    elif ((sa ==0)|(sb ==0)):
+        return 0.
+    else:    
+        return np.mean((A-ma)*(B-mb))/sa/sb    
 
 distmtx    = np.zeros((Jnum*Tnum,Jnum*Tnum,len(Mfile)))
 distmtx3   = np.zeros((Jnum*Tnum,Jnum*Tnum,3,len(Mfile)))
@@ -104,9 +91,9 @@ for midx,mfile in enumerate(Mfile):
     ### calculate correlation between joints
     for i in range(Jnum*Tnum-1):
         for j in range(i+1,Jnum*Tnum):
-            corrmtx3[i,j,0,midx] = pearsonr(data[i,0,:],data[j,0,:])[0]
-            corrmtx3[i,j,1,midx] = pearsonr(data[i,1,:],data[j,1,:])[0]
-            corrmtx3[i,j,2,midx] = pearsonr(data[i,2,:],data[j,2,:])[0]
+            corrmtx3[i,j,0,midx] = corr(data[i,0,:],data[j,0,:])
+            corrmtx3[i,j,1,midx] = corr(data[i,1,:],data[j,1,:])
+            corrmtx3[i,j,2,midx] = corr(data[i,2,:],data[j,2,:])
     ### calculate distant's weight between joints
     for idx in range(1,Jnum*Tnum/2+1):   # precisely should be np.round((Jnum*Tnum-1)/2.).astype('int')+1
         
@@ -128,8 +115,8 @@ for midx,mfile in enumerate(Mfile):
 
 Rel_th = 0.7
 st = time.clock()
-corrmtx3[0,3,2,:][np.isnan(corrmtx3[0,3,2,:])] = 1  # L and R shoulder in Z axis's correlation
-corrmtx3[np.isnan(corrmtx3)] = 0
+#corrmtx3[0,3,2,:][np.isnan(corrmtx3[0,3,2,:])] = 1  # L and R shoulder in Z axis's correlation
+#corrmtx3[np.isnan(corrmtx3)] = 0
          
 for cor_th in [0,0.25,0.5]:  # ============================================================#
     

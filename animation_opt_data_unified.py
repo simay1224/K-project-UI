@@ -52,8 +52,9 @@ from mpl_toolkits.mplot3d import Axes3D
 #mpdata_all = cPickle.load(file('D:/Project/K_project/data/unified GPR/Andy_data201612151615_unified_ex4.pkl'))
 #data_all = cPickle.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
 
-kdata_all = cPickle.load(file('./data/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
-data_all  = cPickle.load(file('D:/Project/K_project/data/unified data array/Unified_MData/Andy_2017-03-06 02.19.08 PM_ex4_FPS30_motion_unified.pkl'))
+#kdata_all = cPickle.load(file('./data/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
+kdata_all = cPickle.load(file('I:/AllData_0327/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
+#data_all  = cPickle.load(file('D:/Project/K_project/data/unified data array/Unified_MData/Andy_2017-03-06 02.19.08 PM_ex4_FPS30_motion_unified.pkl'))
 
 
 #Rfile  = glob.glob(os.path.join('D:/Project/K_project/data/unified data array/reliability/','*ex4.pkl'))[0]
@@ -75,7 +76,7 @@ ax.set_xlabel('Z axis')
 ax.set_ylabel('X axis')
 ax.set_zlabel('Y axis')
     
-for frame_no in xrange(1,10):#min(kNUM_FRAMES,NUM_FRAMES)):
+for frame_no in xrange(140,170):#min(kNUM_FRAMES,NUM_FRAMES)):
     plt.cla()
     
 #    mpxs = mpdata_all[0::3,frame_no]
@@ -86,9 +87,9 @@ for frame_no in xrange(1,10):#min(kNUM_FRAMES,NUM_FRAMES)):
     kys = kdata_all[1::3,frame_no]
     kzs = kdata_all[2::3,frame_no] 
 
-    xs = data_all[0::3,frame_no]
-    ys = data_all[1::3,frame_no]
-    zs = data_all[2::3,frame_no] 
+#    xs = data_all[0::3,frame_no]
+#    ys = data_all[1::3,frame_no]
+#    zs = data_all[2::3,frame_no] 
 
    
 #    xs = []
@@ -114,8 +115,8 @@ for frame_no in xrange(1,10):#min(kNUM_FRAMES,NUM_FRAMES)):
         
 
 
-#    ax.scatter(kzs, kxs, kys, c = 'red', s = 30,label='Kinect Joints')    
-    ax.scatter(zs, xs, ys,c = 'green',s = 100,alpha=.4,label='M')
+    ax.scatter(kzs, kxs, kys, c = 'red', s = 30,label='Kinect Joints')    
+#    ax.scatter(zs, xs, ys,c = 'green',s = 100,alpha=.4,label='M')
 #    ax.scatter(mpzs, mpxs, mpys,c = 'blue',s =50,alpha=.4,label='MP ')
     ax.set_xlim(-300,300)
     ax.set_ylim(-200,400)
@@ -130,5 +131,5 @@ for frame_no in xrange(1,10):#min(kNUM_FRAMES,NUM_FRAMES)):
     ax.set_zlabel('Y axis')
     plt.legend( loc=1)
     plt.draw()
-    plt.pause(1.0/40)
+    plt.pause(1.0/10)
 

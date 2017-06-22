@@ -13,8 +13,8 @@ from numpy.linalg import eig
 from scipy.linalg import eig as seig
 from numpy.linalg import norm,inv
 
-#src_path = 'I:/AllData_0327/unified data array/'
-src_path = './data/unified data array/'
+src_path = 'I:/AllData_0327/unified data array/'
+#src_path = './data/unified data array/'
 Mfolder  = 'Unified_MData/'
 Kfolder  = 'Unified_KData/'
 Rfolder  = 'reliability/'
@@ -31,7 +31,17 @@ sigma_z = 17
 Rel_th = 0.7
 cor_th = 0.1
 
-
+def corr(A,B):
+    ma = np.mean(A)
+    mb = np.mean(B)
+    sa = np.std(A)
+    sb = np.std(B)
+    if ((sa ==0)&(sb ==0)):
+        return 1.
+    elif ((sa ==0)|(sb ==0)):
+        return 0.
+    else:    
+        return np.mean((A-ma)*(B-mb))/sa/sb
 
 distmtx    = np.zeros((Jnum*Tnum,Jnum*Tnum,len(Mfile)))
 distmtx3   = np.zeros((Jnum*Tnum,Jnum*Tnum,3,len(Mfile)))
@@ -57,7 +67,10 @@ Ridx       = np.arange(Jnum*Tnum)  #row idx
 thmtx[0,1] = 1
 thmtx[1,2] = 1
 thmtx[3,4] = 1
-thmtx[4,5] = 1    
+thmtx[4,5] = 1
+
+thmtx[0,3] = 1 
+    
 for i in range(Jnum):
     thmtx[i,i::Jnum] = 1
 
@@ -70,7 +83,8 @@ for midx,mfile in enumerate(Mfile):
     print mfile
     data = cPickle.load(file(mfile,'rb'))[12:30]
     data = data.reshape(-1,3,data.shape[1])
-    if  Tnum != 1:   
+    
+    if  Tnum != 1:    # if consider more than one time sample
         M = data[:,:,:-(Tnum-1)]
         for i in range(1,Tnum):
             M = np.vstack([M,np.roll(data,-i,axis = 2)[:,:,:-(Tnum-1)]])
@@ -79,9 +93,9 @@ for midx,mfile in enumerate(Mfile):
     ### calculate correlation between joints
     for i in range(Jnum*Tnum-1):
         for j in range(i+1,Jnum*Tnum):
-            corrmtx3[i,j,0,midx] = pearsonr(data[i,0,:],data[j,0,:])[0]
-            corrmtx3[i,j,1,midx] = pearsonr(data[i,1,:],data[j,1,:])[0]
-            corrmtx3[i,j,2,midx] = pearsonr(data[i,2,:],data[j,2,:])[0]
+            corrmtx3[i,j,0,midx] = corr(data[i,0,:],data[j,0,:])
+            corrmtx3[i,j,1,midx] = corr(data[i,1,:],data[j,1,:])
+            corrmtx3[i,j,2,midx] = corr(data[i,2,:],data[j,2,:])
     ### calculate distant's weight between joints
     for idx in range(1,Jnum*Tnum/2+1):   # precisely should be np.round((Jnum*Tnum-1)/2.).astype('int')+1
         
@@ -102,13 +116,8 @@ for midx,mfile in enumerate(Mfile):
             distmtx3[col,row,1,midx] = W_y[Lidx]
             distmtx3[col,row,2,midx] = W_z[Lidx]
 
-
-
-
-
-
-corrmtx3[0,3,2,:][np.isnan(corrmtx3[0,3,2,:])] = 1  # L and R shoulder in Z axis's correlation
-corrmtx3[np.isnan(corrmtx3)] = 0
+#corrmtx3[0,3,2,:][np.isnan(corrmtx3[0,3,2,:])] = 1  # L and R shoulder in Z axis's correlation
+#corrmtx3[np.isnan(corrmtx3)] = 0
 corrmtx3[corrmtx3<cor_th] = 0
 
 corrmtx[:] = np.mean(np.sum(corrmtx3**2,axis=2)**0.5,axis = 2)        
@@ -126,7 +135,7 @@ adjmtx_xth = adjmtx_x*thmtx
 adjmtx_yth = adjmtx_y*thmtx
 adjmtx_zth = adjmtx_z*thmtx
 
-pdb.set_trace()
+#pdb.set_trace()
 adjmtx[:] = adjmtx + adjmtx.T
 adjmtx_x  = adjmtx_x + adjmtx_x.T
 adjmtx_y  = adjmtx_y + adjmtx_y.T
@@ -222,64 +231,6 @@ for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob
         corKdata[2::3,idx] = fz
 
 
-#    foldername = 'cor_'+cor_th+'_gam_'+gamma+'_adj_'+adj_type+'_relb_'+rel_Btype
-#    #cor_th : threshold of correlation 
-#    #gamma  : gamma value
-#    # adj type : whether it is adjmtx or adjmtx_th
-#    # relb     : reliability in binary or original value
-
-#    if not os.path.isdir('./data/GSP/'+foldername+'/'):
-#        os.makedirs('./data/GSP/'+foldername+'/')
-#        
-#        
-#    fname ='./data/GSP/'+foldername+'/' +Kfile.split('\\')[-1][:-3]+'h5'
-#    f = h5py.File(fname,'w')
-#    f.create_dataset('data',data = corKdata)
-#    f.close()
-    
-
-
-    
-    
-    
-#for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob.glob(os.path.join(src_path+Rfolder,'*ex4.pkl'))):
-#    print Kfile
-#    Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]
-#    Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
-#    unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
-#    corKdata = np.zeros(Kdata.shape)
-#    corKdata += Kdata 
-#    
-#    for idx in unrelidx:
-#        x_coef = []
-#        y_coef = []
-#        z_coef = []    
-#
-#        for i in range(Jnum*Tnum):
-#            x_coef.append(sum(Kdata[0::3,idx]*Evec_x[:,i])/norm(Evec_x[:,i]))   
-#            y_coef.append(sum(Kdata[1::3,idx]*Evec_y[:,i])/norm(Evec_y[:,i]))
-#            z_coef.append(sum(Kdata[2::3,idx]*Evec_z[:,i])/norm(Evec_z[:,i]))
-#        
-#        
-#        gamma = 0
-#        fx = np.zeros(6)
-#        fy = np.zeros(6)
-#        fz = np.zeros(6)
-#        
-#        for i in range(Jnum*Tnum):
-#            fx += (1/(1+gamma*Eval_x)*x_coef)[i]*Evec_xth[:,i]
-#            fy += (1/(1+gamma*Eval_y)*y_coef)[i]*Evec_yth[:,i]
-#            fz += (1/(1+gamma*Eval_z)*z_coef)[i]*Evec_zth[:,i]    
-#          
-#        corKdata[0::3,idx] = fx
-#        corKdata[1::3,idx] = fy
-#        corKdata[2::3,idx] = fz
-#
-#    fname ='./data/GSP/original/' +Kfile.split('\\')[-1][:-3]+'h5'
-#    f = h5py.File(fname,'w')
-#    f.create_dataset('data',data = corKdata)
-#    f.close()    
-    
     
     
     
@@ -289,7 +240,7 @@ Kdata = cPickle.load(file(src_path+Kfolder+'Andy_data201612151615_unified_ex4.pk
 Rdata = cPickle.load(file(src_path+Rfolder+'Andy_data201612151615_Rel_ex4.pkl','rb'))[4:10]
 
     
-idx = 219
+idx = 168
 
 Kdata = Kdata.reshape((-1,3,Kdata.shape[1])) 
 R = np.array([1.,1.,0.,1.,1.,1.])#Rdata[:,idx]#
@@ -298,22 +249,82 @@ R = np.array([1.,1.,0.,1.,1.,1.])#Rdata[:,idx]#
 
 #print sum(R*Evec_x[:,i])**2
 #print np.matmul(np.matmul(np.matmul(Evec_x[:,i].T,R.reshape(-1,6).T),R.reshape(-1,6)),Evec_x[:,i])
-gamma = 0.1
+#gamma = 0.02
+X = []
+Y = []
+Z = []
 
-w = np.matmul(R,Evec_x)**2
-y_proj_x = np.matmul(Kdata[:,0,idx],Evec_x)
-#y_proj_y = np.matmul(Kdata[:,1,idx],Evec_y)
-#y_proj_z = np.matmul(Kdata[:,2,idx],Evec_z)
-x = np.sum(w/(w+gamma*Eval_x)*y_proj_x*Evec_x,axis = 1)
-#y = np.sum(w/(w+gamma*Eval_y)*y_proj_y*Evec_y,axis = 1)
-#z = np.sum(w/(w+gamma*Eval_z)*y_proj_z*Evec_z,axis = 1)
-print x
+Xth = []
+Yth = []
+Zth = []
+
+for i in range(1,1000):
+    gamma = i/100.
+    w_x = np.matmul(R,Evec_x)**2
+    w_y = np.matmul(R,Evec_y)**2
+    w_z = np.matmul(R,Evec_z)**2
+    
+    
+    y_proj_x = np.matmul(Kdata[:,0,idx],Evec_x)
+    y_proj_y = np.matmul(Kdata[:,1,idx],Evec_y)
+    y_proj_z = np.matmul(Kdata[:,2,idx],Evec_z)
+    x = np.sum(w_x/(w_x+gamma*Eval_x)*y_proj_x*Evec_x,axis = 1)
+    y = np.sum(w_y/(w_y+gamma*Eval_y)*y_proj_y*Evec_y,axis = 1)
+    z = np.sum(w_z/(w_z+gamma*Eval_z)*y_proj_z*Evec_z,axis = 1)
+    X.append(x[2])
+    Y.append(y[2])
+    Z.append(z[2])
+    
+    
+    #======================
+    
+    #gamma = 0.02
+    
+    w_xth = np.matmul(R,Evec_xth)**2
+    w_yth = np.matmul(R,Evec_yth)**2
+    w_zth = np.matmul(R,Evec_zth)**2
+    
+    
+    y_proj_xth = np.matmul(Kdata[:,0,idx],Evec_xth)
+    y_proj_yth = np.matmul(Kdata[:,1,idx],Evec_yth)
+    y_proj_zth = np.matmul(Kdata[:,2,idx],Evec_zth)
+    xth = np.sum(w_xth/(w_xth+gamma*Eval_xth)*y_proj_xth*Evec_xth,axis = 1)
+    yth = np.sum(w_yth/(w_yth+gamma*Eval_yth)*y_proj_yth*Evec_yth,axis = 1)
+    zth = np.sum(w_zth/(w_zth+gamma*Eval_zth)*y_proj_zth*Evec_zth,axis = 1)
+    Xth.append(xth[2])
+    Yth.append(yth[2])
+    Zth.append(zth[2])
+
+import matplotlib.pyplot as plt
+plt.figure(1)
+plt.title('normal')
+plt.xlabel('gamma value')
+plt.plot(np.arange(999)*0.01,X,color = 'blue')
+plt.plot(np.arange(999)*0.01,Y,color = 'red')
+plt.plot(np.arange(99)*0.01,Z,color = 'green')
+
+plt.figure(2)
+plt.title('only connected joint')
+plt.xlabel('gamma value')
+plt.plot(np.arange(99)*0.01,Xth,color = 'blue')
+plt.plot(np.arange(99)*0.01,Yth,color = 'red')
+plt.plot(np.arange(99)*0.01,Zth,color = 'green')
+
+plt.show()
+
+#======================
 
 x =np.zeros(6)
 for i in range(6):
-    x +=  w[i]/(w[i]+Eval_x[i]*gamma)*sum(Kdata[:,0,idx]*Evec_x[:,i])*Evec_x[:,i]      
+    x +=  w_x[i]/(w_x[i]+Eval_x[i]*gamma)*sum(Kdata[:,0,idx]*Evec_x[:,i])*Evec_x[:,i]      
 
 print x
+
+#========================
+
+
+
+
 
 
 W = R.reshape(-1,6)
