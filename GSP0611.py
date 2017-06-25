@@ -13,8 +13,8 @@ from numpy.linalg import eig
 from scipy.linalg import eig as seig
 from numpy.linalg import norm,inv
 
-#src_path = 'I:/AllData_0327/unified data array/'
-src_path = './data/unified data array/'
+src_path = 'I:/AllData_0327/unified data array/'
+#src_path = './data/unified data array/'
 Mfolder  = 'Unified_MData/'
 Kfolder  = 'Unified_KData/'
 Rfolder  = 'reliability/'
@@ -243,7 +243,7 @@ Rdata = cPickle.load(file(src_path+Rfolder+'Andy_data201612151615_Rel_ex4.pkl','
 idx = 168
 
 Kdata = Kdata.reshape((-1,3,Kdata.shape[1])) 
-R = np.array([1.,1.,0.,1.,1.,1.])#Rdata[:,idx]#
+R = np.diag(np.array([1.,1.,0.,1.,1.,1.]))#Rdata[:,idx]#
 
 
 
@@ -257,22 +257,51 @@ Z = []
 Xth = []
 Yth = []
 Zth = []
-N = 1000
+
+w_x  = []
+w_y  = []
+w_z   = []
+w_xth = []
+w_yth = []
+w_zth = []
+
+
+N = 100
 scale = 0.01
+
+for i in range(6):
+    w_x.append(  sum(np.matmul(R,Evec_x[:,i])**2))
+    w_y.append(  sum(np.matmul(R,Evec_y[:,i])**2))
+    w_z.append(  sum(np.matmul(R,Evec_z[:,i])**2))
+    w_xth.append(sum(np.matmul(R,Evec_xth[:,i])**2))
+    w_yth.append(sum(np.matmul(R,Evec_yth[:,i])**2))
+    w_zth.append(sum(np.matmul(R,Evec_zth[:,i])**2))
+    
+    
+    
+y_proj_x   = np.matmul(Kdata[:,0,idx],Evec_x)
+y_proj_y   = np.matmul(Kdata[:,1,idx],Evec_y)
+y_proj_z   = np.matmul(Kdata[:,2,idx],Evec_z)
+y_proj_xth = np.matmul(Kdata[:,0,idx],Evec_xth)
+y_proj_yth = np.matmul(Kdata[:,1,idx],Evec_yth)
+y_proj_zth = np.matmul(Kdata[:,2,idx],Evec_zth)
+
+
+
+w_x = np.array(w_x)
+w_y = np.array(w_y)
+w_z = np.array(w_z)
+w_xth = np.array(w_xth)
+w_yth = np.array(w_yth)
+w_zth = np.array(w_zth)
 
 for i in range(1,N):
     gamma = i*scale
-    w_x = np.matmul(R,Evec_x)**2
-    w_y = np.matmul(R,Evec_y)**2
-    w_z = np.matmul(R,Evec_z)**2
-    
-    
-    y_proj_x = np.matmul(Kdata[:,0,idx],Evec_x)
-    y_proj_y = np.matmul(Kdata[:,1,idx],Evec_y)
-    y_proj_z = np.matmul(Kdata[:,2,idx],Evec_z)
+
     x = np.sum(w_x/(w_x+gamma*Eval_x)*y_proj_x*Evec_x,axis = 1)
     y = np.sum(w_y/(w_y+gamma*Eval_y)*y_proj_y*Evec_y,axis = 1)
     z = np.sum(w_z/(w_z+gamma*Eval_z)*y_proj_z*Evec_z,axis = 1)
+    
     X.append(x[2])
     Y.append(y[2])
     Z.append(z[2])
@@ -281,15 +310,7 @@ for i in range(1,N):
     #======================
     
     #gamma = 0.02
-    
-    w_xth = np.matmul(R,Evec_xth)**2
-    w_yth = np.matmul(R,Evec_yth)**2
-    w_zth = np.matmul(R,Evec_zth)**2
-    
-    
-    y_proj_xth = np.matmul(Kdata[:,0,idx],Evec_xth)
-    y_proj_yth = np.matmul(Kdata[:,1,idx],Evec_yth)
-    y_proj_zth = np.matmul(Kdata[:,2,idx],Evec_zth)
+  
     xth = np.sum(w_xth/(w_xth+gamma*Eval_xth)*y_proj_xth*Evec_xth,axis = 1)
     yth = np.sum(w_yth/(w_yth+gamma*Eval_yth)*y_proj_yth*Evec_yth,axis = 1)
     zth = np.sum(w_zth/(w_zth+gamma*Eval_zth)*y_proj_zth*Evec_zth,axis = 1)
@@ -337,32 +358,58 @@ plt.show()
 
 #======================
 
-x =np.zeros(6)
-for i in range(6):
-    x +=  w_x[i]/(w_x[i]+Eval_x[i]*gamma)*sum(Kdata[:,0,idx]*Evec_x[:,i])*Evec_x[:,i]      
 
-print x
+#W=R
+#y = Kdata[:,0,idx].reshape(6,-1) 
+#WtW = np.matmul(R.T,R)
+#h = np.matmul(inv(WtW+gamma*Lapmtx_x),WtW)
+#
+#x_opt = np.matmul(h,y)
+#print x_opt
 
-#========================
+N = 1000
+scale = 0.01
+opt_x = []
+opt_y = []
+opt_z = []
+
+for i in range(1,N):
+    gamma = i*scale
+
+    opt_x.append(np.matmul(np.matmul(inv(np.matmul(R.T,R)+gamma*Lapmtx_x),np.matmul(R.T,R)),Kdata[:,0,idx].reshape(6,-1))[2])
+    opt_y.append(np.matmul(np.matmul(inv(np.matmul(R.T,R)+gamma*Lapmtx_y),np.matmul(R.T,R)),Kdata[:,1,idx].reshape(6,-1))[2])
+    opt_z.append(np.matmul(np.matmul(inv(np.matmul(R.T,R)+gamma*Lapmtx_z),np.matmul(R.T,R)),Kdata[:,2,idx].reshape(6,-1))[2])
+
+    
+import matplotlib.pyplot as plt
+plt.figure(1)
+plt.title('normal')
+ax1 = plt.subplot(3,1,1)
+ax1.set_title('X')
+plt.plot(np.arange(N-1)*scale,opt_x,color = 'blue')
+plt.plot(np.arange(N-1)*scale,np.ones(N-1)*Kdata[2,0,idx],color = 'red')
+plt.plot(np.arange(N-1)*scale,np.ones(N-1)*-25,color = 'green')
+
+ax2 = plt.subplot(3,1,2)
+ax2.set_title('Y')
+plt.plot(np.arange(N-1)*scale,opt_y,color = 'blue')
+plt.plot(np.arange(N-1)*scale,np.ones(N-1)*Kdata[2,1,idx],color = 'red')
+plt.plot(np.arange(N-1)*scale,np.ones(N-1)*347,color = 'green')
 
 
+ax3 = plt.subplot(3,1,3)
+ax3.set_title('Z')
+plt.plot(np.arange(N-1)*scale,opt_z,color = 'blue')
+plt.plot(np.arange(N-1)*scale,np.ones(N-1)*Kdata[2,2,idx],color = 'red')
+plt.plot(np.arange(N-1)*scale,np.ones(N-1)*-148.5,color = 'green')
+plt.show()    
+    
+    
+    
 
-
-
-
-W = np.diag(R)
-y = Kdata[:,0,idx].reshape(6,-1) 
-WtW = np.matmul(W.T,W)
-
-h = np.matmul(inv(WtW+gamma*Lapmtx_x),WtW)
-
-x_opt = np.matmul(h,y)
-
-#x_opt = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_x),np.matmul(W.T,W)),Kdata[:,0,idx].reshape(6,-1))
-
-print x_opt
-          
-
+#print opt_x[2]
+#print opt_y[2]          
+#print opt_z[2]
 
 
 
