@@ -188,11 +188,11 @@ for cor_th in [0,0.25,0.5]:  # =================================================
 
             for ii in range(1,N):   # ============================================================# 
                 for jj in range(1,N):
-                    for kk in range(1,N):
+#                    for kk in range(1,N):
                         gamma_x = ii*scale
                         gamma_y = jj*scale
-                        gamma_z = kk*scale
-                        print 'gamma_x : '+repr(gamma_x)+', gamma_y : '+repr(gamma_y)+', gamma_z : '+repr(gamma_z)
+#                        gamma_z = kk*scale
+                        print 'gamma_x : '+repr(gamma_x)+', gamma_y : '+repr(gamma_y)#+', gamma_z : '+repr(gamma_z)
         
                         
                         #cor_th : threshold of correlation 
@@ -254,8 +254,8 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                                        
                                 uncnt += sum(R==0)
                                 cnt += 6
-                                unerr  = unerr + sum(abs(Mdata[R==0,0,idx]-mx[R==0].flatten()))+sum(abs(Mdata[R==0,1,idx]-my[R==0].flatten()))+sum(abs(Mdata[R==0,2,idx]-mz[R==0].flatten()))
-                                err    = err   + sum(abs(Mdata[:,0,idx]-mx.flatten()))+sum(abs(Mdata[:,1,idx]-my.flatten()))+sum(abs(Mdata[:,2,idx]-mz.flatten()))
+                                unerr  = unerr + sum(abs(Mdata[R==0,0,idx]-mx[R==0].flatten()))+sum(abs(Mdata[R==0,1,idx]-my[R==0].flatten()))#+sum(abs(Mdata[R==0,2,idx]-mz[R==0].flatten()))
+                                err    = err   + sum(abs(Mdata[:,0,idx]-mx.flatten()))+sum(abs(Mdata[:,1,idx]-my.flatten()))#+sum(abs(Mdata[:,2,idx]-mz.flatten()))
                             
                         Err = err/cnt
                         unErr = unerr/uncnt
