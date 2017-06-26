@@ -213,13 +213,14 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                     Mdata = h5py.File(Mfile)['data'][:]
 #                    Mdata = cPickle.load(file(mfile,'rb'))[12:30,:]
                     Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
-                    unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
+                    
                     
                     
                     Len = min(Kdata.shape[1],Mdata.shape[1])
                     Kdata = Kdata[:,:Len].reshape((-1,3,Len))    
                     Mdata = Mdata[:,:Len].reshape((-1,3,Len))
                     Rdata = Rdata[:,:Len]
+                    unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
                     corKdata = np.zeros(Kdata.shape)
                     corKdata += Kdata 
                     
