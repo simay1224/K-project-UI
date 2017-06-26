@@ -186,8 +186,9 @@ for cor_th in [0,0.25,0.5]:  # =================================================
             print titlename
             print '\n\n\n=================================='  
 
-            for gamma in range(1,N):   # ============================================================# 
-                gamma = i*scale
+            for ii in range(1,N):   # ============================================================# 
+                gamma = ii*scale
+                print gamma
 
                 
 #                foldername = 'opt_cor_'+repr(cor_th)+'_gam_'+repr(gamma)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
