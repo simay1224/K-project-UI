@@ -233,10 +233,18 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                             R = np.zeros(6)+Rdata[:,idx]
         
                             if rel_Btype == True: #binary the realibility
-                               R[R>=Rel_th] = 1 
-                               R[R< Rel_th] = 0
+                                R[R>=Rel_th] = 1 
+                                R[R< Rel_th] = 0
+                                W = np.diag(R)
+                            else :
+                                W = np.diag(R)
+                                R[R>=Rel_th] = 1 
+                                R[R< Rel_th] = 0
     
-                            W = np.diag(R)
+                            
+                            
+                            
+                            
                             mx = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_x*Lapmtx_x),np.matmul(W.T,W)),Kdata[:,0,idx].reshape(6,-1))
                             my = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_y*Lapmtx_y),np.matmul(W.T,W)),Kdata[:,1,idx].reshape(6,-1))
     #                        mz = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_z),np.matmul(W.T,W)),Kdata[:,2,idx].reshape(6,-1))

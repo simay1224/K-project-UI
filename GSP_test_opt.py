@@ -175,7 +175,7 @@ for cor_th in [0,0.5]:  # ======================================================
         Eval_z,Evec_z     = eig(Lapmtx_z)   
         
         
-        for rel_Btype in [True]:                        # ============================================================#
+        for rel_Btype in [True,False]:                        # ============================================================#
             N = 200
             scale = 0.01       
 
@@ -234,8 +234,13 @@ for cor_th in [0,0.5]:  # ======================================================
                         R = np.zeros(6)+Rdata[:,idx]
     
                         if rel_Btype == True: #binary the realibility
-                           R[R>=Rel_th] = 1 
-                           R[R< Rel_th] = 0
+                            R[R>=Rel_th] = 1 
+                            R[R< Rel_th] = 0
+                            W = np.diag(R)
+                        else :
+                            W = np.diag(R)
+                            R[R>=Rel_th] = 1 
+                            R[R< Rel_th] = 0
 
                         W = np.diag(R)
                         mx = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_x),np.matmul(W.T,W)),Kdata[:,0,idx].reshape(6,-1))
