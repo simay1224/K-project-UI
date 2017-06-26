@@ -56,9 +56,13 @@ from mpl_toolkits.mplot3d import Axes3D
 #kdata_all = cPickle.load(file('I:/AllData_0327/unified data array/GSP_test/Andy_data201612151615_unified_ex4.pkl'))
 
 #kdata_all = h5py.File('I:/AllData_0327/unified data array/GSP_test/Andy_data201612151615_unified_ex4.h5')['data'][:]
-kdata_all  = cPickle.load(file('I:/AllData_0327/unified data array/biasK/Andy_data201612151615_unified_ex4.pkl'))
-mpdata_all = cPickle.load(file('I:/AllData_0327/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
-data_all   = cPickle.load(file('I:/AllData_0327/unified data array/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
+#kdata_all  = cPickle.load(file('I:/AllData_0327/unified data array/biasK/Andy_data201612151615_unified_ex4.pkl'))
+mpdata_all  = h5py.File('D:/Project/K_project/data/unified GPR_M2K/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.h5')['data'][:]
+kdata_all = cPickle.load(file('./data/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
+data_all = cPickle.load(file('./data/unified data array/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
+
+#mpdata_all = cPickle.load(file('I:/AllData_0327/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
+#data_all   = cPickle.load(file('I:/AllData_0327/unified data array/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
 
 
 #Rfile  = glob.glob(os.path.join('D:/Project/K_project/data/unified data array/reliability/','*ex4.pkl'))[0]
@@ -122,9 +126,9 @@ for frame_no in xrange(80,400):#min(kNUM_FRAMES,NUM_FRAMES)):
         
 
 
-    ax.scatter(kzs, kxs, kys, c = 'red', s = 30,label='modified Kinect Joints')    
+    ax.scatter(kzs, kxs, kys, c = 'red', s = 30,label='K')    
     ax.scatter(zs, xs, ys,c = 'green',s = 100,alpha=.4,label='M')
-    ax.scatter(mpzs, mpxs, mpys,c = 'blue',s =50,alpha=.4,label='K ')
+    ax.scatter(mpzs, mpxs, mpys,c = 'blue',s =50,alpha=.4,label='modified M Joints')
     ax.set_xlim(-300,300)
     ax.set_ylim(-200,400)
     ax.set_zlim(50,600)

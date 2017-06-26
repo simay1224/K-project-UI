@@ -6,8 +6,12 @@ Created on Sun Jun 18 18:44:53 2017
 """
 
 
-
-import cPickle,h5py,time,pdb
+try:
+    import cPickle
+except:
+    import _pickle as cPickle
+    
+import h5py,time,pdb
 import numpy as np
 import glob,os
 from scipy.stats import pearsonr
@@ -80,8 +84,9 @@ corrmtx3 = np.zeros([Jnum*Tnum,Jnum*Tnum,3,len(Mfile)])
 corrmtx = np.zeros([Jnum*Tnum,Jnum*Tnum])
 
 for midx,mfile in enumerate(Mfile):
-    print mfile
-    data = cPickle.load(file(mfile,'rb'))[12:30]
+    print(mfile)
+#    data = cPickle.load(file(mfile,'rb'))[12:30]
+    data = cPickle.load(open(mfile,'rb'),encoding = 'latin1')[12:30]
     data = data.reshape(-1,3,data.shape[1])
     if  Tnum != 1:   
         M = data[:,:,:-(Tnum-1)]
@@ -96,7 +101,7 @@ for midx,mfile in enumerate(Mfile):
             corrmtx3[i,j,1,midx] = corr(data[i,1,:],data[j,1,:])
             corrmtx3[i,j,2,midx] = corr(data[i,2,:],data[j,2,:])
     ### calculate distant's weight between joints
-    for idx in range(1,Jnum*Tnum/2+1):   # precisely should be np.round((Jnum*Tnum-1)/2.).astype('int')+1
+    for idx in range(1,int(Jnum*Tnum/2)+1):   # precisely should be np.round((Jnum*Tnum-1)/2.).astype('int')+1
         
         curRidx = np.roll(Ridx,-idx) 
         Diff = M - np.roll(M,-idx,axis = 0)
@@ -119,7 +124,7 @@ st = time.clock()
 #corrmtx3[0,3,2,:][np.isnan(corrmtx3[0,3,2,:])] = 1  # L and R shoulder in Z axis's correlation
 #corrmtx3[np.isnan(corrmtx3)] = 0
          
-for cor_th in [0,0.25,0.5]:  # ============================================================#
+for cor_th in [0.5]:  # ============================================================#
     
     corrmtx3[corrmtx3<cor_th] = 0
     
@@ -177,22 +182,23 @@ for cor_th in [0,0.25,0.5]:  # =================================================
         
         for rel_Btype in [False]:                        # ============================================================#
             N = 100
-            scale = 0.01       
+            scale = 0.01 
+            step = 10
 
-            Err_all = np.zeros((N,N))
-            Err_unrel = np.zeros((N,N))
+            Err_all = np.zeros((N/step,N/step,N/step))
+            Err_unrel = np.zeros((N/step,N/step,N/step))
             titlename = 'opt_cor_'+repr(cor_th)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
-            print '==================================\n\n\n'
-            print titlename
-            print '\n\n\n=================================='  
+            print('==================================\n\n\n')
+            print(titlename)
+            print('\n\n\n==================================')  
 
-            for ii in range(1,N):   # ============================================================# 
-                for jj in range(1,N):
-#                    for kk in range(1,N):
+            for ii in range(1,N,step):   # ============================================================# 
+                for jj in range(1,N,step):
+                    for kk in range(1,N,step):
                         gamma_x = ii*scale
                         gamma_y = jj*scale
-#                        gamma_z = kk*scale
-                        print 'gamma_x : '+repr(gamma_x)+', gamma_y : '+repr(gamma_y)#+', gamma_z : '+repr(gamma_z)
+                        gamma_z = kk*scale
+                        print('gamma_x : '+repr(gamma_x)+', gamma_y : '+repr(gamma_y)+', gamma_z : '+repr(gamma_z))
         
                         
                         #cor_th : threshold of correlation 
@@ -214,10 +220,11 @@ for cor_th in [0,0.25,0.5]:  # =================================================
         
             
                             
-                            Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]
+#                            Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]
+                            Kdata = cPickle.load(open(Kfile,'rb'),encoding = 'latin1')[12:30,:]
                             Mdata = h5py.File(Mfile)['data'][:]
-                            Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
-                            
+#                            Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
+                            Rdata = cPickle.load(open(Rfile,'rb'),encoding = 'latin1')[4:10,:]
                             
                             
                             Len = min(Kdata.shape[1],Mdata.shape[1])
@@ -234,14 +241,14 @@ for cor_th in [0,0.25,0.5]:  # =================================================
              
                                 R = np.zeros(6)+Rdata[:,idx]
             
-                                if rel_Btype == True: #binary the realibility
-                                    R[R>=Rel_th] = 1 
-                                    R[R< Rel_th] = 0
-                                    W = np.diag(R)
-                                else :
-                                    W = np.diag(R)
-                                    R[R>=Rel_th] = 1 
-                                    R[R< Rel_th] = 0
+#                                if rel_Btype == True: #binary the realibility
+                                R[R>=Rel_th] = 1 
+                                R[R< Rel_th] = 10**-6
+                                W = np.diag(R)
+#                                else :
+#                                    W = np.diag(R)
+#                                    R[R>=Rel_th] = 1 
+#                                    R[R< Rel_th] = 0
         
                                 
                                 
@@ -249,19 +256,28 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                                 
                                 mx = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_x*Lapmtx_x),np.matmul(W.T,W)),Kdata[:,0,idx].reshape(6,-1))
                                 my = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_y*Lapmtx_y),np.matmul(W.T,W)),Kdata[:,1,idx].reshape(6,-1))
-#                                mz = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_z*Lapmtx_z),np.matmul(W.T,W)),Kdata[:,2,idx].reshape(6,-1))
+                                mz = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_z*Lapmtx_z),np.matmul(W.T,W)),Kdata[:,2,idx].reshape(6,-1))
          
                                        
-                                uncnt += sum(R==0)
+                                uncnt += sum(R==10**-6)
                                 cnt += 6
-                                unerr  = unerr + sum(abs(Mdata[R==0,0,idx]-mx[R==0].flatten()))+sum(abs(Mdata[R==0,1,idx]-my[R==0].flatten()))#+sum(abs(Mdata[R==0,2,idx]-mz[R==0].flatten()))
-                                err    = err   + sum(abs(Mdata[:,0,idx]-mx.flatten()))+sum(abs(Mdata[:,1,idx]-my.flatten()))#+sum(abs(Mdata[:,2,idx]-mz.flatten()))
-                            
+#                                unerr  = unerr + sum(abs(Mdata[R==10**-6,0,idx]-mx[R==10**-6].flatten()))+sum(abs(Mdata[R==0,1,idx]-my[R==0].flatten()))+sum(abs(Mdata[R==0,2,idx]-mz[R==0].flatten()))
+#                                err    = err   + sum(abs(Mdata[:,0,idx]-mx.flatten()))+sum(abs(Mdata[:,1,idx]-my.flatten()))+sum(abs(Mdata[:,2,idx]-mz.flatten()))
+
+                                unerr  = unerr + sum(((Mdata[R==10**-6,0,idx]-mx[R==10**-6].flatten())**2+\
+                                                      (Mdata[R==10**-6,1,idx]-my[R==10**-6].flatten())**2+\
+                                                      (Mdata[R==10**-6,2,idx]-mz[R==10**-6].flatten())**2)**0.5)
+                                
+                                err    = err   + sum(((Mdata[:,0,idx]-mx.flatten())**2+\
+                                                      (Mdata[:,1,idx]-my.flatten())**2+\
+                                                      (Mdata[:,2,idx]-mz.flatten())**2)**0.5)
+
+                          
                         Err = err/cnt
                         unErr = unerr/uncnt
         
-                        Err_all[ii,jj]   = Err
-                        Err_unrel[ii,jj] = unErr
+                        Err_all[ii//step,jj//step,kk//step]   = Err
+                        Err_unrel[ii//step,jj//step,kk//step] = unErr
                 
                 
             fname ='./data/GSP/diff/Err_'+titlename+'.h5'
