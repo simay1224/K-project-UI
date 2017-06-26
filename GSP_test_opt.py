@@ -133,7 +133,7 @@ for cor_th in [0,0.25,0.5]:  # =================================================
     adjmtx_y     = np.mean(distmtx3,axis=3)[:,:,1]* corrmtx_y
     adjmtx_z     = np.mean(distmtx3,axis=3)[:,:,2]* corrmtx_z
 
-    for adj_type in [0,1]:  # ============================================================#
+    for adj_type in [0]:  # ============================================================#
         
         if adj_type == 0: #consider relation between all joints 
         
@@ -223,6 +223,8 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                     corKdata = np.zeros(Kdata.shape)
                     corKdata += Kdata 
                     
+
+                    
                     for idx in unrelidx:
      
                         R = np.zeros(6)+Rdata[:,idx]
@@ -234,13 +236,13 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                         W = np.diag(R)
                         mx = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_x),np.matmul(W.T,W)),Kdata[:,0,idx].reshape(6,-1))
                         my = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_y),np.matmul(W.T,W)),Kdata[:,1,idx].reshape(6,-1))
-                        mz = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_z),np.matmul(W.T,W)),Kdata[:,2,idx].reshape(6,-1))
+#                        mz = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_z),np.matmul(W.T,W)),Kdata[:,2,idx].reshape(6,-1))
  
                                
-                    uncnt += sum(R==0)
-                    cnt += 6
-                    unerr  = unerr + sum(abs(Mdata[R==0,0,idx]-mx[R==0].flatten()))+sum(abs(Mdata[R==0,1,idx]-my[R==0].flatten()))+sum(abs(Mdata[R==0,2,idx]-mz[R==0].flatten()))
-                    err    = err   + sum(abs(Mdata[:,0,idx]-mx.flatten()))+sum(abs(Mdata[:,1,idx]-my.flatten()))+sum(abs(Mdata[:,2,idx]-mz.flatten()))
+                        uncnt += sum(R==0)
+                        cnt += 6
+                        unerr  = unerr + sum(abs(Mdata[R==0,0,idx]-mx[R==0].flatten()))+sum(abs(Mdata[R==0,1,idx]-my[R==0].flatten()))#+sum(abs(Mdata[R==0,2,idx]-mz[R==0].flatten()))
+                        err    = err   + sum(abs(Mdata[:,0,idx]-mx.flatten()))+sum(abs(Mdata[:,1,idx]-my.flatten()))#+sum(abs(Mdata[:,2,idx]-mz.flatten()))
                     
                 Err = err/cnt
                 unErr = unerr/uncnt
