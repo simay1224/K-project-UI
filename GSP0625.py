@@ -182,9 +182,9 @@ Eval_yth,Evec_yth = eig(Lapmtx_yth)
 Eval_zth,Evec_zth = eig(Lapmtx_zth)    
     
 
-Rel_th = 0.7
-gamma_x = 0.12
-gamma_y = 1.95
+Rel_th = 0.5
+gamma_x = 8.75
+gamma_y = 0.001
 gamma_z = 0.001
 
 
@@ -193,49 +193,28 @@ for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob
     Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]     
     Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
     unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
+    Kdata = Kdata.reshape((-1,3,Kdata.shape[1]))
     corKdata = np.zeros(Kdata.shape)
     corKdata += Kdata 
-    Kdata = Kdata.reshape((-1,3,Kdata.shape[1]))
+    
     
     
     for idx in unrelidx:
+        pdb.set_trace()
         
-        x_coef = []
-        y_coef = []
-        z_coef = [] 
-        w_x = []
-        w_y = []
-        w_z = []   
-        R = Rdata[:,idx]
+        R = np.zeros(6)+Rdata[:,idx]
         R[R>=Rel_th] = 1.
         R[R< Rel_th] = 0.
-        R = np.diag(R)
-        #R = np.array([1,1,1,1,1,1])
+        W = np.diag(R)
         
         
-        
-        for i in range(Jnum*Tnum):
-            w_x.append(  sum(np.matmul(R,Evec_x[:,i])**2))
-            w_y.append(  sum(np.matmul(R,Evec_y[:,i])**2))
-            w_z.append(  sum(np.matmul(R,Evec_z[:,i])**2))
-        
-        w_x = np.array(w_x)
-        w_y = np.array(w_y)
-        w_z = np.array(w_z)
-        
-        y_proj_x   = np.matmul(Kdata[:,0,idx],Evec_x)
-        y_proj_y   = np.matmul(Kdata[:,1,idx],Evec_y)
-        y_proj_z   = np.matmul(Kdata[:,2,idx],Evec_z)
-                
-        
-        
-        mx = np.sum(w_x/(w_x+gamma_x*Eval_x)*y_proj_x*Evec_x,axis = 1)
-        my = np.sum(w_y/(w_y+gamma_y*Eval_y)*y_proj_y*Evec_y,axis = 1)
-        mz = np.sum(w_z/(w_z+gamma_z*Eval_z)*y_proj_z*Evec_z,axis = 1)
+        mx = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_x*Lapmtx_x),np.matmul(W.T,W)),Kdata[:,0,idx].reshape(6,-1))
+        my = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_y*Lapmtx_y),np.matmul(W.T,W)),Kdata[:,1,idx].reshape(6,-1))
+        mz = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_z*Lapmtx_z),np.matmul(W.T,W)),Kdata[:,2,idx].reshape(6,-1))
           
-        corKdata[0::3,idx] = mx
-        corKdata[1::3,idx] = my
-        corKdata[2::3,idx] = mz
+        corKdata[R==0,0,idx]    = mx[R==0].flatten()
+        corKdata[R==0,1,idx]    = my[R==0].flatten()
+        corKdata[R==0,2,idx]    = mz[R==0].flatten()
 
         fname =src_path +dst_folder +Kfile.split('\\')[-1][:-3]+'h5'
         f = h5py.File(fname,'w')
@@ -244,7 +223,7 @@ for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob
     
     
     
-  
+'''  
 Mdata = cPickle.load(file(src_path+Mfolder+'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl','rb'))[12:30,:]    
 Kdata = cPickle.load(file(src_path+Kfolder+'Andy_data201612151615_unified_ex4.pkl','rb'))[12:30,:]
 Rdata = cPickle.load(file(src_path+Rfolder+'Andy_data201612151615_Rel_ex4.pkl','rb'))[4:10]
