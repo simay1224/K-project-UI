@@ -181,20 +181,22 @@ for cor_th in [0,0.25,0.5]:  # =================================================
 
             Err_all = np.zeros(N)
             Err_unrel = np.zeros(N)
-            
+            titlename = 'opt_cor_'+repr(cor_th)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
+            print '==================================\n\n\n'
+            print titlename
+            print '\n\n\n=================================='  
+
             for gamma in range(1,N):   # ============================================================# 
                 gamma = i*scale
 
                 
 #                foldername = 'opt_cor_'+repr(cor_th)+'_gam_'+repr(gamma)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
-                titlename = 'opt_cor_'+repr(cor_th)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
+                
                 #cor_th : threshold of correlation 
                 #gamma  : gamma value
                 # adj type : whether it is adjmtx or adjmtx_th
                 # relb     : reliability in binary or original value  
-                print '==================================\n\n\n'
-                print titlename
-                print '\n\n\n=================================='                                         
+                                       
 
                 Err = 0
                 unErr = 0
