@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
 
-f = h5py.File('Err_opt_cor_0.5_adj_0_relb_T.h5')
+f = h5py.File('Err_opt_cor_0.5_adj_0_relb_F.h5')
 
 All   = f['all'][:]
 unrel = f['unrel'][:]

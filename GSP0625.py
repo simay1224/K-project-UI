@@ -183,7 +183,7 @@ Eval_zth,Evec_zth = eig(Lapmtx_zth)
     
 
 Rel_th = 0.5
-gamma_x = 8.75
+gamma_x = 0.29
 gamma_y = 0.001
 gamma_z = 0.001
 

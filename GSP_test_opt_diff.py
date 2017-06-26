@@ -175,8 +175,8 @@ for cor_th in [0,0.25,0.5]:  # =================================================
         Eval_z,Evec_z     = eig(Lapmtx_z)   
         
         
-        for rel_Btype in [True,False]:                        # ============================================================#
-            N = 200
+        for rel_Btype in [False]:                        # ============================================================#
+            N = 100
             scale = 0.01       
 
             Err_all = np.zeros((N,N))
@@ -188,78 +188,80 @@ for cor_th in [0,0.25,0.5]:  # =================================================
 
             for ii in range(1,N):   # ============================================================# 
                 for jj in range(1,N):
-                    gamma_x = ii*scale
-                    gamma_y = jj*scale
-                    print 'gamma_x : '+repr(gamma_x)+', gamma_y : '+repr(gamma_y)
-    
-                    
-                    #cor_th : threshold of correlation 
-                    #gamma  : gamma value
-                    # adj type : whether it is adjmtx or adjmtx_th
-                    # relb     : reliability in binary or original value  
-                                           
-    
-                    Err = 0
-                    unErr = 0
-                    unerr = 0
-                    uncnt = 0
-                    err = 0
-                    cnt = 0 
-                    
-                    for Kfile,Rfile,Mfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),\
-                                                 glob.glob(os.path.join(src_path+Rfolder,'*ex4.pkl')),\
-                                                 glob.glob(os.path.join(src_path+M2Kfolder,'*.h5'))):
-    
+                    for kk in range(1,N):
+                        gamma_x = ii*scale
+                        gamma_y = jj*scale
+                        gamma_z = kk*scale
+                        print 'gamma_x : '+repr(gamma_x)+', gamma_y : '+repr(gamma_y)+', gamma_z : '+repr(gamma_z)
         
                         
-                        Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]
-                        Mdata = h5py.File(Mfile)['data'][:]
-                        Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
+                        #cor_th : threshold of correlation 
+                        #gamma  : gamma value
+                        # adj type : whether it is adjmtx or adjmtx_th
+                        # relb     : reliability in binary or original value  
+                                               
+        
+                        Err = 0
+                        unErr = 0
+                        unerr = 0
+                        uncnt = 0
+                        err = 0
+                        cnt = 0 
                         
-                        
-                        
-                        Len = min(Kdata.shape[1],Mdata.shape[1])
-                        Kdata = Kdata[:,:Len].reshape((-1,3,Len))    
-                        Mdata = Mdata[:,:Len].reshape((-1,3,Len))
-                        Rdata = Rdata[:,:Len]
-                        unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
-                        corKdata = np.zeros(Kdata.shape)
-                        corKdata += Kdata 
-                        
-    
-                        
-                        for idx in unrelidx:
+                        for Kfile,Rfile,Mfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),\
+                                                     glob.glob(os.path.join(src_path+Rfolder,'*ex4.pkl')),\
+                                                     glob.glob(os.path.join(src_path+M2Kfolder,'*.h5'))):
+        
+            
+                            
+                            Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]
+                            Mdata = h5py.File(Mfile)['data'][:]
+                            Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
+                            
+                            
+                            
+                            Len = min(Kdata.shape[1],Mdata.shape[1])
+                            Kdata = Kdata[:,:Len].reshape((-1,3,Len))    
+                            Mdata = Mdata[:,:Len].reshape((-1,3,Len))
+                            Rdata = Rdata[:,:Len]
+                            unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
+                            corKdata = np.zeros(Kdata.shape)
+                            corKdata += Kdata 
+                            
+        
+                            
+                            for idx in unrelidx:
+             
+                                R = np.zeros(6)+Rdata[:,idx]
+            
+                                if rel_Btype == True: #binary the realibility
+                                    R[R>=Rel_th] = 1 
+                                    R[R< Rel_th] = 0
+                                    W = np.diag(R)
+                                else :
+                                    W = np.diag(R)
+                                    R[R>=Rel_th] = 1 
+                                    R[R< Rel_th] = 0
+        
+                                
+                                
+                                
+                                
+                                mx = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_x*Lapmtx_x),np.matmul(W.T,W)),Kdata[:,0,idx].reshape(6,-1))
+                                my = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_y*Lapmtx_y),np.matmul(W.T,W)),Kdata[:,1,idx].reshape(6,-1))
+                                mz = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_z),np.matmul(W.T,W)),Kdata[:,2,idx].reshape(6,-1))
          
-                            R = np.zeros(6)+Rdata[:,idx]
+                                       
+                                uncnt += sum(R==0)
+                                cnt += 6
+                                unerr  = unerr + sum(abs(Mdata[R==0,0,idx]-mx[R==0].flatten()))+sum(abs(Mdata[R==0,1,idx]-my[R==0].flatten()))+sum(abs(Mdata[R==0,2,idx]-mz[R==0].flatten()))
+                                err    = err   + sum(abs(Mdata[:,0,idx]-mx.flatten()))+sum(abs(Mdata[:,1,idx]-my.flatten()))+sum(abs(Mdata[:,2,idx]-mz.flatten()))
+                            
+                        Err = err/cnt
+                        unErr = unerr/uncnt
         
-                            if rel_Btype == True: #binary the realibility
-                                R[R>=Rel_th] = 1 
-                                R[R< Rel_th] = 0
-                                W = np.diag(R)
-                            else :
-                                W = np.diag(R)
-                                R[R>=Rel_th] = 1 
-                                R[R< Rel_th] = 0
-    
-                            
-                            
-                            
-                            
-                            mx = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_x*Lapmtx_x),np.matmul(W.T,W)),Kdata[:,0,idx].reshape(6,-1))
-                            my = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_y*Lapmtx_y),np.matmul(W.T,W)),Kdata[:,1,idx].reshape(6,-1))
-    #                        mz = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_z),np.matmul(W.T,W)),Kdata[:,2,idx].reshape(6,-1))
-     
-                                   
-                            uncnt += sum(R==0)
-                            cnt += 6
-                            unerr  = unerr + sum(abs(Mdata[R==0,0,idx]-mx[R==0].flatten()))+sum(abs(Mdata[R==0,1,idx]-my[R==0].flatten()))#+sum(abs(Mdata[R==0,2,idx]-mz[R==0].flatten()))
-                            err    = err   + sum(abs(Mdata[:,0,idx]-mx.flatten()))+sum(abs(Mdata[:,1,idx]-my.flatten()))#+sum(abs(Mdata[:,2,idx]-mz.flatten()))
-                        
-                    Err = err/cnt
-                    unErr = unerr/uncnt
-    
-                    Err_all[ii,jj]   = Err
-                    Err_unrel[ii,jj] = unErr
+                        Err_all[ii,jj]   = Err
+                        Err_unrel[ii,jj] = unErr
                 
                 
             fname ='./data/GSP/diff/Err_'+titlename+'.h5'
