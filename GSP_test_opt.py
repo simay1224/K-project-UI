@@ -217,8 +217,8 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                     
                     
                     Len = min(Kdata.shape[1],Mdata.shape[1])
-                    Kdata = Kdata.reshape((-1,3,Len))    
-                    Mdata = Mdata.reshape((-1,3,Len))
+                    Kdata = Kdata[:,:Len].reshape((-1,3,Len))    
+                    Mdata = Mdata[:,:Len].reshape((-1,3,Len))
                     
                     corKdata = np.zeros(Kdata.shape)
                     corKdata += Kdata 
