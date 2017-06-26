@@ -210,7 +210,7 @@ for cor_th in [0,0.25,0.5]:  # =================================================
     
                     
                     Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]
-                    Mdata = h5py.File(Mfile)['data'][:][12:30,:]
+                    Mdata = h5py.File(Mfile)['data'][:]
 #                    Mdata = cPickle.load(file(mfile,'rb'))[12:30,:]
                     Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
                     unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
