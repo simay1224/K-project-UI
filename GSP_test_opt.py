@@ -251,11 +251,11 @@ for cor_th in [0,0.5]:  # ======================================================
                 Err = err/cnt
                 unErr = unerr/uncnt
 
-                Err_all[int(gamma/scale)]   = Err
-                Err_unrel[int(gamma/scale)] = unErr
+                Err_all[ii]   = Err
+                Err_unrel[ii] = unErr
                 
                 
-            fname ='./data/GSP/same/Err_'+titlename+'.pkl'
+            fname ='./data/GSP/same/Err_'+titlename+'.h5'
             f = h5py.File(fname,'w')
             f.create_dataset('all',data = Err_all)
             f.create_dataset('unrel',data = Err_unrel)

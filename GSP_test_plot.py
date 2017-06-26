@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
 
-f = h5py.File()
+f = h5py.File('Err_opt_cor_0.5_adj_0_relb_T.h5')
 
 All   = f['all'][:]
 unrel = f['unrel'][:]
@@ -22,8 +22,8 @@ scale = 0.01
 plt.figure(1)
 plt.title('x,y,z share same gamma')
 
-plt.plot(np.arange(N-1)*scale,unrel,color = 'blue',label = 'unrel joints')
-plt.plot(np.arange(N-1)*scale,All  ,color = 'red',label = 'rall joints')
+plt.plot(np.arange(N)*scale,unrel,color = 'blue',label = 'unrel joints')
+plt.plot(np.arange(N)*scale,All  ,color = 'red',label = 'rall joints')
 
 plt.legend( loc=1)
 
