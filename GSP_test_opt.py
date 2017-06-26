@@ -247,9 +247,9 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                     
                 Err = err/cnt
                 unErr = unerr/uncnt
-                
-                Err_all[gamma/scale]   = Err
-                Err_unrel[gamma/scale] = unErr
+
+                Err_all[int(gamma/scale)]   = Err
+                Err_unrel[int(gamma/scale)] = unErr
                 
                 
             fname ='./data/GSP/same/Err_'+titlename+'.pkl'
