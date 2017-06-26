@@ -114,7 +114,7 @@ for midx,mfile in enumerate(Mfile):
             distmtx3[col,row,1,midx] = W_y[Lidx]
             distmtx3[col,row,2,midx] = W_z[Lidx]
 
-Rel_th = 0.7
+Rel_th = 0.5
 st = time.clock()
 #corrmtx3[0,3,2,:][np.isnan(corrmtx3[0,3,2,:])] = 1  # L and R shoulder in Z axis's correlation
 #corrmtx3[np.isnan(corrmtx3)] = 0
