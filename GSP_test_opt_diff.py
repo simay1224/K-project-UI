@@ -254,7 +254,7 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                     Err_unrel[int(gamma_x/scale),int(gamma_y/scale)] = unErr
                 
                 
-            fname ='./data/GSP/same/Err_'+titlename+'.pkl'
+            fname ='./data/GSP/diff/Err_'+titlename+'.pkl'
             f = h5py.File(fname,'w')
             f.create_dataset('all',data = Err_all)
             f.create_dataset('unrel',data = Err_unrel)
