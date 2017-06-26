@@ -211,7 +211,7 @@ for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob
         mx = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_x*Lapmtx_x),np.matmul(W.T,W)),Kdata[:,0,idx].reshape(6,-1))
         my = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_y*Lapmtx_y),np.matmul(W.T,W)),Kdata[:,1,idx].reshape(6,-1))
         mz = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma_z*Lapmtx_z),np.matmul(W.T,W)),Kdata[:,2,idx].reshape(6,-1))
-          
+        pdb.set_trace()  
         corKdata[R==0,0,idx]    = mx[R==0].flatten()
         corKdata[R==0,1,idx]    = my[R==0].flatten()
         corKdata[R==0,2,idx]    = mz[R==0].flatten()

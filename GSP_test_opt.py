@@ -21,6 +21,7 @@ src_path = './data/unified data array/'
 Mfolder  = 'Unified_MData/'
 Kfolder  = 'Unified_KData/'
 Rfolder  = 'reliability/'
+M2Kfolder = '../GPR_M2K/'
 
 Mfile = glob.glob(os.path.join(src_path+Mfolder,'*.pkl'))
 
@@ -175,66 +176,96 @@ for cor_th in [0,0.25,0.5]:  # =================================================
         
         
         for rel_Btype in [True,False]:                        # ============================================================#
-            for gamma in [0.001,0.005,0.01,0.05,0.1,0.5]:   # ============================================================# 
+            N = 1000
+            scale = 0.01       
+
+            Err_all = np.zeros(N)
+            Err_unrel = np.zeros(N)
             
-                foldername = 'opt_cor_'+repr(cor_th)+'_gam_'+repr(gamma)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
+            for gamma in range(1,N):   # ============================================================# 
+                gamma = i*scale
+
+                
+#                foldername = 'opt_cor_'+repr(cor_th)+'_gam_'+repr(gamma)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
+                titlename = 'opt_cor_'+repr(cor_th)+'_adj_'+repr(adj_type)+'_relb_'+repr(rel_Btype)[0]
                 #cor_th : threshold of correlation 
                 #gamma  : gamma value
                 # adj type : whether it is adjmtx or adjmtx_th
                 # relb     : reliability in binary or original value  
                 print '==================================\n\n\n'
-                print foldername
+                print titlename
                 print '\n\n\n=================================='                                         
 
-#                for Kfile,Rfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),glob.glob(os.path.join(src_path+Rfolder,'*ex4.pkl'))):
-                if 1:
-                    Kfile = glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl'))[0]
-                    Rfile = glob.glob(os.path.join(src_path+Rfolder,'*ex4.pkl'))[0]
-                    print Kfile.split('\\')[-1][:-3]
+                Err = 0
+                unErr = 0
+                unerr = 0
+                uncnt = 0
+                err = 0
+                cnt = 0 
+                
+                for Kfile,Rfile,Mfile in zip(glob.glob(os.path.join(src_path+Kfolder,'*ex4.pkl')),\
+                                             glob.glob(os.path.join(src_path+Rfolder,'*ex4.pkl')),\
+                                             glob.glob(os.path.join(src_path+M2Kfolder,'*.h5'))):
+
     
                     
                     Kdata = cPickle.load(file(Kfile,'rb'))[12:30,:]
+                    Mdata = h5py.File(Mfile)['data'][:][12:30,:]
+#                    Mdata = cPickle.load(file(mfile,'rb'))[12:30,:]
                     Rdata = cPickle.load(file(Rfile,'rb'))[4:10,:]
                     unrelidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints
+                    
+                    
+                    Len = min(Kdata.shape[1],Mdata.shape[1])
+                    Kdata = Kdata.reshape((-1,3,Len))    
+                    Mdata = Mdata.reshape((-1,3,Len))
+                    
                     corKdata = np.zeros(Kdata.shape)
                     corKdata += Kdata 
                     
-                    Kdata = Kdata.reshape((-1,3,Kdata.shape[1]))    
-#                    Kv    = Kdata3 - np.roll(Kdata3,1,axis = 2) 
-#                    Ka    = Kv - np.roll(Kv,1,axis = 2) 
-                    
                     for idx in unrelidx:
      
-                        R = Rdata[:,idx].reshape(-1,6)
+                        R = np.zeros(6)+Rdata[:,idx]
     
                         if rel_Btype == True: #binary the realibility
                            R[R>=Rel_th] = 1 
                            R[R< Rel_th] = 0
-    
-#                        X_init   = pos_est(idx,Kv,Ka,Kdata3)
-#    
-#                        x =  optimize.fmin_bfgs(func, X_init.flatten() ,args = (0.001,Kdata[:,idx].flatten(),R,Lapmtx_x.flatten(),Lapmtx_y.flatten(),Lapmtx_z.flatten(),)) 
-#                        x = x.reshape(-1,3)  
-                        
-                        x = np.matmul(inv(gamma*Lapmtx_x+np.matmul(R.T,R)),np.matmul(np.matmul(R.T,R), Kdata[:,0,idx]))
-                        
-                        pdb.set_trace()  
-                        corKdata[0::3,idx] = x[:,0]
-                        corKdata[1::3,idx] = x[:,1]
-                        corKdata[2::3,idx] = x[:,2]
-                
 
+                        W = np.diag(R)
+                        mx = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_x),np.matmul(W.T,W)),Kdata[:,0,idx].reshape(6,-1))
+                        my = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_y),np.matmul(W.T,W)),Kdata[:,1,idx].reshape(6,-1))
+                        mz = np.matmul(np.matmul(inv(np.matmul(W.T,W)+gamma*Lapmtx_z),np.matmul(W.T,W)),Kdata[:,2,idx].reshape(6,-1))
+ 
+                               
+                    uncnt += sum(R==0)
+                    cnt += 6
+                    unerr  += sum(abs(Mdata[R==0,0,idx]-mx[R==0].flatten()))
+                    err  +=  sum(abs(Mdata[:,0,idx]-mx.flatten()))
+                    
+                Err = err/cnt
+                unErr = unerr/uncnt
+                
+                Err_all[gamma/scale]   = Err
+                Err_unrel[gamma/scale] = unErr
+                
+                
+            fname ='./data/GSP/same/Err_'+titlename+'.pkl'
+            f = h5py.File(fname,'w')
+            f.create_dataset('all',data = Err_all)
+            f.create_dataset('unrel',data = Err_unrel)
+            f.create_dataset('scale_N',data = [scale,N])
+            f.close()    
 
 #                    pdb.set_trace()
-                    if not os.path.isdir('./data/GSP/'+foldername+'/'):
-                        print('\n\n\n')
-                        os.makedirs('./data/GSP/'+foldername+'/')
-                        
-                        
-                    fname ='./data/GSP/'+foldername+'/' +Kfile.split('\\')[-1][:-3]+'h5'
-                    f = h5py.File(fname,'w')
-                    f.create_dataset('data',data = corKdata)
-                    f.close()
+#                    if not os.path.isdir('./data/GSP/'+foldername+'/'):
+#                        print('\n\n\n')
+#                        os.makedirs('./data/GSP/'+foldername+'/')
+#                        
+#                        
+#                    fname ='./data/GSP/'+foldername+'/' +Kfile.split('\\')[-1][:-3]+'h5'
+#                    f = h5py.File(fname,'w')
+#                    f.create_dataset('data',data = corKdata)
+#                    f.close()
 #            
                 
 print('computation time is ' + repr(time.clock()-st))        
