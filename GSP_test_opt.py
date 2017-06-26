@@ -239,8 +239,8 @@ for cor_th in [0,0.25,0.5]:  # =================================================
                                
                     uncnt += sum(R==0)
                     cnt += 6
-                    unerr  += sum(abs(Mdata[R==0,0,idx]-mx[R==0].flatten()))
-                    err  +=  sum(abs(Mdata[:,0,idx]-mx.flatten()))
+                    unerr  = unerr + sum(abs(Mdata[R==0,0,idx]-mx[R==0].flatten()))+sum(abs(Mdata[R==0,1,idx]-my[R==0].flatten()))+sum(abs(Mdata[R==0,2,idx]-mz[R==0].flatten()))
+                    err    = err   + sum(abs(Mdata[:,0,idx]-mx.flatten()))+sum(abs(Mdata[:,1,idx]-my.flatten()))+sum(abs(Mdata[:,2,idx]-mz.flatten()))
                     
                 Err = err/cnt
                 unErr = unerr/uncnt
