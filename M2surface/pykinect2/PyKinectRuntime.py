@@ -294,9 +294,9 @@ class PyKinectRuntime(object):
     def body_joint_to_depth_space(self, joint): 
         return self._mapper.MapCameraPointToDepthSpace(joint.Position) 
 
-    def testtable(self):
-        #pdb.set_trace()
-        self._mapper.GetDepthFrameToCameraSpaceTable()
+#    def testtable(self):
+#        #pdb.set_trace()
+#        self._mapper.GetDepthFrameToCameraSpaceTable()
 
     def body_joints_to_color_space(self, joints):
 

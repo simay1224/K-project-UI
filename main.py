@@ -288,9 +288,9 @@ class BodyGameRuntime(object):
                         #pdb.set_trace()
                     
                     bddic['timestamp'] = TimeS
-                    bddic['jointspts'] = Jps
+                    bddic['jointspts'] = Jps   # joint coordinate in color space (2D) 
                     bddic['depth_jointspts'] = dJps
-                    bddic['joints'] = Jdic                        
+                    bddic['joints'] = Jdic     # joint coordinate in camera space (3D)                   
                     bddic['vidclip'] = self.clipNo
                     bddic['Rel'] = Rel
                   
