@@ -141,7 +141,7 @@ def human_mod_pts(Body):
     Vec0809 = uni_vec_pts(Body, JointType_ShoulderRight, JointType_ElbowRight)
     Vec0910 = uni_vec_pts(Body, JointType_ElbowRight   , JointType_WristRight)
     
-    
+    J = {}
     J[JointType_SpineBase]     = oripos
     J[JointType_SpineMid]      = J[JointType_SpineBase]    - Vec0001*Jlen['0001']*factor
     J[JointType_SpineShoulder] = J[JointType_SpineMid]     - Vec0120*Jlen['0120']*factor
@@ -191,8 +191,9 @@ def human_mod_Mocam(Body,Kpos):
     Vec09 = Body[JointType_ElbowRight]    - oripos
     Vec10 = Body[JointType_WristRight]    - oripos
     Vec20 = Body[JointType_SpineShoulder] - oripos    
-    
+#    pdb.set_trace()
     Len = min(Vec00.shape[1],Kpos.shape[1])
+    J = {}
     J[JointType_SpineBase]     = Vec00[:,:Len]  + Kpos[:,:Len]
     J[JointType_SpineMid]      = Vec01[:,:Len]  + Kpos[:,:Len]
     J[JointType_SpineShoulder] = Vec20[:,:Len]  + Kpos[:,:Len]
@@ -206,6 +207,39 @@ def human_mod_Mocam(Body,Kpos):
     J[JointType_WristRight]    = Vec10[:,:Len]  + Kpos[:,:Len]
 
     return J
+    
+def human_mod_unified_Mocam(Body,uni_body,KposL,KposR,Len):
+    #Kpos : kinect ShoulderLeft position
+
+
+    Vec45 = (uni_body[1,:,:]  - uni_body[0,:,:])/np.sum((uni_body[1,:,:]-uni_body[0,:,:])**2,0)**0.5
+    Vec56 = (uni_body[2,:,:]  - uni_body[1,:,:])/np.sum((uni_body[2,:,:]-uni_body[1,:,:])**2,0)**0.5 
+    Vec48 = (uni_body[3,:,:]  - uni_body[0,:,:])/np.sum((uni_body[3,:,:]-uni_body[0,:,:])**2,0)**0.5 
+    Vec89 = (uni_body[4,:,:]  - uni_body[3,:,:])/np.sum((uni_body[4,:,:]-uni_body[3,:,:])**2,0)**0.5 
+    Vec90 = (uni_body[5,:,:]  - uni_body[4,:,:])/np.sum((uni_body[5,:,:]-uni_body[4,:,:])**2,0)**0.5  
+    
+    
+    Len45 = np.mean(np.sum((Body[5 ]  - Body[4])**2,axis = 0)**0.5)  
+    Len56 = np.mean(np.sum((Body[6 ]  - Body[5])**2,axis = 0)**0.5)
+    Len48 = np.mean(np.sum((Body[8 ]  - Body[4])**2,axis = 0)**0.5) 
+    Len89 = np.mean(np.sum((Body[9 ]  - Body[8])**2,axis = 0)**0.5)
+    Len90 = np.mean(np.sum((Body[10]  - Body[9])**2,axis = 0)**0.5)  
+    
+#    pdb.set_trace()
+    J = {}
+    
+    J[JointType_ShoulderLeft] = KposL[:,:Len]
+    J[JointType_ElbowLeft]    = Vec45[:,:Len]*Len45 + KposL[:,:Len]
+    J[JointType_WristLeft]    = Vec56[:,:Len]*Len56 + J[JointType_ElbowLeft]
+    
+    J[JointType_ShoulderRight] = KposR[:,:Len]
+#    J[JointType_ShoulderRight] = Vec48[:,:Len]*Len48 + J[JointType_ShoulderLeft]
+    J[JointType_ElbowRight]    = Vec89[:,:Len]*Len89 + KposR[:,:Len]
+    J[JointType_WristRight]    = Vec90[:,:Len]*Len90 + J[JointType_ElbowRight]
+    
+    return J
+    
+    
        
     
 #import cPickle 

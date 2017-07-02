@@ -303,6 +303,8 @@ class PyKinectRuntime(object):
         joint_points = numpy.ndarray((PyKinectV2.JointType_Count), dtype=numpy.object)
 
         for j in range(0, PyKinectV2.JointType_Count):
+#            print j
+#            pdb.set_trace()
             joint_points[j] = self.body_joint_to_color_space(joints[j])
 
         return joint_points
