@@ -50,16 +50,17 @@ from mpl_toolkits.mplot3d import Axes3D
 #mpdata_all  = h5py.File('D:/Project/K_project/data/unified Kprime smooth/Andy_data201612151615_unified_ex4.h5')['data'][:]
 
 #mpdata_all = cPickle.load(file('D:/Project/K_project/data/unified GPR/Andy_data201612151615_unified_ex4.pkl'))
-#data_all = cPickle.load(file('D:/Project/K_project/data/Motion and Kinect unified/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
+data_all = cPickle.load(file('I:/AllData_0327/unified data/Unified_MData/Nata_2016-12-16 03.07.14 PM_ex_FPS30_motion_unified.pkl'))
 
 #kdata_all = cPickle.load(file('./data/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
 #kdata_all = cPickle.load(file('I:/AllData_0327/unified data array/GSP_test/Andy_data201612151615_unified_ex4.pkl'))
 
 #kdata_all = h5py.File('I:/AllData_0327/unified data array/GSP_test/Andy_data201612151615_unified_ex4.h5')['data'][:]
 #kdata_all  = cPickle.load(file('I:/AllData_0327/unified data array/biasK/Andy_data201612151615_unified_ex4.pkl'))
-mpdata_all  = h5py.File('D:/Project/K_project/data/unified GPR_M2K/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.h5')['data'][:]
-kdata_all = cPickle.load(file('./data/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
-data_all = cPickle.load(file('./data/unified data array/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
+#mpdata_all  = h5py.File('D:/Project/K_project/data/unified GPR_M2K/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.h5')['data'][:]
+#kdata_all = cPickle.load(file('./data/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
+#data_all = cPickle.load(file('./data/unified data array/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
+
 
 #mpdata_all = cPickle.load(file('I:/AllData_0327/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
 #data_all   = cPickle.load(file('I:/AllData_0327/unified data array/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
@@ -87,48 +88,48 @@ ax.set_zlabel('Y axis')
 for frame_no in xrange(80,400):#min(kNUM_FRAMES,NUM_FRAMES)):
     plt.cla()
     
-    mpxs = mpdata_all[0::3,frame_no]
-    mpys = mpdata_all[1::3,frame_no]
-    mpzs = mpdata_all[2::3,frame_no]
-
-    kxs = kdata_all[0::3,frame_no]
-    kys = kdata_all[1::3,frame_no]
-    kzs = kdata_all[2::3,frame_no] 
-
-
-
-
-    xs = data_all[0::3,frame_no]
-    ys = data_all[1::3,frame_no]
-    zs = data_all[2::3,frame_no] 
+#    mpxs = mpdata_all[0::3,frame_no]
+#    mpys = mpdata_all[1::3,frame_no]
+#    mpzs = mpdata_all[2::3,frame_no]
+#
+#    kxs = kdata_all[0::3,frame_no]
+#    kys = kdata_all[1::3,frame_no]
+#    kzs = kdata_all[2::3,frame_no] 
+#
+#
+#
+#
+#    xs = data_all[0::3,frame_no]
+#    ys = data_all[1::3,frame_no]
+#    zs = data_all[2::3,frame_no] 
 
    
-#    xs = []
-#    ys = []
-#    zs = []
+    xs = []
+    ys = []
+    zs = []
 
 #    kxs = []
 #    kys = []
 #    kzs = []
 
 
-#    for joint_idx in  kdata_all.keys() :
-#        xs.append(data_all[joint_idx][0][frame_no])
-#        ys.append(data_all[joint_idx][1][frame_no])
-#        zs.append(data_all[joint_idx][2][frame_no])
-##        mxs.append(mdata[joint_idx][0][frame_no])
-##        mys.append(mdata[joint_idx][1][frame_no])
-##        mzs.append(mdata[joint_idx][2][frame_no])        
-#        
+    for joint_idx in  data_all.keys() :
+        xs.append(data_all[joint_idx][0][frame_no])
+        ys.append(data_all[joint_idx][1][frame_no])
+        zs.append(data_all[joint_idx][2][frame_no])
+#        mxs.append(mdata[joint_idx][0][frame_no])
+#        mys.append(mdata[joint_idx][1][frame_no])
+#        mzs.append(mdata[joint_idx][2][frame_no])        
+        
 #        kxs.append(kdata_all[joint_idx][0][frame_no])
 #        kys.append(kdata_all[joint_idx][1][frame_no])
 #        kzs.append(kdata_all[joint_idx][2][frame_no])
-        
+#        
 
 
-    ax.scatter(kzs, kxs, kys, c = 'red', s = 30,label='K')    
+#    ax.scatter(kzs, kxs, kys, c = 'red', s = 30,label='K')    
     ax.scatter(zs, xs, ys,c = 'green',s = 100,alpha=.4,label='M')
-    ax.scatter(mpzs, mpxs, mpys,c = 'blue',s =50,alpha=.4,label='modified M Joints')
+#    ax.scatter(mpzs, mpxs, mpys,c = 'blue',s =50,alpha=.4,label='modified M Joints')
     ax.set_xlim(-300,300)
     ax.set_ylim(-200,400)
     ax.set_zlim(50,600)
