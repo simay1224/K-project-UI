@@ -14,8 +14,10 @@ import glob,os,win32com.client,pdb
 
 
 
-src_path = 'I:/AllData_0327/raw data/20170306/pkl/'
-dst_path = 'I:/Data_0702/unified data/Unified_KData/'
+#src_path = 'I:/AllData_0327/raw data/20170306/pkl/'
+#dst_path = 'I:/Data_0702/unified data/Unified_KData/'
+src_path = 'D:/Project/K_project/data/Motion and Kinect raw data/20170306/pkl/'
+dst_path = 'D:/Project/K_project/data/0705/unified data/Unified_KData/'
 jidx = [0,1,2,3,4,5,6,8,9,10,20]
 
 def folder_retarget(src_path,shortcut):  
@@ -39,7 +41,7 @@ for subfolder in os.listdir(src_path):
             J     = human_mod(Kbody)        
             
             name = infile.split('\\')[-1].split('ex')
-            if name[0].split('data')[1][0]==1:
+            if name[0].split('data')[1][0]=='1':
                 year = '2016'
             else:
                 year = '2017'
@@ -47,4 +49,4 @@ for subfolder in os.listdir(src_path):
             fname = dst_path+'ex'+repr(exeno)+'/' + name[0].replace('data','data'+year)+'unified_ex'+name[1]
     
     
-        cPickle.dump(J,file(fname,'wb'))
+            cPickle.dump(J,file(fname,'wb'))

@@ -4,8 +4,11 @@ Created on Tue Nov 15 14:41:16 2016
 
 @author: medialab
 """
-
+from pykinect2 import PyKinectV2
+from pykinect2.PyKinectV2 import *
+from pykinect2 import PyKinectRuntime
 import numpy as np
+import cPickle
 import copy,pdb
 
 #kinematic segment length (unit:cm)
@@ -22,30 +25,41 @@ kinseg[6]  =27.1  #elbow2wrist
 Tjo = [0,1,2,3,4,5,6,8,9,10,20]
 
 # gaussian filter
-a = np.arange(6)
-sigma = 1
+a = np.arange(2)
+sigma = 0.65
 gw = 1/(2*np.pi)**2/sigma*np.exp(-0.5*a**2/sigma**2) 
 gw = gw*(1/sum(gw))
 #initail reliability 
-rel = {}
+
 jord = [0,1,2,3,4,5,6,8,9,10,20]
+
+rel = {}
 for i in jord:
     rel[i]=0
-
-def rel_behav(J,th = 0.03,theta_r=135,theta_f = 90): #behavior term
+    
+def rel_behav(J,th = 0.03,fsize=3): #behavior term
     #J : 3D joint position in [...,f-4,f-3,f-2,f-1,f]
     #th   : threshold (uint: m)
-
-    theta = 0
-    if len(J)>5:
-        for k in xrange(3):
-            dj   = J[-(k+1)]-J[-(k+2)]
+    r = 1
+    if len(J)>=fsize:
+        for k in xrange(1):
+            dj   = J[-(k+1)]-J[-(k+2)]            
             dj_1 = J[-(k+2)]-J[-(k+3)]
+            dj_2 = J[-(k+1)]-J[-(k+3)]
             n_dj = np.linalg.norm(dj)
             n_dj_1 = np.linalg.norm(dj_1)
-            if (n_dj > th) & (n_dj_1 > th):
-                theta += np.arccos(sum([dj[i]*dj_1[i] for i in xrange(3)])/n_dj/n_dj_1)/np.pi*180
-    return 1-max(min(theta/3,theta_r)-theta_f,0)/(theta_r-theta_f)
+            n_dj_2 = np.linalg.norm(dj_2)
+    
+
+            if (n_dj_2 < th):
+                r = 1
+            else:
+                if (n_dj > th):
+                    r = max(1-4*(n_dj-th)/th,0)
+                else:
+                    r = 1    
+            
+    return r
 
         
 def rel_kin(joints): # kinematic term    
@@ -90,12 +104,14 @@ def rel_trk(joints): # tracking term
     for i in Tjo:
         if joints[i].TrackingState == 2:
             trkrel.append(1.0)
+        elif joints[i].TrackingState == 1:
+            trkrel.append(1.0)
         else:
             trkrel.append(0.0)
 
     return trkrel
     
-def rel_rate(Rb,Rk,Rt,order,flen = 6):
+def rel_rate(Rb,Rk,Rt,order,flen = 2):
     if (len(Rb[0])>=flen) & (len(Rk[0])>=flen) & (len(Rt[0])>=flen) :
         Rel = copy.copy(rel)
         
@@ -110,16 +126,55 @@ def rel_rate(Rb,Rk,Rt,order,flen = 6):
     return Rel
 
 
-#def rel_rate(Rb,Rk,Rt,order,flen = 6):
-#    if (len(Rb[0])>=flen) &  (len(Rt[0])>=flen) :
-#        Rel = copy.copy(rel)
-#        
-#        if order == jord :
-#            for j in order:
-#                for i in xrange(flen):
-#                    Rel[j] += gw[i]*min(Rb[j][-(i+1)],Rt[j][-(i+1)])
-#        else:
-#            print 'joints order not match !!'
-#    else:
-#        return rel
-#    return Rel
+
+Jarray  = {}
+Rb = {}
+Rt = {}
+Rk = {}
+
+for ii in jord:
+    Rk[ii]=[]
+    Rt[ii]=[]
+    Rb[ii]=[]
+
+
+#Alldata = cPickle.load(file('I:/AllData_0327/raw data/20161216/pkl/Andy/Andy_data12151615_ex4.pkl','rb'))
+Alldata = cPickle.load(file('D:/Project/K_project/data/Motion and Kinect raw data/20161216/pkl/Andy/Andy_data12151615_ex4.pkl','rb'))
+
+for fidx in range(125,129):#len(Alldata)):
+    Jdic = Alldata[fidx]['joints']
+    
+    for ii in jord:
+        try : 
+            Jarray[ii].append(np.array([Jdic[ii].Position.x,Jdic[ii].Position.y,Jdic[ii].Position.z]))
+        except:                            
+            Jarray[ii] = []
+            Rb[ii] = []
+            Jarray[ii].append(np.array([Jdic[ii].Position.x,Jdic[ii].Position.y,Jdic[ii].Position.z])) 
+#        if fidx == 127:
+#            pdb.set_trace()
+        Rb[ii].append(rel_behav(Jarray[ii]))
+        
+    rt = rel_trk(Jdic) 
+    rk = rel_kin(Jdic)
+    for ii,jj in enumerate(jord):    
+        Rt[jj].append(rt[ii])
+        Rk[jj].append(rk[ii])
+        
+    Rel = rel_rate(Rb,Rk,Rt,jord)
+    
+    print fidx
+    print 'Rb is :'+repr(np.round(Rb[6],2))
+    print 'Rk is :'+repr(np.round(Rk[6],2))
+    print 'Rt is :'+repr(np.round(Rt[6],2))
+    print np.round(Rel[6],2)
+    print('\n')
+
+
+
+
+
+
+
+
+
