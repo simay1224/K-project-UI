@@ -62,13 +62,13 @@ from mpl_toolkits.mplot3d import Axes3D
 #data_all = cPickle.load(file('./data/unified data array/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
 
 
-#mpdata_all = cPickle.load(file('I:/AllData_0327/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
+mpdata_all = cPickle.load(file('I:/AllData_0327/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
 #data_all   = cPickle.load(file('I:/AllData_0327/unified data array/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
-mpdata_all = cPickle.load(file('dic.pkl'))
+#mpdata_all = cPickle.load(file('dic.pkl'))
 
 #Rfile  = glob.glob(os.path.join('D:/Project/K_project/data/unified data array/reliability/','*ex4.pkl'))[0]
-#rdata   = cPickle.load(file(Rfile,'rb'))
-#Rel_th    =  0.7
+rdata   = cPickle.load(file('reltest.pkl','rb'))[6,:]
+Rel_th    =  0.7
 #R  = rdata[4:10 ,:954]
 #relidx = np.where(np.sum((R<Rel_th)*1,0)==0)[0] 
 
@@ -76,6 +76,8 @@ mpdata_all = cPickle.load(file('dic.pkl'))
 #NUM_FRAMES = len(data_all[0][1])   # total number of the frames
 #kNUM_FRAMES = len(kdata_all[0][1]) 
 #print 'The total frames: ', NUM_FRAMES
+
+
 
 fig = plt.figure(1)
 ax = fig.add_subplot(111, projection='3d')
@@ -85,13 +87,20 @@ ax.set_xlabel('Z axis')
 ax.set_ylabel('X axis')
 ax.set_zlabel('Y axis')
     
-for frame_no in xrange(165,170):#min(kNUM_FRAMES,NUM_FRAMES)):
+for frame_no in xrange(125,150):#min(kNUM_FRAMES,NUM_FRAMES)):
     plt.cla()
     
     mpxs = mpdata_all[0::3,frame_no]
     mpys = mpdata_all[1::3,frame_no]
     mpzs = mpdata_all[2::3,frame_no]
-#
+    
+    if rdata[frame_no]<Rel_th:
+        rx = mpdata_all[18,frame_no]
+        ry = mpdata_all[19,frame_no]
+        rz = mpdata_all[20,frame_no]
+        ax.scatter(rz, rx, ry,c = 'red',s =100,alpha=.8,label='err')
+        
+        
 #    kxs = kdata_all[0::3,frame_no]
 #    kys = kdata_all[1::3,frame_no]
 #    kzs = kdata_all[2::3,frame_no] 
@@ -131,13 +140,13 @@ for frame_no in xrange(165,170):#min(kNUM_FRAMES,NUM_FRAMES)):
 #    ax.scatter(zs, xs, ys,c = 'green',s = 100,alpha=.4,label='M')
     ax.scatter(mpzs, mpxs, mpys,c = 'blue',s =50,alpha=.4,label='modified M Joints')
 #    ax.scatter(mpzs[4:7], mpxs[4:7], mpys[4:7],c = 'red',s =50,alpha=.4,label='modified M Joints')
-#    ax.set_xlim(-300,300)
-#    ax.set_ylim(-200,400)
-#    ax.set_zlim(50,600)
+    ax.set_xlim(-300,300)
+    ax.set_ylim(-200,400)
+    ax.set_zlim(50,600)
 
-    ax.set_ylim(-0.5,0.5)
-    ax.set_zlim(0.1,0.6)
-    ax.set_xlim(2,2.6)
+#    ax.set_ylim(-0.5,0.5)
+#    ax.set_zlim(0.1,0.6)
+#    ax.set_xlim(2,2.6)
 
     ax.set_title(frame_no)
     ax.set_xlabel('Z axis')
@@ -145,5 +154,5 @@ for frame_no in xrange(165,170):#min(kNUM_FRAMES,NUM_FRAMES)):
     ax.set_zlabel('Y axis')
     plt.legend( loc=1)
     plt.draw()
-    plt.pause(1.0/1)
+    plt.pause(1.0/10)
 

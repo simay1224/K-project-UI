@@ -49,7 +49,7 @@ import cPickle
 
 Joints = cPickle.load(file('dic.pkl','rb'))
 
-for idx in range(127,130):
+for idx in range(140,145):
     J = Joints[18:21,:].T.flatten()[:3*idx+3]
     th = 0.03
     theta_r=135
@@ -95,7 +95,7 @@ for idx in range(127,130):
 #                status=0            
 #        else:
 #            r = 1
-        r = -99
+#        r = -99
         if (n_dj_2 < th):
             r = 1
         else:
@@ -111,7 +111,7 @@ for idx in range(127,130):
                 
                 
                     
-    print  1-max(min(theta,theta_r)-theta_f,0)/(theta_r-theta_f)           
+#    print  1-max(min(theta,theta_r)-theta_f,0)/(theta_r-theta_f)           
 
 
 

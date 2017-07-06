@@ -18,7 +18,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 
-mpdata_all = cPickle.load(file('dic.pkl'))
+#mpdata_all = cPickle.load(file('dic.pkl'))
+mpdata_all = cPickle.load(file('I:/AllData_0327/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl','rb'))
+
 
 fig = plt.figure(1)
 ax = fig.add_subplot(111, projection='3d')
@@ -28,7 +30,7 @@ ax.set_xlabel('Z axis')
 ax.set_ylabel('X axis')
 ax.set_zlabel('Y axis')
     
-idx = 129
+idx = 143
 
 
 prx = mpdata_all[0::3,idx-1]
@@ -51,6 +53,8 @@ ax.scatter(prz3, prx3, pry3,c = 'black',s =50,alpha=.4,label=repr(idx-3))
 ax.scatter(prz2, prx2, pry2,c = 'green',s =50,alpha=.4,label=repr(idx-2))
 ax.scatter(prz, prx, pry,   c = 'blue' ,s =50,alpha=.4,label=repr(idx-1))
 ax.scatter(z, x, y,         c = 'red'  ,s =50,alpha=.4,label=repr(idx))
+
+
 
 
 plt.legend( loc=1)

@@ -8,7 +8,7 @@ from pykinect2 import PyKinectV2
 from pykinect2.PyKinectV2 import *
 from pykinect2 import PyKinectRuntime
 import numpy as np
-import cPickle
+import cPickle,glob,os
 import copy,pdb
 
 #kinematic segment length (unit:cm)
@@ -125,52 +125,65 @@ def rel_rate(Rb,Rk,Rt,order,flen = 2):
         return rel
     return Rel
 
+src_path = 'I:/AllData_0327/raw data/'
+dst_path = 'I:/Data_0702/unified data/reliability/'
 
+for datefolder in os.listdir(src_path):  
+    for userfolder in os.listdir(src_path+'/'+datefolder+'/pkl/'):
+        for infile in glob.glob(os.path.join(src_path+'/'+datefolder+'/pkl/'+userfolder+'/','*ex4.pkl')):
+            print infile
+            
+            Jarray  = {}
+            Rb = {}
+            Rt = {}
+            Rk = {}
+            Rel ={}
+            for ii in jord:
+                Rk[ii]=[]
+                Rt[ii]=[]
+                Rb[ii]=[]
+                Rel[ii]=[]
+            
+            Alldata = cPickle.load(file(infile,'rb'))
+            
+            for fidx in range(len(Alldata)):#138,145):#
+                Jdic = Alldata[fidx]['joints']
+                
+                for ii in jord:
+                    try : 
+                        Jarray[ii].append(np.array([Jdic[ii].Position.x,Jdic[ii].Position.y,Jdic[ii].Position.z]))
+                    except:                            
+                        Jarray[ii] = []
+                        Rb[ii] = []
+                        Jarray[ii].append(np.array([Jdic[ii].Position.x,Jdic[ii].Position.y,Jdic[ii].Position.z])) 
 
-Jarray  = {}
-Rb = {}
-Rt = {}
-Rk = {}
-
-for ii in jord:
-    Rk[ii]=[]
-    Rt[ii]=[]
-    Rb[ii]=[]
-
-
-#Alldata = cPickle.load(file('I:/AllData_0327/raw data/20161216/pkl/Andy/Andy_data12151615_ex4.pkl','rb'))
-Alldata = cPickle.load(file('D:/Project/K_project/data/Motion and Kinect raw data/20161216/pkl/Andy/Andy_data12151615_ex4.pkl','rb'))
-
-for fidx in range(125,129):#len(Alldata)):
-    Jdic = Alldata[fidx]['joints']
-    
-    for ii in jord:
-        try : 
-            Jarray[ii].append(np.array([Jdic[ii].Position.x,Jdic[ii].Position.y,Jdic[ii].Position.z]))
-        except:                            
-            Jarray[ii] = []
-            Rb[ii] = []
-            Jarray[ii].append(np.array([Jdic[ii].Position.x,Jdic[ii].Position.y,Jdic[ii].Position.z])) 
-#        if fidx == 127:
-#            pdb.set_trace()
-        Rb[ii].append(rel_behav(Jarray[ii]))
-        
-    rt = rel_trk(Jdic) 
-    rk = rel_kin(Jdic)
-    for ii,jj in enumerate(jord):    
-        Rt[jj].append(rt[ii])
-        Rk[jj].append(rk[ii])
-        
-    Rel = rel_rate(Rb,Rk,Rt,jord)
-    
-    print fidx
-    print 'Rb is :'+repr(np.round(Rb[6],2))
-    print 'Rk is :'+repr(np.round(Rk[6],2))
-    print 'Rt is :'+repr(np.round(Rt[6],2))
-    print np.round(Rel[6],2)
-    print('\n')
-
-
+                    Rb[ii].append(rel_behav(Jarray[ii]))
+                    
+                rt = rel_trk(Jdic) 
+                rk = rel_kin(Jdic)
+                for ii,jj in enumerate(jord):    
+                    Rt[jj].append(rt[ii])
+                    Rk[jj].append(rk[ii])
+                    
+                Reltmp = rel_rate(Rb,Rk,Rt,jord)
+                
+                for jj in Reltmp.keys():
+                    Rel[jj].append(Reltmp[jj]) 
+                
+            #    print fidx
+            #    print 'Rb is :'+repr(np.round(Rb[6],2))
+            #    print 'Rk is :'+repr(np.round(Rk[6],2))
+            #    print 'Rt is :'+repr(np.round(Rt[6],2))
+            #    print np.round(Rel[6],2)
+            #    print('\n')
+            
+            for jj in Rel.keys():
+                if jj == 0:
+                    Relary = Rel[jj]
+                else:
+                    Relary = np.vstack([Relary,Rel[jj]])
+            fname = dst_path+'modified_'+infile.split('\\')[1]
+            cPickle.dump(Relary,file(fname,'wb'))
 
 
 
