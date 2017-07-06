@@ -52,7 +52,7 @@ from mpl_toolkits.mplot3d import Axes3D
 #mpdata_all = cPickle.load(file('D:/Project/K_project/data/unified GPR/Andy_data201612151615_unified_ex4.pkl'))
 #data_all = cPickle.load(file('I:/AllData_0327/unified data/Unified_MData/Nata_2016-12-16 03.07.14 PM_ex_FPS30_motion_unified.pkl'))
 
-#kdata_all = cPickle.load(file('./data/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
+mpdata_all = cPickle.load(file('./data/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
 #kdata_all = cPickle.load(file('I:/AllData_0327/unified data array/GSP_test/Andy_data201612151615_unified_ex4.pkl'))
 
 #kdata_all = h5py.File('I:/AllData_0327/unified data array/GSP_test/Andy_data201612151615_unified_ex4.h5')['data'][:]
@@ -62,12 +62,12 @@ from mpl_toolkits.mplot3d import Axes3D
 #data_all = cPickle.load(file('./data/unified data array/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
 
 
-mpdata_all = cPickle.load(file('I:/AllData_0327/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
+#mpdata_all = cPickle.load(file('I:/AllData_0327/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl'))
 #data_all   = cPickle.load(file('I:/AllData_0327/unified data array/Unified_MData/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
 #mpdata_all = cPickle.load(file('dic.pkl'))
 
-#Rfile  = glob.glob(os.path.join('D:/Project/K_project/data/unified data array/reliability/','*ex4.pkl'))[0]
-rdata   = cPickle.load(file('reltest.pkl','rb'))[6,:]
+rdata  = cPickle.load(file('D:/Project/K_project/data/unified data array/reliability_mod/modified_Andy_data12151615_ex4.pkl','rb'))[6,:]
+#rdata   = cPickle.load(file('reltest.pkl','rb'))[6,:]
 Rel_th    =  0.7
 #R  = rdata[4:10 ,:954]
 #relidx = np.where(np.sum((R<Rel_th)*1,0)==0)[0] 
@@ -87,7 +87,7 @@ ax.set_xlabel('Z axis')
 ax.set_ylabel('X axis')
 ax.set_zlabel('Y axis')
     
-for frame_no in xrange(125,150):#min(kNUM_FRAMES,NUM_FRAMES)):
+for frame_no in xrange(80,250):#min(kNUM_FRAMES,NUM_FRAMES)):
     plt.cla()
     
     mpxs = mpdata_all[0::3,frame_no]

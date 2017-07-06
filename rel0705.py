@@ -125,8 +125,8 @@ def rel_rate(Rb,Rk,Rt,order,flen = 2):
         return rel
     return Rel
 
-src_path = 'I:/AllData_0327/raw data/'
-dst_path = 'I:/Data_0702/unified data/reliability/'
+src_path = 'F:/AllData_0327/raw data/'
+dst_path = 'F:/Data_0702/unified data/reliability_mod/'
 
 for datefolder in os.listdir(src_path):  
     for userfolder in os.listdir(src_path+'/'+datefolder+'/pkl/'):
@@ -182,7 +182,13 @@ for datefolder in os.listdir(src_path):
                     Relary = Rel[jj]
                 else:
                     Relary = np.vstack([Relary,Rel[jj]])
-            fname = dst_path+'modified_'+infile.split('\\')[1]
+            if infile.split('\\')[1].split('data')[1][0]=='1':
+                year = '2016'
+            else:
+                year = '2017'
+                
+            fname = dst_path+'modified_'+infile.split('\\')[1].replace('data','data'+year)
+             
             cPickle.dump(Relary,file(fname,'wb'))
 
 
