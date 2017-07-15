@@ -21,7 +21,22 @@ def rawK2ary(rawK,jidx): #kinect raw data 2 np array
             joints[j][2,i] = rawK[i]['joints'][j].Position.z  
 
     return joints  
+
+
+def rawK2ary2D(rawK,jidx): #kinect raw data 2 np array
+    #rawK : original kinect data
+    #jidx : joints index which are interested
+   
+    joints = {}
+    for i in jidx:
+        joints[i] = np.zeros([2,len(rawK)])
     
+    for i in xrange(len(rawK)):
+        for idx,j in enumerate(jidx):
+            joints[j][0,i] = rawK[i]['jointspts'][j].x
+            joints[j][1,i] = rawK[i]['jointspts'][j].y
+              
+    return joints      
 
  
 

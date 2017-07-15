@@ -15,7 +15,7 @@ from rawK2array import *
 from pykinect2 import PyKinectV2
 from pykinect2.PyKinectV2 import *
 from pykinect2 import PyKinectRuntime
-
+import numpy as np
 
 vid_src = 'Andy_data12151611.avi'
 dst_path = './data/frame/'
@@ -49,8 +49,8 @@ color['bone'] = (50,200,50)
 
 Kinfile = 'D:/Project/K_project/data/Motion and Kinect raw data/20161216/pkl/Andy/Andy_data12151615_ex4.pkl'
 Minfile = 'D:/Project/K_project/data/1216/Andy_2016-12-15 04.15.27 PM_FPS30_motion.pkl'
-Mpinfile = 'D:/Project/K_project/data/unified GPR_M2K/test/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.h5'
-
+#Mpinfile = 'D:/Project/K_project/data/unified GPR_M2K/test/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.h5'
+Mpinfile = 'D:/AllData_0327(0712)/AllData_0327/GPRresult/K2M_800/Andy_data201612151615_unified_ex4.h5'
 #Type = 'dict'
 Type = 'ary'
 
@@ -108,26 +108,47 @@ elif Type == 'ary':
 print Ccord[4]
 
 #
-FPS = 30
-Fsize = (1920,1080) #frame size
-video = cv2.VideoWriter('GPRM2K_.avi', -1, FPS, Fsize)
-
-
+#FPS = 30
+#Fsize = (1920,1080) #frame size
+#video = cv2.VideoWriter('GPRM2K_.avi', -1, FPS, Fsize)
+#
+#
+#for idx,imgfile in enumerate(glob.glob(os.path.join('../data/frame/','*.jpg'))):
+#    print idx
+#    img = cv2.imread(imgfile)
+#    for i in jidx_draw:
+#        cv2.circle(img,(int(Ccord[i][0,idx]),int(Ccord[i][1,idx])), 5, color[i], -1)
+#
+#    cv2.line(img,(int(Ccord[4][0,idx]),int(Ccord[4][1,idx])),(int(Ccord[5][0,idx]),int(Ccord[5][1,idx])),color['bone'],3) 
+#    cv2.line(img,(int(Ccord[5][0,idx]),int(Ccord[5][1,idx])),(int(Ccord[6][0,idx]),int(Ccord[6][1,idx])),color['bone'],3)
+#    cv2.line(img,(int(Ccord[9][0,idx]),int(Ccord[9][1,idx])),(int(Ccord[8][0,idx]),int(Ccord[8][1,idx])),color['bone'],3)
+#    cv2.line(img,(int(Ccord[9][0,idx]),int(Ccord[9][1,idx])),(int(Ccord[10][0,idx]),int(Ccord[10][1,idx])),color['bone'],3)
+#    
+#    video.write(img)
+#
+#del video
+ 
 for idx,imgfile in enumerate(glob.glob(os.path.join('../data/frame/','*.jpg'))):
     print idx
-    img = cv2.imread(imgfile)
+    img  = cv2.imread(imgfile)
+    imgk = cv2.imread(imgfile)
     for i in jidx_draw:
-        cv2.circle(img,(int(Ccord[i][0,idx]),int(Ccord[i][1,idx])), 5, color[i], -1)
+        cv2.circle(img ,(int(Ccord[i][0,idx]),int(Ccord[i][1,idx])), 5, 'blue', -1)
+        cv2.circle(img,(int(kdata[i][0,idx]),int(kdata[i][1,idx])), 5, 'red', -1)
 
     cv2.line(img,(int(Ccord[4][0,idx]),int(Ccord[4][1,idx])),(int(Ccord[5][0,idx]),int(Ccord[5][1,idx])),color['bone'],3) 
     cv2.line(img,(int(Ccord[5][0,idx]),int(Ccord[5][1,idx])),(int(Ccord[6][0,idx]),int(Ccord[6][1,idx])),color['bone'],3)
     cv2.line(img,(int(Ccord[9][0,idx]),int(Ccord[9][1,idx])),(int(Ccord[8][0,idx]),int(Ccord[8][1,idx])),color['bone'],3)
     cv2.line(img,(int(Ccord[9][0,idx]),int(Ccord[9][1,idx])),(int(Ccord[10][0,idx]),int(Ccord[10][1,idx])),color['bone'],3)
+
     
     video.write(img)
 
-del video
-    
+
+
+
+
+   
 #cv2.namedWindow("image", cv2.WINDOW_NORMAL)
 #cv2.imshow('image',img)
 #
