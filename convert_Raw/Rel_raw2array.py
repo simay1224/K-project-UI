@@ -125,12 +125,13 @@ def rel_rate(Rb,Rk,Rt,order,flen = 2):
         return rel
     return Rel
 
-src_path = 'F:/AllData_0327/raw data/'
-dst_path = 'F:/Data_0702/unified data/reliability_mod/'
+src_path = 'F:/AllData_0327/Motion and Kinect raw data/'
+dst_path = 'F:/AllData_0327/unified data/reliability_mod/'
+exeno    = 'ex3'
 
 for datefolder in os.listdir(src_path):  
     for userfolder in os.listdir(src_path+'/'+datefolder+'/pkl/'):
-        for infile in glob.glob(os.path.join(src_path+'/'+datefolder+'/pkl/'+userfolder+'/','*ex4.pkl')):
+        for infile in glob.glob(os.path.join(src_path+'/'+datefolder+'/pkl/'+userfolder+'/','*'+exeno+'.pkl')):
             print infile
             
             Jarray  = {}
@@ -187,7 +188,7 @@ for datefolder in os.listdir(src_path):
             else:
                 year = '2017'
                 
-            fname = dst_path+'modified_'+infile.split('\\')[1].replace('data','data'+year)
+            fname = dst_path+exeno+'/modified_'+infile.split('\\')[1].replace('data','data'+year)
              
             cPickle.dump(Relary,file(fname,'wb'))
 

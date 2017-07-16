@@ -22,8 +22,8 @@ key_list_25 = ['LShoulder_1','RUArm_2','LShoulder_2',
             'RHand_3', 'RHand_2']
 
 # Raw data set up            
-src_path = 'I:/AllData_0327/raw data/20170306/MoCam/30/'
-dst_path = 'I:/Data_0702/unified data/MData/'
+src_path = 'F:/AllData_0327/Motion and Kinect raw data/20161216/MoCam/30/'
+dst_path = 'F:/Data_0702/Not_unified_MData/'
 
 #src_path = 'D:/Project/K_project/data/Motion and Kinect raw data/20161216/MoCam/30/'
 #dst_path = 'D:/Project/K_project/data/1216/'
@@ -111,7 +111,8 @@ for subfolder in os.listdir(src_path):
         data = {}
         Bpidx = {} # Body part index
         
-        fname = dst_path + subfolder.split('_')[0]+'_'+ infile.split('\\')[-1][5:-4] + dst_fps + 'motion.pkl' 
+        exfolder = 'ex'+infile[-5]+'/'
+        fname = dst_path +exfolder +subfolder.split('_')[0]+'_'+ infile.split('\\')[-1][5:-4] + dst_fps + 'motion.pkl' 
 
                 
         f =  open(infile, 'r')
@@ -150,7 +151,7 @@ for subfolder in os.listdir(src_path):
                         else:
                             print row[Bpidx[i][2]]
             
-        
+        pdb.set_trace()
         dkey = data.keys()
         # generate key dictionary
         key_dict = findKeys(dkey,key_list_25)
@@ -202,25 +203,28 @@ for subfolder in os.listdir(src_path):
 #======================== unified the Mcam data ========================
         
 
+#
+#
+#filelist = glob.glob(os.path.join(uni_src_path, '*.pkl'))
+#
+#
+#
+#for infile in filelist:
+#    print infile   
+#    data = cPickle.load(file(infile,'r'))
+#    pos_Kinect = Mocam2Kinect(data)
+#    Pos_Unified = human_mod(pos_Kinect)
+#    subfolder = infile.split('_FPS')[0][-3:]
+#    
+#    if 'FPS30' in infile:
+#        fname = uni_dst_path30+subfolder+'/'+infile.split('\\')[-1][:-4]+ '_unified.pkl'
+#    else:
+#        fname = uni_dst_path120+subfolder+'/'+infile.split('\\')[-1][:-4]+ '_unified.pkl'
+#        
+#    cPickle.dump(Pos_Unified,file(fname,'wb'))
 
 
-filelist = glob.glob(os.path.join(uni_src_path, '*.pkl'))
 
-
-
-for infile in filelist:
-    print infile   
-    data = cPickle.load(file(infile,'r'))
-    pos_Kinect = Mocam2Kinect(data)
-    Pos_Unified = human_mod(pos_Kinect)
-    subfolder = infile.split('_FPS')[0][-3:]
-    
-    if 'FPS30' in infile:
-        fname = uni_dst_path30+subfolder+'/'+infile.split('\\')[-1][:-4]+ '_unified.pkl'
-    else:
-        fname = uni_dst_path120+subfolder+'/'+infile.split('\\')[-1][:-4]+ '_unified.pkl'
-        
-    cPickle.dump(Pos_Unified,file(fname,'wb'))
 
 
 

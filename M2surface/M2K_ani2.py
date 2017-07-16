@@ -17,13 +17,19 @@ from pykinect2.PyKinectV2 import *
 from pykinect2 import PyKinectRuntime
 import numpy as np
 
-vid_src  = 'E:/avi/Angela.lnk_Angela_data0306090752_ex4.avi'
+vid_src  = 'F:/avi/Angela_data20170306090752_ex4.avi'
 name    = 'Angela_data0306090752_ex4'
-dst_path = 'E:/frame/'+name+'/'
+dst_path = 'F:/frame/'+name+'/'
 
-Kinfile  = 'D:/Project/K_project/data/Motion and Kinect raw data/20170306/pkl/Angela/Angela_data0306090752_ex4.pkl'
-Minfile  = 'D:/Project/K_project/data/1216/Andy_2016-12-15 04.15.27 PM_FPS30_motion.pkl'
-Mpinfile = 'D:/AllData_0327(0712)/AllData_0327/GPRresult/K2M_800/Andy_data201612151615_unified_ex4.h5'
+#src_path = 'D:/Project/K_project/data/'
+src_path = 'F:/AllData_0327/' 
+
+#raw kinect data
+Kinfile   =  src_path + 'Motion and Kinect raw data/20170306/pkl/Angela/Angela_data0306090752_ex4.pkl'
+#not unified Motion camera data
+Minfile   = src_path + 'Not_unified_MData/ex4/Angela_2017-03-06 09.09.00 AM_ex4_FPS30_motion.pkl' 
+# filtered data
+Mpinfile  = src_path +'GPRresult/K2M_800/Angela_data20170306090752_unified_ex4.h5'
 
 
 if not os.path.exists(dst_path):
@@ -120,7 +126,10 @@ print Ccord[4]
 #del video
 
 
-
+FPS = 30
+Fsize = (960,540) #frame size
+fourcc = cv2.cv.FOURCC('X','V','I','D')
+video = cv2.VideoWriter(dst_path +name+'.avi', fourcc, FPS, Fsize)
 
 vid      = cv2.VideoCapture(vid_src)
 
@@ -134,27 +143,33 @@ while idx<Len:
         cv2.circle(img ,(int(Ccord[i][0,idx]),int(Ccord[i][1,idx])), 5, (0,0,255), -1)
         cv2.circle(img ,(int(kdata2D[i][0,idx]),int(kdata2D[i][1,idx])), 5, (0,255,0), -1)
 
-    cv2.line(img,(int(Ccord[4][0,idx]),int(Ccord[4][1,idx])),(int(Ccord[5][0,idx]) ,int(Ccord[5][1,idx])) ,(0,0,255),3) 
-    cv2.line(img,(int(Ccord[5][0,idx]),int(Ccord[5][1,idx])),(int(Ccord[6][0,idx]) ,int(Ccord[6][1,idx])) ,(0,0,255),3)
-    cv2.line(img,(int(Ccord[9][0,idx]),int(Ccord[9][1,idx])),(int(Ccord[8][0,idx]) ,int(Ccord[8][1,idx])) ,(0,0,255),3)
-    cv2.line(img,(int(Ccord[9][0,idx]),int(Ccord[9][1,idx])),(int(Ccord[10][0,idx]),int(Ccord[10][1,idx])),(0,0,255),3)
+
 
     cv2.line(img,(int(kdata2D[4][0,idx]),int(kdata2D[4][1,idx])),(int(kdata2D[5][0,idx]) ,int(kdata2D[5][1,idx])) ,(0,255,0),3) 
     cv2.line(img,(int(kdata2D[5][0,idx]),int(kdata2D[5][1,idx])),(int(kdata2D[6][0,idx]) ,int(kdata2D[6][1,idx])) ,(0,255,0),3)
     cv2.line(img,(int(kdata2D[9][0,idx]),int(kdata2D[9][1,idx])),(int(kdata2D[8][0,idx]) ,int(kdata2D[8][1,idx])) ,(0,255,0),3)
     cv2.line(img,(int(kdata2D[9][0,idx]),int(kdata2D[9][1,idx])),(int(kdata2D[10][0,idx]),int(kdata2D[10][1,idx])),(0,255,0),3)
 
+    cv2.line(img,(int(Ccord[4][0,idx]),int(Ccord[4][1,idx])),(int(Ccord[5][0,idx]) ,int(Ccord[5][1,idx])) ,(0,0,255),3) 
+    cv2.line(img,(int(Ccord[5][0,idx]),int(Ccord[5][1,idx])),(int(Ccord[6][0,idx]) ,int(Ccord[6][1,idx])) ,(0,0,255),3)
+    cv2.line(img,(int(Ccord[9][0,idx]),int(Ccord[9][1,idx])),(int(Ccord[8][0,idx]) ,int(Ccord[8][1,idx])) ,(0,0,255),3)
+    cv2.line(img,(int(Ccord[9][0,idx]),int(Ccord[9][1,idx])),(int(Ccord[10][0,idx]),int(Ccord[10][1,idx])),(0,0,255),3)
   
     fname =dst_path + name+'_'+repr(idx).zfill(4)+'.jpg'
 
+    img = cv2.resize(img, (0,0), fx=0.5, fy=0.5)
     cv2.imwrite(fname,img)
     
+    video.write(img)
     idx +=1
     
 vid.release()
-    
+del video    
 
 
+data = {}
+data['K'] = kdata2D
+data['G'] = Ccord
 
 
 
