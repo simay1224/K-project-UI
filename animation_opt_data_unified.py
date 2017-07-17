@@ -40,15 +40,15 @@ from mpl_toolkits.mplot3d import Axes3D
 # Motion capture
 ###########################
 
-mdata_all  = cPickle.load(file('F:/AllData_0327/unified data array/Unified_MData/ex4/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
-
-
-
+#mdata_all  = cPickle.load(file('F:/AllData_0327/unified data array/Unified_MData/ex4/Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'))
+#
+#
+#
 kdata_all  = cPickle.load(file('F:/AllData_0327/unified data array/Unified_KData/ex4/Andy_data201612151615_unified_ex4.pkl'))
 
 
 
-
+mdata_all  = cPickle.load(file('Mdata.pkl'))
 
 
 
@@ -74,7 +74,7 @@ ax = fig.add_subplot(111, projection='3d')
 
 
     
-for frame_no in xrange(249,250):#min(kNUM_FRAMES,NUM_FRAMES)):
+for frame_no in xrange(100,200):#min(kNUM_FRAMES,NUM_FRAMES)):
     plt.cla()
     
 
@@ -86,9 +86,9 @@ for frame_no in xrange(249,250):#min(kNUM_FRAMES,NUM_FRAMES)):
 #        ax.scatter(rz, rx, ry,c = 'red',s =100,alpha=.8,label='err')
         
         
-    kxs = kdata_all[0::3,frame_no]
-    kys = kdata_all[1::3,frame_no]
-    kzs = kdata_all[2::3,frame_no] 
+#    kxs = kdata_all[0::3,frame_no]
+#    kys = kdata_all[1::3,frame_no]
+#    kzs = kdata_all[2::3,frame_no] 
     
     mxs = mdata_all[0::3,frame_no]
     mys = mdata_all[1::3,frame_no]
@@ -122,17 +122,17 @@ for frame_no in xrange(249,250):#min(kNUM_FRAMES,NUM_FRAMES)):
 #        
 
 
-    ax.scatter(kzs, kxs, kys, c = 'red', s = 30,label='K')    
-#    ax.scatter(mzs, mxs, mys,c = 'green',s = 100,alpha=.4,label='M')
+#    ax.scatter(kzs, kxs, kys, c = 'red', s = 30,label='K')    
+    ax.scatter(mzs, mxs, mys,c = 'green',s = 100,alpha=.4,label='M')
 #    ax.scatter(mpzs, mpxs, mpys,c = 'blue',s =50,alpha=.4,label='modified M Joints')
 #    ax.scatter(mpzs[4:7], mpxs[4:7], mpys[4:7],c = 'red',s =50,alpha=.4,label='modified M Joints')
 #    ax.set_xlim(-300,300)
 #    ax.set_ylim(-200,400)
 #    ax.set_zlim(50,600)
 
-#    ax.set_ylim(-0.5,0.5)
-#    ax.set_zlim(0.1,0.6)
-#    ax.set_xlim(2,2.6)
+    ax.set_ylim(-0.5,0.5)
+    ax.set_zlim(-0.5,0.5)
+    ax.set_xlim(1.6,2.6)
 
     ax.set_title(frame_no)
     ax.set_xlabel('Z axis')

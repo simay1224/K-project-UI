@@ -103,6 +103,7 @@ for kidx in Mkeys:
     
     
     
+
     
     
 
@@ -114,12 +115,21 @@ for kidx in [0,1,2,3,4,5,6,8,9,10,12,16,20]:
     Kx.append(kdata_all[kidx].Position.x)
     Ky.append(kdata_all[kidx].Position.y)
     Kz.append(kdata_all[kidx].Position.z)
+    
+    
+yoft = My[RShoulder_1] - Ky[SpineShoulder]  
+zoft = Mz[Head_1]  - Kz[Head] 
+
+
+My = [i-yoft for i in My]
+Mz = [i-zoft for i in Mz]
+    
 
 fig = plt.figure(1)
 ax = fig.add_subplot(111, projection='3d')
 
 
-ax.scatter(Kz, Kx, Ky, c = 'green', s = 30,label='Kinct raw data')    
+ax.scatter(Kz, Kx, Ky, c = 'green', s = 30,label='Kinect raw data')    
 
 ax.plot([Kz[SpineBase]    ,Kz[HipLeft]]     ,[Kx[SpineBase]    ,Kx[HipLeft]]     ,[Ky[SpineBase]    ,Ky[HipLeft]]     , c = 'green')
 ax.plot([Kz[SpineBase]    ,Kz[HipRight]]    ,[Kx[SpineBase]    ,Kx[HipRight]]    ,[Ky[SpineBase]    ,Ky[HipRight]]    , c = 'green')

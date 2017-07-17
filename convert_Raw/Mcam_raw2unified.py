@@ -22,10 +22,10 @@ key_list_25 = ['LShoulder_1','RUArm_2','LShoulder_2',
             'RHand_3', 'RHand_2']
 
 # Raw data set up            
-src_path = 'F:/AllData_0327/Motion and Kinect raw data/20161216/MoCam/30/'
+src_path = 'F:/AllData_0327/Motion and Kinect raw data/20170306/MoCam/30/'
 dst_path = 'F:/Data_0702/Not_unified_MData/'
 
-#src_path = 'D:/Project/K_project/data/Motion and Kinect raw data/20161216/MoCam/30/'
+#src_path = 'D:/Project/K_project/data/Motion and Kinect raw data/20170224/MoCam/30/'
 #dst_path = 'D:/Project/K_project/data/1216/'
 
 
@@ -151,7 +151,7 @@ for subfolder in os.listdir(src_path):
                         else:
                             print row[Bpidx[i][2]]
             
-        pdb.set_trace()
+#        pdb.set_trace()
         dkey = data.keys()
         # generate key dictionary
         key_dict = findKeys(dkey,key_list_25)
