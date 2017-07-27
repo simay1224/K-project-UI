@@ -94,10 +94,6 @@ def pos_est(fidx,Kv,Ka,Kdata):
           
 relidx = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0]   # frames which have unreliable  joints      
 relidx2 = np.where(np.sum((Rdata<Rel_th)*1,0)!=0)[0] 
-
-
- 
-
         
 for frame_idx in  relidx:
     Y   = np.vstack([Kdata[:,:,frame_idx-1],Kdata[:,:,frame_idx]])
