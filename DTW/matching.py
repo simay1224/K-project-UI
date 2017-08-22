@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 gt_src   = 'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'
 test_src = 'Angela_2017-03-06 09.09.00 AM_ex4_FPS30_motion_unified.pkl'
-
+#test_src = 'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'
 #gt_data      = cPickle.load(open(gt_src ,'rb') ,encoding = 'latin1')[18:,30:].T
 #test_data    = cPickle.load(open(test_src,'rb') ,encoding = 'latin1')[18:,30:].T
 
@@ -24,15 +24,10 @@ test_data    = cPickle.load(file(test_src,'rb'))[12:,:].T
 # === initialization ===
 e                   = 20
 delta               = 6
-distance_global     = []
-distance_global_P   = []
+
 distlist            = []
 distplist           = []
-count_global        = 0
-dist_cnt            = 0
-count_IO            = False
-break_IO            = False
-#dist_prev           = np.inf
+
 seglist             =[]
 gtseglist           =[]
 # === data segment ===
@@ -69,14 +64,14 @@ for gt_idx in range(len(idx)-1):
 
 
         print j
-        print dist
-        print dist_p
-        print np.abs(dist_p-dist)/dist
+#        print dist
+#        print dist_p
+#        print np.abs(dist_p-dist)/dist
         
         distlist.append(dist)
         distplist.append(dist_p) 
         
-        if j != (test_idx+1): 
+        if j > (test_idx+30): 
             print dist_p-distp_prev
             if chk_flag:  # in check global min status
                 cnt +=1
@@ -86,19 +81,20 @@ for gt_idx in range(len(idx)-1):
 #                    pdb.set_trace()
                     print('err mean')
                     print(Err_mean)
-                    if Err_mean <0.6:
+                    if Err_mean <1:
                         chk_flag = False
                         seglist.append([test_idx,j-20])
                         gtseglist.append([idx[gt_idx],idx[gt_idx+1]])
                         test_idx = j-20+1
-                        
+                    
                         break
                         
                     else:
                         print('Ooops!!')
-                    
-            else:    
-                if (dist_p-distp_prev)>50:   # turning point
+#                    
+            else:  
+                print dist_p-distp_prev
+                if (dist_p-distp_prev)>20:   # turning point
                     print (' ==============  turning ====================')
 
                     chk_flag = True
@@ -108,7 +104,15 @@ for gt_idx in range(len(idx)-1):
         dist_prev  = dist
         distp_prev = dist_p 
         print ('===========\n')
-    
+    fig = plt.figure()
+    plt.plot(test_data[:j-20,6]-500,color = 'red')
+    plt.plot(gt_data[idx[0]:idx[gt_idx+1],6], color = 'blue')
+    plt.plot(idx,np.zeros(len(idx)),'.m')
+        
+#    plt.show()
+    fig.savefig(str(gt_idx).zfill(2)+'.jpg')
+    plt.close(fig)
+        
 
 
 
