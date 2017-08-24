@@ -65,13 +65,13 @@ Test_ex       = np.concatenate((Test_ex_WL,Test_ex_WR),axis=1)
 ##=================== clip data =============================================#
 GT_ex_clip = scipy.ndimage.filters.gaussian_filter1d(GT_ex.T,sigma=11).T
 
-#th           = 5
-#k            = curvature_3D(GT_ex_clip)
-#k[k<1]       = 0
-#k[k>1]       = 10
-#id_clip      = np.where(k==10)[0]
-#id_clip = id_clip[np.abs(id_clip-np.roll(id_clip,1))>th]
-#id_clip = np.hstack((0,id_clip))
+th           = 5
+k            = curvature_3D(GT_ex_clip)
+k[k<1]       = 0
+k[k>1]       = 10
+id_clip      = np.where(k==10)[0]
+id_clip = id_clip[np.abs(id_clip-np.roll(id_clip,1))>th]
+id_clip = np.hstack((0,id_clip))
 id_clip = np.array([23,88,175,279,377,477,579,682,789,875,939,962])
 
 ##GT_ex               = GT_ex[0:100,:]
