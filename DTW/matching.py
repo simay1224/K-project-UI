@@ -11,6 +11,7 @@ from scipy.spatial.distance import euclidean
 import scipy.signal as signal
 from fastdtw import fastdtw
 import matplotlib.pyplot as plt
+from scipy.ndimage.filters import gaussian_filter1d as gf
 
 gt_src   = 'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'
 test_src = 'Angela_2017-03-06 09.09.00 AM_ex4_FPS30_motion_unified.pkl'
@@ -39,9 +40,33 @@ grad  = gt_data[:,6]-np.roll(gt_data[:,6],-1)
 gidx  = np.arange(gt_data.shape[0])[np.abs(grad)<th]
 #gidx  = np.append(np.append([0],gidx),[gt_data.shape[0]-1])
 sidx  = gidx[np.abs(gidx-np.roll(gidx,1))>th]
-eidx  = gidx[np.abs(gidx-np.roll(gidx,-1))>th]
-idx   = list((sidx+eidx)//2) + [len(gt_data)]
- 
+#eidx  = gidx[np.abs(gidx-np.roll(gidx,-1))>th]
+#idx   = list((sidx+eidx)//2) + [len(gt_data)]
+idx   =  list(sidx)+[len(gt_data)-1]
+
+# === data segment ===
+
+#data  = gf(gt_data[:,6],11)
+#
+#grad  = np.gradient(data)
+#grad2 = np.gradient(grad)
+#
+#curv  = abs(grad2)/(abs(1+grad**2))**1.5 
+
+
+#datax  = gf(gt_data[:,6],7)
+#datay  = gf(gt_data[:,7],7)
+#dataz  = gf(gt_data[:,8],7)
+#gradx  = np.gradient(datax)
+#gradx2 = np.gradient(gradx)
+#grady  = np.gradient(datay)
+#grady2 = np.gradient(grady)
+#gradz  = np.gradient(dataz)
+#gradz2 = np.gradient(gradz)
+#
+#curv  = (((gradz2*grady-grady2*gradz)**2+\
+#          (gradx2*gradz-gradz2*gradx)**2+\
+#          (grady2*gradx-gradx2*grady)**2)**0.5)/(gradx**2+grady**2+gradz**2)**1.5
 
 # === main function ===
 
@@ -83,10 +108,17 @@ for gt_idx in range(len(idx)-1):
                     print(Err_mean)
                     if Err_mean <1:
                         chk_flag = False
-                        seglist.append([test_idx,j-20])
+#                        pdb.set_trace()
+                        pidx  = np.argmin(distplist)
+                        grad2 = np.gradient(np.gradient(distplist))
+                        gidx  = np.where(grad2 <2)[0]
+                        endidx = gidx[gidx>pidx][0]+test_idx
+                        
+                        seglist.append([test_idx,endidx])
                         gtseglist.append([idx[gt_idx],idx[gt_idx+1]])
-                        test_idx = j-20+1
-                    
+                        test_idx = endidx+1
+                        distlist = []
+                        distplist = []
                         break
                         
                     else:
@@ -104,17 +136,27 @@ for gt_idx in range(len(idx)-1):
         dist_prev  = dist
         distp_prev = dist_p 
         print ('===========\n')
-    fig = plt.figure()
+    fig = plt.figure(1)
     plt.plot(test_data[:j-20,6]-500,color = 'red')
     plt.plot(gt_data[idx[0]:idx[gt_idx+1],6], color = 'blue')
-    plt.plot(idx,np.zeros(len(idx)),'.m')
+    plt.title('matching')
+    plt.plot(idx,[-10]*len(idx),'.m')
         
 #    plt.show()
     fig.savefig(str(gt_idx).zfill(2)+'.jpg')
     plt.close(fig)
         
+    fig = plt.figure(2)
+    plt.plot(distplist,color = 'red')
+    plt.title('dist')
+#    plt.show()
 
+    fig = plt.figure(3)
+    plt.plot(np.gradient(distplist),color = 'green')
+    plt.title('dist grad')
 
-
-
-
+    fig = plt.figure(4)
+    plt.plot(np.gradient(np.gradient(distplist)),color = 'green')
+    plt.title('dist grad 2')    
+    
+    plt.show()
