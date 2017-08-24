@@ -33,16 +33,25 @@ seglist             =[]
 gtseglist           =[]
 # === data segment ===
 
-th                  = 3
+#th                  = 3
+#
+#
+#grad  = gt_data[:,6]-np.roll(gt_data[:,6],-1)
+#gidx  = np.arange(gt_data.shape[0])[np.abs(grad)<th]
+##gidx  = np.append(np.append([0],gidx),[gt_data.shape[0]-1])
+#sidx  = gidx[np.abs(gidx-np.roll(gidx,1))>th]
+##eidx  = gidx[np.abs(gidx-np.roll(gidx,-1))>th]
+##idx   = list((sidx+eidx)//2) + [len(gt_data)]
+#idx   =  list(sidx)+[len(gt_data)-1]
 
 
-grad  = gt_data[:,6]-np.roll(gt_data[:,6],-1)
-gidx  = np.arange(gt_data.shape[0])[np.abs(grad)<th]
-#gidx  = np.append(np.append([0],gidx),[gt_data.shape[0]-1])
-sidx  = gidx[np.abs(gidx-np.roll(gidx,1))>th]
-#eidx  = gidx[np.abs(gidx-np.roll(gidx,-1))>th]
-#idx   = list((sidx+eidx)//2) + [len(gt_data)]
-idx   =  list(sidx)+[len(gt_data)-1]
+datax  = gf(gt_data[:,6],7)
+dx     = np.gradient(datax)
+idx = np.where(((dx > -0.1) & (dx<0.2))==True)[0]
+tmp = np.roll(idx,1)-idx
+idx = idx[np.where(abs(tmp)>20)[0]]
+
+
 
 # === data segment ===
 
@@ -52,8 +61,8 @@ idx   =  list(sidx)+[len(gt_data)-1]
 #grad2 = np.gradient(grad)
 #
 #curv  = abs(grad2)/(abs(1+grad**2))**1.5 
-
-
+#
+#
 #datax  = gf(gt_data[:,6],7)
 #datay  = gf(gt_data[:,7],7)
 #dataz  = gf(gt_data[:,8],7)
@@ -67,7 +76,11 @@ idx   =  list(sidx)+[len(gt_data)-1]
 #curv  = (((gradz2*grady-grady2*gradz)**2+\
 #          (gradx2*gradz-gradz2*gradx)**2+\
 #          (grady2*gradx-gradx2*grady)**2)**0.5)/(gradx**2+grady**2+gradz**2)**1.5
+#
+#id_clip      = np.where(curv >1)[0]
+#idx = id_clip[np.abs(id_clip-np.roll(id_clip,1))>10]
 
+          
 # === main function ===
 
 
@@ -137,7 +150,9 @@ for gt_idx in range(len(idx)-1):
         distp_prev = dist_p 
         print ('===========\n')
     fig = plt.figure(1)
-    plt.plot(test_data[:j-20,6]-500,color = 'red')
+    plt.plot(test_data[:endidx,6]-500,color = 'red')
+#    plt.plot(np.arange(57,endidx),test_data[57:endidx,6]-500,color = 'red')
+#    plt.plot(np.arange(idx[1],idx[2]),gt_data[idx[1]:idx[2],6], color = 'blue')
     plt.plot(gt_data[idx[0]:idx[gt_idx+1],6], color = 'blue')
     plt.title('matching')
     plt.plot(idx,[-10]*len(idx),'.m')
@@ -145,18 +160,40 @@ for gt_idx in range(len(idx)-1):
 #    plt.show()
     fig.savefig(str(gt_idx).zfill(2)+'.jpg')
     plt.close(fig)
+
+
+
+
         
-    fig = plt.figure(2)
-    plt.plot(distplist,color = 'red')
-    plt.title('dist')
+#    fig = plt.figure(2)
+#    plt.plot(np.arange(len(distplist))+57,distplist,color = 'red')
+#    plt.title('dist')
+##    plt.show()
+#
+#    fig = plt.figure(3)
+#    plt.plot(np.arange(len(distplist))+57,np.gradient(distplist),color = 'green')
+#    plt.title('dist grad')
+#
+#    fig = plt.figure(4)
+#    plt.plot(np.arange(len(distplist))+57,np.gradient(np.gradient(distplist)),color = 'green')
+#    plt.title('dist grad 2')    
+#    
 #    plt.show()
 
-    fig = plt.figure(3)
-    plt.plot(np.gradient(distplist),color = 'green')
-    plt.title('dist grad')
 
-    fig = plt.figure(4)
-    plt.plot(np.gradient(np.gradient(distplist)),color = 'green')
-    plt.title('dist grad 2')    
-    
-    plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
