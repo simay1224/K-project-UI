@@ -64,7 +64,7 @@ ztmp = np.roll(zidx,1)-zidx
 grad = (dx**2+dy**2+dz**2)**0.5
 
 minm = argrelextrema(grad, np.less)[0]
-
+idx  = np.append([0],minm)
 #plt.plot(dy,color='blue')
 #plt.plot(dz,color='green')
 #plt.plot(dx,color='red')
