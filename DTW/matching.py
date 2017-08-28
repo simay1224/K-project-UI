@@ -8,10 +8,10 @@ Created on Mon Aug 21 14:21:52 2017
 import cPickle,pdb
 import numpy as np
 from scipy.spatial.distance import euclidean
-import scipy.signal as signal
 from fastdtw import fastdtw
 import matplotlib.pyplot as plt
 from scipy.ndimage.filters import gaussian_filter1d as gf
+#from __future__ import print_function
 
 gt_src   = 'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'
 test_src = 'Angela_2017-03-06 09.09.00 AM_ex4_FPS30_motion_unified.pkl'
@@ -63,16 +63,16 @@ ztmp = np.roll(zidx,1)-zidx
 
 grad = (dx**2+dy**2+dz**2)**0.5
 
-minm = argrelextrema(grad, np.less)[0]
+minm = argrelextrema(grad, np.less,order = 3)[0]
 idx  = np.append([0],minm)
 #plt.plot(dy,color='blue')
 #plt.plot(dz,color='green')
 #plt.plot(dx,color='red')
-plt.plot(gt_data[:,6]/10,color='red')
-plt.plot(grad,color='black')
-plt.plot(minm,grad[minm],'o')
-
-plt.show()
+#plt.plot(gt_data[:,6]/10,color='red')
+#plt.plot(grad,color='black')
+#plt.plot(minm,grad[minm],'o')
+#
+#plt.show()
 
 #idx = xidx[np.where(abs(xtmp)>20)[0]]
 
@@ -109,98 +109,143 @@ plt.show()
 # === main function ===
 
 
-cnt = 0
-test_idx   = 0
-chk_flag   = False
-err        = []
-dist_prev  = 0
-distp_prev = 0 
+cnt         = 0
+dcnt        = 0      # decreasing cnt
+test_idx    = 268
+offset      = test_idx 
+chk_flag    = False
+deflag      = False  # decreasing flag
+err         = []
+dist_prev   = 0
+distp_prev  = 0 
 
+distp_cmp  = np.inf
 
-for gt_idx in range(len(idx)-1):
+for gt_idx in range(3,4):#len(idx)-1):
     test_data_p  = test_data + np.atleast_2d((gt_data[idx[gt_idx],6]-test_data[test_idx,6]))
-    distlist = []
+    distlist  = []
     distplist = []
-    for j in  range(test_idx+1,test_data.shape[0]-1):
+    gdist     = [0,0]
+    gdistp    = [0,0]
+    
+#    dcnt        = 0 
+#    deflag      = False
+    
+    for j in  range(test_idx+1,450):#test_data.shape[0]-1):
         dist  , path   = fastdtw(gt_data[idx[gt_idx]:idx[gt_idx+1],6], test_data[test_idx:j,6]  , dist=euclidean)
         dist_p, path_p = fastdtw(gt_data[idx[gt_idx]:idx[gt_idx+1],6], test_data_p[test_idx:j,6], dist=euclidean)
 
 
         print j
-#        print dist
-#        print dist_p
-#        print np.abs(dist_p-dist)/dist
+        
         
         distlist.append(dist)
-        distplist.append(dist_p) 
-        
-        if j > (test_idx+30): 
-            print dist_p-distp_prev
-            if chk_flag:  # in check global min status
-                cnt +=1
-                err.append(np.abs(dist_p-dist)/dist) 
-                if cnt == 20:
-                    Err_mean = np.mean(err)
-#                    pdb.set_trace()
-                    print('err mean')
-                    print(Err_mean)
-                    if Err_mean <1:
-                        chk_flag = False
-#                        pdb.set_trace()
-                        pidx  = np.argmin(distplist)
-                        grad2 = np.gradient(np.gradient(distplist))
-                        gidx  = np.where(grad2 <2)[0]
-                        endidx = gidx[gidx>pidx][0]+test_idx
-                        
-                        seglist.append([test_idx,endidx])
-                        gtseglist.append([idx[gt_idx],idx[gt_idx+1]])
-                        test_idx = endidx+1
-                        distlist = []
-                        distplist = []
-                        break
-                        
-                    else:
-                        print('Ooops!!')
+        distplist.append(dist_p)
+#        if len(distlist)>1:
+#            gdist  = np.gradient(distlist)
+#            gdistp = np.gradient(distplist)
+#        
+##        if (j > test_idx+2) & (not deflag):
+##            if (distlist[-1]-distlist[-2]) <= 0:
+##                dcnt +=1
+##            else:
+##                dcnt = 0
+##                
+##
+##            if dcnt == 10:
+##                deflag = True
+#        
+#        
+#        if 1:#deflag : 
+#            if chk_flag:  # in check global min status
+#                cnt +=1
+#                err.append(np.abs(dist_p-dist)/dist) 
+#                
+#                if dist_p < distp_cmp : # find another small value
+#                    cnt = 0
+#                    err = []
+#                    print(' ==== reset ====')
 #                    
-            else:  
-                print dist_p-distp_prev
-                if (dist_p-distp_prev)>20:   # turning point
-                    print (' ==============  turning ====================')
-
-                    chk_flag = True
-                    err      = []
-                    cnt      = 0
-                    
-        dist_prev  = dist
-        distp_prev = dist_p 
-        print ('===========\n')
-    fig = plt.figure(1)
-    plt.plot(test_data[:endidx,6]-500,color = 'red')
-#    plt.plot(np.arange(57,endidx),test_data[57:endidx,6]-500,color = 'red')
-#    plt.plot(np.arange(idx[1],idx[2]),gt_data[idx[1]:idx[2],6], color = 'blue')
-    plt.plot(gt_data[idx[0]:idx[gt_idx+1],6], color = 'blue')
-    plt.title('matching')
-    plt.plot(idx,[-10]*len(idx),'.m')
-        
-#    plt.show()
-    fig.savefig(str(gt_idx).zfill(2)+'.jpg')
-    plt.close(fig)
-
-
-
-
-        
-#    fig = plt.figure(2)
-#    plt.plot(np.arange(len(distplist))+57,distplist,color = 'red')
-#    plt.title('dist')
+#                elif cnt == 20:
+#                    Err_mean = np.mean(err)
+##                    pdb.set_trace()
+#                    print('err mean')
+#                    print(Err_mean)
+#                    if Err_mean <2:
+#                        chk_flag = False
+##                        pdb.set_trace()
+#                        pidx  = np.argmin(distplist)
+#                        grad2 = np.gradient(np.gradient(distplist))
+#                        gidx  = np.where(grad2 <2)[0]
+#                        endidx = gidx[gidx>pidx][0]+test_idx
+##                        endidx = pidx+test_idx
+#                        seglist.append([test_idx,endidx])
+#                        gtseglist.append([idx[gt_idx],idx[gt_idx+1]])
+#                        test_idx = endidx+1
+#                        cnt      = 0
+#                        break
+#                        
+#                    else:
+#                        print('Ooops!!')
+##                    
+#            else:  
+#                print dist_p-distp_prev
+#                
+##                if (((dist_p-distp_prev)>2) &  ((distp_prev-distp_prev2)<0)):  # turning point
+##                if (dist_p-distp_prev)>2:
+#                if (gdistp[-2]<0)&(gdistp[-1]>0):
+#                    print (' ==============  large ====================')
+#                    pdb.set_trace()
+#                    distp_cmp = distp_prev
+#                    idx_cmp   = j
+#                    chk_flag = True
+#                    err      = []
+#                    
+#
+#        dist_prev   = dist
+#        distp_prev  = dist_p 
+#        
+#        print ('===========\n')
+#     
+##    pdb.set_trace()    
+#    if cnt > 0:
+#       seglist.append([test_idx,idx_cmp]) 
+#       gtseglist.append([idx[gt_idx],idx[gt_idx+1]]) 
+#       endidx =  idx_cmp
+       
+    
+#    fig = plt.figure(1)
+#    plt.plot(test_data[:endidx,6]-500,color = 'red')
+##    plt.plot(np.arange(675,endidx),test_data[675:endidx,6]-500,color = 'red')
+##    plt.plot(np.arange(idx[1],idx[2]),gt_data[idx[1]:idx[2],6], color = 'blue')
+#    plt.plot(gt_data[idx[0]:idx[gt_idx+1],6], color = 'blue')
+#    plt.title('matching')
+#    plt.plot(idx,[-10]*len(idx),'.m')
+#        
 ##    plt.show()
+#    fig.savefig(str(gt_idx).zfill(2)+'.jpg')
+#    plt.close(fig)
+
+
+    fig = plt.figure(1)
+#    plt.plot(range(57,300),test_data[57:300,6],color = 'blue') 
+#    plt.plot(range(offset,450),test_data[offset:450,6],color = 'blue') 
+#    plt.plot(range(idx[3],idx[4]),gt_data[idx[3]:idx[4],6],color = 'green')
+    plt.plot(pidx+offset,distplist[pidx]/1,'o',color = 'blue')
+    plt.plot(idx_cmp,distplist[idx_cmp-offset]/1,'o',color = 'red')
+    plt.title('data')
+        
+
+    plt.plot(np.arange(len(distplist))+offset,np.array(distplist)/1,color = 'red')
+    plt.title('dist')
+    plt.show()
 #
 #    fig = plt.figure(3)
-#    plt.plot(np.arange(len(distplist))+57,np.gradient(distplist),color = 'green')
+#    plt.plot(np.arange(len(distplist))+test_idx,np.gradient(distplist),color = 'green')
 #    plt.title('dist grad')
 #
 #    fig = plt.figure(4)
-#    plt.plot(np.arange(len(distplist))+57,np.gradient(np.gradient(distplist)),color = 'green')
+#    plt.plot(np.arange(len(distplist))+test_idx,np.gradient(np.gradient(distplist)),color = 'green')
 #    plt.title('dist grad 2')    
 #    
 #    plt.show()
