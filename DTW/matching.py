@@ -44,12 +44,36 @@ gtseglist           =[]
 ##idx   = list((sidx+eidx)//2) + [len(gt_data)]
 #idx   =  list(sidx)+[len(gt_data)-1]
 
+from scipy.signal import argrelextrema
 
-datax  = gf(gt_data[:,6],7)
+datax  = gf(gt_data[:,6],15)
 dx     = np.gradient(datax)
-idx = np.where(((dx > -0.1) & (dx<0.2))==True)[0]
-tmp = np.roll(idx,1)-idx
-idx = idx[np.where(abs(tmp)>20)[0]]
+xidx = np.where(((dx > -0.1) & (dx<0.2))==True)[0]
+xtmp = np.roll(xidx,1)-xidx
+
+datay  = gf(gt_data[:,7],15)
+dy     = np.gradient(datay)
+yidx = np.where(((dy > -0.1) & (dy<0.2))==True)[0]
+ytmp = np.roll(yidx,1)-yidx
+
+dataz  = gf(gt_data[:,8],15)
+dz     = np.gradient(dataz)
+zidx = np.where(((dz > -0.1) & (dz<0.2))==True)[0]
+ztmp = np.roll(zidx,1)-zidx
+
+grad = (dx**2+dy**2+dz**2)**0.5
+
+minm = argrelextrema(grad, np.less)
+
+#plt.plot(dy,color='blue')
+#plt.plot(dz,color='green')
+#plt.plot(dx,color='red')
+plt.plot(grad,color='black')
+plt.plot(minm,[10]*len(minm),'o')
+
+plt.show()
+
+idx = xidx[np.where(abs(xtmp)>20)[0]]
 
 
 
