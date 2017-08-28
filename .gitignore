@@ -144,5 +144,7 @@ $RECYCLE.BIN/
 *.csv
 *.zip
 *.rar
+*.jpg
+*.png
 
 *.txt
