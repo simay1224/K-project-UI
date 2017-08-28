@@ -63,17 +63,18 @@ ztmp = np.roll(zidx,1)-zidx
 
 grad = (dx**2+dy**2+dz**2)**0.5
 
-minm = argrelextrema(grad, np.less)
+minm = argrelextrema(grad, np.less)[0]
 
 #plt.plot(dy,color='blue')
 #plt.plot(dz,color='green')
 #plt.plot(dx,color='red')
+plt.plot(gt_data[:,6]/10,color='red')
 plt.plot(grad,color='black')
-plt.plot(minm,[10]*len(minm),'o')
+plt.plot(minm,grad[minm],'o')
 
 plt.show()
 
-idx = xidx[np.where(abs(xtmp)>20)[0]]
+#idx = xidx[np.where(abs(xtmp)>20)[0]]
 
 
 
