@@ -50,6 +50,7 @@ idx  = np.append([0],minm)
 
 
 src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+
 dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0829/1 joint(greater than 0)/'
 
 
@@ -72,7 +73,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
     test_idx    = 0
     chk_flag    = False
     deflag      = False  # decreasing flag
-#    err         = []
+    err         = []
     dist_prev   = 0
     distp_prev  = 0 
     distp_cmp   = np.inf    
@@ -111,7 +112,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                     dcnt = 0
     
                 if dcnt == 10:
-                    if (dpfirst - dist_p)>3000:
+                    if (dpfirst - dist_p)>2000:
                         print('deflag on')
                         deflag = True
                     else:
