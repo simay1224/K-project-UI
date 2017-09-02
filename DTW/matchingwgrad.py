@@ -15,8 +15,10 @@ from scipy.signal import argrelextrema
 
 gt_src    = 'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'
 
-plotJidx  = 0 
-gt_data   = cPickle.load(file(gt_src,'rb'))[12:,:].T[:,6:9]
+plotJidx  = 3 
+gt_data   = cPickle.load(file(gt_src,'rb'))[12:,:].T
+
+gt_data      = np.hstack([  gt_data[:,3:9],  gt_data[:,12:18]])
 
 
 # === initialization ===
@@ -51,13 +53,14 @@ idx  = np.append([0],minm)
 
 src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
 
-dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0829/1 joint(greater than 0)/'
+dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0829/4 joints/'
 
 
 
-for infile in glob.glob(os.path.join(src_path,'*.pkl')):
+for infile in glob.glob(os.path.join(src_path,'*.pkl'))[60:]:
     print infile
-    test_data    = cPickle.load(file(infile,'rb'))[12:,:].T[:,6:9]
+    test_data    = cPickle.load(file(infile,'rb'))[12:,:].T
+    test_data    = np.hstack([test_data[:,3:9],test_data[:,12:18]])
     foldername   = infile.split('\\')[-1].split('_ex4')[0][:-3]
     
     
@@ -201,11 +204,11 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
     text_file.close()        
         
 
-fig = plt.figure(2)
-plt.plot(test_data[:,plotJidx]-500,color = 'red')
-plt.plot(gt_data[:,plotJidx], color = 'blue')
-fig.savefig(dst_path+foldername+'/whole_plot.jpg')
-plt.close(fig)
+    fig = plt.figure(2)
+    plt.plot(test_data[:,plotJidx]-500,color = 'red')
+    plt.plot(gt_data[:,plotJidx], color = 'blue')
+    fig.savefig(dst_path+foldername+'/whole_plot.jpg')
+    plt.close(fig)
 
 
 

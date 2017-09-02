@@ -13,12 +13,12 @@ import matplotlib.pyplot as plt
 from scipy.ndimage.filters import gaussian_filter1d as gf
 from scipy.signal import argrelextrema
 
-#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 gt_src   = 'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'
 
 
-test_src = src_path + 'Andy_2017-03-06 02.17.39 PM_ex4_FPS30_motion_unified.pkl'
+test_src = src_path + 'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'
 
 
 #test_src = 'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'
@@ -27,6 +27,8 @@ test_src = src_path + 'Andy_2017-03-06 02.17.39 PM_ex4_FPS30_motion_unified.pkl'
 
 gt_data      = cPickle.load(file(gt_src,'rb'))[12:,:].T
 test_data    = cPickle.load(file(test_src,'rb'))[12:,:].T
+
+
 
 # === initialization ===
 e                   = 20
@@ -117,7 +119,7 @@ idx  = np.append([0],minm)
 
 cnt         = 0
 dcnt        = 0      # decreasing cnt
-test_idx    = 616
+test_idx    = 0
 offset      = test_idx 
 chk_flag    = False
 deflag      = False  # decreasing flag
@@ -127,8 +129,12 @@ distp_prev  = 0
 
 distp_cmp  = np.inf
 
-for gt_idx in range(8,9):#,len(idx)-1):
-    test_data_p  = test_data[:,6:9] + np.atleast_2d((gt_data[idx[gt_idx],6:9]-test_data[test_idx,6:9]))
+gt_data      = np.hstack([  gt_data[:,3:9],  gt_data[:,12:18]])
+test_data    = np.hstack([test_data[:,3:9],test_data[:,12:18]])
+
+
+for gt_idx in range(len(idx)-1):
+    test_data_p  = test_data[:,:] + np.atleast_2d((gt_data[idx[gt_idx],:]-test_data[test_idx,:]))
     distlist  = []
     distplist = []
 
@@ -138,15 +144,15 @@ for gt_idx in range(8,9):#,len(idx)-1):
     deflag      = False
     
     for jidx,j in  enumerate(range(test_idx+1,test_data.shape[0])): 
-        dist  , path   = fastdtw(gt_data[idx[gt_idx]:idx[gt_idx+1],6:9], test_data[test_idx:j,6:9]  , dist=euclidean)
-        dist_p, path_p = fastdtw(gt_data[idx[gt_idx]:idx[gt_idx+1],6:9], test_data_p[test_idx:j,:]    , dist=euclidean)
+        dist  , path   = fastdtw(gt_data[idx[gt_idx]:idx[gt_idx+1],:], test_data[test_idx:j,:]  , dist=euclidean)
+        dist_p, path_p = fastdtw(gt_data[idx[gt_idx]:idx[gt_idx+1],:], test_data_p[test_idx:j,:]    , dist=euclidean)
 
 
         print j
         if jidx == 0:
-            testlist = test_data[j,6:9]
+            testlist = test_data[j,:]
         else:
-            testlist = np.vstack([testlist,test_data[j,6:9]])
+            testlist = np.vstack([testlist,test_data[j,:]])
        
         distlist.append(dist)
         distplist.append(dist_p)
@@ -266,10 +272,10 @@ for gt_idx in range(8,9):#,len(idx)-1):
 #       
 ##    
     fig = plt.figure(1)
-    plt.plot(test_data[:endidx,6]-500,color = 'red')
+    plt.plot(test_data[:endidx,3]-500,color = 'red')
 #    plt.plot(np.arange(675,endidx),test_data[675:endidx,6]-500,color = 'red')
 #    plt.plot(np.arange(idx[1],idx[2]),gt_data[idx[1]:idx[2],6], color = 'blue')
-    plt.plot(gt_data[idx[0]:idx[gt_idx+1],6], color = 'blue')
+    plt.plot(gt_data[idx[0]:idx[gt_idx+1],3], color = 'blue')
     plt.title('matching')
     plt.plot(idx,[-10]*len(idx),'.m')
         
@@ -287,19 +293,19 @@ for gt_idx in range(8,9):#,len(idx)-1):
 ##    plt.title('data')
 #        
 #
-    plt.plot(np.arange(len(distplist))+offset,np.array(distplist)/1,color = 'red')
-    plt.title('dist'+str(test_idx))
+#    plt.plot(np.arange(len(distplist))+offset,np.array(distplist)/1,color = 'red')
+#    plt.title('dist'+str(test_idx))
+##    plt.show()
+#
+#    fig = plt.figure(3)
+#    plt.plot(np.arange(len(distplist))+offset,np.gradient(distplist),color = 'green')
+#    plt.title('dist grad'+str(test_idx))
+#
+#    fig = plt.figure(4)
+#    plt.plot(np.arange(len(distplist))+offset,np.gradient(np.gradient(distplist)),color = 'green')
+#    plt.title('dist grad 2'+str(test_idx))    
+#    
 #    plt.show()
-
-    fig = plt.figure(3)
-    plt.plot(np.arange(len(distplist))+offset,np.gradient(distplist),color = 'green')
-    plt.title('dist grad'+str(test_idx))
-
-    fig = plt.figure(4)
-    plt.plot(np.arange(len(distplist))+offset,np.gradient(np.gradient(distplist)),color = 'green')
-    plt.title('dist grad 2'+str(test_idx))    
-    
-    plt.show()
 
 #
 #
