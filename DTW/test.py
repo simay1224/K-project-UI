@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Sep 05 14:48:06 2017
+Created on Wed Sep 06 14:20:18 2017
 
 @author: medialab
 """
 
-import h5py,cPickle,pdb
+import h5py,cPickle
 import numpy as np
 from scipy.spatial.distance import euclidean
 from fastdtw import fastdtw
@@ -38,7 +38,7 @@ seglist             =[]
 gtseglist           =[]
 cnt         = 0
 dcnt        = 0      # decreasing cnt
-test_idx    = 0
+test_idx    = 730
 offset      = test_idx 
 chk_flag    = False
 deflag      = False  # decreasing flag
@@ -48,52 +48,19 @@ distp_prev  = 0
 argmin      = []
 distp_cmp  = np.inf
 
-order = {}
-order[0] = [1]
-order[1] = [3]
-order[2] = 'end'
-order[3] = [4]
-order[4] = [2,3]
-oidx     = 0      # initail
-idxlist  = [0]
-j    = 0
-ccnt = 1
+order = [2]
 
-while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
-#    if ccnt >11:
-#        pdb.set_trace()
-#    ccnt+=1
-    
-    if len(order[oidx])>1:
-        
-        
-        minval = np.inf
-        minidx = 0
-        for ii in order[oidx]:
-            d_p = []
-            for jj in range(test_idx+1,test_idx+5):
-                test_p = test_data[:,:] + np.atleast_2d((gt_data[ii][0,:]-test_data[test_idx,:]))
-                dist_p, _ = fastdtw(gt_data[ii], test_p[test_idx:jj,:], dist=euclidean)
-                d_p.append(dist_p)
-            if minval>np.mean(d_p):
-               minval = np.mean(d_p) 
-               minidx = ii
-        gt_idx = minidx  
-        
-    else:
-        gt_idx = order[oidx][0]
-        
-    idxlist.append(gt_idx)    
+for gt_idx in order:
     test_data_p  = test_data[:,:] + np.atleast_2d((gt_data[gt_idx][0,:]-test_data[test_idx,:]))
     
-
+    distlist  = []
     distplist = []
-   
+  
     dcnt        = 0 
     deflag      = False
     
     for jidx,j in  enumerate(range(test_idx+1,test_data.shape[0])): 
-
+        dist  , path   = fastdtw(gt_data[gt_idx], test_data[test_idx:j,:]  , dist=euclidean)
         dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:j,:], dist=euclidean)
 
 
@@ -103,24 +70,28 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
         else:
             testlist = np.vstack([testlist,test_data[j,:]])
        
-
+        distlist.append(dist)
         distplist.append(dist_p)
         
         if len(distlist)>1:
-
+            gdist  = np.gradient(distlist)
             gdistp = np.gradient(distplist)
         
         if (j > test_idx+2) & (not deflag):
-            print distplist[-1]-distplist[-2]
-            if (distplist[-1]-distplist[-2]) <= 0:
+            print distlist[-1]-distlist[-2]
+            if (distlist[-1]-distlist[-2]) <= 0:
                 dcnt +=1
                 if dcnt == 1:
                     dpfirst = dist_p
             else:
                 dcnt = 0
-         
+                
+#            print ('dcnt')
+#            print dcnt
+            
             if dcnt == 10:
-
+#                print ('dpfirst - dist_p')
+#                print dpfirst - dist_p
                 if (dpfirst - dist_p)>2000:
                     print('deflag on')
                     deflag = True
@@ -130,20 +101,21 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
         if deflag : 
             if chk_flag:  # in check global min status
                 cnt +=1
-
+                err.append(np.abs(dist_p-dist)/dist) 
                 
                 if dist_p < distp_cmp : # find another small value
                     cnt = 0
-
+                    err = []
                     distp_cmp = dist_p
                     idx_cmp   = j
                     print(' ==== reset ====')
                     
                 elif cnt == 20:
-
-
-
-
+                    Err_mean = np.mean(err)
+#                    pdb.set_trace()
+                    print('err mean')
+                    print(Err_mean)
+#                    if Err_mean <3:
                     chk_flag = False
 
                     tgrad = 0
@@ -153,17 +125,22 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                         
                     tgrad = tgrad**0.5
 
+
+#                    pdb.set_trace()
                     endidx = np.argmin(tgrad[idx_cmp-test_idx-10:idx_cmp-test_idx+10])+(idx_cmp-10) 
+                    # (idx_cmp-10)  = (idx_cmp-test_idx-10)+ test_idx
+                    
+
                     seglist.append([test_idx,endidx])
 #                    gtseglist.append([idx[gt_idx],idx[gt_idx+1]])
                     argmin.append(np.argmin(distplist)+test_idx)                        
                     test_idx = endidx+1
                     cnt      = 0
-                    oidx = gt_idx
-                    
                     break
                         
-
+#                    else:
+#                        print('Ooops!!')
+#                        pdb.set_trace()
 #                    
             else:  
                 print dist_p-distp_prev
@@ -179,28 +156,24 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                     err      = []
                     
 
-#        dist_prev   = dist
+        dist_prev   = dist
         distp_prev  = dist_p 
         
         print ('===========\n')
      
-#    pdb.set_trace()    
-    if cnt > 0:
-       seglist.append([test_idx,idx_cmp]) 
-       argmin.append(np.argmin(distplist)+test_idx)
-#       gtseglist.append([idx[gt_idx],idx[gt_idx+1]]) 
-       endidx =  idx_cmp
-    elif j == (test_data.shape[0]-1):
-        seglist.append([test_idx,test_data.shape[0]-1]) 
-        argmin.append(np.argmin(distplist)+test_idx)
-        endidx = test_data.shape[0]-1
-#        gtseglist.append([idx[gt_idx],idx[gt_idx+1]])
-    
+##    pdb.set_trace()    
+#    if cnt > 0:
+#       seglist.append([test_idx,idx_cmp]) 
+#       argmin.append(np.argmin(distplist)+test_idx)
+##       gtseglist.append([idx[gt_idx],idx[gt_idx+1]]) 
+#       endidx =  idx_cmp
+#    elif idx_cmp == (test_data.shape[0]-1):
+#        seglist.append([test_idx,idx_cmp]) 
+#        argmin.append(np.argmin(distplist)+test_idx) 
+##        gtseglist.append([idx[gt_idx],idx[gt_idx+1]])
+#        endidx =  idx_cmp
         
-    fig = plt.figure(1)
-    plt.plot(test_data[:endidx,6]-500,color = 'red')
-    plt.plot(test_data[:,6],color = 'blue')
-    plt.title('matching')
-
-    fig.savefig(str(len(seglist)).zfill(2)+'.jpg')
-    plt.close(fig)
+        
+plt.plot(np.arange(len(distplist))+210,distplist)
+plt.title('matching to '+str(order[0]))
+plt.show()
