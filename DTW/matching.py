@@ -144,9 +144,8 @@ for gt_idx in range(len(idx)-1):
     deflag      = False
     
     for jidx,j in  enumerate(range(test_idx+1,test_data.shape[0])): 
-        dist  , path   = fastdtw(gt_data[idx[gt_idx]:idx[gt_idx+1],:], test_data[test_idx:j,:]  , dist=euclidean)
-        dist_p, path_p = fastdtw(gt_data[idx[gt_idx]:idx[gt_idx+1],:], test_data_p[test_idx:j,:]    , dist=euclidean)
-
+        dist  , path   = fastdtw(gt_data[idx[gt_idx]:idx[gt_idx+1],:], test_data[test_idx:j,:]   , dist=euclidean)
+        dist_p, path_p = fastdtw(gt_data[idx[gt_idx]:idx[gt_idx+1],:], test_data_p[test_idx:j,:] , dist=euclidean)
 
         print j
         if jidx == 0:
