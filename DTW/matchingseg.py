@@ -79,6 +79,7 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
 #               minval = np.mean(d_p) 
 #               minidx = ii
 #        gt_idx = minidx  
+
         test_p2 = test_data[:,:] + np.atleast_2d((gt_data[2][0,:]-test_data[test_idx,:]))
         test_p3 = test_data[:,:] + np.atleast_2d((gt_data[3][0,:]-test_data[test_idx,:]))
         dist_p2, _ = fastdtw(gt_data[2], test_p2[test_idx:test_idx+40,:], dist=euclidean)

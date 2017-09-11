@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 from scipy.ndimage.filters import gaussian_filter1d as gf
 
 
-src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 gt_src   = 'GT_V_data.h5'
 
 test_src = src_path + 'Andy_2017-03-06 02.17.39 PM_ex4_FPS30_motion_unified.pkl'
@@ -93,7 +93,8 @@ for i in range(test_data.shape[0]):
                     minval = np.inf
                     for j in oidx:
                         moddata = inputdata[test_idx:endidx,:] + np.atleast_2d((gt_data[j][0,:]-test_data[test_idx,:]))
-                        dist, _ = fastdtw(gt_data[j], moddata, dist=euclidean)
+                        dist, path = fastdtw(gt_data[j], moddata, dist=euclidean)
+                        print dist/len(path)
                         if minval>dist:    
                            minval = dist
                            minidx = j
@@ -163,3 +164,26 @@ if tgrad[-1] < 0.5:
     
 plt.plot(Tmp)
 plt.show()
+
+
+
+#    tgrad = {}
+#    for ii in range(0,test_data.shape[1],3):
+#        tgrad[ii] = np.gradient(gf(test_data[:,ii],3))**2
+#        tgrad[ii] +=np.gradient(gf(test_data[:,ii+1],3))**2
+#        tgrad[ii] +=np.gradient(gf(test_data[:,ii+2],3))**2
+#        tgrad[ii] = tgrad[ii]**0.5
+#    for i in tgrad.keys():
+#        print i
+#        plt.figure(i/3)
+#        plt.plot(range(600,650),tgrad[i][600:650])
+#        
+#    plt.show()
+
+
+
+
+
+
+
+
