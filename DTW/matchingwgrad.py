@@ -15,7 +15,7 @@ from scipy.signal import argrelextrema
 
 gt_src    = 'Andy_2016-12-15 04.15.27 PM_ex4_FPS30_motion_unified.pkl'
 
-plotJidx  = 3 
+plotJidx  = 6 
 gt_data   = cPickle.load(file(gt_src,'rb'))[12:,:].T
 
 #gt_data      = np.hstack([  gt_data[:,3:9],  gt_data[:,12:18]])
