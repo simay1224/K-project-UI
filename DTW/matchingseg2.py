@@ -18,13 +18,16 @@ from scipy.spatial.distance import euclidean
 from fastdtw import fastdtw
 import matplotlib.pyplot as plt
 from scipy.ndimage.filters import gaussian_filter1d as gf
-from scipy.signal import argrelextrema
 
-#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+
+src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 gt_src   = 'GT_V_data.h5'
 
-test_src = src_path + 'Angela_2017-03-06 09.10.02 AM_ex4_FPS30_motion_unified.pkl'
+#test_src = src_path + 'Angela_2017-03-06 09.10.02 AM_ex4_FPS30_motion_unified.pkl'
+test_src = src_path + 'Kavita_2017-03-06 12.17.02 AM_ex4_FPS30_motion_unified.pkl'
+
+
 
 
 data       = h5py.File('GT_V_data_mod_EX4.h5','r')
@@ -39,24 +42,18 @@ gt_data[4] = data['GT_4'][:]
 test_data    = cPickle.load(file(test_src,'rb'))[12:,:].T
 
 
-distlist            = []
-distplist           = []
-
-seglist             =[]
-gtseglist           =[]
 cnt         = 0
 dcnt        = 0      # decreasing cnt
 test_idx    = 0
-#offset      = test_idx 
+
 chk_flag    = False
 deflag      = False  # decreasing flag
-err         = []
-dist_prev   = 0
+
 distp_prev  = 0 
-argmin      = []
+
 distp_cmp  = np.inf
 
-order = {}
+order    = {}
 order[0] = [1]
 order[1] = [3]
 order[2] = 'end'
@@ -65,22 +62,18 @@ order[4] = [2,3]
 oidx     = 0      # initail
 gt_idx   = 0
 idxlist  = []
-j    = 0
-ccnt = 1
+seglist  =[]
+j        = 0
 
 while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
     
-        
-#    idxlist.append(gt_idx)    
-    
-    
-    distplist = []
-    dpfirst   = {}
-    dist_p    = {}
+    dpfirst     = {}
+    dist_p      = {}
     dcnt        = 0 
     deflag      = False
     deflag_mul  = {}
-    minval =np.inf 
+    minval      =np.inf 
+    
     if (len(order[oidx])>1 ):
         for ii in order[oidx]:
             deflag_mul[ii] = False 
@@ -91,18 +84,16 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
     for jidx,j in  enumerate(range(test_idx,test_data.shape[0])): 
 
         print j
-#        if j == 782:
-#            pdb.set_trace()
+
         if jidx == 0:
             testlist = test_data[j,:]
         else:
             testlist = np.vstack([testlist,test_data[j,:]])
-       
-        
-        
+      
         if not deflag :
             if np.mod(j-(test_idx+1),10) == 0:
-                if (len(order[oidx])>1 ) &((j- (test_idx+1)) <=40):
+#                pdb.set_trace()
+                if (len(order[oidx])>1 ) &((j- (test_idx+1)) <=60):
                     for ii in order[oidx]:
                         test_p = test_data[:,:] + np.atleast_2d((gt_data[ii][0,:]-test_data[test_idx,:]))
                         dist_p[ii], _ = fastdtw(gt_data[ii], test_p[test_idx:j,:], dist=euclidean)  
@@ -112,12 +103,13 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                              if (dpfirst[ii] - dist_p[ii])>2000:
                                  print('deflag on')
                                  deflag_mul[ii] = True
-                    if (j- (test_idx+1)) >=40:   
+                    if (j- (test_idx+1)) >=60: 
+#                        pdb.set_trace()
                         for ii in order[oidx]:
                             if minval>dist_p[ii]:
                                 minval = dist_p[ii] 
                                 minidx = ii
-                        
+                        print('movment is '+str(minidx))
                         deflag =  deflag_mul[ii]  
                         gt_idx =  minidx 
                         idxlist.append(gt_idx)
@@ -135,11 +127,10 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                             print('deflag on')
                             deflag = True
                             distp_prev  = dist_p
-
-            
+          
         else: 
             dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:j,:], dist=euclidean)
-            distplist.append(dist_p)
+
             if chk_flag:  # in check global min status
                 cnt +=1
                
@@ -151,7 +142,6 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                     print(' ==== reset ====')
                     
                 elif cnt == 20:
-
 
                     chk_flag = False
 
