@@ -31,9 +31,10 @@ gt_data[4] = data['GT_4'][:]
 
 
 
-src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
-dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
+#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+#dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
+dst_path  = './figure/0912/7 joints/'
 
 order    = {}
 order[0] = [1]
@@ -158,14 +159,14 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                                 distp_prev  = dist_p
               
             else: 
-                
+                test_data_p  = test_data[:,:] + np.atleast_2d((gt_data[gt_idx][0,:]-test_data[test_idx,:]))
                 dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:j,:], dist=euclidean)
     
                 if chk_flag:  # in check global min status
                     cnt +=1
                    
                     if dist_p < distp_cmp : # find another small value
-                        cnt = 0
+                        cnt = 1
     
                         distp_cmp = dist_p
                         idx_cmp   = j
@@ -242,23 +243,39 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
             
             test_idx = endidx+1
        
-        fig = plt.figure(1)
-        plt.plot(test_data[:endidx,6]-500,color = 'red')
-        plt.plot(test_data[:,6],color = 'blue')
-        plt.title('matching')
-    
-        fig.savefig(dst_path+foldername+'/'+str(len(seglist)).zfill(2)+'.jpg')
-        plt.close(fig)
+        for i in range(21):
+            fig = plt.figure(1)
+            plt.plot(test_data[:endidx,i]-500,color = 'red')
+            plt.plot(test_data[:,i],color = 'blue')
+            plt.title('matching _ coordinate number is : ' +str(i))
+            subfolder = '/coordinate '+str(i)
+            if not os.path.exists(dst_path+foldername+subfolder):
+                os.makedirs(dst_path+foldername+subfolder)
+            fig.savefig(dst_path+foldername+subfolder+'/'+str(len(seglist)).zfill(2)+'.jpg')
+            plt.close(fig)
+
+            fig = plt.figure(1)
+            offset = test_data[seglist[-1][0],i]-gt_data[idxlist[-1]][0,i]
+            plt.plot(test_data[seglist[-1][0]:seglist[-1][1],i]-offset,color = 'red')
+            plt.plot(gt_data[idxlist[-1]][:,i],color = 'Blue')
+            plt.title('comparing _ coordinate number is : ' +str(i))
+            fig.savefig(dst_path+foldername+subfolder+'/comparing w ground truth '+str(len(seglist)).zfill(2)+'.jpg')
+            plt.close(fig)
+            
     
     for i in order.keys():
         AVGdist[i].append(avgdist[i])    
         
     text_file.write("\n === seglist === \n"  )
-    text_file.write(" %s \n\n" %str(seglist) )
+    for i in range(len(seglist)):
+        text_file.write(" %s :" %str(idxlist[i]) )
+        text_file.write(" %s \n\n" %str(seglist[i]) )
     text_file.write(" === idx list === \n"  )
-    text_file.write(" %s \n" %str(idxlist) )
+    text_file.write(" %s \n\n" %str(idxlist) )
     text_file.write(" === avgerage distant === \n"  )
-    text_file.write(" %s \n" %str(avgdist) )        
+    for i in avgdist.keys():
+        text_file.write(" %s :" %str(i) )
+        text_file.write(" %s \n" %str(avgdist[i]) )        
     text_file.close() 
 
 

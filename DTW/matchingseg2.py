@@ -20,12 +20,12 @@ import matplotlib.pyplot as plt
 from scipy.ndimage.filters import gaussian_filter1d as gf
 
 
-src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 gt_src   = 'GT_V_data.h5'
 
 #test_src = src_path + 'Angela_2017-03-06 09.10.02 AM_ex4_FPS30_motion_unified.pkl'
-test_src = src_path + 'Guansheng_2017-02-24 05.46.36 PM_ex4_FPS30_motion_unified.pkl'
+test_src = src_path + 'Kavita_2017-03-06 12.17.02 AM_ex4_FPS30_motion_unified.pkl'
 
 
 
@@ -142,19 +142,20 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                     if (j == test_idx+1):
                         dpfirst = dist_p
                     else: # j > test_idx+1
-                        if (dpfirst - dist_p)>2000:
+                        if (dpfirst - dist_p)>3000:
                             print('deflag on')
                             deflag = True
                             distp_prev  = dist_p
           
         else: 
+            test_data_p  = test_data[:,:] + np.atleast_2d((gt_data[gt_idx][0,:]-test_data[test_idx,:]))
             dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:j,:], dist=euclidean)
 
             if chk_flag:  # in check global min status
                 cnt +=1
                
                 if dist_p < distp_cmp : # find another small value
-                    cnt = 0
+                    cnt = 1
 
                     distp_cmp = dist_p
                     idx_cmp   = j
