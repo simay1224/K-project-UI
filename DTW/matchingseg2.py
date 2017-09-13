@@ -25,7 +25,7 @@ src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
 gt_src   = 'GT_V_data.h5'
 
 #test_src = src_path + 'Angela_2017-03-06 09.10.02 AM_ex4_FPS30_motion_unified.pkl'
-test_src = src_path + 'Kavita_2017-03-06 12.17.02 AM_ex4_FPS30_motion_unified.pkl'
+test_src = src_path + 'Guansheng_2017-02-24 05.46.36 PM_ex4_FPS30_motion_unified.pkl'
 
 
 
@@ -53,17 +53,18 @@ distp_prev  = 0
 
 distp_cmp  = np.inf
 
-order    = {}
-order[0] = [1]
-order[1] = [3]
-order[2] = 'end'
-order[3] = [4]
-order[4] = [2,3]
-oidx     = 0      # initail
-gt_idx   = 0
-idxlist  = []
-seglist  =[]
-j        = 0
+order     = {}
+order[0]  = [1]
+order[1]  = [3]
+order[2]  = 'end'
+order[3]  = [4]
+order[4]  = [2,3]
+oidx      = 0      # initail
+gt_idx    = 0
+idxlist   = []
+seglist   = []
+j         = 0
+
 
 while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
     
@@ -72,8 +73,9 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
     dcnt        = 0 
     deflag      = False
     deflag_mul  = {}
-    minval      =np.inf 
-    
+    minval      = np.inf 
+    onedeflag   = False
+    segend      = False
     if (len(order[oidx])>1 ):
         for ii in order[oidx]:
             deflag_mul[ii] = False 
@@ -93,28 +95,45 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
         if not deflag :
             if np.mod(j-(test_idx+1),10) == 0:
 #                pdb.set_trace()
-                if (len(order[oidx])>1 ) &((j- (test_idx+1)) <=60):
+                if (len(order[oidx])>1 ) & (not onedeflag):#((j- (test_idx+1)) <=80):
                     for ii in order[oidx]:
                         test_p = test_data[:,:] + np.atleast_2d((gt_data[ii][0,:]-test_data[test_idx,:]))
                         dist_p[ii], _ = fastdtw(gt_data[ii], test_p[test_idx:j,:], dist=euclidean)  
                         if (j == test_idx+1):
                             dpfirst[ii] = dist_p[ii]
                         else: # j > test_idx+1
-                             if (dpfirst[ii] - dist_p[ii])>2000:
-                                 print('deflag on')
+                             if (dpfirst[ii] - dist_p[ii])>3000:
+                                 print('deflag on at moment '+str(ii))
+#                                 pdb.set_trace()
                                  deflag_mul[ii] = True
-                    if (j- (test_idx+1)) >=60: 
-#                        pdb.set_trace()
-                        for ii in order[oidx]:
-                            if minval>dist_p[ii]:
-                                minval = dist_p[ii] 
-                                minidx = ii
-                        print('movment is '+str(minidx))
-                        deflag =  deflag_mul[ii]  
-                        gt_idx =  minidx 
+                                 onedeflag = True
+#                                 pdb.set_trace()
+                                 
+                    if onedeflag:#(j- (test_idx+1)) >=80: 
+
+
+                        seg = []
+                        for dekey in deflag_mul:
+                            if deflag_mul[dekey] == True:
+                                seg.append(dekey)
+                        if len(seg)==1:
+                            gt_idx = seg[0]
+                        
+                            print('movment is '+str(gt_idx))
+                        else:  # len(seg) > 1:
+                    
+                            for ii in seg:
+                                if minval>dist_p[ii]:
+                                    minval = dist_p[ii] 
+                                    minidx = ii
+                            print('movment is '+str(minidx))
+                            gt_idx =  minidx
+                        deflag =  True  
+                         
                         idxlist.append(gt_idx)
                         distp_prev  = dist_p[gt_idx]
                         dpfirst = dpfirst[gt_idx]
+
                       
                 else:  
                     test_data_p  = test_data[:,:] + np.atleast_2d((gt_data[gt_idx][0,:]-test_data[test_idx,:]))
@@ -157,7 +176,7 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                     test_idx = endidx+1
                     cnt      = 0
                     oidx = gt_idx
-                    
+                    segend = True
                     break
                 
             else:  
@@ -175,14 +194,28 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
         
             print ('===========\n')
      
-  
+
     if cnt > 0:
        seglist.append([test_idx,idx_cmp]) 
        endidx =  idx_cmp
-    elif j == (test_data.shape[0]-1):
-        seglist.append([test_idx,test_data.shape[0]-1]) 
-        endidx = test_data.shape[0]-1
+       test_idx = endidx+1
+       oidx = gt_idx
+    elif (j == (test_data.shape[0]-1))&(not segend) & (not deflag)  :
+        
+        if len(order[oidx])>1:
+            # === no decrese happen 
+            for i in  order[oidx]: 
 
+                test_p = test_data[:,:] + np.atleast_2d((gt_data[i][0,:]-test_data[test_idx,:]))
+                dist_p[i], _ = fastdtw(gt_data[i], test_p[test_idx:,:], dist=euclidean)                      
+                if minval>dist_p[i]:
+                    minval = dist_p[i] 
+                    minidx = i  
+                gt_idx =  minidx 
+                idxlist.append(gt_idx)
+        seglist.append([test_idx,len(test_data)-1]) 
+        endidx = len(test_data)-1
+        test_idx = endidx+1
     
         
     fig = plt.figure(1)

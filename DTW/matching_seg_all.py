@@ -88,7 +88,9 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
         dcnt        = 0 
         deflag      = False
         deflag_mul  = {}
-        minval      =np.inf 
+        minval      = np.inf 
+        onedeflag   = False
+        segend      = False
         
         if (len(order[oidx])>1 ):
             for ii in order[oidx]:
@@ -108,25 +110,37 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
           
             if not deflag :
                 if np.mod(j-(test_idx+1),10) == 0: # check every 10 frames
-                    if (len(order[oidx])>1 ) &((j- (test_idx+1)) <=60):
+                    if (len(order[oidx])>1 ) & (not onedeflag):#((j- (test_idx+1)) <=60):
                         for ii in order[oidx]:
                             test_p = test_data[:,:] + np.atleast_2d((gt_data[ii][0,:]-test_data[test_idx,:]))
                             dist_p[ii], _ = fastdtw(gt_data[ii], test_p[test_idx:j,:], dist=euclidean)  
                             if (j == test_idx+1):
                                 dpfirst[ii] = dist_p[ii]
                             else: # j > test_idx+1
-                                 if (dpfirst[ii] - dist_p[ii])>2000:
+                                 if (dpfirst[ii] - dist_p[ii])>3000:
                                      print('deflag on')
                                      deflag_mul[ii] = True
-                        if (j- (test_idx+1)) >=60:   # compare the dist_p to decide which movement it is. 
-                                                     #(may need further modification when doing muilti-ex)
-                            for ii in order[oidx]: 
-                                if minval>dist_p[ii]:
-                                    minval = dist_p[ii] 
-                                    minidx = ii
+                                     onedeflag = True
+                        if onedeflag:#(j- (test_idx+1)) >=60:   # compare the dist_p to decide which movement it is. 
+                                                                #(may need further modification when doing muilti-ex)
+                            seg = []
+                            for dekey in deflag_mul:
+                                if deflag_mul[dekey] == True:
+                                    seg.append(dekey)
+                            if len(seg)==1:
+                                gt_idx = seg[0]
                             
-                            deflag =  deflag_mul[ii]  
-                            gt_idx =  minidx 
+                                print('movment is '+str(gt_idx))
+                            else:  # len(seg) > 1:
+                        
+                                for ii in seg:
+                                    if minval>dist_p[ii]:
+                                        minval = dist_p[ii] 
+                                        minidx = ii
+                                print('movment is '+str(minidx))
+                                gt_idx =  minidx
+                            deflag =  True  
+                             
                             idxlist.append(gt_idx)
                             distp_prev  = dist_p[gt_idx]
                             dpfirst = dpfirst[gt_idx]
@@ -179,7 +193,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                         test_idx = endidx+1
                         cnt      = 0
                         oidx = gt_idx
-                        
+                        segend = True
                         break
                     
                 else:  
@@ -200,22 +214,34 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
       
         if cnt > 0:
            seglist.append([test_idx,idx_cmp]) 
-           endidx =  idx_cmp
+           endidx =  idx_cmp           
+           oidx = gt_idx
            # === avg dist test ===
            dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
            avgdist[gt_idx].append(dist_p/len(path_p))                        
            # ===
-        elif j == (test_data.shape[0]-1):
+           test_idx = endidx+1
+        elif (j == (test_data.shape[0]-1))&(not segend) & (not deflag) :
             seglist.append([test_idx,test_data.shape[0]-1]) 
             endidx = test_data.shape[0]-1
+            if len(order[oidx])>1:
+            # === no decrease happen 
+                for i in  order[oidx]: 
+                    test_p = test_data[:,:] + np.atleast_2d((gt_data[i][0,:]-test_data[test_idx,:]))
+                    dist_p[i], _ = fastdtw(gt_data[i], test_p[test_idx:,:], dist=euclidean)                      
+                    if minval>dist_p[i]:
+                        minval = dist_p[i] 
+                        minidx = i  
+                    gt_idx =  minidx 
+                    idxlist.append(gt_idx)  
+           
             # === avg dist test ===
             dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
             avgdist[gt_idx].append(dist_p/len(path_p))                        
             # ===    
-
-
-
             
+            test_idx = endidx+1
+       
         fig = plt.figure(1)
         plt.plot(test_data[:endidx,6]-500,color = 'red')
         plt.plot(test_data[:,6],color = 'blue')
