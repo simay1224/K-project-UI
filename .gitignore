@@ -149,4 +149,5 @@ $RECYCLE.BIN/
 
 *.txt
 *.jpg
-DTW/01.jpg
+DTW/*.jpg
+
