@@ -31,8 +31,8 @@ gt_data[4] = data['GT_4'][:]
 
 
 
-#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
 dst_path  = './figure/0912/7 joints/'
 
@@ -78,10 +78,11 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
     seglist  = []
     j        = 0
     
+    DTW_path = {}
     avgdist  = {}
     for i in order.keys():
-        avgdist[i] = []
-    
+        avgdist[i]  = []
+        DTW_path[i] = []
     while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
         
         dpfirst     = {}
@@ -187,7 +188,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                         # === avg dist test ===
                         dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
                         avgdist[gt_idx].append(dist_p/len(path_p))
-                        
+                        DTW_path[gt_idx].append(path_p)
                         # ===
                         
                         seglist.append([test_idx,endidx])                       
@@ -219,7 +220,8 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
            oidx = gt_idx
            # === avg dist test ===
            dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
-           avgdist[gt_idx].append(dist_p/len(path_p))                        
+           avgdist[gt_idx].append(dist_p/len(path_p)) 
+           DTW_path[gt_idx].append(path_p)
            # ===
            test_idx = endidx+1
         elif (j == (test_data.shape[0]-1))&(not segend) & (not deflag) :
@@ -238,7 +240,8 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
            
             # === avg dist test ===
             dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
-            avgdist[gt_idx].append(dist_p/len(path_p))                        
+            avgdist[gt_idx].append(dist_p/len(path_p))       
+            DTW_path[gt_idx].append(path_p)                 
             # ===    
             
             test_idx = endidx+1
@@ -277,7 +280,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
         text_file.write(" %s :" %str(i) )
         text_file.write(" %s \n" %str(avgdist[i]) )        
     text_file.close() 
-
+    cPickle.dump(DTW_path,file(dst_path+foldername+subfolder+'DTW_path.pkl','wb'))
 
 text_file_total = open(dst_path+"/log.txt", "w") 
 text_file_total.write(" === avgerage distant === \n"  )
