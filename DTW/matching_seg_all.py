@@ -34,7 +34,7 @@ gt_data[4] = data['GT_4'][:]
 src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
 #src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
-dst_path  = './figure/0912/7 joints/'
+dst_path  = './figure/0914/7 joints/'
 
 order    = {}
 order[0] = [1]
@@ -48,8 +48,10 @@ for i in order.keys():
     AVGdist[i] = []
     
 
+import time
+ST = time.clock()
 
-for infile in glob.glob(os.path.join(src_path,'*.pkl')):
+for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:9]:
     print infile
     test_data    = cPickle.load(file(infile,'rb'))[12:,:].T
     foldername   = infile.split('\\')[-1].split('_ex4')[0][:-3]
@@ -57,7 +59,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
     if not os.path.exists(dst_path+foldername):
         os.makedirs(dst_path+foldername)
         
-    text_file = open(dst_path+foldername+"/log.txt", "w")    
+#    text_file = open(dst_path+foldername+"/log.txt", "w")    
 
     # === initial setting ===
     cnt         = 0
@@ -246,61 +248,61 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
             
             test_idx = endidx+1
        
-        for i in range(21):
-            fig = plt.figure(1)
-            plt.plot(test_data[:endidx,i]-500,color = 'red')
-            plt.plot(test_data[:,i],color = 'blue')
-            plt.title('matching _ coordinate number is : ' +str(i))
-            subfolder = '/coordinate '+str(i)
-            if not os.path.exists(dst_path+foldername+subfolder):
-                os.makedirs(dst_path+foldername+subfolder)
-            fig.savefig(dst_path+foldername+subfolder+'/'+str(len(seglist)).zfill(2)+'.jpg')
-            plt.close(fig)
+#        for i in range(21):
+#            fig = plt.figure(1)
+#            plt.plot(test_data[:endidx,i]-500,color = 'red')
+#            plt.plot(test_data[:,i],color = 'blue')
+#            plt.title('matching _ coordinate number is : ' +str(i))
+#            subfolder = '/coordinate '+str(i)
+#            if not os.path.exists(dst_path+foldername+subfolder):
+#                os.makedirs(dst_path+foldername+subfolder)
+#            fig.savefig(dst_path+foldername+subfolder+'/'+str(len(seglist)).zfill(2)+'.jpg')
+#            plt.close(fig)
+#
+#            fig = plt.figure(1)
+#            offset = test_data[seglist[-1][0],i]-gt_data[idxlist[-1]][0,i]
+#            plt.plot(test_data[seglist[-1][0]:seglist[-1][1],i]-offset,color = 'red')
+#            plt.plot(gt_data[idxlist[-1]][:,i],color = 'Blue')
+#            plt.title('comparing _ coordinate number is : ' +str(i))
+#            fig.savefig(dst_path+foldername+subfolder+'/comparing w ground truth '+str(len(seglist)).zfill(2)+'.jpg')
+#            plt.close(fig)
+#            
+#    
+#    for i in order.keys():
+#        AVGdist[i].append(avgdist[i])    
+#        
+#    text_file.write("\n === seglist === \n"  )
+#    for i in range(len(seglist)):
+#        text_file.write(" %s :" %str(idxlist[i]) )
+#        text_file.write(" %s \n\n" %str(seglist[i]) )
+#    text_file.write(" === idx list === \n"  )
+#    text_file.write(" %s \n\n" %str(idxlist) )
+#    text_file.write(" === avgerage distant === \n"  )
+#    for i in avgdist.keys():
+#        text_file.write(" %s :" %str(i) )
+#        text_file.write(" %s \n" %str(avgdist[i]) )        
+#    text_file.close() 
+#    cPickle.dump(DTW_path,file(dst_path+foldername+subfolder+'DTW_path.pkl','wb'))
+#
+#text_file_total = open(dst_path+"/log.txt", "w") 
+#text_file_total.write(" === avgerage distant === \n"  )
+#text_file_total.write(" %s \n" %str(AVGdist) )
+#
+#cPickle.dump(AVGdist,file('AVGdist.pkl','wb'))
+#tmp = {} 
+#for i in order.keys():
+#    tmp[i] = [] 
+#    for j in range(len(AVGdist[i])):
+#        tmp[i] = tmp[i]+AVGdist[i][j]
+#    if tmp[i] != []:
+#        tmp[i] = [np.mean(tmp[i]),np.std(tmp[i])] 
+#        text_file_total.write(" === avgerage distant and std in movement %s === \n"%str(i) )
+#        text_file_total.write(" %s \n" %str(tmp[i]) )
+#
+#text_file_total.close()
 
-            fig = plt.figure(1)
-            offset = test_data[seglist[-1][0],i]-gt_data[idxlist[-1]][0,i]
-            plt.plot(test_data[seglist[-1][0]:seglist[-1][1],i]-offset,color = 'red')
-            plt.plot(gt_data[idxlist[-1]][:,i],color = 'Blue')
-            plt.title('comparing _ coordinate number is : ' +str(i))
-            fig.savefig(dst_path+foldername+subfolder+'/comparing w ground truth '+str(len(seglist)).zfill(2)+'.jpg')
-            plt.close(fig)
-            
-    
-    for i in order.keys():
-        AVGdist[i].append(avgdist[i])    
-        
-    text_file.write("\n === seglist === \n"  )
-    for i in range(len(seglist)):
-        text_file.write(" %s :" %str(idxlist[i]) )
-        text_file.write(" %s \n\n" %str(seglist[i]) )
-    text_file.write(" === idx list === \n"  )
-    text_file.write(" %s \n\n" %str(idxlist) )
-    text_file.write(" === avgerage distant === \n"  )
-    for i in avgdist.keys():
-        text_file.write(" %s :" %str(i) )
-        text_file.write(" %s \n" %str(avgdist[i]) )        
-    text_file.close() 
-    cPickle.dump(DTW_path,file(dst_path+foldername+subfolder+'DTW_path.pkl','wb'))
 
-text_file_total = open(dst_path+"/log.txt", "w") 
-text_file_total.write(" === avgerage distant === \n"  )
-text_file_total.write(" %s \n" %str(AVGdist) )
-
-cPickle.dump(AVGdist,file('AVGdist.pkl','wb'))
-tmp = {} 
-for i in order.keys():
-    tmp[i] = [] 
-    for j in range(len(AVGdist[i])):
-        tmp[i] = tmp[i]+AVGdist[i][j]
-    if tmp[i] != []:
-        tmp[i] = [np.mean(tmp[i]),np.std(tmp[i])] 
-        text_file_total.write(" === avgerage distant and std in movement %s === \n"%str(i) )
-        text_file_total.write(" %s \n" %str(tmp[i]) )
-
-text_file_total.close()
-
-
-
+print time.clock()-ST
 
 
 
