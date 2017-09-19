@@ -31,10 +31,10 @@ gt_data[4] = data['GT_4'][:]
 
 
 
-#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
-dst_path  = './figure/0918/7 joints/'
+dst_path  = './figure/0919/7 joints/'
 
 order    = {}
 order[0] = [1]
@@ -51,7 +51,7 @@ for i in order.keys():
 import time
 ST = time.clock()
 
-for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
+for infile in glob.glob(os.path.join(src_path,'*.pkl')):
     print infile
     test_data    = cPickle.load(file(infile,'rb'))[12:,:].T
     foldername   = infile.split('\\')[-1].split('_ex4')[0][:-3]
@@ -80,14 +80,17 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
     seglist  = []
     j        = 0
     
-    DTW_path = {}
-    avgdist  = {}
-    avgsubdist = {}
-    subdistlsit  ={}
+    DTW_path    = {}
+    avgdist     = {}
+    avgsubdist  = {}
+    subdistlist = {}
+    idxcnt      = {}
+    
     for i in order.keys():
         avgdist[i]    = []
         DTW_path[i]   = []
-        subdistlsit[i]= []
+        subdistlist[i]= {}
+        idxcnt[i]     = 1
     for i in range(21):
         avgsubdist[i] = []
     
@@ -309,12 +312,23 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
         text_file.write(" %s :" %str(i) )
         text_file.write(" %s \n" %str(avgdist[i]) )
     text_file.write("\n\n === avgerage sub distant === \n"  )
-    for iidx,i in enumerate(idxlist):        
+
+    for iidx,i in enumerate(idxlist):         
         for jj in range(21):
-            subdistlsit[i].append(np.round(avgsubdist[jj][iidx],2))
-    for i in [1,2,3,4]:   
-        text_file.write(" %s :" %str(i) )
-        text_file.write(" %s \n" %str(subdistlsit[i]) )    
+            if jj == 0:
+               subdistlist[i][idxcnt[i]] = [] 
+            subdistlist[i][idxcnt[i]].append(float(np.round(avgsubdist[jj][iidx],2)))
+        idxcnt[i] += 1
+
+    for i in subdistlist.keys():
+        for jj in subdistlist[i].keys():
+            text_file.write("\n\n %s -" %str(i) )
+            text_file.write(" %s :" %str(jj) )
+            for qqidx,qq in enumerate(subdistlist[i][jj]):
+                if (qqidx %9)==0:
+                    text_file.write("\n\n")               
+                text_file.write(" %s " %str(qq) ) 
+#    pdb.set_trace()
             
             
         
