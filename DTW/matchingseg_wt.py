@@ -29,12 +29,14 @@ def wt_euclidean(u,v,w):
     dist = norm(w*(u - v))
     return dist
 
-Jweight = np.array([0, 0, 0, 3, 3, 3, 9, 9, 9,\
-                    0, 0, 0, 3, 3, 3, 9, 9, 9,\
-                    0, 0, 0])
-Jweight = Jweight/sum(Jweight)*21
-src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+Jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,\
+                    0., 0., 0., 3., 3., 3., 9., 9., 9.,\
+                    0., 0., 0.])
+    
+Jweight = Jweight/sum(Jweight)*1.5
+
+#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 gt_src   = 'GT_V_data.h5'
 
 #test_src = src_path + 'Angela_2017-03-06 09.10.02 AM_ex4_FPS30_motion_unified.pkl'
@@ -57,7 +59,7 @@ test_data    = cPickle.load(file(test_src,'rb'))[12:,:].T
 
 cnt         = 0
 dcnt        = 0      # decreasing cnt
-test_idx    = 272
+test_idx    = 0
 
 chk_flag    = False
 deflag      = False  # decreasing flag
@@ -72,8 +74,8 @@ order[1]  = [3]
 order[2]  = 'end'
 order[3]  = [4]
 order[4]  = [2,3]
-oidx      = 4      # initail
-gt_idx    = 4
+oidx      = 0      # initail
+gt_idx    = 0
 idxlist   = []
 seglist   = []
 j         = 0
@@ -115,7 +117,8 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                         if (j == test_idx+1):
                             dpfirst[ii] = dist_p[ii]
                         else: # j > test_idx+1
-                             if (dpfirst[ii] - dist_p[ii])>2000:
+                             print(dpfirst[ii] - dist_p[ii])
+                             if (dpfirst[ii] - dist_p[ii])>2400:
                                  print('deflag on at moment '+str(ii))
 #                                 pdb.set_trace()
                                  deflag_mul[ii] = True
@@ -155,7 +158,8 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                     if (j == test_idx+1):
                         dpfirst = dist_p
                     else: # j > test_idx+1
-                        if (dpfirst - dist_p)>3000:
+                        print(dpfirst - dist_p)
+                        if (dpfirst - dist_p)>2400:
                             print('deflag on')
                             deflag = True
                             distp_prev  = dist_p
@@ -232,10 +236,10 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
         test_idx = endidx+1
     
         
-#    fig = plt.figure(1)
-#    plt.plot(test_data[:endidx,6]-500,color = 'red')
-#    plt.plot(test_data[:,6],color = 'blue')
-#    plt.title('matching')
-#
-#    fig.savefig(str(len(seglist)).zfill(2)+'.jpg')
-#    plt.close(fig)
+    fig = plt.figure(1)
+    plt.plot(test_data[:endidx,6]-500,color = 'red')
+    plt.plot(test_data[:,6],color = 'blue')
+    plt.title('matching')
+
+    fig.savefig(str(len(seglist)).zfill(2)+'.jpg')
+    plt.close(fig)

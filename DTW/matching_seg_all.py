@@ -27,9 +27,10 @@ def wt_euclidean(u,v,w):
     dist = norm(w*(u - v))
     return dist
 
-Jweight = np.array([0, 0, 0, 3, 3, 3, 9, 9, 9,\
-                    0, 0, 0, 3, 3, 3, 9, 9, 9,\
-                    0, 0, 0])
+Jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,\
+                    0., 0., 0., 3., 3., 3., 9., 9., 9.,\
+                    0., 0., 0.])
+Jweight = Jweight/sum(Jweight)*1.5
 
 data       = h5py.File('GT_V_data_mod_EX4.h5','r')
 gt_data    = {}
@@ -41,8 +42,8 @@ gt_data[4] = data['GT_4'][:]
 
 
 
-src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
 dst_path  = './figure/0920/7 joints Weight/'
 
@@ -143,7 +144,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[6:7]:
                             if (j == test_idx+1):
                                 dpfirst[ii] = dist_p[ii]
                             else: # j > test_idx+1
-                                 if (dpfirst[ii] - dist_p[ii])>3000:
+                                 if (dpfirst[ii] - dist_p[ii])>2400:
                                      print('deflag on')
                                      deflag_mul[ii] = True
                                      onedeflag = True
@@ -178,7 +179,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[6:7]:
                         if (j == test_idx+1):
                             dpfirst = dist_p
                         else: # j > test_idx+1
-                            if (dpfirst - dist_p)>2000:
+                            if (dpfirst - dist_p)>2400:
                                 print('deflag on')
                                 deflag = True
                                 distp_prev  = dist_p
