@@ -47,6 +47,8 @@ src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
 dst_path  = './figure/0920/7 joints Weight/'
 
+decTh     = 2000
+
 order    = {}
 order[0] = [1]
 order[1] = [3]
@@ -62,7 +64,7 @@ for i in order.keys():
 import time
 ST = time.clock()
 
-for infile in glob.glob(os.path.join(src_path,'*.pkl'))[6:7]:
+for infile in glob.glob(os.path.join(src_path,'*.pkl')):
     print infile
     test_data    = cPickle.load(file(infile,'rb'))[12:,:].T
     foldername   = infile.split('\\')[-1].split('_ex4')[0][:-3]
@@ -144,7 +146,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[6:7]:
                             if (j == test_idx+1):
                                 dpfirst[ii] = dist_p[ii]
                             else: # j > test_idx+1
-                                 if (dpfirst[ii] - dist_p[ii])>2400:
+                                 if (dpfirst[ii] - dist_p[ii])>decTh:
                                      print('deflag on')
                                      deflag_mul[ii] = True
                                      onedeflag = True
@@ -179,7 +181,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[6:7]:
                         if (j == test_idx+1):
                             dpfirst = dist_p
                         else: # j > test_idx+1
-                            if (dpfirst - dist_p)>2400:
+                            if (dpfirst - dist_p)>decTh:
                                 print('deflag on')
                                 deflag = True
                                 distp_prev  = dist_p

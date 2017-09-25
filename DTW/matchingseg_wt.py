@@ -40,7 +40,7 @@ src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 gt_src   = 'GT_V_data.h5'
 
 #test_src = src_path + 'Angela_2017-03-06 09.10.02 AM_ex4_FPS30_motion_unified.pkl'
-test_src = src_path + 'Angela_2017-03-06 09.09.00 AM_ex4_FPS30_motion_unified.pkl'
+test_src = src_path + 'Kavita_2017-03-06 12.17.23 AM_ex4_FPS30_motion_unified.pkl'
 
 
 
@@ -80,6 +80,7 @@ idxlist   = []
 seglist   = []
 j         = 0
 
+decTh     = 2000 
 
 while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
     
@@ -118,7 +119,7 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                             dpfirst[ii] = dist_p[ii]
                         else: # j > test_idx+1
                              print(dpfirst[ii] - dist_p[ii])
-                             if (dpfirst[ii] - dist_p[ii])>2400:
+                             if (dpfirst[ii] - dist_p[ii])>decTh:
                                  print('deflag on at moment '+str(ii))
 #                                 pdb.set_trace()
                                  deflag_mul[ii] = True
@@ -159,7 +160,7 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                         dpfirst = dist_p
                     else: # j > test_idx+1
                         print(dpfirst - dist_p)
-                        if (dpfirst - dist_p)>2400:
+                        if (dpfirst - dist_p)>decTh:
                             print('deflag on')
                             deflag = True
                             distp_prev  = dist_p
@@ -179,7 +180,7 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                     print(' ==== reset ====')
                     
                 elif cnt == 20:
-
+                    print(' ====  20  ========')
                     chk_flag = False
 
                     tgrad = 0
@@ -212,14 +213,35 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
         
             print ('===========\n')
      
+#    if j == 374:
+#        pdb.set_trace()
+#    if cnt > 0:
+#       seglist.append([test_idx,idx_cmp]) 
+#       endidx =  idx_cmp
+#       test_idx = endidx+1
+#       oidx = gt_idx
+#    elif (j == (test_data.shape[0]-1))&(not segend) & (not deflag)  :
+#        
+#        if len(order[oidx])>1:
+#            # === no decrese happen 
+#            for i in  order[oidx]: 
+#
+#                test_p = test_data[:,:] + np.atleast_2d((gt_data[i][0,:]-test_data[test_idx,:]))
+#                dist_p[i], _ = fastdtw(gt_data[i], test_p[test_idx:,:], Jweight, dist=wt_euclidean)                      
+#                if minval>dist_p[i]:
+#                    minval = dist_p[i] 
+#                    minidx = i  
+#                gt_idx =  minidx 
+#                idxlist.append(gt_idx)
+#        seglist.append([test_idx,len(test_data)-1]) 
+#        endidx = len(test_data)-1
+#        test_idx = endidx+1
+ 
 
-    if cnt > 0:
-       seglist.append([test_idx,idx_cmp]) 
-       endidx =  idx_cmp
-       test_idx = endidx+1
-       oidx = gt_idx
-    elif (j == (test_data.shape[0]-1))&(not segend) & (not deflag)  :
-        
+#    pdb.set_trace()
+    if segend:
+        pass
+    elif (not deflag):
         if len(order[oidx])>1:
             # === no decrese happen 
             for i in  order[oidx]: 
@@ -234,7 +256,22 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
         seglist.append([test_idx,len(test_data)-1]) 
         endidx = len(test_data)-1
         test_idx = endidx+1
+    elif (not chk_flag):
+        seglist.append([test_idx,j]) 
+        endidx =  j
+        test_idx = endidx+1
+        oidx = gt_idx                 
+    elif cnt > 0:
+        seglist.append([test_idx,idx_cmp]) 
+        endidx =  idx_cmp
+        test_idx = endidx+1
+        oidx = gt_idx
+
     
+
+        
+
+   
         
     fig = plt.figure(1)
     plt.plot(test_data[:endidx,6]-500,color = 'red')
