@@ -42,8 +42,8 @@ gt_data[4] = data['GT_4'][:]
 
 
 
-src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
 dst_path  = './figure/0920/7 joints Weight/'
 
@@ -59,7 +59,8 @@ order[4] = [2,3]
 AVGdist  ={}
 for i in order.keys():
     AVGdist[i] = []
-    
+
+Color = ['red','blue','green','black','m']    
 
 import time
 ST = time.clock()
@@ -216,14 +217,14 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                         # === avg dist test ===
 #                        dist_p, path_p = orifastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
                         dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
-                        avgdist[gt_idx].append(dist_p/len(path_p))
+                        avgdist[gt_idx].append(float(np.round(dist_p/len(path_p),2)))
 #                        TMP = 0
                         for subidx in range(21):
                             subdist = 0
                             for ii in xrange(len(path_p)):
                                 subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
 #                            TMP += subdist**2
-                            avgsubdist[subidx].append((subdist)/len(path_p))
+                            avgsubdist[subidx].append(float(np.round(subdist/len(path_p),2)))
 #                        pdb.set_trace()
                         DTW_path[gt_idx].append(path_p)
                         # ===
@@ -321,13 +322,13 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
             # === avg dist test ===
 
             dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
-            avgdist[gt_idx].append(dist_p/len(path_p))       
+            avgdist[gt_idx].append(float(np.round(dist_p/len(path_p),2)))       
             DTW_path[gt_idx].append(path_p)    
             for subidx in range(21):
                 subdist = 0
                 for ii in xrange(len(path_p)):
                     subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
-                avgsubdist[subidx].append((subdist)/len(path_p))             
+                avgsubdist[subidx].append(float(np.round(subdist/len(path_p),2)))            
             # ===   
                
             test_idx = endidx+1
@@ -352,14 +353,31 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
             plt.plot(test_data[seglist[-1][0]:seglist[-1][1],i]-offset,color = 'red')
             plt.plot(gt_data[idxlist[-1]][:,i],color = 'Blue')
             plt.title(foldername + '\n comparing _ coordinate : ' +str(i)+' segment :'+str(idxlist[-1])+'-'+str(sum(np.array(idxlist)==idxlist[-1]))\
-                                                  +'\n avgsubdist :' + str(np.round(avgsubdist[i][-1],2)))
+                                                  +'\n avgsubdist :' + str(avgsubdist[i][-1]))
             fig.savefig(dst_path+foldername+subfolder+'/comparing/comparing w ground truth '+str(len(seglist)).zfill(2)+'.jpg')
             plt.close(fig)
             
+    for Jidx in range(21):
+        for i in [3,4]:
+            fig = plt.figure(1)
+            plt.title('matching : movment ' +str(i) + '\n at coordinated ' + str(Jidx))
+            
+            plt.plot(gt_data[i][:,Jidx],'c--',linewidth = 5.0,label='GT')
+            for iiidx,ii in enumerate(np.where(np.array(idxlist)==i)[0]):
+                Sta = seglist[ii][0]
+                End = seglist[ii][1]
+                offset = test_data[Sta,Jidx]-gt_data[i][0,Jidx]
+                plt.plot(test_data[Sta:End,Jidx]-offset,color = Color[iiidx],label=str(i)+'-'+str(iiidx+1))  
+            plt.legend( loc=1)
+            
+            fig.savefig(dst_path+foldername+'/coordinate '+str(Jidx)+'/comparing/Total_'+str(i)+'.jpg')
+            plt.close(fig)
     
     for i in order.keys():
         AVGdist[i].append(avgdist[i])    
-        
+    
+    text_file.write("\n === Total frame === \n"  )
+    text_file.write(" %s \n:" %str(test_data.shape[0]) )    
     text_file.write("\n === seglist === \n"  )
     for i in range(len(seglist)):
         text_file.write(" %s :" %str(idxlist[i]) )
@@ -376,7 +394,8 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
         for jj in range(21):
             if jj == 0:
                subdistlist[i][idxcnt[i]] = [] 
-            subdistlist[i][idxcnt[i]].append(float(np.round(avgsubdist[jj][iidx],2)))
+#            subdistlist[i][idxcnt[i]].append(float(np.round(avgsubdist[jj][iidx],2)))
+            subdistlist[i][idxcnt[i]].append(avgsubdist[jj][iidx])
         idxcnt[i] += 1
 
     for i in subdistlist.keys():
