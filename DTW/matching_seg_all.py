@@ -297,66 +297,39 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
 #-================================================================
         if segend:
             pass
-        elif (not deflag):
-            seglist.append([test_idx,test_data.shape[0]-1]) 
-            endidx = test_data.shape[0]-1
-            if len(order[oidx])>1:
-                # === no decrese happen 
-                for i in  order[oidx]: 
-    
-                    test_p = test_data[:,:] + np.atleast_2d((gt_data[i][0,:]-test_data[test_idx,:]))
-                    dist_p[i], _ = fastdtw(gt_data[i], test_p[test_idx:,:], Jweight, dist=wt_euclidean)                      
-                    if minval>dist_p[i]:
-                        minval = dist_p[i] 
-                        minidx = i  
-                    gt_idx =  minidx 
-                    idxlist.append(gt_idx)
-                    
+        else:
+            seglist.append([test_idx,j]) 
+            endidx = j
+            
+            if (not deflag):
+                if len(order[oidx])>1:
+                    # === no decrese happen 
+                    for i in  order[oidx]: 
+        
+                        test_p = test_data[:,:] + np.atleast_2d((gt_data[i][0,:]-test_data[test_idx,:]))
+                        dist_p[i], _ = fastdtw(gt_data[i], test_p[test_idx:,:], Jweight, dist=wt_euclidean)                      
+                        if minval>dist_p[i]:
+                            minval = dist_p[i] 
+                            minidx = i  
+                        gt_idx =  minidx 
+                        idxlist.append(gt_idx)
+            
+            elif (not chk_flag) | (cnt > 0):
+
+                oidx = gt_idx
+                
             # === avg dist test ===
-#            dist_p, path_p = orifastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
+
             dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
             avgdist[gt_idx].append(dist_p/len(path_p))       
             DTW_path[gt_idx].append(path_p)    
             for subidx in range(21):
-               subdist = 0
-               for ii in xrange(len(path_p)):
-                   subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
-               avgsubdist[subidx].append((subdist)/len(path_p))             
+                subdist = 0
+                for ii in xrange(len(path_p)):
+                    subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
+                avgsubdist[subidx].append((subdist)/len(path_p))             
             # ===   
-            
-            
-            test_idx = endidx+1
-            
-            
-        elif (not chk_flag):
-            seglist.append([test_idx,j]) 
-            endidx =  j
-            oidx = gt_idx
-            # === avg dist test ===
-            dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
-            avgdist[gt_idx].append(dist_p/len(path_p)) 
-            DTW_path[gt_idx].append(path_p)
-            for subidx in range(21):
-                subdist = 0
-                for ii in xrange(len(path_p)):
-                    subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
-                avgsubdist[subidx].append((subdist)/len(path_p))
-            # ===             
-            test_idx = endidx+1                 
-        elif cnt > 0:
-            seglist.append([test_idx,idx_cmp]) 
-            endidx =  idx_cmp            
-            oidx = gt_idx
-            # === avg dist test ===
-            dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
-            avgdist[gt_idx].append(dist_p/len(path_p)) 
-            DTW_path[gt_idx].append(path_p)
-            for subidx in range(21):
-                subdist = 0
-                for ii in xrange(len(path_p)):
-                    subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
-                avgsubdist[subidx].append((subdist)/len(path_p))
-            # ===            
+               
             test_idx = endidx+1
 
 
