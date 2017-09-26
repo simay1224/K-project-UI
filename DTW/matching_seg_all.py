@@ -42,8 +42,8 @@ gt_data[4] = data['GT_4'][:]
 
 
 
-#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
 dst_path  = './figure/0920/7 joints Weight/'
 
@@ -251,36 +251,67 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                 print ('===========\n')
          
       
-        if cnt > 0:
-           seglist.append([test_idx,idx_cmp]) 
-           endidx =  idx_cmp           
-           oidx = gt_idx
-           # === avg dist test ===
-#           dist_p, path_p = orifastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
-           dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
-           avgdist[gt_idx].append(dist_p/len(path_p)) 
-           DTW_path[gt_idx].append(path_p)
-           for subidx in range(21):
-               subdist = 0
-               for ii in xrange(len(path_p)):
-                   subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
-               avgsubdist[subidx].append((subdist)/len(path_p))
-           # ===
-           test_idx = endidx+1
-        elif (j == (test_data.shape[0]-1))&(not segend) & (not deflag) :
+#        if cnt > 0:
+#           seglist.append([test_idx,idx_cmp]) 
+#           endidx =  idx_cmp           
+#           oidx = gt_idx
+#           # === avg dist test ===
+##           dist_p, path_p = orifastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
+#           dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
+#           avgdist[gt_idx].append(dist_p/len(path_p)) 
+#           DTW_path[gt_idx].append(path_p)
+#           for subidx in range(21):
+#               subdist = 0
+#               for ii in xrange(len(path_p)):
+#                   subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
+#               avgsubdist[subidx].append((subdist)/len(path_p))
+#           # ===
+#           test_idx = endidx+1
+#        elif (j == (test_data.shape[0]-1))&(not segend) & (not deflag) :
+#            seglist.append([test_idx,test_data.shape[0]-1]) 
+#            endidx = test_data.shape[0]-1
+#            if len(order[oidx])>1:
+#            # === no decrease happen 
+#                for i in  order[oidx]: 
+#                    test_p = test_data[:,:] + np.atleast_2d((gt_data[i][0,:]-test_data[test_idx,:]))
+#                    dist_p[i], _ = fastdtw(gt_data[i], test_p[test_idx:,:],Jweight, dist=wt_euclidean)                     
+#                    if minval>dist_p[i]:
+#                        minval = dist_p[i] 
+#                        minidx = i  
+#                    gt_idx =  minidx 
+#                    idxlist.append(gt_idx)  
+#           
+#            # === avg dist test ===
+##            dist_p, path_p = orifastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
+#            dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
+#            avgdist[gt_idx].append(dist_p/len(path_p))       
+#            DTW_path[gt_idx].append(path_p)    
+#            for subidx in range(21):
+#               subdist = 0
+#               for ii in xrange(len(path_p)):
+#                   subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
+#               avgsubdist[subidx].append((subdist)/len(path_p))             
+#            # ===    
+#            
+#            test_idx = endidx+1
+#-================================================================
+        if segend:
+            pass
+        elif (not deflag):
             seglist.append([test_idx,test_data.shape[0]-1]) 
             endidx = test_data.shape[0]-1
             if len(order[oidx])>1:
-            # === no decrease happen 
+                # === no decrese happen 
                 for i in  order[oidx]: 
+    
                     test_p = test_data[:,:] + np.atleast_2d((gt_data[i][0,:]-test_data[test_idx,:]))
-                    dist_p[i], _ = fastdtw(gt_data[i], test_p[test_idx:,:],Jweight, dist=wt_euclidean)                     
+                    dist_p[i], _ = fastdtw(gt_data[i], test_p[test_idx:,:], Jweight, dist=wt_euclidean)                      
                     if minval>dist_p[i]:
                         minval = dist_p[i] 
                         minidx = i  
                     gt_idx =  minidx 
-                    idxlist.append(gt_idx)  
-           
+                    idxlist.append(gt_idx)
+                    
             # === avg dist test ===
 #            dist_p, path_p = orifastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
             dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
@@ -291,9 +322,44 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                for ii in xrange(len(path_p)):
                    subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
                avgsubdist[subidx].append((subdist)/len(path_p))             
-            # ===    
+            # ===   
+            
             
             test_idx = endidx+1
+            
+            
+        elif (not chk_flag):
+            seglist.append([test_idx,j]) 
+            endidx =  j
+            oidx = gt_idx
+            # === avg dist test ===
+            dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
+            avgdist[gt_idx].append(dist_p/len(path_p)) 
+            DTW_path[gt_idx].append(path_p)
+            for subidx in range(21):
+                subdist = 0
+                for ii in xrange(len(path_p)):
+                    subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
+                avgsubdist[subidx].append((subdist)/len(path_p))
+            # ===             
+            test_idx = endidx+1                 
+        elif cnt > 0:
+            seglist.append([test_idx,idx_cmp]) 
+            endidx =  idx_cmp            
+            oidx = gt_idx
+            # === avg dist test ===
+            dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
+            avgdist[gt_idx].append(dist_p/len(path_p)) 
+            DTW_path[gt_idx].append(path_p)
+            for subidx in range(21):
+                subdist = 0
+                for ii in xrange(len(path_p)):
+                    subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
+                avgsubdist[subidx].append((subdist)/len(path_p))
+            # ===            
+            test_idx = endidx+1
+
+
        
         for i in range(21):
             fig = plt.figure(1)
