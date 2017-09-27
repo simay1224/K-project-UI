@@ -20,7 +20,7 @@ from w_fastdtw import fastdtw,dtw
 import matplotlib.pyplot as plt
 from scipy.ndimage.filters import gaussian_filter1d as gf
 from scipy.linalg import norm
-
+from clip import clip
 def wt_euclidean(u,v,w):
     u = _validate_vector(u)
     v = _validate_vector(v)
@@ -42,10 +42,10 @@ gt_data[4] = data['GT_4'][:]
 
 
 
-#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
-dst_path  = './figure/0920/7 joints Weight/'
+dst_path  = './figure/0926/7 joints Weight/'
 
 decTh     = 2000
 
@@ -189,9 +189,8 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
               
             else: 
                 test_data_p  = test_data[:,:] + np.atleast_2d((gt_data[gt_idx][0,:]-test_data[test_idx,:]))
-#                dist_p, path_p = orifastdtw(gt_data[gt_idx], test_data_p[test_idx:j,:], dist=euclidean)
-
                 dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:j,:],Jweight, dist=wt_euclidean)
+                
                 if chk_flag:  # in check global min status
                     cnt +=1
                    
@@ -204,28 +203,42 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                         
                     elif cnt == 20:
                         
-                        chk_flag = False
-    
+                        chk_flag = False   
                         tgrad = 0
     
                         for ii in range(testlist.shape[1]):
                             tgrad += np.gradient(gf(testlist[:,ii],3))**2
                             
-                        tgrad = tgrad**0.5
-    
+                        tgrad = tgrad**0.5    
                         endidx = np.argmin(tgrad[idx_cmp-test_idx-10:idx_cmp-test_idx+10])+(idx_cmp-10) 
                         # === avg dist test ===
-#                        dist_p, path_p = orifastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
+
                         dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
-                        avgdist[gt_idx].append(float(np.round(dist_p/len(path_p),2)))
-#                        TMP = 0
+#                        avgdist[gt_idx].append(float(np.round(dist_p/len(path_p),2)))
+#                        if j == 79:
+#                            pdb.set_trace()
+                        uni_data = clip(test_data_p[test_idx:endidx,:])
+                        uni_dist_p, uni_path_p = fastdtw(gt_data[gt_idx], uni_data,Jweight, dist=wt_euclidean)
+                        avgdist[gt_idx].append(float(np.round(uni_dist_p/len(uni_path_p),2)))
+                        
+                        
+#                        for subidx in range(21):
+#                            subdist = 0
+#                            for ii in xrange(len(path_p)):
+#                                subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
+#
+#                            avgsubdist[subidx].append(float(np.round(subdist/len(path_p),2)))
+
+                        # ==== test uni-dist ====  
                         for subidx in range(21):
                             subdist = 0
-                            for ii in xrange(len(path_p)):
-                                subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
-#                            TMP += subdist**2
-                            avgsubdist[subidx].append(float(np.round(subdist/len(path_p),2)))
-#                        pdb.set_trace()
+                            for ii in xrange(len(uni_path_p)):
+                                subdist += np.abs(gt_data[gt_idx][uni_path_p[ii][0],subidx]-uni_data[uni_path_p[ii][1],subidx])
+
+                            avgsubdist[subidx].append(float(np.round(subdist/len(uni_path_p),2)))
+
+
+
                         DTW_path[gt_idx].append(path_p)
                         # ===
                         
@@ -250,52 +263,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                 distp_prev  = dist_p 
             
                 print ('===========\n')
-         
-      
-#        if cnt > 0:
-#           seglist.append([test_idx,idx_cmp]) 
-#           endidx =  idx_cmp           
-#           oidx = gt_idx
-#           # === avg dist test ===
-##           dist_p, path_p = orifastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
-#           dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
-#           avgdist[gt_idx].append(dist_p/len(path_p)) 
-#           DTW_path[gt_idx].append(path_p)
-#           for subidx in range(21):
-#               subdist = 0
-#               for ii in xrange(len(path_p)):
-#                   subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
-#               avgsubdist[subidx].append((subdist)/len(path_p))
-#           # ===
-#           test_idx = endidx+1
-#        elif (j == (test_data.shape[0]-1))&(not segend) & (not deflag) :
-#            seglist.append([test_idx,test_data.shape[0]-1]) 
-#            endidx = test_data.shape[0]-1
-#            if len(order[oidx])>1:
-#            # === no decrease happen 
-#                for i in  order[oidx]: 
-#                    test_p = test_data[:,:] + np.atleast_2d((gt_data[i][0,:]-test_data[test_idx,:]))
-#                    dist_p[i], _ = fastdtw(gt_data[i], test_p[test_idx:,:],Jweight, dist=wt_euclidean)                     
-#                    if minval>dist_p[i]:
-#                        minval = dist_p[i] 
-#                        minidx = i  
-#                    gt_idx =  minidx 
-#                    idxlist.append(gt_idx)  
-#           
-#            # === avg dist test ===
-##            dist_p, path_p = orifastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:], dist=euclidean)
-#            dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
-#            avgdist[gt_idx].append(dist_p/len(path_p))       
-#            DTW_path[gt_idx].append(path_p)    
-#            for subidx in range(21):
-#               subdist = 0
-#               for ii in xrange(len(path_p)):
-#                   subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
-#               avgsubdist[subidx].append((subdist)/len(path_p))             
-#            # ===    
-#            
-#            test_idx = endidx+1
-#-================================================================
+
         if segend:
             pass
         else:
@@ -322,13 +290,25 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
             # === avg dist test ===
 
             dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:endidx,:],Jweight, dist=wt_euclidean)
-            avgdist[gt_idx].append(float(np.round(dist_p/len(path_p),2)))       
+#            avgdist[gt_idx].append(float(np.round(dist_p/len(path_p),2)))     
+            uni_data = clip(test_data_p[test_idx:endidx,:])
+            uni_dist_p, uni_path_p = fastdtw(gt_data[gt_idx], uni_data,Jweight, dist=wt_euclidean)
+            avgdist[gt_idx].append(float(np.round(uni_dist_p/len(uni_path_p),2)))            
+            
             DTW_path[gt_idx].append(path_p)    
+#            for subidx in range(21):
+#                subdist = 0
+#                for ii in xrange(len(path_p)):
+#                    subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
+#                avgsubdist[subidx].append(float(np.round(subdist/len(path_p),2)))  
+
+            # ==== test uni-dist ====  
             for subidx in range(21):
                 subdist = 0
-                for ii in xrange(len(path_p)):
-                    subdist += np.abs(gt_data[gt_idx][path_p[ii][0],subidx]-test_data_p[path_p[ii][1],subidx])
-                avgsubdist[subidx].append(float(np.round(subdist/len(path_p),2)))            
+                for ii in xrange(len(uni_path_p)):
+                    subdist += np.abs(gt_data[gt_idx][uni_path_p[ii][0],subidx]-uni_data[uni_path_p[ii][1],subidx])
+
+                avgsubdist[subidx].append(float(np.round(subdist/len(uni_path_p),2)))          
             # ===   
                
             test_idx = endidx+1
@@ -372,6 +352,21 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
             
             fig.savefig(dst_path+foldername+'/coordinate '+str(Jidx)+'/comparing/Total_'+str(i)+'.jpg')
             plt.close(fig)
+            # === unified plot
+            fig = plt.figure(1)
+            plt.title('unified matching : movment ' +str(i) + '\n at coordinated ' + str(Jidx))
+            
+            plt.plot(gt_data[i][:,Jidx],'c--',linewidth = 5.0,label='GT')
+            for iiidx,ii in enumerate(np.where(np.array(idxlist)==i)[0]):
+                Sta = seglist[ii][0]
+                End = seglist[ii][1]
+                uni_data = clip(test_data[Sta:End,:])
+                offset = test_data[Sta,Jidx]-gt_data[i][0,Jidx]
+                plt.plot(uni_data[:,Jidx]-offset,color = Color[iiidx],label=str(i)+'-'+str(iiidx+1))  
+            plt.legend( loc=1)
+            
+            fig.savefig(dst_path+foldername+'/coordinate '+str(Jidx)+'/comparing/unified Total_'+str(i)+'.jpg')
+            plt.close(fig)           
     
     for i in order.keys():
         AVGdist[i].append(avgdist[i])    
@@ -405,7 +400,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
             for qqidx,qq in enumerate(subdistlist[i][jj]):
                 if (qqidx %9)==0:
                     text_file.write("\n\n")               
-                text_file.write(" %s " %str(qq) ) 
+                text_file.write(" %0.2f " %qq ) 
 #    pdb.set_trace()
             
             
@@ -424,8 +419,8 @@ for i in order.keys():
     for j in range(len(AVGdist[i])):
         tmp[i] = tmp[i]+AVGdist[i][j]
     if tmp[i] != []:
-        tmp[i] = [np.mean(tmp[i]),np.std(tmp[i])] 
-        text_file_total.write(" === avgerage distant and std in movement %s === \n"%str(i) )
+        tmp[i] = [float(np.round(np.mean(tmp[i]),2)),float(np.round(np.std(tmp[i]),2))] 
+        text_file_total.write("\n === avgerage distant and std in movement %s === \n"%str(i) )
         text_file_total.write(" %s \n" %str(tmp[i]) )
 
 text_file_total.close()
