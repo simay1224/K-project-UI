@@ -48,9 +48,9 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
-mdata_all  = cPickle.load(file(src_path+'Andy_2017-03-06 02.17.39 PM_ex4_FPS30_motion_unified.pkl'))
+#mdata_all  = cPickle.load(file(src_path+'Andy_2017-03-06 02.17.39 PM_ex4_FPS30_motion_unified.pkl'))
 
-
+mdata_all  = cPickle.load(file('D:/Project/K_project/data/unified data array/Unified_KData/Andy_data201612151615_unified_ex4.pkl','rb'))
 
 
 
@@ -74,7 +74,7 @@ ax = fig.add_subplot(111, projection='3d')
 
 
     
-for frame_no in xrange(700,775):#min(kNUM_FRAMES,NUM_FRAMES)):
+for frame_no in xrange(954):#min(kNUM_FRAMES,NUM_FRAMES)):
     plt.cla()
     
 
@@ -140,5 +140,5 @@ for frame_no in xrange(700,775):#min(kNUM_FRAMES,NUM_FRAMES)):
     ax.set_zlabel('Y axis')
     plt.legend( loc=1)
     plt.draw()
-    plt.pause(1.0/10)
+    plt.pause(1.0/30)
 
