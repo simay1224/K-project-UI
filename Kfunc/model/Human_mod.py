@@ -169,7 +169,7 @@ def human_mod_pts(Body,array= False, limb = True):
 #        return J
     if array :
         for i in [4,5,6,8,9,10,20]:
-            if i == 0 :            
+            if i == 4 :            
                 Jary = J[0]
             else:
                 Jary = np.vstack([Jary, J[i]])

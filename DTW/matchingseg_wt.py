@@ -113,8 +113,8 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
 #                pdb.set_trace()
                 if (len(order[oidx])>1 ) & (not onedeflag):#((j- (test_idx+1)) <=80):
                     for ii in order[oidx]:
-                        test_p = test_data[:,:] + np.atleast_2d((gt_data[ii][0,:]-test_data[test_idx,:]))
-                        dist_p[ii], _ = fastdtw(gt_data[ii], test_p[test_idx:j,:], Jweight, dist=wt_euclidean)  
+                        test_p = testlist[:,:] + np.atleast_2d((gt_data[ii][0,:]-testlist[0,:]))
+                        dist_p[ii], _ = fastdtw(gt_data[ii], test_p, Jweight, dist=wt_euclidean)  
                         if (j == test_idx+1):
                             dpfirst[ii] = dist_p[ii]
                         else: # j > test_idx+1
@@ -153,8 +153,8 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
 
                       
                 else:  
-                    test_data_p  = test_data[:,:] + np.atleast_2d((gt_data[gt_idx][0,:]-test_data[test_idx,:]))
-                    dist_p, _ = fastdtw(gt_data[gt_idx], test_data_p[test_idx:j,:], Jweight, dist=wt_euclidean)
+                    test_data_p  = testlist[:,:] + np.atleast_2d((gt_data[gt_idx][0,:]-testlist[0,:]))
+                    dist_p, _ = fastdtw(gt_data[gt_idx], test_data_p, Jweight, dist=wt_euclidean)
     
                     if (j == test_idx+1):
                         dpfirst = dist_p
@@ -166,8 +166,8 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                             distp_prev  = dist_p
           
         else: 
-            test_data_p  = test_data[:,:] + np.atleast_2d((gt_data[gt_idx][0,:]-test_data[test_idx,:]))
-            dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p[test_idx:j,:], Jweight, dist=wt_euclidean)
+            test_data_p  = testlist[:,:] + np.atleast_2d((gt_data[gt_idx][0,:]-testlist[0,:]))
+            dist_p, path_p = fastdtw(gt_data[gt_idx], test_data_p, Jweight, dist=wt_euclidean)
 
             if chk_flag:  # in check global min status
                 cnt +=1
@@ -190,7 +190,7 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
                         
                     tgrad = tgrad**0.5
 
-                    endidx = np.argmin(tgrad[idx_cmp-test_idx-10:idx_cmp-test_idx+10])+(idx_cmp-10) 
+                    endidx = np.argmin(tgrad[idx_cmp-test_idx-10:idx_cmp-test_idx+19])+(idx_cmp-10) 
                     seglist.append([test_idx,endidx])                       
                     test_idx = endidx+1
                     cnt      = 0
@@ -246,8 +246,8 @@ while not ((order[oidx] == 'end') | (j == (test_data.shape[0]-1))):
             # === no decrese happen 
             for i in  order[oidx]: 
 
-                test_p = test_data[:,:] + np.atleast_2d((gt_data[i][0,:]-test_data[test_idx,:]))
-                dist_p[i], _ = fastdtw(gt_data[i], test_p[test_idx:,:], Jweight, dist=wt_euclidean)                      
+                test_p = testlist[:,:] + np.atleast_2d((gt_data[i][0,:]-testlist[0,:]))
+                dist_p[i], _ = fastdtw(gt_data[i], test_p, Jweight, dist=wt_euclidean)                      
                 if minval>dist_p[i]:
                     minval = dist_p[i] 
                     minidx = i  

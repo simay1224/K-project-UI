@@ -131,15 +131,15 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
             print j
     
             if jidx == 0:
-                testlist = test_data[j,:]
+                seqlist = test_data[j,:]
             else:
-                testlist = np.vstack([testlist,test_data[j,:]])
+                seqlist = np.vstack([seqlist,test_data[j,:]])
           
             if not deflag :
                 if np.mod(j-(test_idx+1),10) == 0: # check every 10 frames
                     if (len(order[oidx])>1 ) & (not onedeflag):#((j- (test_idx+1)) <=60):
                         for ii in order[oidx]:
-                            test_p = test_data[:,:] + np.atleast_2d((gt_data[ii][0,:]-test_data[test_idx,:]))
+                            test_p = seqlist[:,:] + np.atleast_2d((gt_data[ii][0,:]-seqlist[test_idx,:]))
 
 #                            dist_p[ii], _ = orifastdtw(gt_data[ii], test_p[test_idx:j,:], dist=euclidean)
                             
@@ -206,8 +206,8 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                         chk_flag = False   
                         tgrad = 0
     
-                        for ii in range(testlist.shape[1]):
-                            tgrad += np.gradient(gf(testlist[:,ii],3))**2
+                        for ii in range(seqlist.shape[1]):
+                            tgrad += np.gradient(gf(seqlist[:,ii],3))**2
                             
                         tgrad = tgrad**0.5    
                         endidx = np.argmin(tgrad[idx_cmp-test_idx-10:idx_cmp-test_idx+10])+(idx_cmp-10) 

@@ -98,7 +98,7 @@ def rel_trk(joints): # tracking term
 def rel_rate(Rb,Rk,Rt,order,flen = 6):
     Relary = np.zeros(21)
     if (len(Rb[0])>=flen) & (len(Rk[0])>=flen) & (len(Rt[0])>=flen) :
-        Rel = {}
+        Rel = copy.copy(rel)
         
         if order == jord :
             for j in order:

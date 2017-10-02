@@ -9,7 +9,7 @@ from pykinect2 import PyKinectV2
 from pykinect2.PyKinectV2 import *
 from pykinect2 import PyKinectRuntime
 #from Kfunc        import *
-from Kfunc.IO     import typetext    as Txt
+from Kfunc.IO     import *
 from Kfunc.finger import *
 from Kfunc.skel   import skel
 from Kfunc.model  import Human_mod   as Hmod
@@ -22,7 +22,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.externals import joblib
-
+from w_fastdtw import fastdtw,dtw
+from scipy.ndimage.filters import gaussian_filter1d as gf
+from scipy.spatial.distance import euclidean,_validate_vector
+from scipy.linalg import norm
 
 #if sys.hexversion >= 0x03000000:
 #    import _thread as thread
@@ -42,9 +45,11 @@ SKELETON_COLORS = [pygame.color.THECOLORS["red"],
                   pygame.color.THECOLORS["purple"], 
                   pygame.color.THECOLORS["yellow"], 
                   pygame.color.THECOLORS["violet"]]
+# GPR
+limbidx = np.array([4,5,6,8,9,10,20]) 
+gp      = joblib.load('GPR_cluster_800_meter_fix_ex4.pkl')
+[MIN,MAX] = h5py.File('model_CNN_0521_K2M_rel.h5','r')['minmax'][:]
 
-limbidx = [4,5,6,8,9,10,20] 
-gp      = joblib.load('test.pkl')
 
 # DTW
 order    = {}
@@ -53,6 +58,24 @@ order[1] = [3]
 order[2] = 'end'
 order[3] = [4]
 order[4] = [2,3]
+
+data       = h5py.File('GT_kinect_EX4_40_40_40.h5','r')
+gt_data    = {}
+gt_data[1] = data['GT_kinect_1'][:]
+gt_data[2] = data['GT_kinect_2'][:]
+gt_data[3] = data['GT_kinect_3'][:]
+gt_data[4] = data['GT_kinect_4'][:]
+
+Jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,\
+                    0., 0., 0., 3., 3., 3., 9., 9., 9.,\
+                    0., 0., 0.])
+Jweight = Jweight/sum(Jweight)*1.5
+
+def wt_euclidean(u,v,w):
+    u = _validate_vector(u)
+    v = _validate_vector(v)
+    dist = norm(w*(u - v))
+    return dist
 
 class BodyGameRuntime(object):
     def __init__(self):
@@ -90,10 +113,10 @@ class BodyGameRuntime(object):
         self.jorder  = [0,1,2,3,4,5,6,8,9,10,20] #joints order we care
         
         # dtw parameter initialize
-        
+        self.d_decTh       = 2000
         self.d_cnt         = 0
         self.d_dcnt        = 0      # decreasing cnt
-        self.d_test_idx    = 0
+#        self.d_test_idx    = 0
         
         self.d_chk_flag    = False
         self.d_deflag      = False  # decreasing flag
@@ -105,11 +128,11 @@ class BodyGameRuntime(object):
         self.d_oidx     = 0      # initail
         self.d_gt_idx   = 0
         self.d_idxlist  = []
-        self.d_seglist  = []
+#        self.d_seglist  = []
         self.d_j        = 0        
             
         #
-
+        
         self.d_dpfirst     = {}
         self.d_dist_p      = {}
         self.d_dcnt        = 0 
@@ -117,8 +140,10 @@ class BodyGameRuntime(object):
         self.d_deflag_mul  = {}
         self.d_minval      = np.inf 
         self.d_onedeflag   = False
-        self.d_segend      = False        
-        
+#        self.d_segend      = False        
+        self.d_seqlist     = np.array([])
+        self.d_segini      = True
+        self.d_presv_size  = 0
         #
         
         time.sleep(5)
@@ -298,34 +323,184 @@ class BodyGameRuntime(object):
                     #draw skel
                     skel.draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface)
                     skel.draw_Rel_joints(Jps,Rel,self._frame_surface)
- 
-                    # =================  GPR ====================
-                    
-                    _, modJary = Hmod.human_mod_pts(joints,True) #modJary is 21*1 array 
-                    if not all(ii>0.6 for ii in Relary[limbidx]): # check if contains unreliable joints
-                                                
-                        reconJ     = GPR.gp_pred(modJary, gp)
-                        unrelidx = np.where(Relary[limbidx]<0.6)[0]
+                    if not Relary == []:
+                        # =================  GPR ====================
                         
-                        # use unrelidx and reconJ to replace unreliable joints in modJary 
-                    else: #all joint is reliable
+                        _, modJary = Hmod.human_mod_pts(joints,True) #modJary is 7*3 array 
+                        modJary = modJary.flatten().reshape(-1,21)   #change shape to 1*21 array
                         reconJ = modJary
-                    
-                    # =================== GPR end ===================
-                    # =================== DTW matching ==============
-                    
-                    if (len(order[self.d_oidx])>1 ):
-                        for ii in order[self.d_oidx]:
-                            self.d_deflag_mul[ii] = False 
-                    else:
-                       self.d_gt_idx = order[self.d_oidx][0] 
-                       self.d_idxlist.append(self.d_gt_idx)                    
+#                        if not all(ii>0.6 for ii in Relary[limbidx]): # check if contains unreliable joints
+#                            
+##                            print('==================')
+##                            print('=======GPR========')
+##                            print('==================')
+#                            mask = np.zeros([7,3])
+#                            modJary_norm = (modJary-MIN)/(MAX-MIN)                        
+#                            reconJ       = (GPR.gp_pred(modJary_norm, gp)*(MAX-MIN)+MIN)  # reconJ is 1*21 array
+#                            unrelidx = np.where(Relary[limbidx]<0.6)[0]   # limbidx = [4,5,6,8,9,10,20]
+#
+#                            mask[unrelidx,:] = np.array([1,1,1])
+#                            modJary[:,mask.flatten()==1] = reconJ[:,mask.flatten()==1]
+#                                                        
+#                            # use unrelidx and reconJ to replace unreliable joints in modJary 
+#                        else: #all joint is reliable
+##                            print('================ All GOOD ================')
+#                            reconJ = modJary      # reconJ is 1*21 array
                         
+                        # =================== GPR end ===================
+                        # =================== DTW matching ==============
+                        
+                        if not (order[self.d_oidx] == 'end'):
+                            
+                            if self.d_segini:
+                                self.d_segini = False
+                                if (len(order[self.d_oidx])>1 ):
+                                    for ii in order[self.d_oidx]:
+                                        self.d_deflag_mul[ii] = False 
+                                else:
+                                   self.d_gt_idx = order[self.d_oidx][0] 
+                                   self.d_idxlist.append(self.d_gt_idx)                    
+                                    
+                            if len(self.d_seqlist) == 0:
+                                self.d_seqlist = reconJ
+                            else:
+                                self.d_seqlist = np.vstack([self.d_seqlist,reconJ])
+                                
+                            if not self.d_deflag: 
 
+                                if np.mod(self.d_seqlist.shape[0]-self.d_presv_size-1,10) == 0: # check every 10 frames    
+                                    if (len(order[self.d_oidx])>1 ) & (not self.d_onedeflag):
+                                        for ii in order[self.d_oidx]:
+                                            test_p = self.d_seqlist + np.atleast_2d((gt_data[ii][0,:]-self.d_seqlist[0,:]))
+                                            self.d_dist_p[ii], _ = fastdtw(gt_data[ii], test_p,Jweight, dist=wt_euclidean)
+                                            
+                                            if (self.d_seqlist.shape[0] == 1+self.d_presv_size):
+                                                if self.d_presv_size != 0:
+                                                    self.d_dist_p[ii], _ = fastdtw(gt_data[self.d_gt_idx], test_data_p[:2],Jweight, dist=wt_euclidean)
+                                                    
+                                                self.d_dpfirst[ii] = self.d_dist_p[ii]
+                                                
+                                            else: # j > test_idx+1
+                                                 if (self.d_dpfirst[ii] - self.d_dist_p[ii])>self.d_decTh:
+                                                     print('deflag on')
+                                                     self.d_deflag_mul[ii] = True
+                                                     self.d_onedeflag = True             
+                                                     
+                                        if self.d_onedeflag:#:   
+                                                                                      
+                                            seg = []
+                                            for dekey in self.d_deflag_mul:
+                                                if self.d_deflag_mul[dekey] == True:
+                                                    seg.append(dekey)
+                                            if len(seg)==1:
+                                                self.d_gt_idx = seg[0]
+                                            
+                                                print('movment is '+str(self.d_gt_idx))
+                                            else:  # len(seg) > 1:
+                                        
+                                                for ii in seg:
+                                                    if self.d_minval>self.d_dist_p[ii]:
+                                                        self.d_minval = self.d_dist_p[ii] 
+                                                        minidx = ii
+                                                print('movment is '+str(minidx))
+                                                self.d_gt_idx =  minidx
+                                            self.d_deflag =  True  
+                                             
+                                            self.d_idxlist.append(self.d_gt_idx)
+                                            self.d_distp_prev  = self.d_dist_p[self.d_gt_idx]
+                                            self.d_dpfirst = self.d_dpfirst[self.d_gt_idx]
+                                            
+                                    else:  
+                                        test_data_p  = self.d_seqlist + np.atleast_2d((gt_data[self.d_gt_idx][0,:]-self.d_seqlist[0,:]))
+                                        self.d_dist_p, _ = fastdtw(gt_data[self.d_gt_idx], test_data_p,Jweight, dist=wt_euclidean)
+                                        
+                                        if (self.d_seqlist.shape[0] == 1+self.d_presv_size):
+                                               
+                                            if self.d_presv_size != 0:
+                                                self.d_dist_p, _ = fastdtw(gt_data[self.d_gt_idx], test_data_p[:2],Jweight, dist=wt_euclidean)
+                                                
+                                            self.d_dpfirst = self.d_dist_p    
+                                            
+                                            print('self.d_dpfirst is : %f' %self.d_dpfirst)
+                                        else: # j > test_idx+1
+                                            print('de diff is :%f' %(self.d_dpfirst - self.d_dist_p))
+                                            try:
+                                                if (self.d_dpfirst - self.d_dist_p)>self.d_decTh:
+                                                    print('=========')
+                                                    print('deflag on')
+                                                    print('=========')
+                                                    self.d_deflag = True
+                                                    self.d_distp_prev  = self.d_dist_p                                    
+                                            except:
+                                                pdb.set_trace()
+                                                print('sthing wrong')
+                                                
+                            else: 
+                                test_data_p  = self.d_seqlist + np.atleast_2d((gt_data[self.d_gt_idx][0,:]-self.d_seqlist[0,:]))
+                                self.d_dist_p, path_p = fastdtw(gt_data[self.d_gt_idx], test_data_p,Jweight, dist=wt_euclidean)                                    
+        
+        
+                        
+                                if self.d_chk_flag:  # in check global min status
+                                    self.d_cnt +=1
+                                   
+                                    if self.d_dist_p < self.d_distp_cmp : # find another small value
+                                        self.d_cnt = 1
+                    
+                                        self.d_distp_cmp = self.d_dist_p
+                                        idx_cmp   = self.d_seqlist.shape[0]
+                                        print(' ==== reset ====')
+                                        
+                                    elif self.d_cnt == 20:
+                                        
+                                        self.d_chk_flag = False   
+                                        tgrad = 0
+                    
+                                        for ii in range(self.d_seqlist.shape[1]):
+                                            tgrad += np.gradient(gf(self.d_seqlist[:,ii],3))**2
+                                            
+                                        tgrad = tgrad**0.5    
+                                        endidx = np.argmin(tgrad[idx_cmp-10:idx_cmp+19])+(idx_cmp-10) 
+                           
+                                        # update or reset dtw parameter
+                                        self.d_seqlist = self.d_seqlist[endidx+1:,] # update the seqlist
+                                        self.d_presv_size =self.d_seqlist.shape[0] 
+                                        self.d_cnt      = 0
+                                        self.d_oidx = self.d_gt_idx
 
+        #                                self.d_segend = True
+                                        
+                                        self.d_dpfirst     = {}   # need modify
+                                        self.d_dist_p      = {}   # need modify
+                                        self.d_deflag      = False
+                                        self.d_deflag_mul  = {}
+                                        self.d_minval      = np.inf 
+                                        self.d_onedeflag   = False
+        #                                self.d_segend      = False                                   
+                                        self.d_segini      = True
+        
+                                    
+                                else:  
+                                    
+                                    print self.d_dist_p-self.d_distp_prev
+                                    
+                                    if (self.d_dist_p-self.d_distp_prev)>0:
+                                        print (' ==============  large ====================')
+                    
+                                        self.d_distp_cmp = self.d_distp_prev
+                                        idx_cmp   = self.d_seqlist.shape[0]
+                                        self.d_chk_flag = True
+        
+                    
+                                self.d_distp_prev  = self.d_dist_p 
+                            
+                                          
+                        else:
+                            print('================= exe END ======================')
 
-                    # =================== DTW matching end ===========               
-
+                        
+                        # =================== DTW matching end ===========               
+     
                     #draw unify human model
                     if self.model_draw:
                         modJoints = Hmod.human_mod_pts(joints)
@@ -340,7 +515,7 @@ class BodyGameRuntime(object):
                         
                         Hmod.draw_human_mod_pts(modJoints,ax,keys)
                         
-                        #pdb.set_trace()
+
                     
                     bddic['timestamp'] = TimeS
                     bddic['jointspts'] = Jps   # joint coordinate in color space (2D) 
@@ -350,14 +525,15 @@ class BodyGameRuntime(object):
                     bddic['Rel'] = Rel
                   
             else:
-                Txt.typetext(self._frame_surface,'No human be detected ',(100,100))
+                typetext(self._frame_surface,'No human be detected ',(100,100))
+
                 
             #--find ID and extract skeleton info and draw over--
                     
             cur_frame+=1
             
             if self.vid_rcd == True:
-                Txt.typetext(self._frame_surface,'Video Recording' ,(1550,20),(255,0,0))
+                typetext(self._frame_surface,'Video Recording' ,(1550,20),(255,0,0))
                 
                 self.cimgs.create_dataset('img_'+repr(self.fno).zfill(4), data = frame)
                 self.bdimgs.create_dataset('bd_'+repr(self.fno).zfill(4), data = np.dstack((bodyidx,bodyidx,bodyidx)))
@@ -366,7 +542,7 @@ class BodyGameRuntime(object):
                 self.fno += 1
                 bdjoints.append(bddic)
             else:
-                Txt.typetext(self._frame_surface,'Not Recording' ,(1550,20),(0,255,0))
+                typetext(self._frame_surface,'Not Recording' ,(1550,20),(0,255,0))
             
 
                 
@@ -390,8 +566,8 @@ class BodyGameRuntime(object):
                
             
         self._kinect.close()
-        pygame.quit()
         
+        print self.d_idxlist
         
         if bdjoints !=[]:
            cPickle.dump(bdjoints,file(self.dstr+'.pkl','wb')) 
@@ -399,7 +575,7 @@ class BodyGameRuntime(object):
             self.dataset.close()
         except:
             pass
-
+        pdb.set_trace()
 
 __main__ = "Kinect v2 Body Game"
 
