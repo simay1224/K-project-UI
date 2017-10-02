@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Oct 01 16:23:46 2017
+Created on Mon Oct 02 18:02:12 2017
 
 @author: medialab
 """
@@ -26,6 +26,7 @@ from w_fastdtw import fastdtw,dtw
 from scipy.ndimage.filters import gaussian_filter1d as gf
 from scipy.spatial.distance import euclidean,_validate_vector
 from scipy.linalg import norm
+from collections import defaultdict
 
 #if sys.hexversion >= 0x03000000:
 #    import _thread as thread
@@ -113,37 +114,29 @@ class BodyGameRuntime(object):
         self.jorder  = [0,1,2,3,4,5,6,8,9,10,20] #joints order we care
         
         # dtw parameter initialize
+        
         self.d_decTh       = 2000
         self.d_cnt         = 0
-        self.d_dcnt        = 0      # decreasing cnt
-#        self.d_test_idx    = 0
-        
+        self.d_distp_prev  = 0         
+        self.d_distp_cmp   = np.inf             
+        self.d_oidx        = 0      # initail
+        self.d_gt_idx      = 0 
+        self.d_presv_size  = 0
+        self.d_idxlist     = []   
         self.d_chk_flag    = False
-        self.d_deflag      = False  # decreasing flag
-        
-        self.d_distp_prev  = 0 
-        
-        self.d_distp_cmp  = np.inf     
-        
-        self.d_oidx     = 0      # initail
-        self.d_gt_idx   = 0
-        self.d_idxlist  = []
-#        self.d_seglist  = []
-        self.d_j        = 0        
-            
+        self.exechk        = True
         #
         
         self.d_dpfirst     = {}
         self.d_dist_p      = {}
+        self.d_deflag_mul  = defaultdict(lambda:(bool(False)))  
+#        self.d_minval      = np.inf 
+        self.d_seqlist     = np.array([])                
         self.d_dcnt        = 0 
-        self.d_deflag      = False
-        self.d_deflag_mul  = {}
-        self.d_minval      = np.inf 
+        self.d_deflag      = False   # decreasing flag
         self.d_onedeflag   = False
-#        self.d_segend      = False        
-        self.d_seqlist     = np.array([])
         self.d_segini      = True
-        self.d_presv_size  = 0
+        
         #
         
         time.sleep(5)
@@ -174,15 +167,19 @@ class BodyGameRuntime(object):
         global video
         
         cur_frame=0
+        
+        Rb = defaultdict(list)
+        Rt = defaultdict(list)
+        Rk = defaultdict(list)
+        
+#        Rb = {}
+#        Rt = {}
+#        Rk = {}
 
-        Rb = {}
-        Rt = {}
-        Rk = {}
-
-        for ii in self.jorder:
-            Rk[ii]=[]
-            Rt[ii]=[]
-            Rb[ii]=[]
+#        for ii in self.jorder:
+#            Rk[ii]=[]
+#            Rt[ii]=[]
+#            Rb[ii]=[]
         
         #-all the number in variable names below indicates:        
 
@@ -323,182 +320,179 @@ class BodyGameRuntime(object):
                     #draw skel
                     skel.draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface)
                     skel.draw_Rel_joints(Jps,Rel,self._frame_surface)
-                    if not Relary == []:
-                        # =================  GPR ====================
-                        
-                        _, modJary = Hmod.human_mod_pts(joints,True) #modJary is 7*3 array 
-                        modJary = modJary.flatten().reshape(-1,21)   #change shape to 1*21 array
-                        reconJ = modJary
-#                        if not all(ii>0.6 for ii in Relary[limbidx]): # check if contains unreliable joints
-#                            
-##                            print('==================')
-##                            print('=======GPR========')
-##                            print('==================')
-#                            mask = np.zeros([7,3])
-#                            modJary_norm = (modJary-MIN)/(MAX-MIN)                        
-#                            reconJ       = (GPR.gp_pred(modJary_norm, gp)*(MAX-MIN)+MIN)  # reconJ is 1*21 array
-#                            unrelidx = np.where(Relary[limbidx]<0.6)[0]   # limbidx = [4,5,6,8,9,10,20]
-#
-#                            mask[unrelidx,:] = np.array([1,1,1])
-#                            modJary[:,mask.flatten()==1] = reconJ[:,mask.flatten()==1]
-#                                                        
-#                            # use unrelidx and reconJ to replace unreliable joints in modJary 
-#                        else: #all joint is reliable
-##                            print('================ All GOOD ================')
-#                            reconJ = modJary      # reconJ is 1*21 array
-                        
-                        # =================== GPR end ===================
-                        # =================== DTW matching ==============
-                        
-                        if not (order[self.d_oidx] == 'end'):
+                    
+                    if self.exechk :
+                        if not Relary == []:
+                            # =================  GPR ====================
                             
-                            if self.d_segini:
-                                self.d_segini = False
-                                if (len(order[self.d_oidx])>1 ):
-                                    for ii in order[self.d_oidx]:
-                                        self.d_deflag_mul[ii] = False 
-                                else:
-                                   self.d_gt_idx = order[self.d_oidx][0] 
-                                   self.d_idxlist.append(self.d_gt_idx)                    
-                                    
-                            if len(self.d_seqlist) == 0:
-                                self.d_seqlist = reconJ
-                            else:
-                                self.d_seqlist = np.vstack([self.d_seqlist,reconJ])
+                            _, modJary = Hmod.human_mod_pts(joints,True) #modJary is 7*3 array 
+                            modJary = modJary.flatten().reshape(-1,21)   #change shape to 1*21 array
+                            reconJ = modJary
+    #                        if not all(ii>0.6 for ii in Relary[limbidx]): # check if contains unreliable joints
+    #                            
+    ##                            print('==================')
+    ##                            print('=======GPR========')
+    ##                            print('==================')
+    #                            mask = np.zeros([7,3])
+    #                            modJary_norm = (modJary-MIN)/(MAX-MIN)                        
+    #                            reconJ       = (GPR.gp_pred(modJary_norm, gp)*(MAX-MIN)+MIN)  # reconJ is 1*21 array
+    #                            unrelidx = np.where(Relary[limbidx]<0.6)[0]   # limbidx = [4,5,6,8,9,10,20]
+    #
+    #                            mask[unrelidx,:] = np.array([1,1,1])
+    #                            modJary[:,mask.flatten()==1] = reconJ[:,mask.flatten()==1]
+    #                                                        
+    #                            # use unrelidx and reconJ to replace unreliable joints in modJary 
+    #                        else: #all joint is reliable
+    ##                            print('================ All GOOD ================')
+    #                            reconJ = modJary      # reconJ is 1*21 array
+                            
+                            # =================== GPR end ===================
+                            # =================== DTW matching ==============
+                            
+                            if not (order[self.d_oidx] == 'end'):
                                 
-                            if not self.d_deflag: 
-
-                                if np.mod(self.d_seqlist.shape[0]-self.d_presv_size-1,10) == 0: # check every 10 frames    
-                                    if (len(order[self.d_oidx])>1 ) & (not self.d_onedeflag):
-                                        for ii in order[self.d_oidx]:
-                                            test_p = self.d_seqlist + np.atleast_2d((gt_data[ii][0,:]-self.d_seqlist[0,:]))
-                                            self.d_dist_p[ii], _ = fastdtw(gt_data[ii], test_p,Jweight, dist=wt_euclidean)
-                                            
-                                            if (self.d_seqlist.shape[0] == 1+self.d_presv_size):
-                                                if self.d_presv_size != 0:
-                                                    self.d_dist_p[ii], _ = fastdtw(gt_data[self.d_gt_idx], test_p[:2],Jweight, dist=wt_euclidean)
+                                if self.d_segini:  # new segement/movement start
+                                    self.d_segini = False
+                                    if (len(order[self.d_oidx])==1 ):
+                                       self.d_gt_idx = order[self.d_oidx][0]
+                                       self.d_idxlist.append(self.d_gt_idx) 
+    #                                if (len(order[self.d_oidx])>1 ):
+    #                                    for ii in order[self.d_oidx]:
+    #                                        self.d_deflag_mul[ii] = False 
+    #                                else:
+    #                                   self.d_gt_idx = order[self.d_oidx][0] 
+    #                                   self.d_idxlist.append(self.d_gt_idx)                    
+                                        
+                                if len(self.d_seqlist) == 0: #build sequence list
+                                    self.d_seqlist = reconJ
+                                else:
+                                    self.d_seqlist = np.vstack([self.d_seqlist,reconJ])
+                                    
+                                if not self.d_deflag: # Not yet decreasing
+    
+                                    if np.mod(self.d_seqlist.shape[0]-self.d_presv_size-1,10) == 0: # check every 10 frames    
+                                        if (len(order[self.d_oidx])>1 ) :#& (not self.d_onedeflag): # if candidate more than 1 and not anyone is decreasing
+                                            for ii in order[self.d_oidx]:
+                                                test_p = self.d_seqlist + np.atleast_2d((gt_data[ii][0,:]-self.d_seqlist[0,:]))
+                                                self.d_dist_p[ii], _ = fastdtw(gt_data[ii], test_p,Jweight, dist=wt_euclidean)
+                                                
+                                                if (self.d_seqlist.shape[0] == 1+self.d_presv_size): # new movement initail setting
+                                                    if self.d_presv_size != 0:  # seglist contains some previous joints data
+                                                        # compare the DTW btw Gt and first two row in test_p to get the dpfirst
+                                                        self.d_dist_p[ii], _ = fastdtw(gt_data[self.d_gt_idx], test_p[:2],Jweight, dist=wt_euclidean)
+                                                        
+                                                    self.d_dpfirst[ii] = self.d_dist_p[ii]
                                                     
-                                                self.d_dpfirst[ii] = self.d_dist_p[ii]
+                                                else: 
+                                                     if (self.d_dpfirst[ii] - self.d_dist_p[ii])>self.d_decTh:
+                                                         print('deflag on')
+                                                         self.d_deflag_mul[ii] = True
+                                                         self.d_onedeflag = True             
+                                                         
+                                            if self.d_onedeflag:# at least one DTW value of candidate movements is decreasing    
+                                                                                          
+                                                seg = []
+                                                for dekey in self.d_deflag_mul:
+                                                    if self.d_deflag_mul[dekey] == True:
+                                                        seg.append(dekey)
+                                                if len(seg)==1: # only 1 movement is decreasing
+                                                    self.d_gt_idx = seg[0]
                                                 
-                                            else: # j > test_idx+1
-                                                 if (self.d_dpfirst[ii] - self.d_dist_p[ii])>self.d_decTh:
-                                                     print('deflag on')
-                                                     self.d_deflag_mul[ii] = True
-                                                     self.d_onedeflag = True             
-                                                     
-                                        if self.d_onedeflag:#:   
-                                                                                      
-                                            seg = []
-                                            for dekey in self.d_deflag_mul:
-                                                if self.d_deflag_mul[dekey] == True:
-                                                    seg.append(dekey)
-                                            if len(seg)==1:
-                                                self.d_gt_idx = seg[0]
+                                                    print('movment is '+str(self.d_gt_idx))
+                                                else:  # len(seg) > 1:
                                             
-                                                print('movment is '+str(self.d_gt_idx))
-                                            else:  # len(seg) > 1:
-                                        
-                                                for ii in seg:
-                                                    if self.d_minval>self.d_dist_p[ii]:
-                                                        self.d_minval = self.d_dist_p[ii] 
-                                                        minidx = ii
-                                                print('movment is '+str(minidx))
-                                                self.d_gt_idx =  minidx
-                                            self.d_deflag =  True  
-                                             
-                                            self.d_idxlist.append(self.d_gt_idx)
-                                            self.d_distp_prev  = self.d_dist_p[self.d_gt_idx]
-                                            self.d_dpfirst = self.d_dpfirst[self.d_gt_idx]
-                                            
-                                    else:  
-                                        test_data_p  = self.d_seqlist + np.atleast_2d((gt_data[self.d_gt_idx][0,:]-self.d_seqlist[0,:]))
-                                        self.d_dist_p, _ = fastdtw(gt_data[self.d_gt_idx], test_data_p,Jweight, dist=wt_euclidean)
-                                        
-                                        if (self.d_seqlist.shape[0] == 1+self.d_presv_size):
-                                               
-                                            if self.d_presv_size != 0:
-                                                self.d_dist_p, _ = fastdtw(gt_data[self.d_gt_idx], test_data_p[:2],Jweight, dist=wt_euclidean)
+                                                    minidx = min(self.d_dist_p, key = self.d_dist_p.get)
+                                                    
+    #                                                for ii in seg:
+    #                                                    if self.d_minval>self.d_dist_p[ii]:
+    #                                                        self.d_minval = self.d_dist_p[ii] 
+    #                                                        minidx = ii
+                                                    print('movment is '+str(minidx))
+                                                    self.d_gt_idx =  minidx
+                                                self.d_deflag =  True  
+                                                 
+                                                self.d_idxlist.append(self.d_gt_idx)
+                                                self.d_distp_prev  = self.d_dist_p[self.d_gt_idx]
+                                                self.d_dpfirst = self.d_dpfirst[self.d_gt_idx]
                                                 
-                                            self.d_dpfirst = self.d_dist_p    
+                                        else:  
+                                            test_data_p  = self.d_seqlist + np.atleast_2d((gt_data[self.d_gt_idx][0,:]-self.d_seqlist[0,:]))
+                                            self.d_dist_p, _ = fastdtw(gt_data[self.d_gt_idx], test_data_p,Jweight, dist=wt_euclidean)
                                             
-                                            print('self.d_dpfirst is : %f' %self.d_dpfirst)
-                                        else: # j > test_idx+1
-                                            print('de diff is :%f' %(self.d_dpfirst - self.d_dist_p))
-                                            try:
+                                            if (self.d_seqlist.shape[0] == 1+self.d_presv_size): # new movement initail setting
+                                                   
+                                                if self.d_presv_size != 0:  # seglist contains some previous joints data
+                                                    # compare the DTW btw Gt and first two row in test_p to get the dpfirst
+                                                    self.d_dist_p, _ = fastdtw(gt_data[self.d_gt_idx], test_data_p[:2],Jweight, dist=wt_euclidean)
+                                                    
+                                                self.d_dpfirst = self.d_dist_p    
+                                                
+                                                print('self.d_dpfirst is : %f' %self.d_dpfirst)
+                                            else: 
+                                                print('de diff is :%f' %(self.d_dpfirst - self.d_dist_p))
+                                            
                                                 if (self.d_dpfirst - self.d_dist_p)>self.d_decTh:
                                                     print('=========')
                                                     print('deflag on')
                                                     print('=========')
                                                     self.d_deflag = True
                                                     self.d_distp_prev  = self.d_dist_p                                    
-                                            except:
-                                                pdb.set_trace()
-                                                print('sthing wrong')
-                                                
-                            else: 
-                                test_data_p  = self.d_seqlist + np.atleast_2d((gt_data[self.d_gt_idx][0,:]-self.d_seqlist[0,:]))
-                                self.d_dist_p, path_p = fastdtw(gt_data[self.d_gt_idx], test_data_p,Jweight, dist=wt_euclidean)                                    
-        
-        
-                        
-                                if self.d_chk_flag:  # in check global min status
-                                    self.d_cnt +=1
-                                   
-                                    if self.d_dist_p < self.d_distp_cmp : # find another small value
-                                        self.d_cnt = 1
-                    
-                                        self.d_distp_cmp = self.d_dist_p
-                                        idx_cmp   = self.d_seqlist.shape[0]
-                                        print(' ==== reset ====')
-                                        
-                                    elif self.d_cnt == 20:
-                                        
-                                        self.d_chk_flag = False   
-                                        tgrad = 0
-                    
-                                        for ii in range(self.d_seqlist.shape[1]):
-                                            tgrad += np.gradient(gf(self.d_seqlist[:,ii],3))**2
-                                            
-                                        tgrad = tgrad**0.5    
-                                        endidx = np.argmin(tgrad[idx_cmp-10:idx_cmp+19])+(idx_cmp-10) 
-                           
-                                        # update or reset dtw parameter
-                                        self.d_seqlist = self.d_seqlist[endidx+1:,] # update the seqlist
-                                        self.d_presv_size =self.d_seqlist.shape[0] 
-                                        self.d_cnt      = 0
-                                        self.d_oidx = self.d_gt_idx
-
-
-        #                                self.d_segend = True
-                                        
-                                        self.d_dpfirst     = {}   # need modify
-                                        self.d_dist_p      = {}   # need modify
-                                        self.d_deflag      = False
-                                        self.d_deflag_mul  = {}
-                                        self.d_minval      = np.inf 
-                                        self.d_onedeflag   = False
-        #                                self.d_segend      = False                                   
-                                        self.d_segini      = True
-        
-                                    
-                                else:  
-                                    
-                                    print self.d_dist_p-self.d_distp_prev
-                                    
-                                    if (self.d_dist_p-self.d_distp_prev)>0:
-                                        print (' ==============  large ====================')
-                    
-                                        self.d_distp_cmp = self.d_distp_prev
-                                        idx_cmp   = self.d_seqlist.shape[0]
-                                        self.d_chk_flag = True
-        
-                    
-                                self.d_distp_prev  = self.d_dist_p 
+                         
+                                                    
+                                else: # already start decreasing
+                                    test_data_p  = self.d_seqlist + np.atleast_2d((gt_data[self.d_gt_idx][0,:]-self.d_seqlist[0,:]))
+                                    self.d_dist_p, path_p = fastdtw(gt_data[self.d_gt_idx], test_data_p,Jweight, dist=wt_euclidean)                                    
                             
-                                          
-                        else:
-                            print('================= exe END ======================')
-
+                                    if self.d_chk_flag:  # in check global min status
+                                        self.d_cnt +=1
+                                       
+                                        if self.d_dist_p < self.d_distp_cmp : # find smaller value
+                                            self.d_cnt = 1
+                        
+                                            self.d_distp_cmp = self.d_dist_p
+                                            idx_cmp   = self.d_seqlist.shape[0]
+                                            print(' ==== reset ====')
+                                            
+                                        elif self.d_cnt == 20:
+                                            
+                                            self.d_chk_flag = False   
+                                            tgrad = 0
+                        
+                                            for ii in range(self.d_seqlist.shape[1]): #maybe can include Jweight
+                                                tgrad += np.gradient(gf(self.d_seqlist[:,ii],3))**2
+                                                
+                                            tgrad = tgrad**0.5    
+                                            endidx = np.argmin(tgrad[idx_cmp-10:idx_cmp+19])+(idx_cmp-10) 
+                               
+                                            # update or reset dtw parameter
+                                            self.d_seqlist = self.d_seqlist[endidx+1:,] # update the seqlist
+                                            self.d_presv_size =self.d_seqlist.shape[0] 
+                                            self.d_cnt      = 0
+                                            self.d_oidx = self.d_gt_idx
+    
+                                            
+                                            self.d_dpfirst     = {}   
+                                            self.d_dist_p      = {}   
+                                            self.d_deflag      = False
+                                            self.d_deflag_mul  = defaultdict(lambda:(bool(False)))                                        
+    #                                        self.d_minval      = np.inf 
+                                            self.d_onedeflag   = False                                  
+                                            self.d_segini      = True
+                                      
+                                    else:  
+                                                                          
+                                        if (self.d_dist_p-self.d_distp_prev)>0: #turning point
+                                            print (' ==============  large ====================')
+                        
+                                            self.d_distp_cmp = self.d_distp_prev
+                                            idx_cmp   = self.d_seqlist.shape[0]
+                                            self.d_chk_flag = True
+                                
+                                    self.d_distp_prev  = self.d_dist_p 
+                                                                          
+                            else:
+                                print('================= exe END ======================')
+                                self.exechk = False
                         
                         # =================== DTW matching end ===========               
      
