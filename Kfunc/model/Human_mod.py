@@ -127,7 +127,7 @@ def draw_human_mod(Joints):
         plt.pause(1.0/120)
     
 
-def human_mod_pts(Body):
+def human_mod_pts(Body,array= False, limb = True):
     # Body : include all joints 3D position
     #pdb.set_trace()
     Vec0001 = uni_vec_pts(Body, JointType_SpineBase    , JointType_SpineMid)
@@ -153,9 +153,29 @@ def human_mod_pts(Body):
     J[JointType_ShoulderRight] = J[JointType_SpineShoulder]- Vec2008*Jlen['2008']*factor
     J[JointType_ElbowRight]    = J[JointType_ShoulderRight]- Vec0809*Jlen['0809']*factor
     J[JointType_WristRight]    = J[JointType_ElbowRight]   - Vec0910*Jlen['0910']*factor
-
-    return J
-
+    
+#    if array :
+#        for i in [0,1,2,3,4,5,6,8,9,10,20]:
+#            if i == 0 :            
+#                Jary = J[0]
+#            else:
+#                Jary = np.hstack([Jary, J[i]])
+#        if limb:
+#            return J,Jary[12:]
+#        else:
+#            return J,Jary
+#                
+#    else:       
+#        return J
+    if array :
+        for i in [4,5,6,8,9,10,20]:
+            if i == 0 :            
+                Jary = J[0]
+            else:
+                Jary = np.vstack([Jary, J[i]])
+        return J,Jary                
+    else:       
+        return J
 
 def draw_human_mod_pts(Joints,surface,keys):
     x=[]

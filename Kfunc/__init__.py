@@ -11,3 +11,4 @@ from finger  import *
 from shlder  import *
 from skel    import *
 from model   import *
+from GPR     import *

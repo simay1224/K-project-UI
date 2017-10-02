@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Nov 15 10:27:23 2016
+Created on Sun Oct 01 16:23:46 2017
 
 @author: medialab
 """
@@ -8,19 +8,22 @@ Created on Tue Nov 15 10:27:23 2016
 from pykinect2 import PyKinectV2
 from pykinect2.PyKinectV2 import *
 from pykinect2 import PyKinectRuntime
-#from Kfunc import *
-from Kfunc.IO import *
+#from Kfunc        import *
+from Kfunc.IO     import typetext    as Txt
 from Kfunc.finger import *
-from Kfunc.shlder import *
-from Kfunc.skel import *
-from Kfunc.model import *
-import QKNTshlder_1 as SDTP
+from Kfunc.skel   import skel
+from Kfunc.model  import Human_mod   as Hmod
+from Kfunc.Rel    import reliability as REL
+from Kfunc.GPR    import GPR
 import ctypes
 import pygame,h5py,datetime
 import pdb,time,cv2,cPickle
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from sklearn.externals import joblib
+
+
 #if sys.hexversion >= 0x03000000:
 #    import _thread as thread
 #else:
@@ -40,7 +43,8 @@ SKELETON_COLORS = [pygame.color.THECOLORS["red"],
                   pygame.color.THECOLORS["yellow"], 
                   pygame.color.THECOLORS["violet"]]
 
-
+limbidx = [4,5,6,8,9,10,20] 
+gp      = joblib.load('test.pkl')
 
 
 class BodyGameRuntime(object):
@@ -77,6 +81,39 @@ class BodyGameRuntime(object):
         # here we will store skeleton data 
         self._bodies = None
         self.jorder  = [0,1,2,3,4,5,6,8,9,10,20] #joints order we care
+        
+        # dtw parameter initialize
+        
+        self.d_cnt         = 0
+        self.d_dcnt        = 0      # decreasing cnt
+        self.d_test_idx    = 0
+        
+        self.d_chk_flag    = False
+        self.d_deflag      = False  # decreasing flag
+        
+        self.d_distp_prev  = 0 
+        
+        self.d_distp_cmp  = np.inf     
+        
+        self.d_oidx     = 0      # initail
+        self.d_gt_idx   = 0
+        self.d_idxlist  = []
+        self.d_seglist  = []
+        self.d_j        = 0        
+            
+        #
+
+        self.d_dpfirst     = {}
+        self.d_dist_p      = {}
+        self.d_dcnt        = 0 
+        self.d_deflag      = False
+        self.d_deflag_mul  = {}
+        self.d_minval      = np.inf 
+        self.d_onedeflag   = False
+        self.d_segend      = False        
+        
+        #
+        
         time.sleep(5)
 
 
@@ -105,8 +142,7 @@ class BodyGameRuntime(object):
         global video
         
         cur_frame=0
-        rec_Rshld=SDTP.ShoulderTops()   #recording the shoudler movements(record data)
-        pro_Rshld=SDTP.ShoulderRoll()   #detecting the shoulder movements(processing data)
+
         Rb = {}
         Rt = {}
         Rk = {}
@@ -117,8 +153,7 @@ class BodyGameRuntime(object):
             Rb[ii]=[]
         
         #-all the number in variable names below indicates:        
-        shld_flag=False #flag to start processing the shoulder when press some key
-        
+
         #-for key pressing
         wait_key_count=3
         # -------- Main Program Loop -----------
@@ -127,11 +162,7 @@ class BodyGameRuntime(object):
             #ST = time.clock()
             bddic={}
             Jdic ={}
-            Jpf = []
-
-            
-
-            
+          
             #--key pressing--
             if(wait_key_count<3):
                 wait_key_count+=1
@@ -153,16 +184,6 @@ class BodyGameRuntime(object):
                     else:
                         self.model_draw = True
                         
-                if press[49]==1:  #.#1 open/close shoulder detection
-                    print 'I am innnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'
-                    if shld_flag==True:
-                        shld_flag=False
-                    else: 
-                        shld_flag=True
-                if press[50]==1 and shld_flag: #.#2 initial setting
-                    pro_Rshld.calibration_flag=True
-                    pro_Rshld.shoulder_roll_count=0
-                    pro_Rshld.shoulder_updown_count=0
                 if press[114]==1: # use 'r' to open/close video recording
                 
                     if self.clipNo ==0:
@@ -213,7 +234,7 @@ class BodyGameRuntime(object):
             
             if self._bodies is not None:
                 
-                #self._kinect.testtable()
+
                 closest_ID=-1
                 cSS_dist=20 #closest SpineShoulder distance
                 
@@ -255,26 +276,47 @@ class BodyGameRuntime(object):
                             Jarray[ii] = []
                             Rb[ii] = []
                             Jarray[ii].append(np.array([Jdic[ii].Position.x,Jdic[ii].Position.y,Jdic[ii].Position.z]))                            
-                        Rb[ii].append(rel_behav(Jarray[ii]))
+                        Rb[ii].append(REL.rel_behav(Jarray[ii]))
                         
-                    rt = rel_trk(Jdic) 
-                    rk = rel_kin(Jdic)
+                    rt = REL.rel_trk(Jdic) 
+                    rk = REL.rel_kin(Jdic)
                     for ii,jj in enumerate(self.jorder):    
                         Rt[jj].append(rt[ii])
                         Rk[jj].append(rk[ii])
                         
-                    Rel = rel_rate(Rb,Rk,Rt,self.jorder)
+                    Rel,Relary = REL.rel_rate(Rb,Rk,Rt,self.jorder)
   
-                    #print Rk                      
+                     
                     
                     #draw skel
-                    draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface)
-                    draw_Rel_joints(Jps,Rel,self._frame_surface)
+                    skel.draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface)
+                    skel.draw_Rel_joints(Jps,Rel,self._frame_surface)
+ 
+                    # =================  GPR ====================
                     
+                    
+                    if not all(ii>0.6 for ii in Relary[limbidx]): # check if contains unreliable joints
+                        
+                        _, modJary = Hmod.human_mod_pts(joints,True) #modJary is 21*1 array 
+                        reconJ     = GPR.gp_pred(modJary, gp)
+                        unrelidx = np.where(Relary[limbidx]<0.6)[0]
+                        
+                        # use unrelidx and reconJ to replace unreliable joints in modJary 
+                    
+                    # =================== GPR end ===================
+                    # =================== DTW matching ==============
+                    
+                    
+                        
+
+
+
+                    # =================== DTW matching end ===========               
+
                     #draw unify human model
                     if self.model_draw:
-                        modJoints = human_mod_pts(joints)
-                        pdb.set_trace()
+                        modJoints = Hmod.human_mod_pts(joints)
+
                         if not self.model_frame :
                             fig = plt.figure() 
                             ax = fig.add_subplot(111, projection='3d')
@@ -283,7 +325,7 @@ class BodyGameRuntime(object):
                         else:
                             plt.cla()
                         
-                        draw_human_mod_pts(modJoints,ax,keys,color)
+                        Hmod.draw_human_mod_pts(modJoints,ax,keys)
                         
                         #pdb.set_trace()
                     
@@ -295,14 +337,14 @@ class BodyGameRuntime(object):
                     bddic['Rel'] = Rel
                   
             else:
-                typetext(self._frame_surface,'No human be detected ',(100,100))
+                Txt.typetext(self._frame_surface,'No human be detected ',(100,100))
                 
             #--find ID and extract skeleton info and draw over--
                     
             cur_frame+=1
             
             if self.vid_rcd == True:
-                typetext(self._frame_surface,'Video Recording' ,(1550,20),(255,0,0))
+                Txt.typetext(self._frame_surface,'Video Recording' ,(1550,20),(255,0,0))
                 
                 self.cimgs.create_dataset('img_'+repr(self.fno).zfill(4), data = frame)
                 self.bdimgs.create_dataset('bd_'+repr(self.fno).zfill(4), data = np.dstack((bodyidx,bodyidx,bodyidx)))
@@ -311,16 +353,8 @@ class BodyGameRuntime(object):
                 self.fno += 1
                 bdjoints.append(bddic)
             else:
-                typetext(self._frame_surface,'Not Recording' ,(1550,20),(0,255,0))
+                Txt.typetext(self._frame_surface,'Not Recording' ,(1550,20),(0,255,0))
             
-
-            #   ====   Shoulder action detection  ====                    
-            if (shld_flag and closest_ID!=-1):
-                Jpf = rec_Rshld.findShouderTops(self._kinect,bodyidx,dJps,joints,dframe,closest_ID)[2:4]
-                if Jpf!=[]:
-                    shld_act(joints,Jpf,pro_Rshld,cur_frame)                    
-                shld_text(pro_Rshld,rec_Rshld,self._frame_surface)
-                    
 
                 
                 

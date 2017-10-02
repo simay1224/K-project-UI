@@ -96,18 +96,25 @@ def rel_trk(joints): # tracking term
     return trkrel
     
 def rel_rate(Rb,Rk,Rt,order,flen = 6):
+    Relary = np.zeros(21)
     if (len(Rb[0])>=flen) & (len(Rk[0])>=flen) & (len(Rt[0])>=flen) :
-        Rel = copy.copy(rel)
+        Rel = {}
         
         if order == jord :
             for j in order:
                 for i in xrange(flen):
                     Rel[j] += gw[i]*min(Rb[j][-(i+1)],Rk[j][-(i+1)],Rt[j][-(i+1)])
+                    Relary[j] += gw[i]*min(Rb[j][-(i+1)],Rk[j][-(i+1)],Rt[j][-(i+1)])
         else:
-            print 'joints order not match !!'
+            raise ImportError('joints order not match !!')
+            
     else:
-        return rel
-    return Rel
+        return rel,[]
+    return Rel,Relary
+
+
+
+
 
 
 #def rel_rate(Rb,Rk,Rt,order,flen = 6):

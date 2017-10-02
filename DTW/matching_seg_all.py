@@ -18,7 +18,7 @@ from scipy.spatial.distance import euclidean,_validate_vector
 from fastdtw import fastdtw as orifastdtw
 from w_fastdtw import fastdtw,dtw
 import matplotlib.pyplot as plt
-from scipy.ndimage.filters import gaussian_filter1d as gf
+from scipy.ndimage.filters import gaussian_filter1d as gfm,
 from scipy.linalg import norm
 from clip import clip
 def wt_euclidean(u,v,w):
