@@ -46,6 +46,13 @@ SKELETON_COLORS = [pygame.color.THECOLORS["red"],
 limbidx = [4,5,6,8,9,10,20] 
 gp      = joblib.load('test.pkl')
 
+# DTW
+order    = {}
+order[0] = [1]
+order[1] = [3]
+order[2] = 'end'
+order[3] = [4]
+order[4] = [2,3]
 
 class BodyGameRuntime(object):
     def __init__(self):
@@ -294,19 +301,25 @@ class BodyGameRuntime(object):
  
                     # =================  GPR ====================
                     
-                    
+                    _, modJary = Hmod.human_mod_pts(joints,True) #modJary is 21*1 array 
                     if not all(ii>0.6 for ii in Relary[limbidx]): # check if contains unreliable joints
-                        
-                        _, modJary = Hmod.human_mod_pts(joints,True) #modJary is 21*1 array 
+                                                
                         reconJ     = GPR.gp_pred(modJary, gp)
                         unrelidx = np.where(Relary[limbidx]<0.6)[0]
                         
                         # use unrelidx and reconJ to replace unreliable joints in modJary 
+                    else: #all joint is reliable
+                        reconJ = modJary
                     
                     # =================== GPR end ===================
                     # =================== DTW matching ==============
                     
-                    
+                    if (len(order[self.d_oidx])>1 ):
+                        for ii in order[self.d_oidx]:
+                            self.d_deflag_mul[ii] = False 
+                    else:
+                       self.d_gt_idx = order[self.d_oidx][0] 
+                       self.d_idxlist.append(self.d_gt_idx)                    
                         
 
 
