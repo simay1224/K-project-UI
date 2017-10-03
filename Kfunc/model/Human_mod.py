@@ -193,8 +193,61 @@ def draw_human_mod_pts(Joints,surface,keys):
     plt.draw()
     plt.pause(1.0/120)
 
+def reconJ2joints(joint,recon_body):
+    #LSpos : ShoulderLeft position
 
-       
+
+    ori_body = {}
+    for i in [4,5,6,8,9,10]:
+        ori_body[i] = np.array([joint[i].Position.x,joint[i].Position.y,joint[i].Position.z])
+
+    Vec45 = (recon_body[1,:]  - recon_body[0,:])/np.sum((recon_body[1,:]-recon_body[0,:])**2,0)**0.5
+    Vec56 = (recon_body[2,:]  - recon_body[1,:])/np.sum((recon_body[2,:]-recon_body[1,:])**2,0)**0.5 
+#    Vec48 = (recon_body[3,:]  - recon_body[0,:])/np.sum((recon_body[3,:]-recon_body[0,:])**2,0)**0.5 
+    Vec89 = (recon_body[4,:]  - recon_body[3,:])/np.sum((recon_body[4,:]-recon_body[3,:])**2,0)**0.5 
+    Vec90 = (recon_body[5,:]  - recon_body[4,:])/np.sum((recon_body[5,:]-recon_body[4,:])**2,0)**0.5  
+    
+    
+    Len45 = np.mean(np.sum((ori_body[5 ]  - ori_body[4])**2,axis = 0)**0.5)  
+    Len56 = np.mean(np.sum((ori_body[6 ]  - ori_body[5])**2,axis = 0)**0.5)
+#    Len48 = np.mean(np.sum((ori_body[8 ]  - ori_body[4])**2,axis = 0)**0.5) 
+    Len89 = np.mean(np.sum((ori_body[9 ]  - ori_body[8])**2,axis = 0)**0.5)
+    Len90 = np.mean(np.sum((ori_body[10]  - ori_body[9])**2,axis = 0)**0.5)  
+    
+
+    J = {}
+#    LSpos = ori_body[4]
+#    RSpos = ori_body[8]
+    
+    J[JointType_ShoulderLeft] = ori_body[4]
+    J[JointType_ElbowLeft]    = Vec45*Len45 + ori_body[4]
+    J[JointType_WristLeft]    = Vec56*Len56 + J[JointType_ElbowLeft]
+    
+    J[JointType_ShoulderRight] = ori_body[8]
+#    J[JointType_ShoulderRight] = Vec48*Len48 + J[JointType_ShoulderLeft]
+    J[JointType_ElbowRight]    = Vec89*Len89 + ori_body[8]
+    J[JointType_WristRight]    = Vec90*Len90 + J[JointType_ElbowRight]
+
+    return J
+
+#    joint[JointType_ElbowLeft].Position.x     = (Vec45*Len45 + ori_body[4])[0]
+#    joint[JointType_ElbowLeft].Position.y     = (Vec45*Len45 + ori_body[4])[1]
+#    joint[JointType_ElbowLeft].Position.z     = (Vec45*Len45 + ori_body[4])[2]
+#    
+#    joint[JointType_WristLeft].Position.x     = (Vec56*Len56 + joint[JointType_ElbowLeft])[0]
+#    joint[JointType_WristLeft].Position.y     = (Vec56*Len56 + joint[JointType_ElbowLeft])[1]
+#    joint[JointType_WristLeft].Position.z     = (Vec56*Len56 + joint[JointType_ElbowLeft])[2]
+#    joint[JointType_ElbowRight].Position.x    = (Vec89*Len89 + ori_body[8])[0]
+#    joint[JointType_ElbowRight].Position.y    = (Vec89*Len89 + ori_body[8])[1]
+#    joint[JointType_ElbowRight].Position.z    = (Vec89*Len89 + ori_body[8])[2]
+#    joint[JointType_WristRight] .Position.x   = (Vec90*Len90 + joint[JointType_ElbowRight])[0]
+#    joint[JointType_WristRight] .Position.y   = (Vec90*Len90 + joint[JointType_ElbowRight])[1]
+#    joint[JointType_WristRight] .Position.z   = (Vec90*Len90 + joint[JointType_ElbowRight])[2]
+#    
+#    
+#    return joint
+  
+     
     
 #import cPickle 
 #from Mocam2Kinect import *
