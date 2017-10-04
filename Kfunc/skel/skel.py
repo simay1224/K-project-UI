@@ -40,7 +40,7 @@ TrackingState_NotTracked = 0
 TrackingState_Inferred = 1
 TrackingState_Tracked = 2
 
-def draw_body_bone(joints, jointPoints, color, joint0, joint1,surface):
+def draw_body_bone(joints, jointPoints, color, joint0, joint1,surface,linewidth=8):
     joint0State = joints[joint0].TrackingState;
     joint1State = joints[joint1].TrackingState;
 
@@ -57,34 +57,34 @@ def draw_body_bone(joints, jointPoints, color, joint0, joint1,surface):
     end = (jointPoints[joint1].x, jointPoints[joint1].y)
 
     try:
-        pygame.draw.line(surface, color, start, end, 8)
+        pygame.draw.line(surface, color, start, end ,linewidth)
         #lines(Surface, color, closed, pointlist, width=1)
     except: # need to catch it due to possible invalid positions (with inf)
         pass
 
-def draw_body( joints, jointPoints, color , surface):
+def draw_body( joints, jointPoints, color , surface,linewidth = 8):
     # Torso
     #pdb.set_trace()
     
-    draw_body_bone(joints, jointPoints, color,  JointType_Head,  JointType_Neck,surface);
-    draw_body_bone(joints, jointPoints, color,  JointType_Neck,  JointType_SpineShoulder,surface);
-    draw_body_bone(joints, jointPoints, color,  JointType_SpineShoulder,  JointType_SpineMid,surface);
-    draw_body_bone(joints, jointPoints, color,  JointType_SpineMid,  JointType_SpineBase,surface);
-    draw_body_bone(joints, jointPoints, color,  JointType_SpineShoulder,  JointType_ShoulderRight,surface);
-    draw_body_bone(joints, jointPoints, color,  JointType_SpineShoulder,  JointType_ShoulderLeft,surface);
-    draw_body_bone(joints, jointPoints, color,  JointType_SpineBase,  JointType_HipRight,surface);
-    draw_body_bone(joints, jointPoints, color,  JointType_SpineBase,  JointType_HipLeft,surface);
+    draw_body_bone(joints, jointPoints, color,  JointType_Head,  JointType_Neck,surface,linewidth);
+    draw_body_bone(joints, jointPoints, color,  JointType_Neck,  JointType_SpineShoulder,surface,linewidth);
+    draw_body_bone(joints, jointPoints, color,  JointType_SpineShoulder,  JointType_SpineMid,surface,linewidth);
+    draw_body_bone(joints, jointPoints, color,  JointType_SpineMid,  JointType_SpineBase,surface,linewidth);
+    draw_body_bone(joints, jointPoints, color,  JointType_SpineShoulder,  JointType_ShoulderRight,surface,linewidth);
+    draw_body_bone(joints, jointPoints, color,  JointType_SpineShoulder,  JointType_ShoulderLeft,surface,linewidth);
+    draw_body_bone(joints, jointPoints, color,  JointType_SpineBase,  JointType_HipRight,surface,linewidth);
+    draw_body_bone(joints, jointPoints, color,  JointType_SpineBase,  JointType_HipLeft,surface,linewidth);
     
     # Right Arm    
-    draw_body_bone(joints, jointPoints, color,  JointType_ShoulderRight,  JointType_ElbowRight,surface);
-    draw_body_bone(joints, jointPoints, color,  JointType_ElbowRight,  JointType_WristRight,surface);
-    #draw_body_bone(joints, jointPoints, color,  JointType_WristRight,  JointType_HandRight,surface);
+    draw_body_bone(joints, jointPoints, color,  JointType_ShoulderRight,  JointType_ElbowRight,surface,linewidth);
+    draw_body_bone(joints, jointPoints, color,  JointType_ElbowRight,  JointType_WristRight,surface,linewidth);
+    #draw_body_bone(joints, jointPoints, color,  JointType_WristRight,  JointType_HandRight,surface,linewidth);
 
 
     # Left Arm
-    draw_body_bone(joints, jointPoints, color,  JointType_ShoulderLeft,  JointType_ElbowLeft,surface);
-    draw_body_bone(joints, jointPoints, color,  JointType_ElbowLeft,  JointType_WristLeft,surface);
-    #draw_body_bone(joints, jointPoints, color,  JointType_WristLeft,  JointType_HandLeft,surface);
+    draw_body_bone(joints, jointPoints, color,  JointType_ShoulderLeft,  JointType_ElbowLeft,surface,linewidth);
+    draw_body_bone(joints, jointPoints, color,  JointType_ElbowLeft,  JointType_WristLeft,surface,linewidth);
+    #draw_body_bone(joints, jointPoints, color,  JointType_WristLeft,  JointType_HandLeft,surface,linewidth);
 
 def draw_Rel_joints(jointPoints,Rel,surface):
     for i in Rel.keys():

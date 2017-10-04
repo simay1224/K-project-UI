@@ -73,7 +73,7 @@ class BodyGameRuntime(object):
         # Used to manage how fast the screen updates
         self._clock = pygame.time.Clock()
         self.now = datetime.datetime.now() 
-        self.dstr = './output/data'+repr(self.now.month).zfill(2)+repr(self.now.day).zfill(2)+repr(self.now.hour).zfill(2)+repr(self.now.minute).zfill(2)
+        self.dstr = './output/data'+repr(self.now.year)+repr(self.now.month).zfill(2)+repr(self.now.day).zfill(2)+repr(self.now.hour).zfill(2)+repr(self.now.minute).zfill(2)
         self.fno = 0
         
         
@@ -294,51 +294,55 @@ class BodyGameRuntime(object):
                      
                     
                     #draw skel
-                    skel.draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface)
+                    skel.draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface,15)
 #                    skel.draw_Rel_joints(Jps,Rel,self._frame_surface)
                     
                     if self.Dtw['exechk'] :
                         if not Relary == []:
                             # =================  GPR ====================
-                            
+#                            
                             _, modJary = Hmod.human_mod_pts(joints,True) #modJary is 7*3 array 
                             modJary = modJary.flatten().reshape(-1,21)   #change shape to 1*21 array
-#                            reconJ = modJary
-                            if all(ii>0.6 for ii in Relary[limbidx]): # all joints are reliable
-#                                print('================ All GOOD ================')
-                                reconJ = modJary      # reconJ is 1*21 array                                
-
-                            else: #contains unreliable joints
-
-                                print('==================')
-                                print('=======GPR========')
-                                print('==================')
-                                mask = np.zeros([7,3])
-                                modJary_norm = (modJary-MIN)/(MAX-MIN)                        
-                                reconJ       = (GPR.gp_pred(modJary_norm, gp)*(MAX-MIN)+MIN)  # reconJ is 1*21 array
-                                unrelidx = np.where(Relary[limbidx]<0.6)[0]   # limbidx = [4,5,6,8,9,10,20]
-    
-                                mask[unrelidx,:] = np.array([1,1,1])
-                                modJary[:,mask.flatten()==1] = reconJ[:,mask.flatten()==1]
-                                reconJ =   modJary                          
-                                # use unrelidx and reconJ to replace unreliable joints in modJary 
-
-                                #  === GPR recon ===
-#                                pdb.set_trace()
-                                JJ = Hmod.reconJ2joints(rec_joints,reconJ.reshape(7,3))
-                                for ii in [4,5,6,8,9,10]:
-                                    rec_joints[ii].Position.x = JJ[i][0]
-                                    rec_joints[ii].Position.y = JJ[i][1]
-                                    rec_joints[ii].Position.z = JJ[i][2]
-#                                pdb.set_trace()    
-                                tmp_Jps    = self._kinect.body_joints_to_color_space(rec_joints) #joint points in color domain
-                                rec_Jps    = Jps
-                                for ii in unrelidx:
-                                    rec_Jps[ii].x = tmp_Jps[ii].x
-                                    rec_Jps[ii].y = tmp_Jps[ii].y
-                                skel.draw_body(rec_joints, rec_Jps, SKELETON_COLORS[-1],self._frame_surface)
-#                                pdb.set_trace()
-                            
+                            reconJ = modJary
+#                            if all(ii>0.6 for ii in Relary[limbidx]): # all joints are reliable
+##                                print('================ All GOOD ================')
+#                                reconJ = modJary      # reconJ is 1*21 array                                
+#
+#                            else: #contains unreliable joints
+#
+#                                print('==================')
+#                                print('=======GPR========')
+#                                print('==================')
+#                                mask = np.zeros([7,3])
+#                                modJary_norm = (modJary-MIN)/(MAX-MIN)                        
+#                                reconJ       = (GPR.gp_pred(modJary_norm, gp)*(MAX-MIN)+MIN)  # reconJ is 1*21 array
+#                                unrelidx = np.where(Relary[limbidx]<0.6)[0]   # limbidx = [4,5,6,8,9,10,20]
+#    
+#                                mask[unrelidx,:] = np.array([1,1,1])
+#                                if np.sum(np.isnan(reconJ))==21:
+#                                    pdb.set_trace()
+#                                    _,_ = Hmod.human_mod_pts2(joints,True)
+#                                modJary[:,mask.flatten()==1] = reconJ[:,mask.flatten()==1]
+#                                reconJ =   modJary                          
+#                                # use unrelidx and reconJ to replace unreliable joints in modJary 
+#
+#                                #  === GPR recon ===
+##                                pdb.set_trace()
+#                                JJ = Hmod.reconJ2joints(rec_joints,reconJ.reshape(7,3))
+#                                for ii in [4,5,6,8,9,10]:
+#                                    rec_joints[ii].Position.x = JJ[i][0]
+#                                    rec_joints[ii].Position.y = JJ[i][1]
+#                                    rec_joints[ii].Position.z = JJ[i][2]
+##                                pdb.set_trace()    
+#                                tmp_Jps    = self._kinect.body_joints_to_color_space(rec_joints) #joint points in color domain
+#                                rec_Jps    = Jps
+#                                for ii in unrelidx:
+#                                    rec_Jps[ii].x = tmp_Jps[ii].x
+#                                    rec_Jps[ii].y = tmp_Jps[ii].y
+#                                skel.draw_body(rec_joints, rec_Jps, SKELETON_COLORS[-1],self._frame_surface)
+##                                skel.draw_Rel_joints(rec_Jps,Rel,self._frame_surface)
+##                                pdb.set_trace()
+#                            
                             
                             # === DTW matching ===
                             try :

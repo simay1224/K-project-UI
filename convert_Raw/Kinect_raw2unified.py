@@ -16,8 +16,10 @@ import glob,os,win32com.client,pdb
 
 #src_path = 'I:/AllData_0327/raw data/20170306/pkl/'
 #dst_path = 'I:/Data_0702/unified data/Unified_KData/'
-src_path = 'D:/Project/K_project/data/Motion and Kinect raw data/20170306/pkl/'
-dst_path = 'D:/Project/K_project/data/0705/unified data/Unified_KData/'
+src_path = 'D:/Project/K_project/data/Motion and Kinect raw data/20171004/pkl/'
+dst_path = 'D:/Project/K_project/data/'
+
+
 jidx = [0,1,2,3,4,5,6,8,9,10,20]
 
 def folder_retarget(src_path,shortcut):  
@@ -26,7 +28,7 @@ def folder_retarget(src_path,shortcut):
 
 
 for subfolder in os.listdir(src_path):  
-    for exeno in [1,2,3,5,6,7]:
+    for exeno in [4]:#[1,2,3,5,6,7]:
     
         if '.lnk' in subfolder:
             path = folder_retarget(src_path,subfolder)

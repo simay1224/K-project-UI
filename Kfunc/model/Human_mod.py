@@ -168,14 +168,67 @@ def human_mod_pts(Body,array= False, limb = True):
 #    else:       
 #        return J
     if array :
-        for i in [4,5,6,8,9,10,20]:
-            if i == 4 :            
-                Jary = J[0]
+        for iidx,i in enumerate([4,5,6,8,9,10,20]):
+            if iidx == 0 :            
+                Jary = J[i]
             else:
                 Jary = np.vstack([Jary, J[i]])
         return J,Jary                
     else:       
         return J
+
+
+def human_mod_pts2(Body,array= False, limb = True):
+    # Body : include all joints 3D position
+    pdb.set_trace()
+    Vec0001 = uni_vec_pts(Body, JointType_SpineBase    , JointType_SpineMid)
+    Vec0120 = uni_vec_pts(Body, JointType_SpineMid     , JointType_SpineShoulder)
+    Vec2002 = uni_vec_pts(Body, JointType_SpineShoulder, JointType_Neck)
+    Vec0203 = uni_vec_pts(Body, JointType_Neck         , JointType_Head)
+    Vec2004 = uni_vec_pts(Body, JointType_SpineShoulder, JointType_ShoulderLeft)
+    Vec0405 = uni_vec_pts(Body, JointType_ShoulderLeft , JointType_ElbowLeft)
+    Vec0506 = uni_vec_pts(Body, JointType_ElbowLeft    , JointType_WristLeft)
+    Vec2008 = uni_vec_pts(Body, JointType_SpineShoulder, JointType_ShoulderRight)
+    Vec0809 = uni_vec_pts(Body, JointType_ShoulderRight, JointType_ElbowRight)
+    Vec0910 = uni_vec_pts(Body, JointType_ElbowRight   , JointType_WristRight)
+    
+    
+    J[JointType_SpineBase]     = oripos
+    J[JointType_SpineMid]      = J[JointType_SpineBase]    - Vec0001*Jlen['0001']*factor
+    J[JointType_SpineShoulder] = J[JointType_SpineMid]     - Vec0120*Jlen['0120']*factor
+    J[JointType_Neck]          = J[JointType_SpineShoulder]- Vec2002*Jlen['2002']*factor
+    J[JointType_Head]          = J[JointType_Neck]         - Vec0203*Jlen['0203']*factor
+    J[JointType_ShoulderLeft]  = J[JointType_SpineShoulder]- Vec2004*Jlen['2004']*factor
+    J[JointType_ElbowLeft]     = J[JointType_ShoulderLeft] - Vec0405*Jlen['0405']*factor
+    J[JointType_WristLeft]     = J[JointType_ElbowLeft]    - Vec0506*Jlen['0506']*factor
+    J[JointType_ShoulderRight] = J[JointType_SpineShoulder]- Vec2008*Jlen['2008']*factor
+    J[JointType_ElbowRight]    = J[JointType_ShoulderRight]- Vec0809*Jlen['0809']*factor
+    J[JointType_WristRight]    = J[JointType_ElbowRight]   - Vec0910*Jlen['0910']*factor
+    pdb.set_trace()
+#    if array :
+#        for i in [0,1,2,3,4,5,6,8,9,10,20]:
+#            if i == 0 :            
+#                Jary = J[0]
+#            else:
+#                Jary = np.hstack([Jary, J[i]])
+#        if limb:
+#            return J,Jary[12:]
+#        else:
+#            return J,Jary
+#                
+#    else:       
+#        return J
+    if array :
+        for iidx,i in enumerate([4,5,6,8,9,10,20]):
+            if iidx == 0 :            
+                Jary = J[i]
+            else:
+                Jary = np.vstack([Jary, J[i]])
+        return J,Jary                
+    else:       
+        return J
+
+
 
 def draw_human_mod_pts(Joints,surface,keys):
     x=[]
