@@ -66,6 +66,8 @@ def uni_vec_pts(Body,start,end):
                     Body[start].Position.z-Body[end].Position.z])
     
     vlen = sum(tmp**2)**.5
+    if vlen == 0:
+        vlen = 10**-6
     return tmp/vlen
     
 def human_mod(Body):

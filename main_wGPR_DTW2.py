@@ -58,12 +58,22 @@ gt_data[1] = data['GT_kinect_1'][:]
 gt_data[2] = data['GT_kinect_2'][:]
 gt_data[3] = data['GT_kinect_3'][:]
 gt_data[4] = data['GT_kinect_4'][:]
-
+data.close()
 #status string
 Sstr = ['from hands down to T-pose','from T-pose to hands close','finish','from hand close to T-pose',\
         'from T-pose to hands close','from T-pose to hands down']
 #goal string
 #gstr = ['initial','T-pos','finish the exercise','Hand close','T-pose']
+
+#ani img data
+ANI = {} 
+anidata = h5py.File('399x219_ex4_comp.h5','r')
+ANI[0]  = anidata['M0'][:]
+ANI[1]  = anidata['M1'][:]
+ANI[2]  = anidata['M2'][:]
+ANI[3]  = anidata['M3'][:]
+ANI[4]  = anidata['M4'][:]
+anidata.close()
 
 class BodyGameRuntime(object):
     def __init__(self):
@@ -110,10 +120,8 @@ class BodyGameRuntime(object):
         self.Dtw['gt_idx']      = 0 
         self.Dtw['presv_size']  = 0
         self.Dtw['idxlist']     = []   
-        self.Dtw['chk_flag']    = False
-        self.Dtw['exechk']      = True
         self.Dtw['idx_cmp']     = 0
-        self.Dtw['periodcnt']   = 0
+#        self.Dtw['periodcnt']   = 0
         self.Dtw['fcnt']        = 0
         #        
         self.Dtw['dpfirst']     = {}
@@ -121,11 +129,18 @@ class BodyGameRuntime(object):
         self.Dtw['deflag_mul']  = defaultdict(lambda:(bool(False)))  
         self.Dtw['seqlist']     = np.array([])                
         self.Dtw['dcnt']        = 0 
+        self.Dtw['chk_flag']    = False
+        self.Dtw['exechk']      = True
         self.Dtw['deflag']      = False   # decreasing flag
         self.Dtw['onedeflag']   = False
         self.Dtw['segini']      = True  
         self.Dtw['evalstr']     = ''
         #
+        
+        # ani        
+        self.ani_cnt   = 0
+        self.ani_bound = 0
+        self.ani_order = 0
         
         time.sleep(5)
 
@@ -153,7 +168,9 @@ class BodyGameRuntime(object):
     def run(self):
         #--------- initial -------       
         global video
-        
+
+            
+            
         cur_frame=0
         
         Rb = defaultdict(list)
@@ -166,6 +183,13 @@ class BodyGameRuntime(object):
         wait_key_count=3
         # -------- Main Program Loop -----------
         while not self._done:
+
+            # ani setting
+            
+            self.ani_bound = ANI[self.Dtw['gt_idx']].shape[0]
+            if (self.ani_cnt > (self.ani_bound- 1)) | (self.ani_order != self.Dtw['gt_idx']) :
+                self.ani_cnt   = 0
+                self.ani_order = self.Dtw['gt_idx']
             
             #ST = time.clock()
             bddic={}
@@ -223,9 +247,13 @@ class BodyGameRuntime(object):
                             
             
             if self._kinect.has_new_color_frame():
-                frame = self._kinect.get_last_color_frame()                
+                ori_frame = self._kinect.get_last_color_frame()
+                frame = ori_frame.reshape(1080,1920,4)
+#                print self.ani_cnt
+                frame[790:1009,1500:1899,:3] = ANI[self.Dtw['gt_idx']][self.ani_cnt,:,:,:]
+                self.ani_cnt +=1
                 self.draw_color_frame(frame, self._frame_surface)
-                frame = frame.reshape(1080,1920,4)[:,:,:3]
+                frame = ori_frame.reshape(1080,1920,4)[:,:,:3]
                 
             if self._kinect.has_new_body_frame(): 
                 self._bodies = self._kinect.get_last_body_frame()
@@ -290,11 +318,9 @@ class BodyGameRuntime(object):
                         Rk[jj].append(rk[ii])
                         
                     Rel,Relary = REL.rel_rate(Rb,Rk,Rt,self.jorder)
-  
-                     
-                    
+                  
                     #draw skel
-                    skel.draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface,15)
+                    skel.draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface,8)
 #                    skel.draw_Rel_joints(Jps,Rel,self._frame_surface)
                     
                     if self.Dtw['exechk'] :
@@ -319,39 +345,40 @@ class BodyGameRuntime(object):
 #                                unrelidx = np.where(Relary[limbidx]<0.6)[0]   # limbidx = [4,5,6,8,9,10,20]
 #    
 #                                mask[unrelidx,:] = np.array([1,1,1])
-#                                if np.sum(np.isnan(reconJ))==21:
-#                                    pdb.set_trace()
-#                                    _,_ = Hmod.human_mod_pts2(joints,True)
+##                                if np.sum(np.isnan(reconJ))==21:
+##                                    pdb.set_trace()
+##                                    _,_ = Hmod.human_mod_pts2(joints,True)
+##                                    skel.draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface,15)
 #                                modJary[:,mask.flatten()==1] = reconJ[:,mask.flatten()==1]
 #                                reconJ =   modJary                          
 #                                # use unrelidx and reconJ to replace unreliable joints in modJary 
 #
 #                                #  === GPR recon ===
-##                                pdb.set_trace()
+#
 #                                JJ = Hmod.reconJ2joints(rec_joints,reconJ.reshape(7,3))
 #                                for ii in [4,5,6,8,9,10]:
 #                                    rec_joints[ii].Position.x = JJ[i][0]
 #                                    rec_joints[ii].Position.y = JJ[i][1]
 #                                    rec_joints[ii].Position.z = JJ[i][2]
-##                                pdb.set_trace()    
+# 
 #                                tmp_Jps    = self._kinect.body_joints_to_color_space(rec_joints) #joint points in color domain
 #                                rec_Jps    = Jps
 #                                for ii in unrelidx:
 #                                    rec_Jps[ii].x = tmp_Jps[ii].x
 #                                    rec_Jps[ii].y = tmp_Jps[ii].y
-#                                skel.draw_body(rec_joints, rec_Jps, SKELETON_COLORS[-1],self._frame_surface)
-##                                skel.draw_Rel_joints(rec_Jps,Rel,self._frame_surface)
-##                                pdb.set_trace()
+#                                skel.draw_body(rec_joints, rec_Jps, SKELETON_COLORS[-1],self._frame_surface,15)                            
 #                            
-                            
                             # === DTW matching ===
-                            try :
-                                self.Dtw.update(DTW_matching(self.Dtw,reconJ,gt_data))
-                            except:
-                                pdb.set_trace()
-                            if self.Dtw['periodcnt'] <4:
+
+                            self.Dtw.update(DTW_matching(self.Dtw,reconJ,gt_data))
+
+                            if self.Dtw['idxlist'].count(4) <4:
                                 typetext(self._frame_surface,Sstr[self.Dtw['oidx']],(100,10),fontsize=100,bold=True) 
-                            else:
+                            elif self.Dtw['oidx']!=4:
+#                                print('oidx is %r' %self.Dtw['oidx'])
+#                                print('gt_idx is      %r' %self.Dtw['gt_idx'])                                
+                                typetext(self._frame_surface,Sstr[self.Dtw['oidx']],(100,10),fontsize=100,bold=True)
+                            else:    
                                 typetext(self._frame_surface,Sstr[5],(100,10),(255,0,0),fontsize=100,bold=True)
   
                             if self.Dtw['evalstr'] != '':

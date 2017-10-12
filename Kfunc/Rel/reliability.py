@@ -23,7 +23,7 @@ Tjo = [0,1,2,3,4,5,6,8,9,10,20]
 
 # gaussian filter
 a = np.arange(6)
-sigma = 1
+sigma = 0.65
 gw = 1/(2*np.pi)**2/sigma*np.exp(-0.5*a**2/sigma**2) 
 gw = gw*(1/sum(gw))
 #initail reliability 
@@ -32,21 +32,27 @@ jord = [0,1,2,3,4,5,6,8,9,10,20]
 for i in jord:
     rel[i]=0
 
-def rel_behav(J,th = 0.03,theta_r=135,theta_f = 90): #behavior term
+def rel_behav(J,th = 0.03,fsize=3): #behavior term
     #J : 3D joint position in [...,f-4,f-3,f-2,f-1,f]
     #th   : threshold (uint: m)
+    r = 1
+    if len(J)>=fsize:
+        for k in xrange(1):
+            dist2   = J[-(k+1)]-J[-(k+2)]            
+            dist1 = J[-(k+1)]-J[-(k+3)]
+            n_dist2 = np.linalg.norm(dist2)
+            n_dist1 = np.linalg.norm(dist1)
+    
 
-    theta = 0
-    if len(J)>5:
-        for k in xrange(3):
-            dj   = J[-(k+1)]-J[-(k+2)]
-            dj_1 = J[-(k+2)]-J[-(k+3)]
-            n_dj = np.linalg.norm(dj)
-            n_dj_1 = np.linalg.norm(dj_1)
-            if (n_dj > th) & (n_dj_1 > th):
-                theta += np.arccos(sum([dj[i]*dj_1[i] for i in xrange(3)])/n_dj/n_dj_1)/np.pi*180
-    return 1-max(min(theta/3,theta_r)-theta_f,0)/(theta_r-theta_f)
-
+            if (n_dist1 < th):
+                r = 1
+            else:
+                if (n_dist2 > th):
+                    r = max(1-4*(n_dist2-th)/th,0)
+                else:
+                    r = 1    
+            
+    return r
         
 def rel_kin(joints): # kinematic term    
     order1 = [9,5,20,1,2]
@@ -90,12 +96,14 @@ def rel_trk(joints): # tracking term
     for i in Tjo:
         if joints[i].TrackingState == 2:
             trkrel.append(1.0)
+        elif joints[i].TrackingState == 1:
+            trkrel.append(1.0)
         else:
             trkrel.append(0.0)
 
     return trkrel
     
-def rel_rate(Rb,Rk,Rt,order,flen = 6):
+def rel_rate(Rb,Rk,Rt,order,flen = 2):
     Relary = np.zeros(21)
     if (len(Rb[0])>=flen) & (len(Rk[0])>=flen) & (len(Rt[0])>=flen) :
         Rel = copy.copy(rel)

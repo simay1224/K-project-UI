@@ -5,20 +5,13 @@ Created on Tue Sep 12 00:25:04 2017
 @author: Dawnknight
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Sep 11 14:50:20 2017
-
-@author: medialab
-"""
-
 import h5py,cPickle,pdb,glob,os
 import numpy as np
 from scipy.spatial.distance import euclidean,_validate_vector
 from fastdtw import fastdtw as orifastdtw
 from w_fastdtw import fastdtw,dtw
 import matplotlib.pyplot as plt
-from scipy.ndimage.filters import gaussian_filter1d as gfm,
+from scipy.ndimage.filters import gaussian_filter1d as gf
 from scipy.linalg import norm
 from clip import clip
 def wt_euclidean(u,v,w):
@@ -42,8 +35,8 @@ gt_data[4] = data['GT_4'][:]
 
 
 
-src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+#src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
+src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
 dst_path  = './figure/0926/7 joints Weight/'
 
@@ -65,7 +58,7 @@ Color = ['red','blue','green','black','m']
 import time
 ST = time.clock()
 
-for infile in glob.glob(os.path.join(src_path,'*.pkl')):
+for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
     print infile
     test_data    = cPickle.load(file(infile,'rb'))[12:,:].T
     foldername   = infile.split('\\')[-1].split('_ex4')[0][:-3]
@@ -139,7 +132,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                 if np.mod(j-(test_idx+1),10) == 0: # check every 10 frames
                     if (len(order[oidx])>1 ) & (not onedeflag):#((j- (test_idx+1)) <=60):
                         for ii in order[oidx]:
-                            test_p = seqlist[:,:] + np.atleast_2d((gt_data[ii][0,:]-seqlist[test_idx,:]))
+                            test_p = test_data[:,:] + np.atleast_2d((gt_data[ii][0,:]-test_data[test_idx,:]))
 
 #                            dist_p[ii], _ = orifastdtw(gt_data[ii], test_p[test_idx:j,:], dist=euclidean)
                             

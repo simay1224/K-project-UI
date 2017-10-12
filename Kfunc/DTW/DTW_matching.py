@@ -40,8 +40,10 @@ def DTW_matching(Dtw,reconJ,gt_data):
             
         if len(Dtw['seqlist']) == 0: #build sequence list
             Dtw['seqlist'] = reconJ
+            Dtw['seqlist'] = Dtw['seqlist'].reshape(-1,21)
         else:
             Dtw['seqlist'] = np.vstack([Dtw['seqlist'],reconJ])
+            Dtw['seqlist'] = gf(Dtw['seqlist'],3,axis = 0)
             
         if not Dtw['deflag']: # Not yet decreasing
 
@@ -52,12 +54,12 @@ def DTW_matching(Dtw,reconJ,gt_data):
                         Dtw['dist_p'][ii], _ = fastdtw(gt_data[ii], test_p,Jweight, dist=wt_euclidean)
                         
                         if (Dtw['seqlist'].shape[0] == 1+Dtw['presv_size']): # new movement initail setting
-                            if Dtw['presv_size'] != 0:  # seglist contains some previous joints data
-                                # compare the DTW btw Gt and first two row in test_p to get the dpfirst
-                                Dtw['dist_p'][ii], _ = fastdtw(gt_data[Dtw['gt_idx']], test_p[:2],Jweight, dist=wt_euclidean)
-                                
-                            Dtw['dpfirst'][ii] = Dtw['dist_p'][ii]
-                            
+#                            if Dtw['presv_size'] != 0:  # seglist contains some previous joints data
+#                                # compare the DTW btw Gt and first two row in test_p to get the dpfirst
+#                                Dtw['dist_p'][ii], _ = fastdtw(gt_data[Dtw['gt_idx']], test_p[:2],Jweight, dist=wt_euclidean)
+#                                
+#                            Dtw['dpfirst'][ii] = Dtw['dist_p'][ii]
+                             Dtw['dpfirst'][ii], _ = fastdtw(gt_data[Dtw['gt_idx']], test_p[:2],Jweight, dist=wt_euclidean)
                         else: 
                              if (Dtw['dpfirst'][ii] - Dtw['dist_p'][ii])>Dtw['decTh']:
                                  print('deflag on')
@@ -92,11 +94,11 @@ def DTW_matching(Dtw,reconJ,gt_data):
                     
                     if (Dtw['seqlist'].shape[0] == 1+Dtw['presv_size']): # new movement initail setting
                            
-                        if Dtw['presv_size'] != 0:  # seglist contains some previous joints data
-                            # compare the DTW btw Gt and first two row in test_p to get the dpfirst
-                            Dtw['dist_p'], _ = fastdtw(gt_data[Dtw['gt_idx']], test_data_p[:2],Jweight, dist=wt_euclidean)
-                            
-                        Dtw['dpfirst'] = Dtw['dist_p']    
+#                        if Dtw['presv_size'] != 0:  # seglist contains some previous joints data
+#                            # compare the DTW btw Gt and first two row in test_p to get the dpfirst
+#                        Dtw['dist_p'], _ = fastdtw(gt_data[Dtw['gt_idx']], test_data_p[:2],Jweight, dist=wt_euclidean)                            
+#                        Dtw['dpfirst'] = Dtw['dist_p'] 
+                        Dtw['dpfirst'],_ = fastdtw(gt_data[Dtw['gt_idx']], test_data_p[:2],Jweight, dist=wt_euclidean)   
                         
                         print('dpfirst is : %f' %Dtw['dpfirst'])
                     else: 
@@ -137,8 +139,8 @@ def DTW_matching(Dtw,reconJ,gt_data):
                     endidx = np.argmin(tgrad[Dtw['idx_cmp']-10:Dtw['idx_cmp']+19])+(Dtw['idx_cmp']-10) 
        
                     # update or reset dtw parameter
-                    if Dtw['gt_idx'] == 4:
-                       Dtw['periodcnt'] += 1
+#                    if Dtw['gt_idx'] == 4:
+#                       Dtw['periodcnt'] += 1
                     Dtw['seqlist'] = Dtw['seqlist'][endidx+1:,] # update the seqlist
                     Dtw['presv_size'] =Dtw['seqlist'].shape[0] 
                     Dtw['cnt']     = 0
