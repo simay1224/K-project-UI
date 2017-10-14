@@ -15,7 +15,7 @@ from Kfunc.model  import Human_mod   as Hmod
 from Kfunc.Rel    import reliability as REL
 from Kfunc.GPR    import GPR
 from Kfunc.DTW    import DTW_matching
-import ctypes
+import ctypes,os
 import pygame,h5py,datetime
 import pdb,time,cv2,cPickle
 import numpy as np
@@ -32,8 +32,7 @@ from collections import defaultdict
 fps = 30
 
 bkimg = np.zeros([1080,1920])
-bdjoints = []
-Jarray  = {}  # joint array
+
 
 # colors for drawing different bodies 
 SKELETON_COLORS = [pygame.color.THECOLORS["red"], 
@@ -81,11 +80,7 @@ class BodyGameRuntime(object):
         pygame.init()
 
         # Used to manage how fast the screen updates
-        self._clock = pygame.time.Clock()
-        self.now = datetime.datetime.now() 
-        self.dstr = './output/data'+repr(self.now.year)+repr(self.now.month).zfill(2)+repr(self.now.day).zfill(2)+repr(self.now.hour).zfill(2)+repr(self.now.minute).zfill(2)
-        self.fno = 0
-        
+        self._clock = pygame.time.Clock()        
         
         # Set the width and height of the screen [width, height]
         self._infoObject = pygame.display.Info()
@@ -94,21 +89,65 @@ class BodyGameRuntime(object):
 
         pygame.display.set_caption("Kinect Body detection")
 
-        # Loop until the user clicks the close button.
-        self._done = False
-        self._handmode = False
-        self.vid_rcd = False
-        self.model_draw = False
-        self.model_frame = False
-        self.clipNo = 0
+
         #self.cntno = 0
         # Kinect runtime object, we want only color and body frames 
         self._kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color | PyKinectV2.FrameSourceTypes_Body|PyKinectV2.FrameSourceTypes_Depth|PyKinectV2.FrameSourceTypes_BodyIndex)    
         # back buffer surface for getting Kinect color frames, 32bit color, width and height equal to the Kinect color frame size
-        self._frame_surface = pygame.Surface((self._kinect.color_frame_desc.Width, self._kinect.color_frame_desc.Height), 0, 32)
+#        self._frame_surface = pygame.Surface((self._kinect.color_frame_desc.Width, self._kinect.color_frame_desc.Height), 0, 32)
+        self._frame_surface = pygame.Surface((1920, 1080), 0, 32)
         # here we will store skeleton data 
         self._bodies = None
         self.jorder  = [0,1,2,3,4,5,6,8,9,10,20] #joints order we care
+
+        time.sleep(5)
+        if self._kinect.has_new_color_frame():
+            frame =  self._kinect.get_last_color_frame().reshape([1080,1920,4])[:,:,:3]                   
+            bkimg = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+      
+            print ('extract bg....')
+        else:
+            print 'failed to extract.....'        
+        
+        self.__param_init__()
+        
+        
+    def __param_init__(self,clean = False):
+        
+
+        try:
+            if self.bdjoints !=[]:
+               cPickle.dump(self.bdjoints,file(self.dstr+'.pkl','wb')) 
+               print('save pkl ....')
+            
+            if clean:
+                os.remove(self.dstr+'.pkl')
+                print('remove pkl ....')
+        except:
+            pass
+        try:
+            self.dataset.close()
+            print('save h5py ....')
+            if clean:
+                os.remove(self.dstr+'.h5')
+                print('remove h5py ....')
+        except:
+            pass
+            
+        self.bdjoints = []
+        self.Jarray  = {}  # joint array
+        self.now = datetime.datetime.now() 
+        self.dstr = './output/data'+repr(self.now.year)+repr(self.now.month).zfill(2)+repr(self.now.day).zfill(2)+\
+                                    repr(self.now.hour).zfill(2)+repr(self.now.minute).zfill(2)
+        
+        self.scale       = 1.0
+        self._done       = False
+        self._handmode   = False
+        self.vid_rcd     = False
+        self.model_draw  = False
+        self.model_frame = False
+        self.clipNo      = 0
+        self.fno         = 0        
         
         # dtw parameter initialize
         self.Dtw = {}
@@ -121,7 +160,6 @@ class BodyGameRuntime(object):
         self.Dtw['presv_size']  = 0
         self.Dtw['idxlist']     = []   
         self.Dtw['idx_cmp']     = 0
-#        self.Dtw['periodcnt']   = 0
         self.Dtw['fcnt']        = 0
         #        
         self.Dtw['dpfirst']     = {}
@@ -142,16 +180,6 @@ class BodyGameRuntime(object):
         self.ani_bound = 0
         self.ani_order = 0
         
-        time.sleep(5)
-
-
-        if self._kinect.has_new_color_frame():
-            frame =  self._kinect.get_last_color_frame().reshape([1080,1920,4])[:,:,:3]                   
-            bkimg = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-      
-            print ('extract bg....')
-        else:
-            print 'failed to extract.....'
                               
 
 
@@ -163,7 +191,8 @@ class BodyGameRuntime(object):
         del address
         target_surface.unlock()
         
-
+    def reset(self,clean=False):
+        self.__param_init__(clean)
 
     def run(self):
         #--------- initial -------       
@@ -217,7 +246,7 @@ class BodyGameRuntime(object):
                         self.model_draw = True
                         
                 if press[114]==1: # use 'r' to open/close video recording
-                
+                    
                     if self.clipNo ==0:
                         self.dataset = h5py.File(self.dstr+'.h5','w')
                         self.dataset =h5py.File(self.dstr+'.h5', 'r')
@@ -230,10 +259,26 @@ class BodyGameRuntime(object):
                         # other data
                      
                     if self.vid_rcd == False:
+                        print('recording .......')
                         self.vid_rcd = True
                         self.clipNo += 1
                     else:
-                        self.vid_rcd = False            
+                        print('stop recording .......')
+                        self.vid_rcd = False 
+                        
+                if press[105]==1: # use 'i' to reset every parameter
+                    print('Reseting ............................')
+                    self.reset()
+                if press[117]==1: # use 'u' to reset every parameter and remove the save data
+                    print('Reseting & trmoving the saved file ................')
+                    self.reset(True)
+                if press[98]==1: # use 'b' to lager the scale
+                    if (self.scale < 2):
+                        self.scale = self.scale*1.1
+                if press[115]==1:# use 's' to smaller the scale
+                    if (self.scale > 0.4): 
+                        self.scale = self.scale/1.1
+                
             #--key pressing over--
                         
             # --- Main event loop
@@ -248,9 +293,11 @@ class BodyGameRuntime(object):
             
             if self._kinect.has_new_color_frame():
                 ori_frame = self._kinect.get_last_color_frame()
-                frame = ori_frame.reshape(1080,1920,4)
-#                print self.ani_cnt
-                frame[790:1009,1500:1899,:3] = ANI[self.Dtw['gt_idx']][self.ani_cnt,:,:,:]
+                frame     = ori_frame.reshape(1080,1920,4) 
+                Height    = int(219 * self.scale)
+                Width     = int(399 * self.scale)
+
+                frame[(1009-Height):1009,(1899-Width):1899,:3] = cv2.resize(ANI[self.Dtw['gt_idx']][self.ani_cnt,:,:,:], (Width,Height))
                 self.ani_cnt +=1
                 self.draw_color_frame(frame, self._frame_surface)
                 frame = ori_frame.reshape(1080,1920,4)[:,:,:3]
@@ -304,12 +351,12 @@ class BodyGameRuntime(object):
                     # === joint reliability ===
                     for ii in self.jorder:
                         try : 
-                            Jarray[ii].append(np.array([Jdic[ii].Position.x,Jdic[ii].Position.y,Jdic[ii].Position.z]))
+                            self.Jarray[ii].append(np.array([Jdic[ii].Position.x,Jdic[ii].Position.y,Jdic[ii].Position.z]))
                         except:                            
-                            Jarray[ii] = []
+                            self.Jarray[ii] = []
                             Rb[ii] = []
-                            Jarray[ii].append(np.array([Jdic[ii].Position.x,Jdic[ii].Position.y,Jdic[ii].Position.z]))                            
-                        Rb[ii].append(REL.rel_behav(Jarray[ii]))
+                            self.Jarray[ii].append(np.array([Jdic[ii].Position.x,Jdic[ii].Position.y,Jdic[ii].Position.z]))                            
+                        Rb[ii].append(REL.rel_behav(self.Jarray[ii]))
                         
                     rt = REL.rel_trk(Jdic) 
                     rk = REL.rel_kin(Jdic)
@@ -367,7 +414,7 @@ class BodyGameRuntime(object):
 #                                    rec_Jps[ii].x = tmp_Jps[ii].x
 #                                    rec_Jps[ii].y = tmp_Jps[ii].y
 #                                skel.draw_body(rec_joints, rec_Jps, SKELETON_COLORS[-1],self._frame_surface,15)                            
-#                            
+                            
                             # === DTW matching ===
 
                             self.Dtw.update(DTW_matching(self.Dtw,reconJ,gt_data))
@@ -387,6 +434,27 @@ class BodyGameRuntime(object):
                                 if self.Dtw['fcnt'] >40:
                                     self.Dtw['evalstr'] = ''
                                     self.Dtw['fcnt']  = 0
+                            
+                            if (body.hand_left_state == 2)| (body.hand_left_state == 0): #Lhand open
+                                Lhstatus = 'open'
+                            elif body.hand_left_state ==3:
+                                Lhstatus = 'closed'
+                            elif body.hand_left_state == 4:
+                                Lhstatus = 'Lasso'
+                            else:
+                                Lhstatus = 'Not be detected'                            
+
+                            if (body.hand_right_state == 2)| (body.hand_right_state == 0): #Lhand open
+                                Rhstatus = 'open'
+                            elif body.hand_right_state ==3:
+                                Rhstatus = 'closed'
+                            elif body.hand_right_state == 4:
+                                Rhstatus = 'Lasso'
+                            else:
+                                Rhstatus = 'Not be detected'
+                            
+                            typetext(self._frame_surface,'Lhand : '+Lhstatus ,(100,800),(200,200,255),fontsize=60,bold=True)        
+                            typetext(self._frame_surface,'Rhand : '+Rhstatus ,(100,900),(200,200,255),fontsize=60,bold=True) 
                                 
                     #draw unify human model
                     if self.model_draw:
@@ -425,7 +493,7 @@ class BodyGameRuntime(object):
                 self.dimgs.create_dataset('d_'+repr(self.fno).zfill(4), data = np.dstack((dframe,dframe,dframe)))
                 #self.timestamp.create_dataset('t_'+repr(self.fno).zfill(4),data =TimeS)
                 self.fno += 1
-                bdjoints.append(bddic)
+                self.bdjoints.append(bddic)
             else:
                 typetext(self._frame_surface,'Not Recording' ,(1550,20),(0,255,0))
             
@@ -454,8 +522,8 @@ class BodyGameRuntime(object):
         
         print self.Dtw['idxlist']
         
-        if bdjoints !=[]:
-           cPickle.dump(bdjoints,file(self.dstr+'.pkl','wb')) 
+        if self.bdjoints !=[]:
+           cPickle.dump(self.bdjoints,file(self.dstr+'.pkl','wb')) 
         try:
             self.dataset.close()
         except:
