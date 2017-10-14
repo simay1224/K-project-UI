@@ -57,14 +57,14 @@ for subfolder in os.listdir(src_path):
             
             
 # for single file:
-
-infile = 'E:/user/dawnknight/desktop/Yao_data201710131636.pkl'
+jidx = [0,1,2,3,4,5,6,8,9,10,20]
+infile = 'D:/Project/K_project/output/Yao_data201710131636.pkl'
 
 data  = cPickle.load(file(infile,'rb'))
 Kbody = rawK2ary(data,jidx)
 J     = human_mod(Kbody)
-name  = infile.split('/')[-1].split('ex')
-fname = name[0].replace('data','data'+year)+'unified_ex'+name[1]
+name  = infile.split('/')[-1].split('.pkl')
+fname = name[0]+'_unified_ex4.pkl'
 cPickle.dump(J,file(fname,'wb'))
 
 
