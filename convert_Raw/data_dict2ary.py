@@ -58,12 +58,21 @@ for idx,(kinfile,minfile,rinfile)  in enumerate(zip(glob.glob(os.path.join(src_p
         
         
         
+#for single file        
         
+exeno      = 'ex4'        
+group_size = 30 # sample number per group
+jnum       = 11          
         
+kinfile = ''
+
+kdata = cPickle.load(file(kinfile,'r'))
+Kary = np.zeros((jnum*3,kdata[20].shape[1]))
+
+for kidx, i in enumerate(kdata.keys()):
+    Kary[3*kidx:3*(kidx+1),:] = kdata[i]
+   
+kname = kinfile.split('/')[-1]        
         
-        
-        
-        
-        
-        
+cPickle.dump(Kary,file(kname,'wb'))        
         
