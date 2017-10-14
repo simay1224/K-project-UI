@@ -52,3 +52,23 @@ for subfolder in os.listdir(src_path):
     
     
             cPickle.dump(J,file(fname,'wb'))
+            
+            
+            
+            
+# for single file:
+
+infile = 'E:/user/dawnknight/desktop/Yao_data201710131636.pkl'
+
+data  = cPickle.load(file(infile,'rb'))
+Kbody = rawK2ary(data,jidx)
+J     = human_mod(Kbody)
+name  = infile.split('/')[-1].split('ex')
+fname = name[0].replace('data','data'+year)+'unified_ex'+name[1]
+cPickle.dump(J,file(fname,'wb'))
+
+
+
+            
+            
+            
