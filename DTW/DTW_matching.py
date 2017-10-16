@@ -8,14 +8,12 @@ Created on Tue Oct 10 13:27:08 2017
 
 import h5py,cPickle,pdb,glob,os
 import numpy as np
-from scipy.spatial.distance import euclidean,_validate_vector
-from fastdtw import fastdtw as orifastdtw
-from w_fastdtw import fastdtw,dtw
-import matplotlib.pyplot as plt
+from scipy.spatial.distance import _validate_vector
+from w_fastdtw import fastdtw
 from scipy.ndimage.filters import gaussian_filter1d as gf
 from scipy.linalg import norm
 from collections import defaultdict
-#from clip import clip
+import matplotlib.pyplot as plt
 
 def wt_euclidean(u,v,w):
     u = _validate_vector(u)
@@ -28,20 +26,28 @@ Jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,\
                     0., 0., 0.])
 Jweight = Jweight/sum(Jweight)*1.5
 
-data       = h5py.File('GT_V_data_mod_EX4.h5','r')
-gt_data    = {}
-gt_data[1] = data['GT_1'][:]
-gt_data[2] = data['GT_2'][:]
-gt_data[3] = data['GT_3'][:]
-gt_data[4] = data['GT_4'][:]
+#data       = h5py.File('GT_V_data_mod_EX4.h5','r')
+#gt_data    = {}
+#gt_data[1] = data['GT_1'][:]
+#gt_data[2] = data['GT_2'][:]
+#gt_data[3] = data['GT_3'][:]
+#gt_data[4] = data['GT_4'][:]
 
+data       = h5py.File('GT_kinect_EX4_40_40_40.h5','r')
+gt_data    = {}
+gt_data[1] = data['GT_kinect_1'][:]
+gt_data[2] = data['GT_kinect_2'][:]
+gt_data[3] = data['GT_kinect_3'][:]
+gt_data[4] = data['GT_kinect_4'][:]
 
 
 
 #src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
-src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+#src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
+src_path  = 'D:/Project/K_project/DTW/test data/'
+
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
-dst_path  = './figure/0926/7 joints Weight/'
+dst_path  = './figure/1016/7 joints Weight/'
 
 #decTh     = 2000
 
@@ -52,9 +58,9 @@ order[2] = 'end'
 order[3] = [4]
 order[4] = [2,3]
 
-AVGdist  ={}
-for i in order.keys():
-    AVGdist[i] = []
+#AVGdist  ={}
+#for i in order.keys():
+#    AVGdist[i] = []
 
 Color = ['red','blue','green','black','m']    
 
@@ -62,9 +68,15 @@ Color = ['red','blue','green','black','m']
 
 for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
     print infile
-    test_data    = cPickle.load(file(infile,'rb'))[12:,:].T
-      
-  
+    pdb.set_trace()
+#    test_data    = cPickle.load(file(infile,'rb'))[12:,:].T
+    test_data    = cPickle.load(file(infile,'rb')).T
+    foldername   = infile.split('\\')[-1].split('_ex4')[0][:-3]  
+    
+    if not os.path.exists(dst_path+foldername):
+        os.makedirs(dst_path+foldername)
+        
+#    text_file = open(dst_path+foldername+"/"+foldername+"_log.txt", "w")    
 
     # === initial setting ===
     Dtw                = {}
@@ -115,7 +127,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
             Dtw['seqlist'] = Dtw['seqlist'].reshape(-1,21)
         else:
             Dtw['seqlist'] = np.vstack([Dtw['seqlist'],test_data[j,:]])                
-            
+            Dtw['seqlist'] = gf(Dtw['seqlist'],3,axis = 0)
       
         if not Dtw['deflag'] :
             if np.mod(Dtw['seqlist'].shape[0]-Dtw['presv_size']-1,10) == 0: # check every 10 frames
@@ -242,62 +254,38 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
     
                     test_p = Dtw['seqlist'] + np.atleast_2d((gt_data[i][0,:]-Dtw['seqlist'][0,:]))
                     Dtw['dist_p'][i], _ = fastdtw(gt_data[Dtw['gt_idx']], test_p,Jweight, dist=wt_euclidean)                     
-#                    if minval>dist_p[i]:
-#                        minval = dist_p[i] 
-#                        minidx = i  
+                    
                 minidx = min(Dtw['dist_p'], key = Dtw['dist_p'].get)
                 Dtw['gt_idx'] =  minidx 
                 Dtw['idxlist'].append(Dtw['gt_idx'])
         
         elif (not Dtw['chk_flag']) | (Dtw['cnt'] > 0):
 
-            Dtw['oidx'] = Dtw['gt_idx']        
+            Dtw['oidx'] = Dtw['gt_idx']   
             
-            
-#        if segend:
-#            pass
-#        else:
-#            seglist.append([test_idx,j]) 
-#            endidx = j
-#            
-#            if (not deflag):
-#                if len(order[oidx])>1:
-#                    # === no decrese happen 
-#                    for i in  order[oidx]: 
+# draw results    
+#    for jj in xrange(len(Dtw['idxlist'])): 
+#        print jj
+#        for i in range(21):
+#            fig = plt.figure(1)
+#            plt.plot(test_data[Dtw['seglist'][0][0]:Dtw['seglist'][jj][1],i]-500,color = 'red')
+#            plt.plot(test_data[:,i],color = 'blue')
+#            plt.title('matching _ coordinate number is : ' +str(i))
+#            subfolder = '/coordinate '+str(i)
+#            if not os.path.exists(dst_path+foldername+subfolder+'/matching/'):
+#                os.makedirs(dst_path+foldername+subfolder+'/matching/')
+#            if not os.path.exists(dst_path+foldername+subfolder+'/comparing/'):
+#                os.makedirs(dst_path+foldername+subfolder+'/comparing/')
+#            fig.savefig(dst_path+foldername+subfolder+'/matching/'+str(jj).zfill(2)+'.jpg')
+#            plt.close(fig)
+#    
+#            fig = plt.figure(1)
+#            offset = test_data[Dtw['seglist'][jj][0],i]-gt_data[Dtw['idxlist'][jj]][0,i]
+#            plt.plot(test_data[Dtw['seglist'][jj][0]:Dtw['seglist'][jj][1],i]-offset,color = 'red')
+#            plt.plot(gt_data[Dtw['idxlist'][jj]][:,i],color = 'Blue')
+#            plt.title(foldername + '\n comparing _ coordinate : ' +str(i)+' segment :'+str(Dtw['idxlist'][jj])+'-'\
+#                                 +str(sum(np.array(Dtw['idxlist'])==Dtw['idxlist'][jj])) )#+'\n avgsubdist :' + str(Dtw['avgsubdist'][i][-1]))
+#            fig.savefig(dst_path+foldername+subfolder+'/comparing/comparing w ground truth '+str(jj).zfill(2)+'.jpg')
+#            plt.close(fig)            
 #        
-#                        test_p = test_data[:,:] + np.atleast_2d((gt_data[i][0,:]-test_data[test_idx,:]))
-#                        dist_p[i], _ = fastdtw(gt_data[i], test_p[test_idx:,:], Jweight, dist=wt_euclidean)                      
-#                        if minval>dist_p[i]:
-#                            minval = dist_p[i] 
-#                            minidx = i  
-#                        gt_idx =  minidx 
-#                        idxlist.append(gt_idx)
 #            
-#            elif (not chk_flag) | (cnt > 0):
-#
-#                oidx = gt_idx
-#                
-#
-#            # ==== test uni-dist ====  
-#            for subidx in range(21):
-#                subdist = 0
-#                for ii in xrange(len(uni_path_p)):
-#                    subdist += np.abs(gt_data[gt_idx][uni_path_p[ii][0],subidx]-uni_data[uni_path_p[ii][1],subidx])
-#
-#                avgsubdist[subidx].append(float(np.round(subdist/len(uni_path_p),2)))          
-#            # ===   
-#               
-#            test_idx = endidx+1
-
-
-       
-
-
-
-
-
-
-
-
-
-

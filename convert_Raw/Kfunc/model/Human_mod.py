@@ -58,6 +58,7 @@ oripos = np.array([80,100,0])
 def uni_vec(Body,start,end):
     tmp = Body[start]-Body[end]
     vlen = sum(tmp**2)**.5
+  
     return tmp/vlen
 
 def uni_vec_pts(Body,start,end):
@@ -66,9 +67,12 @@ def uni_vec_pts(Body,start,end):
                     Body[start].Position.z-Body[end].Position.z])
     
     vlen = sum(tmp**2)**.5
+    if vlen == 0:
+        pdb.set_trace()
+        vlen = 10**-6
     return tmp/vlen
     
-def human_mod(Body): # for offline
+def human_mod(Body):
     # Body : include all joints 3D position
     #pdb.set_trace()
     Vec0001 = uni_vec(Body, JointType_SpineBase    , JointType_SpineMid)
@@ -127,7 +131,7 @@ def draw_human_mod(Joints):
         plt.pause(1.0/120)
     
 
-def human_mod_pts(Body):
+def human_mod_pts(Body,array= False, limb = True): #for online
     # Body : include all joints 3D position
     #pdb.set_trace()
     Vec0001 = uni_vec_pts(Body, JointType_SpineBase    , JointType_SpineMid)
@@ -153,8 +157,81 @@ def human_mod_pts(Body):
     J[JointType_ShoulderRight] = J[JointType_SpineShoulder]- Vec2008*Jlen['2008']*factor
     J[JointType_ElbowRight]    = J[JointType_ShoulderRight]- Vec0809*Jlen['0809']*factor
     J[JointType_WristRight]    = J[JointType_ElbowRight]   - Vec0910*Jlen['0910']*factor
+    
+#    if array :
+#        for i in [0,1,2,3,4,5,6,8,9,10,20]:
+#            if i == 0 :            
+#                Jary = J[0]
+#            else:
+#                Jary = np.hstack([Jary, J[i]])
+#        if limb:
+#            return J,Jary[12:]
+#        else:
+#            return J,Jary
+#                
+#    else:       
+#        return J
+    if array :
+        for iidx,i in enumerate([4,5,6,8,9,10,20]):
+            if iidx == 0 :            
+                Jary = J[i]
+            else:
+                Jary = np.vstack([Jary, J[i]])
+        return J,Jary                
+    else:       
+        return J
 
-    return J
+
+def human_mod_pts2(Body,array= False, limb = True):
+    # Body : include all joints 3D position
+    pdb.set_trace()
+    Vec0001 = uni_vec_pts(Body, JointType_SpineBase    , JointType_SpineMid)
+    Vec0120 = uni_vec_pts(Body, JointType_SpineMid     , JointType_SpineShoulder)
+    Vec2002 = uni_vec_pts(Body, JointType_SpineShoulder, JointType_Neck)
+    Vec0203 = uni_vec_pts(Body, JointType_Neck         , JointType_Head)
+    Vec2004 = uni_vec_pts(Body, JointType_SpineShoulder, JointType_ShoulderLeft)
+    Vec0405 = uni_vec_pts(Body, JointType_ShoulderLeft , JointType_ElbowLeft)
+    Vec0506 = uni_vec_pts(Body, JointType_ElbowLeft    , JointType_WristLeft)
+    Vec2008 = uni_vec_pts(Body, JointType_SpineShoulder, JointType_ShoulderRight)
+    Vec0809 = uni_vec_pts(Body, JointType_ShoulderRight, JointType_ElbowRight)
+    Vec0910 = uni_vec_pts(Body, JointType_ElbowRight   , JointType_WristRight)
+    
+    
+    J[JointType_SpineBase]     = oripos
+    J[JointType_SpineMid]      = J[JointType_SpineBase]    - Vec0001*Jlen['0001']*factor
+    J[JointType_SpineShoulder] = J[JointType_SpineMid]     - Vec0120*Jlen['0120']*factor
+    J[JointType_Neck]          = J[JointType_SpineShoulder]- Vec2002*Jlen['2002']*factor
+    J[JointType_Head]          = J[JointType_Neck]         - Vec0203*Jlen['0203']*factor
+    J[JointType_ShoulderLeft]  = J[JointType_SpineShoulder]- Vec2004*Jlen['2004']*factor
+    J[JointType_ElbowLeft]     = J[JointType_ShoulderLeft] - Vec0405*Jlen['0405']*factor
+    J[JointType_WristLeft]     = J[JointType_ElbowLeft]    - Vec0506*Jlen['0506']*factor
+    J[JointType_ShoulderRight] = J[JointType_SpineShoulder]- Vec2008*Jlen['2008']*factor
+    J[JointType_ElbowRight]    = J[JointType_ShoulderRight]- Vec0809*Jlen['0809']*factor
+    J[JointType_WristRight]    = J[JointType_ElbowRight]   - Vec0910*Jlen['0910']*factor
+    pdb.set_trace()
+#    if array :
+#        for i in [0,1,2,3,4,5,6,8,9,10,20]:
+#            if i == 0 :            
+#                Jary = J[0]
+#            else:
+#                Jary = np.hstack([Jary, J[i]])
+#        if limb:
+#            return J,Jary[12:]
+#        else:
+#            return J,Jary
+#                
+#    else:       
+#        return J
+    if array :
+        for iidx,i in enumerate([4,5,6,8,9,10,20]):
+            if iidx == 0 :            
+                Jary = J[i]
+            else:
+                Jary = np.vstack([Jary, J[i]])
+        return J,Jary                
+    else:       
+        return J
+
 
 
 def draw_human_mod_pts(Joints,surface,keys):
@@ -173,40 +250,61 @@ def draw_human_mod_pts(Joints,surface,keys):
     plt.draw()
     plt.pause(1.0/120)
 
-def human_mod_Mocam(Body,Kpos):
-    # Body : include all joints 3D position
-    #pdb.set_trace()
-    #Kpos : kinect spinshoulder position
-    
-    oripos = Body[JointType_SpineShoulder]
+def reconJ2joints(joint,recon_body):
+    #LSpos : ShoulderLeft position
 
-    Vec00 = Body[JointType_SpineBase]     - oripos  
-    Vec01 = Body[JointType_SpineMid]      - oripos
-    Vec02 = Body[JointType_Neck]          - oripos
-    Vec03 = Body[JointType_Head]          - oripos
-    Vec04 = Body[JointType_ShoulderLeft]  - oripos
-    Vec05 = Body[JointType_ElbowLeft]     - oripos
-    Vec06 = Body[JointType_WristLeft]     - oripos   
-    Vec08 = Body[JointType_ShoulderRight] - oripos
-    Vec09 = Body[JointType_ElbowRight]    - oripos
-    Vec10 = Body[JointType_WristRight]    - oripos
-    Vec20 = Body[JointType_SpineShoulder] - oripos    
+
+    ori_body = {}
+    for i in [4,5,6,8,9,10]:
+        ori_body[i] = np.array([joint[i].Position.x,joint[i].Position.y,joint[i].Position.z])
+
+    Vec45 = (recon_body[1,:]  - recon_body[0,:])/np.sum((recon_body[1,:]-recon_body[0,:])**2,0)**0.5
+    Vec56 = (recon_body[2,:]  - recon_body[1,:])/np.sum((recon_body[2,:]-recon_body[1,:])**2,0)**0.5 
+#    Vec48 = (recon_body[3,:]  - recon_body[0,:])/np.sum((recon_body[3,:]-recon_body[0,:])**2,0)**0.5 
+    Vec89 = (recon_body[4,:]  - recon_body[3,:])/np.sum((recon_body[4,:]-recon_body[3,:])**2,0)**0.5 
+    Vec90 = (recon_body[5,:]  - recon_body[4,:])/np.sum((recon_body[5,:]-recon_body[4,:])**2,0)**0.5  
     
-    Len = min(Vec00.shape[1],Kpos.shape[1])
-    J[JointType_SpineBase]     = Vec00[:,:Len]  + Kpos[:,:Len]
-    J[JointType_SpineMid]      = Vec01[:,:Len]  + Kpos[:,:Len]
-    J[JointType_SpineShoulder] = Vec20[:,:Len]  + Kpos[:,:Len]
-    J[JointType_Neck]          = Vec02[:,:Len]  + Kpos[:,:Len]
-    J[JointType_Head]          = Vec03[:,:Len]  + Kpos[:,:Len]
-    J[JointType_ShoulderLeft]  = Vec04[:,:Len]  + Kpos[:,:Len]
-    J[JointType_ElbowLeft]     = Vec05[:,:Len]  + Kpos[:,:Len]
-    J[JointType_WristLeft]     = Vec06[:,:Len]  + Kpos[:,:Len]
-    J[JointType_ShoulderRight] = Vec08[:,:Len]  + Kpos[:,:Len]
-    J[JointType_ElbowRight]    = Vec09[:,:Len]  + Kpos[:,:Len]
-    J[JointType_WristRight]    = Vec10[:,:Len]  + Kpos[:,:Len]
+    
+    Len45 = np.mean(np.sum((ori_body[5 ]  - ori_body[4])**2,axis = 0)**0.5)  
+    Len56 = np.mean(np.sum((ori_body[6 ]  - ori_body[5])**2,axis = 0)**0.5)
+#    Len48 = np.mean(np.sum((ori_body[8 ]  - ori_body[4])**2,axis = 0)**0.5) 
+    Len89 = np.mean(np.sum((ori_body[9 ]  - ori_body[8])**2,axis = 0)**0.5)
+    Len90 = np.mean(np.sum((ori_body[10]  - ori_body[9])**2,axis = 0)**0.5)  
+    
+
+    J = {}
+#    LSpos = ori_body[4]
+#    RSpos = ori_body[8]
+    
+    J[JointType_ShoulderLeft] = ori_body[4]
+    J[JointType_ElbowLeft]    = Vec45*Len45 + ori_body[4]
+    J[JointType_WristLeft]    = Vec56*Len56 + J[JointType_ElbowLeft]
+    
+    J[JointType_ShoulderRight] = ori_body[8]
+#    J[JointType_ShoulderRight] = Vec48*Len48 + J[JointType_ShoulderLeft]
+    J[JointType_ElbowRight]    = Vec89*Len89 + ori_body[8]
+    J[JointType_WristRight]    = Vec90*Len90 + J[JointType_ElbowRight]
 
     return J
-       
+
+#    joint[JointType_ElbowLeft].Position.x     = (Vec45*Len45 + ori_body[4])[0]
+#    joint[JointType_ElbowLeft].Position.y     = (Vec45*Len45 + ori_body[4])[1]
+#    joint[JointType_ElbowLeft].Position.z     = (Vec45*Len45 + ori_body[4])[2]
+#    
+#    joint[JointType_WristLeft].Position.x     = (Vec56*Len56 + joint[JointType_ElbowLeft])[0]
+#    joint[JointType_WristLeft].Position.y     = (Vec56*Len56 + joint[JointType_ElbowLeft])[1]
+#    joint[JointType_WristLeft].Position.z     = (Vec56*Len56 + joint[JointType_ElbowLeft])[2]
+#    joint[JointType_ElbowRight].Position.x    = (Vec89*Len89 + ori_body[8])[0]
+#    joint[JointType_ElbowRight].Position.y    = (Vec89*Len89 + ori_body[8])[1]
+#    joint[JointType_ElbowRight].Position.z    = (Vec89*Len89 + ori_body[8])[2]
+#    joint[JointType_WristRight] .Position.x   = (Vec90*Len90 + joint[JointType_ElbowRight])[0]
+#    joint[JointType_WristRight] .Position.y   = (Vec90*Len90 + joint[JointType_ElbowRight])[1]
+#    joint[JointType_WristRight] .Position.z   = (Vec90*Len90 + joint[JointType_ElbowRight])[2]
+#    
+#    
+#    return joint
+  
+     
     
 #import cPickle 
 #from Mocam2Kinect import *

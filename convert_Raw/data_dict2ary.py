@@ -64,7 +64,7 @@ exeno      = 'ex4'
 group_size = 30 # sample number per group
 jnum       = 11          
         
-kinfile = ''
+kinfile = 'D:/Project/K_project/convert_Raw/Yao_data201710131636_unified_ex4.pkl'
 
 kdata = cPickle.load(file(kinfile,'r'))
 Kary = np.zeros((jnum*3,kdata[20].shape[1]))

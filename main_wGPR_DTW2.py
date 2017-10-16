@@ -33,6 +33,10 @@ fps = 30
 
 bkimg = np.zeros([1080,1920])
 
+Uname = 'Yao_' # user name
+Eno   = '_ex4'  # execise number 
+
+
 
 # colors for drawing different bodies 
 SKELETON_COLORS = [pygame.color.THECOLORS["red"], 
@@ -137,8 +141,9 @@ class BodyGameRuntime(object):
         self.bdjoints = []
         self.Jarray  = {}  # joint array
         self.now = datetime.datetime.now() 
-        self.dstr = './output/data'+repr(self.now.year)+repr(self.now.month).zfill(2)+repr(self.now.day).zfill(2)+\
-                                    repr(self.now.hour).zfill(2)+repr(self.now.minute).zfill(2)
+        self.dstr = './output/'+Uname+'data'+repr(self.now.year)+repr(self.now.month).zfill(2)\
+                               +repr(self.now.day).zfill(2)+repr(self.now.hour).zfill(2)\
+                               +repr(self.now.minute).zfill(2)+repr(self.now.second).zfill(2)+Eno
         
         self.scale       = 1.0
         self._done       = False
@@ -252,7 +257,7 @@ class BodyGameRuntime(object):
                         self.dataset =h5py.File(self.dstr+'.h5', 'r')
                         # img group
                         self.imgs = self.dataset.create_group('imgs')
-                        self.cimgs = self.imgs.create_group('cimgs')
+#                        self.cimgs = self.imgs.create_group('cimgs')
                         self.dimgs = self.imgs.create_group('dimgs')
                         self.bdimgs = self.imgs.create_group('bdimgs')
                         #self.timestamp = self.imgs.create_group('tstamp')
@@ -488,7 +493,7 @@ class BodyGameRuntime(object):
             if self.vid_rcd == True:
                 typetext(self._frame_surface,'Video Recording' ,(1550,20),(255,0,0))
                 
-                self.cimgs.create_dataset('img_'+repr(self.fno).zfill(4), data = frame)
+#                self.cimgs.create_dataset('img_'+repr(self.fno).zfill(4), data = frame)
                 self.bdimgs.create_dataset('bd_'+repr(self.fno).zfill(4), data = np.dstack((bodyidx,bodyidx,bodyidx)))
                 self.dimgs.create_dataset('d_'+repr(self.fno).zfill(4), data = np.dstack((dframe,dframe,dframe)))
                 #self.timestamp.create_dataset('t_'+repr(self.fno).zfill(4),data =TimeS)
