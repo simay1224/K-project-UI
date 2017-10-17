@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Oct 10 13:27:08 2017
+Created on Tue Oct 17 15:45:29 2017
 
 @author: medialab
 """
+
 
 
 import h5py,cPickle,pdb,glob,os
@@ -66,9 +67,8 @@ Color = ['red','blue','green','black','m']
 
 
 
-for infile in glob.glob(os.path.join(src_path,'*.pkl')):
+for infile in glob.glob(os.path.join(src_path,'*.pkl'))[3:]:
     print infile
-    pdb.set_trace()
     test_data    = cPickle.load(file(infile,'rb'))[12:,:].T
 #    test_data    = cPickle.load(file(infile,'rb')).T
     foldername   = infile.split('\\')[-1].split('_ex4')[0][:-3]  
@@ -80,19 +80,16 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
 
     # === initial setting ===
     Dtw                = {}
-    Dtw['decTh']       = 1900
+    Dtw['decTh']       = 2000
     Dtw['cnt']         = 0
     Dtw['distp_prev']  = 0         
     Dtw['distp_cmp']   = np.inf             
-    Dtw['oidx']        = 0      # initail
-    Dtw['gt_idx']      = 0 
+
     Dtw['presv_size']  = 0
     Dtw['idxlist']     = []   
     Dtw['idx_cmp']     = 0
     Dtw['fcnt']        = 0
     Dtw['seglist']     = []
-    Dtw['Thcnt']       = 10     #threshold of cnt
-
     
     #
     Dtw['seginidx']    = 0
@@ -107,14 +104,17 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
     Dtw['deflag']      = False   # decreasing flag
     Dtw['onedeflag']   = False
     Dtw['segini']      = True  
-    j = 0  
-
-
     
-#    for j in  range(test_data.shape[0]): 
     
+    
+    # tunable parameter
+    j                  = 271
+    Dtw['seginidx']    = j
+    Dtw['oidx']        = 3      # initail
+    Dtw['gt_idx']      = 3 
+
         
-    while not ((order[Dtw['oidx']] == 'end') | (j == (test_data.shape[0]-1))):
+    while not ((order[Dtw['oidx']] == 'end') | (j == 400)):#(test_data.shape[0]-1))):
         print j
         Dtw['segend']      = False 
 
@@ -157,8 +157,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                              if (Dtw['dpfirst'][ii] - Dtw['dist_p'][ii])>Dtw['decTh']:
                                  print('deflag on')
                                  Dtw['deflag_mul'][ii] = True
-                                 Dtw['onedeflag'] = True 
-#                                 Dtw['deidx'][ii] = Dtw['seqlist_reg'].shape[0]
+                                 Dtw['onedeflag'] = True  
                                  
                     if Dtw['onedeflag']:#(j- (test_idx+1)) >=60:   # compare the dist_p to decide which movement it is. 
                                                             #(may need further modification when doing muilti-ex)
@@ -180,8 +179,8 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                          
                         Dtw['idxlist'].append(Dtw['gt_idx'])
                         Dtw['distp_prev']  = Dtw['dist_p'][Dtw['gt_idx']]
-                        Dtw['dpfirst']     = Dtw['dpfirst'][Dtw['gt_idx']]
-#                        Dtw['deidx']       = Dtw['deidx'][minidx]
+                        Dtw['dpfirst'] = Dtw['dpfirst'][Dtw['gt_idx']]
+                       
                 else:  
                     test_data_p  = Dtw['seqlist'] + np.atleast_2d((gt_data[Dtw['gt_idx']][0,:]-Dtw['seqlist'][0,:]))
                     Dtw['dist_p'], _ = fastdtw(gt_data[Dtw['gt_idx']], test_data_p,Jweight, dist=wt_euclidean)
@@ -198,8 +197,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                             print('=========')
                             print('deflag on')
                             print('=========')
-                            Dtw['deidx']       = Dtw['seqlist_reg'].shape[0]
-                            Dtw['deflag']      = True
+                            Dtw['deflag'] = True
                             Dtw['distp_prev']  = Dtw['dist_p']   
           
         else: 
@@ -216,7 +214,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                     Dtw['idx_cmp']   = Dtw['seqlist'].shape[0]
                     print(' ==== reset ====')
                     
-                elif Dtw['cnt'] == Dtw['Thcnt']:
+                elif Dtw['cnt'] == 20:
                     
                     Dtw['evalstr']  = 'Well done'
                     Dtw['chk_flag'] = False   
@@ -226,18 +224,15 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
                         tgrad += np.gradient(gf(Dtw['seqlist'][:,ii],3))**2
                         
                     tgrad = tgrad**0.5    
-                    endidx = np.argmin(tgrad[Dtw['idx_cmp']-20:Dtw['idx_cmp']+Dtw['Thcnt']-1])+(Dtw['idx_cmp']-20)
-#                    pdb.set_trace() 
-#                    endidx  = np.argmin(tgrad[Dtw['deidx']:]+Dtw['deidx'])
+                    endidx = np.argmin(tgrad[Dtw['idx_cmp']-10:Dtw['idx_cmp']+19])+(Dtw['idx_cmp']-10) 
+       
                     
-#                    pdb.set_trace()
                     if Dtw['seglist'] == []:
                         Dtw['seglist'].append([Dtw['seginidx'],Dtw['seginidx']+endidx])
                         Dtw['seginidx']    = Dtw['seginidx']+endidx
                     else:
                         Dtw['seglist'].append([Dtw['seginidx']+1,Dtw['seginidx']+1+endidx])
                         Dtw['seginidx']    = Dtw['seginidx']+endidx+1
-                        
                         
                     Dtw['seqlist_reg'] = Dtw['seqlist_reg'][endidx+1:,] # update the seqlist
                     Dtw['presv_size']  = Dtw['seqlist_reg'].shape[0] 
@@ -287,29 +282,3 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl')):
 
             Dtw['oidx'] = Dtw['gt_idx']   
             
-# draw results    
-#    for jj in xrange(len(Dtw['idxlist'])): 
-#        print jj
-#        for i in range(21):
-#            fig = plt.figure(1)
-#            plt.plot(test_data[Dtw['seglist'][0][0]:Dtw['seglist'][jj][1],i]-500,color = 'red')
-#            plt.plot(test_data[:,i],color = 'blue')
-#            plt.title('matching _ coordinate number is : ' +str(i))
-#            subfolder = '/coordinate '+str(i)
-#            if not os.path.exists(dst_path+foldername+subfolder+'/matching/'):
-#                os.makedirs(dst_path+foldername+subfolder+'/matching/')
-#            if not os.path.exists(dst_path+foldername+subfolder+'/comparing/'):
-#                os.makedirs(dst_path+foldername+subfolder+'/comparing/')
-#            fig.savefig(dst_path+foldername+subfolder+'/matching/'+str(jj).zfill(2)+'.jpg')
-#            plt.close(fig)
-#    
-#            fig = plt.figure(1)
-#            offset = test_data[Dtw['seglist'][jj][0],i]-gt_data[Dtw['idxlist'][jj]][0,i]
-#            plt.plot(test_data[Dtw['seglist'][jj][0]:Dtw['seglist'][jj][1],i]-offset,color = 'red')
-#            plt.plot(gt_data[Dtw['idxlist'][jj]][:,i],color = 'Blue')
-#            plt.title(foldername + '\n comparing _ coordinate : ' +str(i)+' segment :'+str(Dtw['idxlist'][jj])+'-'\
-#                                 +str(sum(np.array(Dtw['idxlist'])==Dtw['idxlist'][jj])) )#+'\n avgsubdist :' + str(Dtw['avgsubdist'][i][-1]))
-#            fig.savefig(dst_path+foldername+subfolder+'/comparing/comparing w ground truth '+str(jj).zfill(2)+'.jpg')
-#            plt.close(fig)            
-#        
-#            
