@@ -44,7 +44,7 @@ gt_data[4] = data['GT_kinect_4'][:]
 
 #src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
 #src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
-src_path  = 'D:/Project/K_project/DTW/test data/'
+src_path  = './test data/'
 
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
 dst_path  = './figure/1016/7 joints Weight/'
@@ -66,9 +66,8 @@ Color = ['red','blue','green','black','m']
 
 
 
-for infile in glob.glob(os.path.join(src_path,'*.pkl')):
+for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
     print infile
-    pdb.set_trace()
     test_data    = cPickle.load(file(infile,'rb'))[12:,:].T
 #    test_data    = cPickle.load(file(infile,'rb')).T
     foldername   = infile.split('\\')[-1].split('_ex4')[0][:-3]  

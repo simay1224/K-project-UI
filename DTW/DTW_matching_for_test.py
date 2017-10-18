@@ -15,6 +15,8 @@ from scipy.ndimage.filters import gaussian_filter1d as gf
 from scipy.linalg import norm
 from collections import defaultdict
 import matplotlib.pyplot as plt
+from scipy.signal import argrelextrema
+
 
 def wt_euclidean(u,v,w):
     u = _validate_vector(u)
@@ -22,10 +24,23 @@ def wt_euclidean(u,v,w):
     dist = norm(w*(u - v))
     return dist
 
+
+
 Jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,\
                     0., 0., 0., 3., 3., 3., 9., 9., 9.,\
                     0., 0., 0.])
 Jweight = Jweight/sum(Jweight)*1.5
+
+def clip(seqlist):
+    tgrad = 0
+    for ii in [3,4,5,6,7,8,12,13,14,15,16,17]: #maybe can include Jweight
+        tgrad += (np.gradient(gf(seqlist[:,ii],5))**2 )*Jweight[ii]       
+    tgrad = tgrad**0.5 
+    
+    minm = argrelextrema(tgrad, np.less,order = 10)[0]
+    
+    return minm
+
 
 #data       = h5py.File('GT_V_data_mod_EX4.h5','r')
 #gt_data    = {}
@@ -84,13 +99,13 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[3:]:
     Dtw['cnt']         = 0
     Dtw['distp_prev']  = 0         
     Dtw['distp_cmp']   = np.inf             
-
     Dtw['presv_size']  = 0
     Dtw['idxlist']     = []   
     Dtw['idx_cmp']     = 0
     Dtw['fcnt']        = 0
     Dtw['seglist']     = []
-    
+    Dtw['deidx']       = {}    # decrease index 
+    Dtw['Thcnt']       = 10
     #
     Dtw['seginidx']    = 0
     Dtw['dpfirst']     = {}
@@ -157,6 +172,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[3:]:
                              if (Dtw['dpfirst'][ii] - Dtw['dist_p'][ii])>Dtw['decTh']:
                                  print('deflag on')
                                  Dtw['deflag_mul'][ii] = True
+                                 Dtw['deidx'][ii] = j
                                  Dtw['onedeflag'] = True  
                                  
                     if Dtw['onedeflag']:#(j- (test_idx+1)) >=60:   # compare the dist_p to decide which movement it is. 
@@ -178,9 +194,9 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[3:]:
                         Dtw['deflag'] =  True  
                          
                         Dtw['idxlist'].append(Dtw['gt_idx'])
-                        Dtw['distp_prev']  = Dtw['dist_p'][Dtw['gt_idx']]
-                        Dtw['dpfirst'] = Dtw['dpfirst'][Dtw['gt_idx']]
-                       
+                        Dtw['distp_prev'] = Dtw['dist_p'][Dtw['gt_idx']]
+                        Dtw['dpfirst']    = Dtw['dpfirst'][Dtw['gt_idx']]
+                        Dtw['deidx']      = Dtw['deidx'][minidx]
                 else:  
                     test_data_p  = Dtw['seqlist'] + np.atleast_2d((gt_data[Dtw['gt_idx']][0,:]-Dtw['seqlist'][0,:]))
                     Dtw['dist_p'], _ = fastdtw(gt_data[Dtw['gt_idx']], test_data_p,Jweight, dist=wt_euclidean)
@@ -197,8 +213,9 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[3:]:
                             print('=========')
                             print('deflag on')
                             print('=========')
-                            Dtw['deflag'] = True
+                            Dtw['deflag']      = True
                             Dtw['distp_prev']  = Dtw['dist_p']   
+                            Dtw['deidx']       = j
           
         else: 
             test_data_p  = Dtw['seqlist'] + np.atleast_2d((gt_data[Dtw['gt_idx']][0,:]-Dtw['seqlist'][0,:]))
@@ -214,7 +231,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[3:]:
                     Dtw['idx_cmp']   = Dtw['seqlist'].shape[0]
                     print(' ==== reset ====')
                     
-                elif Dtw['cnt'] == 20:
+                elif Dtw['cnt'] == Dtw['Thcnt']:
                     
                     Dtw['evalstr']  = 'Well done'
                     Dtw['chk_flag'] = False   
@@ -224,7 +241,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[3:]:
                         tgrad += np.gradient(gf(Dtw['seqlist'][:,ii],3))**2
                         
                     tgrad = tgrad**0.5    
-                    endidx = np.argmin(tgrad[Dtw['idx_cmp']-10:Dtw['idx_cmp']+19])+(Dtw['idx_cmp']-10) 
+                    endidx = np.argmin(tgrad[Dtw['idx_cmp']-10:Dtw['idx_cmp']+Dtw['Thcnt']-1])+(Dtw['idx_cmp']-10) 
        
                     
                     if Dtw['seglist'] == []:
@@ -238,6 +255,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[3:]:
                     Dtw['presv_size']  = Dtw['seqlist_reg'].shape[0] 
                     Dtw['cnt']         = 0
                     Dtw['oidx']        = Dtw['gt_idx']
+                    Dtw['deidx']       = {}
                     
                     Dtw['dpfirst']     = {}   
                     Dtw['dist_p']      = {}   
