@@ -79,7 +79,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
 
     # === initial setting ===
     Dtw                = {}
-    Dtw['decTh']       = 1900
+    Dtw['decTh']       = 2000
     Dtw['cnt']         = 0
     Dtw['distp_prev']  = 0         
     Dtw['distp_cmp']   = np.inf             
@@ -91,7 +91,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
     Dtw['fcnt']        = 0
     Dtw['seglist']     = []
     Dtw['Thcnt']       = 10     #threshold of cnt
-
+    Dtw['serchLb']     = 20     # lower bound
     
     #
     Dtw['seginidx']    = 0
@@ -225,7 +225,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
                         tgrad += np.gradient(gf(Dtw['seqlist'][:,ii],3))**2
                         
                     tgrad = tgrad**0.5    
-                    endidx = np.argmin(tgrad[Dtw['idx_cmp']-20:Dtw['idx_cmp']+Dtw['Thcnt']-1])+(Dtw['idx_cmp']-20)
+                    endidx = np.argmin(tgrad[Dtw['idx_cmp']-Dtw['serchLb']:Dtw['idx_cmp']+Dtw['Thcnt']-1])+(Dtw['idx_cmp']-Dtw['serchLb'])
 #                    pdb.set_trace() 
 #                    endidx  = np.argmin(tgrad[Dtw['deidx']:]+Dtw['deidx'])
                     

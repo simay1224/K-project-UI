@@ -4,7 +4,7 @@ Created on Sun May 21 13:57:19 2017
 
 @author: Dawnknight
 """
-import os , glob , cPickle
+import os, glob, cPickle
 import numpy as np
 
 
@@ -26,7 +26,8 @@ jnum = 11      # joint number per sample; *3 (xyz)
 for idx,(kinfile,minfile,rinfile)  in enumerate(zip(glob.glob(os.path.join(src_path+Kfolder+exeno+'/','*'+exeno+'.pkl')),\
                                                     glob.glob(os.path.join(src_path+Mfolder+exeno+'/','*'+exeno+'_FPS30_motion_unified.pkl')),\
                                                     glob.glob(os.path.join(src_path+Rfolder+exeno+'/','*'+exeno+'.pkl')))):
-                                                        
+
+             
 
     print(kinfile)
     print(minfile)  
@@ -74,5 +75,5 @@ for kidx, i in enumerate(kdata.keys()):
    
 kname = kinfile.split('/')[-1]        
         
-cPickle.dump(Kary,file(kname,'wb'))        
-        
+cPickle.dump(Kary,file(kname,'wb'))   
+

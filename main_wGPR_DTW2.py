@@ -15,9 +15,9 @@ from Kfunc.model  import Human_mod   as Hmod
 from Kfunc.Rel    import reliability as REL
 from Kfunc.GPR    import GPR
 from Kfunc.DTW    import DTW_matching
-import ctypes,os
-import pygame,h5py,datetime
-import pdb,time,cv2,cPickle
+import ctypes, os
+import pygame, h5py, datetime
+import pdb, time, cv2, cPickle
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -31,7 +31,7 @@ from collections import defaultdict
 #    import thread
 fps = 30
 
-bkimg = np.zeros([1080,1920])
+bkimg = np.zeros([1080, 1920])
 
 Uname = 'Yao_' # user name
 Eno   = '_ex4'  # execise number 

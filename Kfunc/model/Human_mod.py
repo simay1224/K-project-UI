@@ -58,7 +58,7 @@ oripos = np.array([80,100,0])
 def uni_vec(Body,start,end):
     tmp = Body[start]-Body[end]
     vlen = sum(tmp**2)**.5
-  
+    vlen[vlen==0] = 10**-6
     return tmp/vlen
 
 def uni_vec_pts(Body,start,end):

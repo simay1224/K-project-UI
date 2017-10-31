@@ -31,15 +31,16 @@ Jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,\
                     0., 0., 0.])
 Jweight = Jweight/sum(Jweight)*1.5
 
-def clip(seqlist):
+def clip(seqlist,LB):
+    #LB : lower bound  
     tgrad = 0
     for ii in [3,4,5,6,7,8,12,13,14,15,16,17]: #maybe can include Jweight
-        tgrad += (np.gradient(gf(seqlist[:,ii],5))**2 )*Jweight[ii]       
+        tgrad += (np.gradient(gf(seqlist[:,ii],1))**2 )*Jweight[ii]       
     tgrad = tgrad**0.5 
     
     minm = argrelextrema(tgrad, np.less,order = 10)[0]
-    
-    return minm
+    pdb.set_trace()
+    return minm[minm>LB]
 
 
 #data       = h5py.File('GT_V_data_mod_EX4.h5','r')
@@ -82,7 +83,7 @@ Color = ['red','blue','green','black','m']
 
 
 
-for infile in glob.glob(os.path.join(src_path,'*.pkl'))[3:]:
+for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
     print infile
     test_data    = cPickle.load(file(infile,'rb'))[12:,:].T
 #    test_data    = cPickle.load(file(infile,'rb')).T
@@ -105,7 +106,9 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[3:]:
     Dtw['fcnt']        = 0
     Dtw['seglist']     = []
     Dtw['deidx']       = {}    # decrease index 
-    Dtw['Thcnt']       = 10
+    Dtw['Thcnt']       = 20
+    Dtw['serchLb']     = 20
+    
     #
     Dtw['seginidx']    = 0
     Dtw['dpfirst']     = {}
@@ -123,13 +126,16 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[3:]:
     
     
     # tunable parameter
-    j                  = 271
+    
+    j                  = 0
     Dtw['seginidx']    = j
-    Dtw['oidx']        = 3      # initail
-    Dtw['gt_idx']      = 3 
+    Dtw['oidx']        = 0     # initail
+    Dtw['gt_idx']      = 0 
+    Dtw['idlelimit']   = 100
+#    Dtw['resetidx']    = 0
 
         
-    while not ((order[Dtw['oidx']] == 'end') | (j == 400)):#(test_data.shape[0]-1))):
+    while not ((order[Dtw['oidx']] == 'end') | (j == (test_data.shape[0]-1))):
         print j
         Dtw['segend']      = False 
 
@@ -150,133 +156,162 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[3:]:
             Dtw['seqlist_reg'] = np.vstack([Dtw['seqlist_reg'],test_data[j,:]])                
             Dtw['seqlist_gf'] = gf(Dtw['seqlist_reg'],3,axis = 0)
 
-#            Dtw['seqlist'] = Dtw['seqlist_reg']
-            Dtw['seqlist'] = Dtw['seqlist_gf']
+            Dtw['seqlist'] = Dtw['seqlist_reg']
+#            Dtw['seqlist'] = Dtw['seqlist_gf']
         
+        if (Dtw['seqlist_reg'].shape[0] - Dtw['idx_cmp']) >= Dtw['idlelimit']:
+            pdb.set_trace()
+            print('======================= Force Clip ======================')
+            endidx = clip(Dtw['seqlist'],Dtw['idx_cmp'])[0]
 
-            
-
-        if not Dtw['deflag'] :
-            if np.mod(Dtw['seqlist'].shape[0]-Dtw['presv_size']-1,10) == 0: # check every 10 frames
-                if (len(order[Dtw['oidx']])>1 ):# & (not onedeflag):#((j- (test_idx+1)) <=60):
-                    for ii in order[Dtw['oidx']]:
-
-                        test_p = Dtw['seqlist'] + np.atleast_2d((gt_data[ii][0,:]-Dtw['seqlist'][0,:]))
-                        Dtw['dist_p'][ii], _ = fastdtw(gt_data[ii], test_p,Jweight, dist=wt_euclidean)
-
-                        if (Dtw['seqlist'].shape[0] == 1+Dtw['presv_size']): # new movement initail setting
-                             Dtw['dpfirst'][ii], _ = fastdtw(gt_data[Dtw['gt_idx']], test_p[:2],Jweight, dist=wt_euclidean)
-                        else: 
-                             print('%s : ' %ii)
-                             print('%.2f \n'   %(Dtw['dpfirst'][ii] - Dtw['dist_p'][ii]))
-                             if (Dtw['dpfirst'][ii] - Dtw['dist_p'][ii])>Dtw['decTh']:
-                                 print('deflag on')
-                                 Dtw['deflag_mul'][ii] = True
-                                 Dtw['deidx'][ii] = j
-                                 Dtw['onedeflag'] = True  
-                                 
-                    if Dtw['onedeflag']:#(j- (test_idx+1)) >=60:   # compare the dist_p to decide which movement it is. 
-                                                            #(may need further modification when doing muilti-ex)
-                        seg = []
-                        for dekey in Dtw['deflag_mul']:
-                            if Dtw['deflag_mul'][dekey] == True:
-                                seg.append(dekey)
-                        if len(seg)==1: # only 1 movement is decreasing
-                            Dtw['gt_idx'] = seg[0]
-                        
-                            print('movment is '+str(Dtw['gt_idx']))
-                        else:  # len(seg) > 1:
-                    
-                            minidx = min(Dtw['dist_p'], key = Dtw['dist_p'].get)
-                            
-                            print('movment is '+str(minidx))
-                            Dtw['gt_idx'] =  minidx
-                        Dtw['deflag'] =  True  
-                         
-                        Dtw['idxlist'].append(Dtw['gt_idx'])
-                        Dtw['distp_prev'] = Dtw['dist_p'][Dtw['gt_idx']]
-                        Dtw['dpfirst']    = Dtw['dpfirst'][Dtw['gt_idx']]
-                        Dtw['deidx']      = Dtw['deidx'][minidx]
-                else:  
-                    test_data_p  = Dtw['seqlist'] + np.atleast_2d((gt_data[Dtw['gt_idx']][0,:]-Dtw['seqlist'][0,:]))
-                    Dtw['dist_p'], _ = fastdtw(gt_data[Dtw['gt_idx']], test_data_p,Jweight, dist=wt_euclidean)
-                    
-                    if (Dtw['seqlist'].shape[0] == 1+Dtw['presv_size']): # new movement initail setting
-
-                        Dtw['dpfirst'],_ = fastdtw(gt_data[Dtw['gt_idx']], test_data_p[:2],Jweight, dist=wt_euclidean)   
-                        
-                        print('dpfirst is : %f' %Dtw['dpfirst'])
-                    else: 
-                        print('de diff is :%f' %(Dtw['dpfirst'] - Dtw['dist_p']))
-                    
-                        if (Dtw['dpfirst'] - Dtw['dist_p'])>Dtw['decTh']:
-                            print('=========')
-                            print('deflag on')
-                            print('=========')
-                            Dtw['deflag']      = True
-                            Dtw['distp_prev']  = Dtw['dist_p']   
-                            Dtw['deidx']       = j
-          
-        else: 
-            test_data_p  = Dtw['seqlist'] + np.atleast_2d((gt_data[Dtw['gt_idx']][0,:]-Dtw['seqlist'][0,:]))
-            Dtw['dist_p'], path_p = fastdtw(gt_data[Dtw['gt_idx']], test_data_p,Jweight, dist=wt_euclidean) 
+            if Dtw['seglist'] == []:
+                Dtw['seglist'].append([Dtw['seginidx'],Dtw['seginidx']+endidx])
+                Dtw['seginidx']    = Dtw['seginidx']+endidx
+            else:
+                Dtw['seglist'].append([Dtw['seginidx']+1,Dtw['seginidx']+1+endidx])
+                Dtw['seginidx']    = Dtw['seginidx']+endidx+1
                 
-            if Dtw['chk_flag']:  # in check global min status
-                Dtw['cnt'] +=1
-               
-                if Dtw['dist_p'] < Dtw['distp_cmp'] : # find smaller value
-                    Dtw['cnt'] = 1
-
-                    Dtw['distp_cmp'] = Dtw['dist_p']
-                    Dtw['idx_cmp']   = Dtw['seqlist'].shape[0]
-                    print(' ==== reset ====')
-                    
-                elif Dtw['cnt'] == Dtw['Thcnt']:
-                    
-                    Dtw['evalstr']  = 'Well done'
-                    Dtw['chk_flag'] = False   
-                    tgrad = 0
-
-                    for ii in range(Dtw['seqlist'].shape[1]): #maybe can include Jweight
-                        tgrad += np.gradient(gf(Dtw['seqlist'][:,ii],3))**2
-                        
-                    tgrad = tgrad**0.5    
-                    endidx = np.argmin(tgrad[Dtw['idx_cmp']-10:Dtw['idx_cmp']+Dtw['Thcnt']-1])+(Dtw['idx_cmp']-10) 
-       
-                    
-                    if Dtw['seglist'] == []:
-                        Dtw['seglist'].append([Dtw['seginidx'],Dtw['seginidx']+endidx])
-                        Dtw['seginidx']    = Dtw['seginidx']+endidx
-                    else:
-                        Dtw['seglist'].append([Dtw['seginidx']+1,Dtw['seginidx']+1+endidx])
-                        Dtw['seginidx']    = Dtw['seginidx']+endidx+1
-                        
-                    Dtw['seqlist_reg'] = Dtw['seqlist_reg'][endidx+1:,] # update the seqlist
-                    Dtw['presv_size']  = Dtw['seqlist_reg'].shape[0] 
-                    Dtw['cnt']         = 0
-                    Dtw['oidx']        = Dtw['gt_idx']
-                    Dtw['deidx']       = {}
-                    
-                    Dtw['dpfirst']     = {}   
-                    Dtw['dist_p']      = {}   
-                    Dtw['deflag']      = False
-                    Dtw['deflag_mul']  = defaultdict(lambda:(bool(False)))                                        
-                    Dtw['onedeflag']   = False                                  
-                    Dtw['segini']      = True
-                    Dtw['segend']      = True
-              
-            else:  
-                                                  
-                if (Dtw['dist_p']-Dtw['distp_prev'])>0: #turning point
-                    print (' ==============  large ====================')
-
-                    Dtw['distp_cmp'] = Dtw['distp_prev']
-                    Dtw['idx_cmp']   = Dtw['seqlist'].shape[0]
-                    Dtw['chk_flag'] = True
-        
-            Dtw['distp_prev']  = Dtw['dist_p'] 
+            Dtw['seqlist_reg'] = Dtw['seqlist_reg'][endidx+1:,] # update the seqlist
+            Dtw['presv_size']  = Dtw['seqlist_reg'].shape[0] 
+            Dtw['cnt']         = 0
+            Dtw['oidx']        = Dtw['gt_idx']
+            Dtw['deidx']       = {}
+#                    Dtw['resetidx']    = 0
             
-            print ('===========\n')
+            Dtw['dpfirst']     = {}   
+            Dtw['dist_p']      = {}   
+            Dtw['deflag']      = False
+            Dtw['deflag_mul']  = defaultdict(lambda:(bool(False)))                                        
+            Dtw['onedeflag']   = False                                  
+            Dtw['segini']      = True
+            Dtw['segend']      = True
+            
+        else:
+            if not Dtw['deflag'] :
+                if np.mod(Dtw['seqlist'].shape[0]-Dtw['presv_size']-1,10) == 0: # check every 10 frames
+                    if (len(order[Dtw['oidx']])>1 ):# & (not onedeflag):#((j- (test_idx+1)) <=60):
+                        for ii in order[Dtw['oidx']]:
+    
+                            test_p = Dtw['seqlist'] + np.atleast_2d((gt_data[ii][0,:]-Dtw['seqlist'][0,:]))
+                            Dtw['dist_p'][ii], _ = fastdtw(gt_data[ii], test_p,Jweight, dist=wt_euclidean)
+    
+                            if (Dtw['seqlist'].shape[0] == 1+Dtw['presv_size']): # new movement initail setting
+                                 Dtw['dpfirst'][ii], _ = fastdtw(gt_data[Dtw['gt_idx']], test_p[:2],Jweight, dist=wt_euclidean)
+                            else: 
+                                 print('%s : ' %ii)
+                                 print('%.2f \n'   %(Dtw['dpfirst'][ii] - Dtw['dist_p'][ii]))
+                                 if (Dtw['dpfirst'][ii] - Dtw['dist_p'][ii])>Dtw['decTh']:
+                                     print('deflag on')
+                                     Dtw['deflag_mul'][ii] = True
+                                     Dtw['deidx'][ii] = j
+                                     Dtw['onedeflag'] = True  
+                                     
+                        if Dtw['onedeflag']:#(j- (test_idx+1)) >=60:   # compare the dist_p to decide which movement it is. 
+                                                                #(may need further modification when doing muilti-ex)
+                            seg = []
+                            for dekey in Dtw['deflag_mul']:
+                                if Dtw['deflag_mul'][dekey] == True:
+                                    seg.append(dekey)
+                            if len(seg)==1: # only 1 movement is decreasing
+                                Dtw['gt_idx'] = seg[0]
+                            
+                                print('movment is '+str(Dtw['gt_idx']))
+                            else:  # len(seg) > 1:
+                        
+                                minidx = min(Dtw['dist_p'], key = Dtw['dist_p'].get)
+                                
+                                print('movment is '+str(minidx))
+                                Dtw['gt_idx'] =  minidx
+                            Dtw['deflag'] =  True  
+                             
+                            Dtw['idxlist'].append(Dtw['gt_idx'])
+                            Dtw['distp_prev'] = Dtw['dist_p'][Dtw['gt_idx']]
+                            Dtw['dpfirst']    = Dtw['dpfirst'][Dtw['gt_idx']]
+                            Dtw['deidx']      = Dtw['deidx'][Dtw['gt_idx']]
+                    else:  
+                        test_data_p  = Dtw['seqlist'] + np.atleast_2d((gt_data[Dtw['gt_idx']][0,:]-Dtw['seqlist'][0,:]))
+                        Dtw['dist_p'], _ = fastdtw(gt_data[Dtw['gt_idx']], test_data_p,Jweight, dist=wt_euclidean)
+                        
+                        if (Dtw['seqlist'].shape[0] == 1+Dtw['presv_size']): # new movement initail setting
+    
+                            Dtw['dpfirst'],_ = fastdtw(gt_data[Dtw['gt_idx']], test_data_p[:2],Jweight, dist=wt_euclidean)   
+                            
+                            print('dpfirst is : %f' %Dtw['dpfirst'])
+                        else: 
+                            print('de diff is :%f' %(Dtw['dpfirst'] - Dtw['dist_p']))
+                        
+                            if (Dtw['dpfirst'] - Dtw['dist_p'])>Dtw['decTh']:
+                                print('=========')
+                                print('deflag on')
+                                print('=========')
+                                Dtw['deflag']      = True
+                                Dtw['distp_prev']  = Dtw['dist_p']   
+                                Dtw['deidx']       = j
+              
+            else: 
+                test_data_p  = Dtw['seqlist'] + np.atleast_2d((gt_data[Dtw['gt_idx']][0,:]-Dtw['seqlist'][0,:]))
+                Dtw['dist_p'], path_p = fastdtw(gt_data[Dtw['gt_idx']], test_data_p,Jweight, dist=wt_euclidean) 
+                    
+                if Dtw['chk_flag']:  # in check global min status
+                    Dtw['cnt'] +=1
+                   
+                    if Dtw['dist_p'] < Dtw['distp_cmp'] : # find smaller value
+                        Dtw['cnt'] = 1
+    
+                        Dtw['distp_cmp'] = Dtw['dist_p']
+                        Dtw['idx_cmp']   = Dtw['seqlist'].shape[0]
+                        print(' ==== reset ====')
+    #                    Dtw['resetidx']    = Dtw['idx_cmp']
+                        
+                    elif Dtw['cnt'] == Dtw['Thcnt']:
+                        
+                        Dtw['evalstr']  = 'Well done'
+                        Dtw['chk_flag'] = False   
+                        tgrad = 0
+    
+                        for ii in range(Dtw['seqlist'].shape[1]): #maybe can include Jweight
+                            tgrad += np.gradient(gf(Dtw['seqlist'][:,ii],3))**2
+                            
+                        tgrad = tgrad**0.5   
+                        
+                        endidx = np.argmin(tgrad[Dtw['idx_cmp']-Dtw['serchLb']:Dtw['idx_cmp']+Dtw['Thcnt']-1])+(Dtw['idx_cmp']-Dtw['serchLb']) 
+           
+                        
+                        if Dtw['seglist'] == []:
+                            Dtw['seglist'].append([Dtw['seginidx'],Dtw['seginidx']+endidx])
+                            Dtw['seginidx']    = Dtw['seginidx']+endidx
+                        else:
+                            Dtw['seglist'].append([Dtw['seginidx']+1,Dtw['seginidx']+1+endidx])
+                            Dtw['seginidx']    = Dtw['seginidx']+endidx+1
+                            
+                        Dtw['seqlist_reg'] = Dtw['seqlist_reg'][endidx+1:,] # update the seqlist
+                        Dtw['presv_size']  = Dtw['seqlist_reg'].shape[0] 
+                        Dtw['cnt']         = 0
+                        Dtw['oidx']        = Dtw['gt_idx']
+                        Dtw['deidx']       = {}
+                        Dtw['idx_cmp']     = 0
+    #                    Dtw['resetidx']    = 0
+                        
+                        Dtw['dpfirst']     = {}   
+                        Dtw['dist_p']      = {}   
+                        Dtw['deflag']      = False
+                        Dtw['deflag_mul']  = defaultdict(lambda:(bool(False)))                                        
+                        Dtw['onedeflag']   = False                                  
+                        Dtw['segini']      = True
+                        Dtw['segend']      = True
+                  
+                else:  
+                                                      
+                    if (Dtw['dist_p']-Dtw['distp_prev'])>0: #turning point
+                        print (' ==============  large ====================')
+    
+                        Dtw['distp_cmp'] = Dtw['distp_prev']
+                        Dtw['idx_cmp']   = Dtw['seqlist'].shape[0]
+                        Dtw['chk_flag'] = True
+            
+                Dtw['distp_prev']  = Dtw['dist_p'] 
+                
+                print ('===========\n')
         j=j+1
             
     if Dtw['segend']:
