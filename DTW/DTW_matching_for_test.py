@@ -61,7 +61,7 @@ gt_data[4] = data['GT_kinect_4'][:]
 
 #src_path  = 'I:/AllData_0327/unified data array/Unified_MData/ex4/'
 #src_path  = 'D:/Project/K_project/data/unified data array/Unified_MData/'
-src_path  = 'D:/Project/K_project/DTW/test data/'
+src_path  = 'D:/Project/K_project/DTW/test data/ex4/'
 
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
 dst_path  = './figure/1016/7 joints Weight/'

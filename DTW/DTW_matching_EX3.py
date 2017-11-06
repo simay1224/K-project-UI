@@ -27,8 +27,8 @@ def wt_euclidean(u, v, w):
     dist = norm(w*(u - v))
     return dist
 
-Jweight = np.array([0., 0., 0., 9., 9., 9., 9., 9., 9.,\
-                    0., 0., 0., 9., 9., 9., 9., 9., 9.,\
+Jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,\
+                    0., 0., 0., 3., 3., 3., 9., 9., 9.,\
                     0., 0., 0.])
 Jweight = Jweight/sum(Jweight)*1.5
 
@@ -39,15 +39,14 @@ def clip(seqlist,LB=0):
     for ii in [3,4,5,6,7,8,12,13,14,15,16,17]: #maybe can include Jweight
         tgrad += (np.gradient(gf(seqlist[:,ii],1))**2 )*Jweight[ii]       
     tgrad = tgrad**0.5 
-    # if j >578:
-    #     pdb.set_trace()
     lcalminm = argrelextrema(tgrad, np.less,order = 5)[0]
-
+    # if j > 750:
+    # pdb.set_trace()
     foo = np.where(((tgrad<1)*1)==0)[0]
-    if len(foo) == 0:
+    if (len(foo) == 0) | (len(lcalminm) == []):
         return []
     else:
-        LB = max(foo[0],30)
+        LB = max(foo[0],50)
         minm = []
         
         for ii in lcalminm[lcalminm>LB]:
@@ -58,6 +57,7 @@ def clip(seqlist,LB=0):
         if len(minm)>1:
             pdb.set_trace()
         return minm
+
 
 def seg_update(Dtw, endidx):
     if Dtw['seglist'] == []:
@@ -83,7 +83,7 @@ def seg_update(Dtw, endidx):
 
     return Dtw
 
-data       = h5py.File('GT_V_data_mod_EX3.h5','r')
+data       = h5py.File('GT_V_data_mod_EX4.h5','r')
 gt_data    = {}
 gt_data[1] = data['GT_1'][:]
 gt_data[2] = data['GT_2'][:]
@@ -91,11 +91,11 @@ gt_data[3] = data['GT_3'][:]
 gt_data[4] = data['GT_4'][:]
 
 
-src_path  = './test data/ex3/'
-
+# src_path  = './test data/ex4/'
+src_path  = 'D:/AllData_0327(0712)/AllData_0327/unified data array/Unified_KData/'
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
 #dst_path  = './figure/1016/7 joints Weight/'
-dst_path  = './figure/EX3/'
+dst_path  = './figure/EX4/'
 #decTh     = 2000
 
 order    = {}
@@ -114,12 +114,12 @@ Color = ['red', 'blue', 'green', 'black', 'm']
 
 
 
-for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:]:
+for infile in glob.glob(os.path.join(src_path,'*.pkl'))[1:]:
     print infile
     test_data    = cPickle.load(file(infile,'rb'))[12:,:].T
     test_data    = gf(test_data,3,axis = 0)
 #    test_data    = cPickle.load(file(infile,'rb')).T
-    foldername   = infile.split('\\')[-1].split('_ex4')[0][:-3]  
+    foldername   = infile.split('\\')[-1].split('_ex4')[0] 
     
     if not os.path.exists(dst_path+foldername):
         os.makedirs(dst_path+foldername)
@@ -280,7 +280,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:]:
         if (not Dtw['deflag']):
             if len(order[Dtw['oidx']])>1:
                 # === no decrease happen  ===
-                if Dtw['seqlist'][endidx,7] <150:
+                if Dtw['seqlist'][-1,7] <150:
                     minidx = 2
                 else:
                     minidx = 3 
@@ -327,5 +327,22 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:]:
             plt.title(foldername + '\n comparing _ coordinate : ' +str(i)+' segment :'+str(Dtw['idxlist'][jj])+'-'\
                                     +str(cnt[Dtw['idxlist'][jj]]) )#+'\n avgsubdist :' + str(Dtw['avgsubdist'][i][-1]))
             fig.savefig(dst_path+foldername+subfolder+'/comparing/comparing w ground truth '+str(jj).zfill(2)+'.jpg')
-            plt.close(fig)     
-        
+            plt.close(fig)    
+
+    fig = plt.figure(1)
+    ax1 = fig.add_subplot(111)
+    tgrad = 0
+
+    for ii in [3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17]: 
+        tgrad += (np.gradient(gf(test_data[:,ii], 1))**2 )*Jweight[ii]       
+    tgrad = tgrad**0.5 
+    plt.plot(tgrad, color = 'b')
+    tmp = np.array(Dtw['seglist'])[:,1]
+    plt.scatter(tmp, tgrad[tmp], color = 'r')
+    for ii in tmp:
+        plt.axvline(x = ii, color = 'g')
+    plt.yticks(np.arange(20)/2.)
+    fig.savefig(dst_path+foldername+"/"+foldername+"_grad.jpg")
+    plt.close(fig)
+
+

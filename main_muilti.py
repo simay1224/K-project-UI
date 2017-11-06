@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 02 18:02:12 2017
 
-@author: medialab
-"""
 
 from pykinect2 import PyKinectV2
 from pykinect2.PyKinectV2 import *
@@ -14,7 +9,7 @@ from Kfunc.skel   import skel
 from Kfunc.model  import Human_mod   as Hmod
 from Kfunc.Rel    import reliability as REL
 from Kfunc.GPR    import GPR
-from Kfunc.DTW    import DTW_matching
+from Kfunc.DTW    import DTW_matching2
 import ctypes, os
 import pygame, h5py, datetime
 import pdb, time, cv2, cPickle
@@ -33,50 +28,75 @@ fps = 30
 
 bkimg = np.zeros([1080, 1920])
 
-Uname = 'Andy_' # user name
-Eno   = '_ex2'  # execise number 
+Uname = 'Yao_' # user name
+
 
 
 
 # colors for drawing different bodies 
 SKELETON_COLORS = [pygame.color.THECOLORS["red"], 
-                  pygame.color.THECOLORS["blue"], 
-                  pygame.color.THECOLORS["green"], 
-                  pygame.color.THECOLORS["orange"], 
-                  pygame.color.THECOLORS["purple"], 
-                  pygame.color.THECOLORS["yellow"], 
-                  pygame.color.THECOLORS["violet"]]
+                   pygame.color.THECOLORS["blue"], 
+                   pygame.color.THECOLORS["green"], 
+                   pygame.color.THECOLORS["orange"], 
+                   pygame.color.THECOLORS["purple"], 
+                   pygame.color.THECOLORS["yellow"], 
+                   pygame.color.THECOLORS["violet"]]
 # GPR
 limbidx = np.array([4,5,6,8,9,10,20]) 
 gp      = joblib.load('GPR_cluster_800_meter_fix_ex4.pkl')
-[MIN,MAX] = h5py.File('model_CNN_0521_K2M_rel.h5','r')['minmax'][:]
+[MIN,MAX] = h5py.File('model_CNN_0521_K2M_rel.h5', 'r')['minmax'][:]
 
 
 # DTW
 
-
-data       = h5py.File('GT_kinect_EX4_40_40_40.h5','r')
-gt_data    = {}
-gt_data[1] = data['GT_kinect_1'][:]
-gt_data[2] = data['GT_kinect_2'][:]
-gt_data[3] = data['GT_kinect_3'][:]
-gt_data[4] = data['GT_kinect_4'][:]
+data    = h5py.File('GT_kinect_EX4_40_40_40.h5', 'r')
+gt_data = defaultdict(dict)
+gt_data[4][1] = data['GT_kinect_1'][:]
+gt_data[4][2] = data['GT_kinect_2'][:]
+gt_data[4][3] = data['GT_kinect_3'][:]
+gt_data[4][4] = data['GT_kinect_4'][:]
 data.close()
+data = h5py.File('GT_V_data_mod_EX3.h5', 'r')
+gt_data[3][1] = data['GT_1'][:]
+gt_data[3][2] = data['GT_2'][:]
+gt_data[3][3] = data['GT_3'][:]
+gt_data[3][4] = data['GT_4'][:]
+data.close()
+
+
+
 #status string
-Sstr = ['from hands down to T-pose','from T-pose to hands close','finish','from hand close to T-pose',\
-        'from T-pose to hands close','from T-pose to hands down']
+Sstr = {}
+Sstr[3] = ['raise hands to the Top', ' vertical push down ', 'finish', 'vertical push up',\
+           'vertical push down', 'put hands down']
+Sstr[4] = ['from hands down to T-pose', 'from T-pose to hands close', 'finish', 'from hand close to T-pose',\
+           'from T-pose to hands close', 'from T-pose to hands down']
+
+
+
+
 #goal string
 #gstr = ['initial','T-pos','finish the exercise','Hand close','T-pose']
 
 #ani img data
-ANI = {} 
+ANI = defaultdict(dict) 
 anidata = h5py.File('399x219_ex4_comp.h5','r')
-ANI[0]  = anidata['M0'][:]
-ANI[1]  = anidata['M1'][:]
-ANI[2]  = anidata['M2'][:]
-ANI[3]  = anidata['M3'][:]
-ANI[4]  = anidata['M4'][:]
+ANI[4][0]  = anidata['M0'][:]
+ANI[4][1]  = anidata['M1'][:]
+ANI[4][2]  = anidata['M2'][:]
+ANI[4][3]  = anidata['M3'][:]
+ANI[4][4]  = anidata['M4'][:]
 anidata.close()
+
+anidata = h5py.File('398x223_ex3_comp.h5','r')
+ANI[3][0]  = anidata['M0'][:]
+ANI[3][1]  = anidata['M1'][:]
+ANI[3][2]  = anidata['M2'][:]
+ANI[3][3]  = anidata['M3'][:]
+ANI[3][4]  = anidata['M4'][:]
+anidata.close()
+
+
 
 class BodyGameRuntime(object):
     def __init__(self):
@@ -113,6 +133,7 @@ class BodyGameRuntime(object):
         else:
             print 'failed to extract.....'        
         
+        self.exeno = 3
         self.__param_init__()
         
         
@@ -137,14 +158,23 @@ class BodyGameRuntime(object):
                 print('remove h5py ....')
         except:
             pass
+
             
         self.bdjoints = []
-        self.Jarray  = {}  # joint array
-        self.now = datetime.datetime.now() 
+        self.Jarray   = {}  # joint array
+        self.now  = datetime.datetime.now() 
+
+        
+        # self.exeno       = raw_input('Which exercise do you want to do? (1~4)')
+        # while int(self.exeno) < 1 | int(self.exeno) > 4 | self.exeno == '':
+        #     print 'Error!! please choose btw 1~4'
+        #     self.exeno       = raw_input('Which exercise do you want to do? (1~4)')
+        # self.exeno = int(self.exeno)
+         
         self.dstr = './output/'+Uname+'data'+repr(self.now.year)+repr(self.now.month).zfill(2)\
                                +repr(self.now.day).zfill(2)+repr(self.now.hour).zfill(2)\
-                               +repr(self.now.minute).zfill(2)+repr(self.now.second).zfill(2)+Eno
-        
+                               +repr(self.now.minute).zfill(2)+repr(self.now.second).zfill(2)+str(self.exeno)
+
         self.scale       = 1.0
         self._done       = False
         self._handmode   = False
@@ -155,6 +185,7 @@ class BodyGameRuntime(object):
         self.fno         = 0        
         
         # dtw parameter initialize
+        
         self.Dtw = {}
         self.Dtw['decTh']       = 2000
         self.Dtw['cnt']         = 0
@@ -162,10 +193,12 @@ class BodyGameRuntime(object):
         self.Dtw['distp_cmp']   = np.inf             
         self.Dtw['oidx']        = 0      # initail
         self.Dtw['gt_idx']      = 0 
+        self.Dtw['Ani_idx']     = 0
         self.Dtw['presv_size']  = 0
         self.Dtw['idxlist']     = []   
         self.Dtw['idx_cmp']     = 0
         self.Dtw['fcnt']        = 0
+        self.Dtw['finishcnt']   = 0
         #        
         self.Dtw['dpfirst']     = {}
         self.Dtw['dist_p']      = {}
@@ -180,10 +213,10 @@ class BodyGameRuntime(object):
         self.Dtw['evalstr']     = ''
         #
         
-        # ani        
+        # ani       
         self.ani_cnt   = 0
         self.ani_bound = 0
-        self.ani_order = 0
+
         
                               
 
@@ -202,9 +235,7 @@ class BodyGameRuntime(object):
     def run(self):
         #--------- initial -------       
         global video
-
-            
-            
+   
         cur_frame=0
         
         Rb = defaultdict(list)
@@ -217,13 +248,13 @@ class BodyGameRuntime(object):
         wait_key_count=3
         # -------- Main Program Loop -----------
         while not self._done:
+            # ani setting    
+            self.ani_bound = ANI[self.exeno][self.Dtw['Ani_idx']].shape[0] 
 
-            # ani setting
-            
-            self.ani_bound = ANI[self.Dtw['gt_idx']].shape[0]
-            if (self.ani_cnt > (self.ani_bound- 1)) | (self.ani_order != self.Dtw['gt_idx']) :
+            # print self.Dtw['gt_idx']
+            if (self.ani_cnt > (self.ani_bound - 1)):
                 self.ani_cnt   = 0
-                self.ani_order = self.Dtw['gt_idx']
+            #     self.ani_order = self.Dtw['gt_idx']
             
             #ST = time.clock()
             bddic={}
@@ -283,6 +314,14 @@ class BodyGameRuntime(object):
                 if press[115]==1:# use 's' to smaller the scale
                     if (self.scale > 0.4): 
                         self.scale = self.scale/1.1
+                if press[51]==1:# use '3' to change to execise 3
+                    self.exeno = 3
+                    print('====  doing exercise 3 ===')
+                    self.reset()  
+                if press[52]==1:# use '3' to change to execise 3
+                    self.exeno = 4
+                    print('====  doing exercise 4 ===')
+                    self.reset()          
                 
             #--key pressing over--
                         
@@ -299,11 +338,19 @@ class BodyGameRuntime(object):
             if self._kinect.has_new_color_frame():
                 ori_frame = self._kinect.get_last_color_frame()
                 frame     = ori_frame.reshape(1080,1920,4) 
-                Height    = int(219 * self.scale)
-                Width     = int(399 * self.scale)
-
-                frame[(1009-Height):1009,(1899-Width):1899,:3] = cv2.resize(ANI[self.Dtw['gt_idx']][self.ani_cnt,:,:,:], (Width,Height))
-                self.ani_cnt +=1
+                if self.Dtw['exechk']:
+                    
+                    Height    = int(223 * self.scale)
+                    Width     = int(398 * self.scale)
+                    if self.Dtw['idxlist'].count(4) >= 4:
+                        self.Dtw['finishcnt'] += 1
+                        if self.Dtw['finishcnt'] > 60:
+                            self.Dtw['Ani_idx'] = 2
+                            self.ani_bound = ANI[self.exeno][self.Dtw['Ani_idx']].shape[0] 
+                            if (self.ani_cnt > (self.ani_bound - 1)):
+                                self.ani_cnt   = 0                        
+                    frame[(1009-Height):1009,(1899-Width):1899,:3] = cv2.resize(ANI[self.exeno][self.Dtw['Ani_idx']][self.ani_cnt,:,:,:], (Width,Height))
+                    self.ani_cnt +=1
                 self.draw_color_frame(frame, self._frame_surface)
                 frame = ori_frame.reshape(1080,1920,4)[:,:,:3]
                 
@@ -421,28 +468,12 @@ class BodyGameRuntime(object):
 #                                skel.draw_body(rec_joints, rec_Jps, SKELETON_COLORS[-1],self._frame_surface,15)                            
                             
                             # === DTW matching ===
+                            # pdb.set_trace()
+                            self.Dtw.update(DTW_matching2(self.Dtw, reconJ, gt_data[self.exeno], self.exeno))
 
-                            self.Dtw.update(DTW_matching(self.Dtw,reconJ,gt_data))
-
-                            if self.Dtw['idxlist'].count(4) <4:
-                                typetext(self._frame_surface,Sstr[self.Dtw['oidx']],(100,10),fontsize=100,bold=True) 
-                            elif self.Dtw['oidx']!=4:
-#                                print('oidx is %r' %self.Dtw['oidx'])
-#                                print('gt_idx is      %r' %self.Dtw['gt_idx'])                                
-                                typetext(self._frame_surface,Sstr[self.Dtw['oidx']],(100,10),fontsize=100,bold=True)
-                            else:    
-                                typetext(self._frame_surface,Sstr[5],(100,10),(255,0,0),fontsize=100,bold=True)
-  
-                            if self.Dtw['evalstr'] != '':
-                                typetext(self._frame_surface,self.Dtw['evalstr'],(100,300),(255,0,0),fontsize=100)
-                                self.Dtw['fcnt'] += 1
-                                if self.Dtw['fcnt'] >40:
-                                    self.Dtw['evalstr'] = ''
-                                    self.Dtw['fcnt']  = 0
-                            
                             if (body.hand_left_state == 2)| (body.hand_left_state == 0): #Lhand open
                                 Lhstatus = 'open'
-                            elif body.hand_left_state ==3:
+                            elif body.hand_left_state == 3:
                                 Lhstatus = 'closed'
                             elif body.hand_left_state == 4:
                                 Lhstatus = 'Lasso'
@@ -459,7 +490,40 @@ class BodyGameRuntime(object):
                                 Rhstatus = 'Not be detected'
                             
                             typetext(self._frame_surface,'Lhand : '+Lhstatus ,(100,800),(200,200,255),fontsize=60,bold=True)        
-                            typetext(self._frame_surface,'Rhand : '+Rhstatus ,(100,900),(200,200,255),fontsize=60,bold=True) 
+                            typetext(self._frame_surface,'Rhand : '+Rhstatus ,(100,900),(200,200,255),fontsize=60,bold=True)   
+
+                            if self.Dtw['evalstr'] != '':
+                                typetext(self._frame_surface,self.Dtw['evalstr'],(100,300),(255,0,0),fontsize=100)
+                                self.Dtw['fcnt'] += 1
+                                if self.Dtw['fcnt'] > 40 :
+                                    if self.Dtw['oidx'] !=5:
+                                        self.Dtw['evalstr'] = ''
+                                        self.Dtw['fcnt']  = 0
+                                    else:
+                                        self.Dtw['evalstr'] = 'finish'                          
+
+        #                     if self.Dtw['idxlist'].count(4) < 1:
+        #                         typetext(self._frame_surface,Sstr[self.exeno][self.Dtw['oidx']],(100,10),fontsize=100,bold=True) 
+        # #                             elif self.Dtw['oidx'] != 4:
+        # # #                                print('oidx is %r' %self.Dtw['oidx'])
+        # # #                                print('gt_idx is      %r' %self.Dtw['gt_idx'])                                
+        # #                                 typetext(self._frame_surface,Sstr[self.exeno][self.Dtw['oidx']],(100,10),fontsize=100,bold=True)
+        #                     else:
+        #                         if self.Dtw['finishcnt'] < 40:
+        #                             if self.Dtw['fcnt'] > 100:   
+        #                                 self.Dtw['oidx'] = 5
+        #                                 typetext(self._frame_surface,Sstr[self.exeno][self.Dtw['oidx']],(100,10),(255,0,0),fontsize=100,bold=True)
+        #                                 self.Dtw['finishcnt'] += 1
+        #                             else:
+        #                                 typetext(self._frame_surface,Sstr[self.exeno][self.Dtw['oidx']],(100,10),fontsize=100,bold=True)
+        #                             self.Dtw['fcnt'] += 1
+                                    
+        #                         else:
+        #                             typetext(self._frame_surface,'Finish',(100,10),(255,0,0),fontsize=100,bold=True)
+
+                    else:
+                        print self.Dtw['idxlist']        
+
                                 
                     #draw unify human model
                     if self.model_draw:
@@ -481,8 +545,7 @@ class BodyGameRuntime(object):
                     bddic['joints'] = Jdic     # joint coordinate in camera space (3D)                   
                     bddic['vidclip'] = self.clipNo
                     bddic['Rel'] = Rel
-                    bddic['LHS'] = body.hand_left_state
-                    bddic['RHS'] = body.hand_right_state
+                  
             else:
                 typetext(self._frame_surface,'No human be detected ',(100,100))
 
@@ -507,7 +570,7 @@ class BodyGameRuntime(object):
                 
                 
                     
-                    
+            # pdb.set_trace()        
             h_to_w = float(self._frame_surface.get_height()) / self._frame_surface.get_width()
             target_height = int(h_to_w * self._screen.get_width())    
             surface_to_draw = pygame.transform.scale(self._frame_surface, (self._screen.get_width(), target_height))

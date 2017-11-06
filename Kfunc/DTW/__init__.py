@@ -7,3 +7,4 @@ Created on Tue Nov 15 17:20:51 2016
 
 
 from DTW_matching import *
+from DTW_matching2 import *

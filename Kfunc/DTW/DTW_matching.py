@@ -35,8 +35,8 @@ def DTW_matching(Dtw,reconJ,gt_data):
         if Dtw['segini']:  # new segement/movement start
             Dtw['segini'] = False
             if (len(order[Dtw['oidx']])==1 ):
-               Dtw['gt_idx'] = order[Dtw['oidx']][0]
-               Dtw['idxlist'].append(Dtw['gt_idx']) 
+                Dtw['gt_idx'] = order[Dtw['oidx']][0]
+                Dtw['idxlist'].append(Dtw['gt_idx']) 
             
         if len(Dtw['seqlist']) == 0: #build sequence list
             Dtw['seqlist'] = reconJ
@@ -59,7 +59,7 @@ def DTW_matching(Dtw,reconJ,gt_data):
 #                                Dtw['dist_p'][ii], _ = fastdtw(gt_data[Dtw['gt_idx']], test_p[:2],Jweight, dist=wt_euclidean)
 #                                
 #                            Dtw['dpfirst'][ii] = Dtw['dist_p'][ii]
-                             Dtw['dpfirst'][ii], _ = fastdtw(gt_data[Dtw['gt_idx']], test_p[:2],Jweight, dist=wt_euclidean)
+                            Dtw['dpfirst'][ii], _ = fastdtw(gt_data[Dtw['gt_idx']], test_p[:2],Jweight, dist=wt_euclidean)
                         else: 
                              if (Dtw['dpfirst'][ii] - Dtw['dist_p'][ii])>Dtw['decTh']:
                                  print('deflag on')
