@@ -17,6 +17,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from sklearn.externals import joblib
 from collections import defaultdict
 
+import movie
 
 #if sys.hexversion >= 0x03000000:
 #    import _thread as thread
@@ -75,7 +76,7 @@ class BodyGameRuntime(object):
     def __init__(self):
         global bkimg
         pygame.init()
-        pygame.mixer.quit()
+        
         # Used to manage how fast the screen updates
         self._clock = pygame.time.Clock()        
         
@@ -113,8 +114,9 @@ class BodyGameRuntime(object):
         self.exeno = 3
         self.__param_init__()
 
-        # self.movie = {}        
-        self.videoplay(initial=True)
+        # self.movie = {}    
+        self.movie = movie.Movie(self.exeno)    
+        # self.videoplay(initial=True)
 
         
         
@@ -175,17 +177,6 @@ class BodyGameRuntime(object):
         self.Dtw['segini']      = True  
         self.Dtw['evalstr']     = ''
         
-    def videoplay(self, change=False, initial=False):    
-        # Video
-        if change:
-            self.movie.stop()  
-            del self.movie
-            self.movie = pygame.movie.Movie('./video/ex'+str(self.exeno)+'.mpg')
-        if initial:
-            self.movie = pygame.movie.Movie('./video/ex'+str(self.exeno)+'.mpg')    
-        self.m_w, self.m_h = [size for size in self.movie.get_size()]
-        self.mscreen = pygame.Surface((self.m_w, self.m_h)).convert()
-
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()       
         address = self._kinect.surface_as_array(target_surface.get_buffer())
@@ -196,7 +187,8 @@ class BodyGameRuntime(object):
     def reset(self, clean=False, change=False):
         self.__param_init__(clean)
         if change:  
-            self.videoplay(change)
+            self.movie.stop(True)
+            self.movie = movie.Movie(self.exeno)
         self.movie.rewind()
 
     def run(self):
@@ -541,26 +533,17 @@ class BodyGameRuntime(object):
 
                 if self._screen.get_width() != self.default_w:
                     target_height = int(self.h_to_w * self._screen.get_width())  
-                    # surface_to_draw = pygame.transform.scale(self._frame_surface, (self._screen.get_width(), target_height))
                     self.default_w = self._screen.get_width()
-                    self.default_h = target_height  
-                    # self._screen.blit(surface_to_draw, (0,0))     
+                    self.default_h = target_height   
 
             surface_to_draw = pygame.transform.scale(self._frame_surface, (self.default_w, self.default_h))
             self._screen.blit(surface_to_draw, (0,0)) 
 
-
-            if self.scale != self.pre_scale:
-                self.mscreen = pygame.Surface((int(self.m_w*self.scale), int(self.m_h*self.scale))).convert()
+            if self.scale != self.pre_scale:            
+                self.movie.draw(self._screen, self.default_w, self.default_h, self.scale, True)
                 self.pre_scale = self.scale
-
-            
-            self.movie.set_display(self.mscreen,pygame.Rect(0, 0, int(self.m_w*self.scale), int(self.m_h*self.scale)))
-            self.movie.play()           
-            m_position = [self.default_w-20-int(self.m_w*self.scale), self.default_h-20-int(self.m_h*self.scale)]   
-
-            self._screen.blit(self.mscreen, m_position)
-                        
+            else:
+                self.movie.draw(self._screen, self.default_w, self.default_h, self.scale)
 
             surface_to_draw = None
             pygame.display.update()
@@ -572,7 +555,7 @@ class BodyGameRuntime(object):
         # Close our Kinect sensor, close the window and quit.
             #print time.clock()-ST
                
-        del self.movie    
+        self.movie.stop(True)    
         self._kinect.close()
         
         print self.Dtw['idxlist']
