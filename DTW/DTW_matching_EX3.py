@@ -114,7 +114,7 @@ Color = ['red', 'blue', 'green', 'black', 'm']
 
 
 
-for infile in glob.glob(os.path.join(src_path,'*.pkl'))[1:]:
+for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
     print infile
     test_data    = cPickle.load(file(infile,'rb'))[12:,:].T
     test_data    = gf(test_data,3,axis = 0)

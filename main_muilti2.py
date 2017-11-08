@@ -26,7 +26,7 @@ fps = 60
 
 bkimg = np.zeros([1080, 1920])
 
-Uname = 'Yao_' # user name
+Uname = 'Andy_' # user name
 
 
 
@@ -110,7 +110,7 @@ class BodyGameRuntime(object):
         else:
             print 'failed to extract.....'        
         
-        self.exeno = 3
+        self.exeno = 2
         self.__param_init__()
 
         # self.movie = {}        
