@@ -92,7 +92,8 @@ gt_data[4] = data['GT_4'][:]
 
 
 # src_path  = './test data/ex4/'
-src_path  = 'D:/AllData_0327(0712)/AllData_0327/unified data array/Unified_KData/'
+# src_path  = 'D:/AllData_0327(0712)/AllData_0327/unified data array/Unified_KData/'
+src_path  = 'I:/AllData_0327/unified data array/Unified_KData/ex4/'
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
 #dst_path  = './figure/1016/7 joints Weight/'
 dst_path  = './figure/EX4/'
@@ -164,7 +165,7 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
 #    for j in  range(test_data.shape[0]): 
     
         
-    while not ((order[Dtw['oidx']] == 'end') | (j == (test_data.shape[0]-1))):
+    while not ((order[Dtw['oidx']] == 'end') | (j == 200)):#(test_data.shape[0]-1))):
         print j
         Dtw['segend']      = False 
 
@@ -296,53 +297,53 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
         elif (not Dtw['chk_flag']) | (Dtw['cnt'] > 0):
 
             Dtw['oidx'] = Dtw['gt_idx']   
-    print infile
-    print( Dtw['idxlist'])
-    print( Dtw['seglist'])
-    text_file.write(str(Dtw['idxlist'])+"\n\n")
-    text_file.write(str(Dtw['seglist']))
-    text_file.close() 
+    # print infile
+    # print( Dtw['idxlist'])
+    # print( Dtw['seglist'])
+    # text_file.write(str(Dtw['idxlist'])+"\n\n")
+    # text_file.write(str(Dtw['seglist']))
+    # text_file.close() 
 
-    cnt = defaultdict(lambda: int(0))   
-    for jj in xrange(len(Dtw['idxlist'])): 
-        print jj
-        cnt[Dtw['idxlist'][jj]] += 1
-        for i in xrange(21):
-            fig = plt.figure(1)
-            plt.plot(test_data[Dtw['seglist'][0][0]:Dtw['seglist'][jj][1],i]-500,color = 'red')
-            plt.plot(test_data[:,i],color = 'blue')
-            plt.title('matching _ coordinate number is : ' +str(i))
-            subfolder = '/coordinate '+str(i)
-            if not os.path.exists(dst_path+foldername+subfolder+'/matching/'):
-                os.makedirs(dst_path+foldername+subfolder+'/matching/')
-            if not os.path.exists(dst_path+foldername+subfolder+'/comparing/'):
-                os.makedirs(dst_path+foldername+subfolder+'/comparing/')
-            fig.savefig(dst_path+foldername+subfolder+'/matching/'+str(jj).zfill(2)+'.jpg')
-            plt.close(fig)
+    # cnt = defaultdict(lambda: int(0))   
+    # for jj in xrange(len(Dtw['idxlist'])): 
+    #     print jj
+    #     cnt[Dtw['idxlist'][jj]] += 1
+    #     for i in xrange(21):
+    #         fig = plt.figure(1)
+    #         plt.plot(test_data[Dtw['seglist'][0][0]:Dtw['seglist'][jj][1],i]-500,color = 'red')
+    #         plt.plot(test_data[:,i],color = 'blue')
+    #         plt.title('matching _ coordinate number is : ' +str(i))
+    #         subfolder = '/coordinate '+str(i)
+    #         if not os.path.exists(dst_path+foldername+subfolder+'/matching/'):
+    #             os.makedirs(dst_path+foldername+subfolder+'/matching/')
+    #         if not os.path.exists(dst_path+foldername+subfolder+'/comparing/'):
+    #             os.makedirs(dst_path+foldername+subfolder+'/comparing/')
+    #         fig.savefig(dst_path+foldername+subfolder+'/matching/'+str(jj).zfill(2)+'.jpg')
+    #         plt.close(fig)
     
-            fig = plt.figure(1)
-            offset = test_data[Dtw['seglist'][jj][0],i]-gt_data[Dtw['idxlist'][jj]][0,i]
-            plt.plot(test_data[Dtw['seglist'][jj][0]:Dtw['seglist'][jj][1],i]-offset,color = 'red')
-            plt.plot(gt_data[Dtw['idxlist'][jj]][:,i],color = 'Blue')
-            plt.title(foldername + '\n comparing _ coordinate : ' +str(i)+' segment :'+str(Dtw['idxlist'][jj])+'-'\
-                                    +str(cnt[Dtw['idxlist'][jj]]) )#+'\n avgsubdist :' + str(Dtw['avgsubdist'][i][-1]))
-            fig.savefig(dst_path+foldername+subfolder+'/comparing/comparing w ground truth '+str(jj).zfill(2)+'.jpg')
-            plt.close(fig)    
+    #         fig = plt.figure(1)
+    #         offset = test_data[Dtw['seglist'][jj][0],i]-gt_data[Dtw['idxlist'][jj]][0,i]
+    #         plt.plot(test_data[Dtw['seglist'][jj][0]:Dtw['seglist'][jj][1],i]-offset,color = 'red')
+    #         plt.plot(gt_data[Dtw['idxlist'][jj]][:,i],color = 'Blue')
+    #         plt.title(foldername + '\n comparing _ coordinate : ' +str(i)+' segment :'+str(Dtw['idxlist'][jj])+'-'\
+    #                                 +str(cnt[Dtw['idxlist'][jj]]) )#+'\n avgsubdist :' + str(Dtw['avgsubdist'][i][-1]))
+    #         fig.savefig(dst_path+foldername+subfolder+'/comparing/comparing w ground truth '+str(jj).zfill(2)+'.jpg')
+    #         plt.close(fig)    
 
-    fig = plt.figure(1)
-    ax1 = fig.add_subplot(111)
-    tgrad = 0
+    # fig = plt.figure(1)
+    # ax1 = fig.add_subplot(111)
+    # tgrad = 0
 
-    for ii in [3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17]: 
-        tgrad += (np.gradient(gf(test_data[:,ii], 1))**2 )*Jweight[ii]       
-    tgrad = tgrad**0.5 
-    plt.plot(tgrad, color = 'b')
-    tmp = np.array(Dtw['seglist'])[:,1]
-    plt.scatter(tmp, tgrad[tmp], color = 'r')
-    for ii in tmp:
-        plt.axvline(x = ii, color = 'g')
-    plt.yticks(np.arange(20)/2.)
-    fig.savefig(dst_path+foldername+"/"+foldername+"_grad.jpg")
-    plt.close(fig)
+    # for ii in [3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17]: 
+    #     tgrad += (np.gradient(gf(test_data[:,ii], 1))**2 )*Jweight[ii]       
+    # tgrad = tgrad**0.5 
+    # plt.plot(tgrad, color = 'b')
+    # tmp = np.array(Dtw['seglist'])[:,1]
+    # plt.scatter(tmp, tgrad[tmp], color = 'r')
+    # for ii in tmp:
+    #     plt.axvline(x = ii, color = 'g')
+    # plt.yticks(np.arange(20)/2.)
+    # fig.savefig(dst_path+foldername+"/"+foldername+"_grad.jpg")
+    # plt.close(fig)
 
 

@@ -47,9 +47,10 @@ class Dtw(object):
         self.segend      = True
         self.seqlist_reg = np.array([]) 
         self.seqlist_gf  = np.array([]) 
-        self.seglist    = []
+        self.seglist     = []
         self.Thcnt       = 10     #threshold of cnt
         self.serchLb     = 20     # lower bound
+        self.seginidx    = 0
 
         
         # exercise order
@@ -83,15 +84,15 @@ class Dtw(object):
         self.aniorder[4][3] = 4
         self.aniorder[4][4] = 3
         # weight
-        self.Jweight = {}
-        self.Jweight[3] = np.array([0., 0., 0., 9., 9., 9., 9., 9., 9.,
+        self.jweight = {}
+        self.jweight[3] = np.array([0., 0., 0., 9., 9., 9., 9., 9., 9.,
                                     0., 0., 0., 9., 9., 9., 9., 9., 9.,
                                     0., 0., 0.])
-        self.Jweight[4] = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
+        self.jweight[4] = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
                                     0., 0., 0., 3., 3., 3., 9., 9., 9.,
                                     0., 0., 0.])
-        for ii in self.Jweight.keys():
-                self.Jweight[ii] = self.Jweight[ii]/sum(self.Jweight[ii])*1.5
+        for ii in self.jweight.keys():
+                self.jweight[ii] = self.jweight[ii]/sum(self.jweight[ii])*1.5
 
     def wt_euclidean(self, u, v, w):
         """ normal euclidean dist with the weighting
@@ -105,7 +106,7 @@ class Dtw(object):
 
         tgrad = 0
         for ii in [3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17]:
-            tgrad += (np.gradient(gf(seqlist[:, ii], 1))**2)*self.Jweight[exeno][ii]
+            tgrad += (np.gradient(gf(seqlist[:, ii], 1))**2)*self.jweight[exeno][ii]
         tgrad = tgrad**0.5
         lcalminm = argrelextrema(tgrad, np.less, order=5)[0]
         foo = np.where(((tgrad < 1)*1) == 0)[0]
@@ -130,12 +131,13 @@ class Dtw(object):
         else:
             self.seglist.append([self.seginidx+1, self.seginidx+1+endidx])
             self.seginidx    = self.seginidx+endidx+1
-        Dtw['segend']      = True
+
+        self.segend      = True
 
         ####
-
-        self.seqlist    = self.seqlist[endidx+1:, :]  # update the seqlist
-        self.presv_size = self.seqlist.shape[0]
+        # pdb.set_trace()
+        self.seqlist_reg = self.seqlist_reg[endidx+1:, :]  # update the seqlist
+        self.presv_size = self.seqlist_reg.shape[0]
         self.oidx       = self.gt_idx
         self.deflag_mul = defaultdict(lambda: (bool(False)))
         self.cnt        = 0       
@@ -164,16 +166,14 @@ class Dtw(object):
             self.seqlist_reg = np.vstack([self.seqlist_reg,test_data[j,:]])                
             self.seqlist_gf = gf(self.seqlist_reg,3,axis = 0)
 
-#            self.seqlist = self.seqlist_reg
-            self.seqlist = self.seqlist_gf
-        
-
-            
+            self.seqlist = self.seqlist_reg
+            # self.seqlist = self.seqlist_gf
+   
 
         if not self.deflag:
             if np.mod(self.seqlist.shape[0]-self.presv_size-1,10) == 0: # check every 10 frames
 
-                if (len(self.order[3][self.oidx])>1 ):# & (not onedeflag):#((j- (test_idx+1)) <=60):
+                if (len(self.order[3][self.oidx])>1 ):# 
                     if self.seqlist.shape[0]>1:
                         result = clip(self.seqlist)
                         if result != []:
@@ -184,26 +184,27 @@ class Dtw(object):
                                minidx = 3 
                             # for ii in self.order[self.oidx]:
                             #     test_p = self.seqlist[:endidx,:] + np.atleast_2d((gt_data[ii][0,:]-self.seqlist[0,:]))
-                            #     self.dist_p[ii], _ = fastdtw(gt_data[ii], test_p,Jweight, dist=wt_euclidean)
+                            #     self.dist_p[ii], _ = fastdtw(gt_data[ii], test_p,jweight, dist=wt_euclidean)
                             # minidx = min(self.dist_p, key = self.dist_p.get)   
 
 
 
                             self.gt_idx =  minidx
                             self.idxlist.append(self.gt_idx)
-                            Dtw.update(seg_update(Dtw, endidx))
+                            self.seg_update(endidx)
                 else:  
-                    # pdb.set_trace()
                     test_data_p  = self.seqlist + np.atleast_2d((gt_data[self.gt_idx][0,:]-self.seqlist[0,:]))
-                    self.dist_p, _ = fastdtw(gt_data[self.gt_idx], test_data_p, self.Jweight, dist=self.wt_euclidean)
+                    self.dist_p, _ = fastdtw(gt_data[self.gt_idx], test_data_p, self.jweight[3], dist=self.wt_euclidean)
                     
                     if (self.seqlist.shape[0] == 1+self.presv_size): # new movement initail setting
 
-                        self.dpfirst,_ = fastdtw(gt_data[self.gt_idx], test_data_p[:2],self.Jweight, dist=self.wt_euclidean)   
+                        self.dpfirst,_ = fastdtw(gt_data[self.gt_idx], test_data_p[:2],self.jweight[3], dist=self.wt_euclidean)   
                         
                         print('dpfirst is : %f' %self.dpfirst)
                     else: 
+
                         print('de diff is :%f' %(self.dpfirst - self.dist_p))
+
                     
                         if (self.dpfirst - self.dist_p)>self.decTh:
                             print('=========')
@@ -215,7 +216,7 @@ class Dtw(object):
           
         else: 
             test_data_p  = self.seqlist + np.atleast_2d((gt_data[self.gt_idx][0,:]-self.seqlist[0,:]))
-            self.dist_p, path_p = fastdtw(gt_data[self.gt_idx], test_data_p,self.Jweight, dist=self.wt_euclidean) 
+            self.dist_p, path_p = fastdtw(gt_data[self.gt_idx], test_data_p,self.jweight[3], dist=self.wt_euclidean) 
                 
             if self.chk_flag:  # in check global min status
                 self.cnt +=1
@@ -233,12 +234,11 @@ class Dtw(object):
                     self.chk_flag = False   
                     tgrad = 0
 
-                    for ii in range(self.seqlist.shape[1]): #maybe can include Jweight
+                    for ii in range(self.seqlist.shape[1]): #maybe can include jweight
                         tgrad += np.gradient(gf(self.seqlist[:,ii],3))**2
                         
                     tgrad = tgrad**0.5    
                     endidx = np.argmin(tgrad[self.idx_cmp-self.serchLb:self.idx_cmp+self.Thcnt-1])+(self.idx_cmp-self.serchLb)
-                    pdb.set_trace()
                     self.seg_update(endidx)
             else:  
                                                   
@@ -291,9 +291,9 @@ class Dtw(object):
                                 self.seg_update(endidx)
                     else:
                         test_data_p = self.seqlist + np.atleast_2d((gt_data[self.gt_idx][0, :]-self.seqlist[0, :]))
-                        self.dist_p, _ = fastdtw(gt_data[self.gt_idx], test_data_p, self.Jweight[exeno], dist=self.wt_euclidean)
+                        self.dist_p, _ = fastdtw(gt_data[self.gt_idx], test_data_p, self.jweight[exeno], dist=self.wt_euclidean)
                         if (self.seqlist.shape[0] == 1+self.presv_size):  # new movement initail setting
-                            self.dpfirst, _ = fastdtw(gt_data[self.gt_idx], test_data_p[:2], self.Jweight[exeno], dist=self.wt_euclidean)
+                            self.dpfirst, _ = fastdtw(gt_data[self.gt_idx], test_data_p[:2], self.jweight[exeno], dist=self.wt_euclidean)
                             print('dpfirst is : %f' % self.dpfirst)
                         else:
                             print('de diff is :%f' % (self.dpfirst - self.dist_p))
@@ -305,7 +305,7 @@ class Dtw(object):
                                 self.distp_prev = self.dist_p
             else:  # already start decreasing
                 test_data_p = self.seqlist + np.atleast_2d((gt_data[self.gt_idx][0, :] - self.seqlist[0, :]))
-                self.dist_p, path_p = fastdtw(gt_data[self.gt_idx], test_data_p, self.Jweight[exeno], dist=self.wt_euclidean)
+                self.dist_p, path_p = fastdtw(gt_data[self.gt_idx], test_data_p, self.jweight[exeno], dist=self.wt_euclidean)
                 if self.chk_flag:  # in check global min status
                     self.cnt += 1
                     if self.dist_p < self.distp_cmp:  # find smaller value
@@ -317,8 +317,8 @@ class Dtw(object):
                         self.evalstr = 'Well done'
                         self.chk_flag = False
                         tgrad = 0
-                        for ii in xrange(self.seqlist.shape[1]):  # maybe can include Jweight
-                            tgrad += (np.gradient(gf(self.seqlist[:, ii], 1))**2)*self.Jweight[exeno][ii]
+                        for ii in xrange(self.seqlist.shape[1]):  # maybe can include jweight
+                            tgrad += (np.gradient(gf(self.seqlist[:, ii], 1))**2)*self.jweight[exeno][ii]
                         tgrad = tgrad**0.5
                         endidx = np.argmin(tgrad[self.idx_cmp-10:self.idx_cmp+19])+(self.idx_cmp-10)
                         self.seg_update(endidx)

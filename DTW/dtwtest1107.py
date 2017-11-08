@@ -12,53 +12,10 @@ import pdb
 import glob
 import os
 import numpy as np
-from scipy.spatial.distance import _validate_vector
-from w_fastdtw import fastdtw
-from scipy.ndimage.filters import gaussian_filter1d as gf
-from scipy.linalg import norm
-from collections import defaultdict
 import matplotlib.pyplot as plt
-from collections import defaultdict
-from scipy.signal import argrelextrema
-
+from scipy.ndimage.filters import gaussian_filter1d as gf
 from dtw import Dtw
 
-def wt_euclidean(u, v, w):
-    u = _validate_vector(u)
-    v = _validate_vector(v)
-    dist = norm(w*(u - v))
-    return dist
-
-Jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,\
-                    0., 0., 0., 3., 3., 3., 9., 9., 9.,\
-                    0., 0., 0.])
-Jweight = Jweight/sum(Jweight)*1.5
-
-def clip(seqlist,LB=0):
-    #LB : lower bound  
-    tgrad = 0
-
-    for ii in [3,4,5,6,7,8,12,13,14,15,16,17]: #maybe can include Jweight
-        tgrad += (np.gradient(gf(seqlist[:,ii],1))**2 )*Jweight[ii]       
-    tgrad = tgrad**0.5 
-    lcalminm = argrelextrema(tgrad, np.less,order = 5)[0]
-    # if j > 750:
-    # pdb.set_trace()
-    foo = np.where(((tgrad<1)*1)==0)[0]
-    if (len(foo) == 0) | (len(lcalminm) == []):
-        return []
-    else:
-        LB = max(foo[0],50)
-        minm = []
-        
-        for ii in lcalminm[lcalminm>LB]:
-            # pdb.set_trace()
-            if tgrad[ii]<1:
-                # pdb.set_trace()
-                minm.append(ii)
-        if len(minm)>1:
-            pdb.set_trace()
-        return minm
 
 
 # def seg_update(Dtw, endidx):
@@ -94,7 +51,9 @@ gt_data[4] = data['GT_4'][:]
 
 
 # src_path  = './test data/ex4/'
-src_path  = 'D:/AllData_0327(0712)/AllData_0327/unified data array/Unified_KData/'
+# src_path  = 'D:/AllData_0327(0712)/AllData_0327/unified data array/Unified_KData/'
+src_path  = 'I:/AllData_0327/unified data array/Unified_KData/ex4/'
+
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
 #dst_path  = './figure/1016/7 joints Weight/'
 dst_path  = './figure/EX4/'
@@ -130,16 +89,13 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
     
     dtw = Dtw()
     j = 0  
-
-
-
-    
-#    for j in  range(test_data.shape[0]): 
-    
+  
         
-    while not ((order[dtw.oidx] == 'end') | (j == (test_data.shape[0]-1))):
+    while not ((order[dtw.oidx] == 'end') | (j == 200)):#(test_data.shape[0]-1))):
         print j
-        # pdb.set_trace()
+
+        # if j == 92:
+        #     pdb.set_trace()
         dtw.matching2(test_data, j, gt_data)
 
         j=j+1
