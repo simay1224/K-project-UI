@@ -9,6 +9,7 @@ class Denoise(object):
     """ Use Gaussian process regression to denoise
     """
     def __init__(self):
+        self._done = True
         self.gp = joblib.load('GPR_cluster_800_meter_fix_ex4.pkl')
         self.parameter = self.gp.kernel_.get_params(deep=True)
         self.limbidx = np.array([4, 5, 6, 8, 9, 10, 20])

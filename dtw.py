@@ -23,6 +23,7 @@ class Dtw(object):
             initailize dtw parameters
         """
         # dtw parameters initialization
+        self._done       = False
         self.decTh       = 1800
         self.cnt         = 0
         self.distp_prev  = 0
@@ -46,7 +47,6 @@ class Dtw(object):
         self.seqlist_gf  = np.array([])
         self.dcnt        = 0
         self.chk_flag    = False
-        self.exechk      = True
         self.deflag      = False  # decreasing flag
         self.onedeflag   = False
         self.segini      = True
@@ -213,4 +213,4 @@ class Dtw(object):
                 self.distp_prev = self.dist_p
         else:
             print('================= exe END ======================')
-            self.exechk = False
+            self._done = True
