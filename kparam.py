@@ -8,7 +8,6 @@ class Kparam(object):
     def __init__(self,exeno, username):
 
         self.bdjoints   = []
-        self.jointary   = {}  # joint array
         self.now  = datetime.datetime.now() 
         self.dstr = './output/'+username+'data'+repr(self.now.year)+repr(self.now.month).zfill(2)\
                                +repr(self.now.day).zfill(2)+repr(self.now.hour).zfill(2)\
