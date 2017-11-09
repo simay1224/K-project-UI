@@ -110,7 +110,7 @@ class BodyGameRuntime(object):
         else:
             print 'failed to extract.....'        
         
-        self.exeno = 2
+        self.exeno = 3
         self.__param_init__()
 
         # self.movie = {}        
@@ -377,108 +377,108 @@ class BodyGameRuntime(object):
                     skel.draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface,8)
 #                    skel.draw_Rel_joints(Jps,Rel,self._frame_surface)
                     
-#                     if self.Dtw['exechk'] :
+                    if self.Dtw['exechk'] :
                     
-#                         if not Relary == []:
-#                             # =================  GPR ====================
-# #                            
-#                             _, modJary = Hmod.human_mod_pts(joints,True) #modJary is 7*3 array 
-#                             modJary = modJary.flatten().reshape(-1,21)   #change shape to 1*21 array
-#                             reconJ = modJary
-# #                            if all(ii>0.6 for ii in Relary[limbidx]): # all joints are reliable
-# ##                                print('================ All GOOD ================')
-# #                                reconJ = modJary      # reconJ is 1*21 array                                
-# #
-# #                            else: #contains unreliable joints
-# #
-# #                                print('==================')
-# #                                print('=======GPR========')
-# #                                print('==================')
-# #                                mask = np.zeros([7,3])
-# #                                modJary_norm = (modJary-MIN)/(MAX-MIN)                        
-# #                                reconJ       = (GPR.gp_pred(modJary_norm, gp)*(MAX-MIN)+MIN)  # reconJ is 1*21 array
-# #                                unrelidx = np.where(Relary[limbidx]<0.6)[0]   # limbidx = [4,5,6,8,9,10,20]
-# #    
-# #                                mask[unrelidx,:] = np.array([1,1,1])
-# ##                                if np.sum(np.isnan(reconJ))==21:
-# ##                                    pdb.set_trace()
-# ##                                    _,_ = Hmod.human_mod_pts2(joints,True)
-# ##                                    skel.draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface,15)
-# #                                modJary[:,mask.flatten()==1] = reconJ[:,mask.flatten()==1]
-# #                                reconJ =   modJary                          
-# #                                # use unrelidx and reconJ to replace unreliable joints in modJary 
-# #
-# #                                #  === GPR recon ===
-# #
-# #                                JJ = Hmod.reconJ2joints(rec_joints,reconJ.reshape(7,3))
-# #                                for ii in [4,5,6,8,9,10]:
-# #                                    rec_joints[ii].Position.x = JJ[i][0]
-# #                                    rec_joints[ii].Position.y = JJ[i][1]
-# #                                    rec_joints[ii].Position.z = JJ[i][2]
-# # 
-# #                                tmp_Jps    = self._kinect.body_joints_to_color_space(rec_joints) #joint points in color domain
-# #                                rec_Jps    = Jps
-# #                                for ii in unrelidx:
-# #                                    rec_Jps[ii].x = tmp_Jps[ii].x
-# #                                    rec_Jps[ii].y = tmp_Jps[ii].y
-# #                                skel.draw_body(rec_joints, rec_Jps, SKELETON_COLORS[-1],self._frame_surface,15)                            
+                        if not Relary == []:
+                            # =================  GPR ====================
+#                            
+                            _, modJary = Hmod.human_mod_pts(joints,True) #modJary is 7*3 array 
+                            modJary = modJary.flatten().reshape(-1,21)   #change shape to 1*21 array
+                            reconJ = modJary
+#                            if all(ii>0.6 for ii in Relary[limbidx]): # all joints are reliable
+##                                print('================ All GOOD ================')
+#                                reconJ = modJary      # reconJ is 1*21 array                                
+#
+#                            else: #contains unreliable joints
+#
+#                                print('==================')
+#                                print('=======GPR========')
+#                                print('==================')
+#                                mask = np.zeros([7,3])
+#                                modJary_norm = (modJary-MIN)/(MAX-MIN)                        
+#                                reconJ       = (GPR.gp_pred(modJary_norm, gp)*(MAX-MIN)+MIN)  # reconJ is 1*21 array
+#                                unrelidx = np.where(Relary[limbidx]<0.6)[0]   # limbidx = [4,5,6,8,9,10,20]
+#    
+#                                mask[unrelidx,:] = np.array([1,1,1])
+##                                if np.sum(np.isnan(reconJ))==21:
+##                                    pdb.set_trace()
+##                                    _,_ = Hmod.human_mod_pts2(joints,True)
+##                                    skel.draw_body(joints, Jps, SKELETON_COLORS[i],self._frame_surface,15)
+#                                modJary[:,mask.flatten()==1] = reconJ[:,mask.flatten()==1]
+#                                reconJ =   modJary                          
+#                                # use unrelidx and reconJ to replace unreliable joints in modJary 
+#
+#                                #  === GPR recon ===
+#
+#                                JJ = Hmod.reconJ2joints(rec_joints,reconJ.reshape(7,3))
+#                                for ii in [4,5,6,8,9,10]:
+#                                    rec_joints[ii].Position.x = JJ[i][0]
+#                                    rec_joints[ii].Position.y = JJ[i][1]
+#                                    rec_joints[ii].Position.z = JJ[i][2]
+# 
+#                                tmp_Jps    = self._kinect.body_joints_to_color_space(rec_joints) #joint points in color domain
+#                                rec_Jps    = Jps
+#                                for ii in unrelidx:
+#                                    rec_Jps[ii].x = tmp_Jps[ii].x
+#                                    rec_Jps[ii].y = tmp_Jps[ii].y
+#                                skel.draw_body(rec_joints, rec_Jps, SKELETON_COLORS[-1],self._frame_surface,15)                            
                             
-#                             # === DTW matching ===
-#                             # pdb.set_trace()
-#                             self.Dtw.update(DTW_matching2(self.Dtw, reconJ, gt_data[self.exeno], self.exeno))
+                            # === DTW matching ===
+                            # pdb.set_trace()
+                            self.Dtw.update(DTW_matching2(self.Dtw, reconJ, gt_data[self.exeno], self.exeno))
 
-#                             if (body.hand_left_state == 2)| (body.hand_left_state == 0): #Lhand open
-#                                 Lhstatus = 'open'
-#                             elif body.hand_left_state == 3:
-#                                 Lhstatus = 'closed'
-#                             elif body.hand_left_state == 4:
-#                                 Lhstatus = 'Lasso'
-#                             else:
-#                                 Lhstatus = 'Not be detected'                            
+                            # if (body.hand_left_state == 2)| (body.hand_left_state == 0): #Lhand open
+                            #     Lhstatus = 'open'
+                            # elif body.hand_left_state == 3:
+                            #     Lhstatus = 'closed'
+                            # elif body.hand_left_state == 4:
+                            #     Lhstatus = 'Lasso'
+                            # else:
+                            #     Lhstatus = 'Not be detected'                            
 
-#                             if (body.hand_right_state == 2)| (body.hand_right_state == 0): #Lhand open
-#                                 Rhstatus = 'open'
-#                             elif body.hand_right_state ==3:
-#                                 Rhstatus = 'closed'
-#                             elif body.hand_right_state == 4:
-#                                 Rhstatus = 'Lasso'
-#                             else:
-#                                 Rhstatus = 'Not be detected'
+                            # if (body.hand_right_state == 2)| (body.hand_right_state == 0): #Lhand open
+                            #     Rhstatus = 'open'
+                            # elif body.hand_right_state ==3:
+                            #     Rhstatus = 'closed'
+                            # elif body.hand_right_state == 4:
+                            #     Rhstatus = 'Lasso'
+                            # else:
+                            #     Rhstatus = 'Not be detected'
                             
-#                             typetext(self._frame_surface,'Lhand : '+Lhstatus ,(100,800),(200,200,255),fontsize=60,bold=True)        
-#                             typetext(self._frame_surface,'Rhand : '+Rhstatus ,(100,900),(200,200,255),fontsize=60,bold=True)   
+                            # typetext(self._frame_surface,'Lhand : '+Lhstatus ,(100,800),(200,200,255),fontsize=60,bold=True)        
+                            # typetext(self._frame_surface,'Rhand : '+Rhstatus ,(100,900),(200,200,255),fontsize=60,bold=True)   
 
-#                             if self.Dtw['evalstr'] != '':
-#                                 typetext(self._frame_surface,self.Dtw['evalstr'],(100,300),(255,0,0),fontsize=100)
-#                                 self.Dtw['fcnt'] += 1
-#                                 if self.Dtw['fcnt'] > 40 :
-#                                     if self.Dtw['oidx'] !=5:
-#                                         self.Dtw['evalstr'] = ''
-#                                         self.Dtw['fcnt']  = 0
-#                                     else:
-#                                         self.Dtw['evalstr'] = 'finish'                          
+                            # if self.Dtw['evalstr'] != '':
+                            #     typetext(self._frame_surface,self.Dtw['evalstr'],(100,300),(255,0,0),fontsize=100)
+                            #     self.Dtw['fcnt'] += 1
+                            #     if self.Dtw['fcnt'] > 40 :
+                            #         if self.Dtw['oidx'] !=5:
+                            #             self.Dtw['evalstr'] = ''
+                            #             self.Dtw['fcnt']  = 0
+                            #         else:
+                            #             self.Dtw['evalstr'] = 'finish'                          
 
-#         #                     if self.Dtw['idxlist'].count(4) < 1:
-#         #                         typetext(self._frame_surface,Sstr[self.exeno][self.Dtw['oidx']],(100,10),fontsize=100,bold=True) 
-#         # #                             elif self.Dtw['oidx'] != 4:
-#         # # #                                print('oidx is %r' %self.Dtw['oidx'])
-#         # # #                                print('gt_idx is      %r' %self.Dtw['gt_idx'])                                
-#         # #                                 typetext(self._frame_surface,Sstr[self.exeno][self.Dtw['oidx']],(100,10),fontsize=100,bold=True)
-#         #                     else:
-#         #                         if self.Dtw['finishcnt'] < 40:
-#         #                             if self.Dtw['fcnt'] > 100:   
-#         #                                 self.Dtw['oidx'] = 5
-#         #                                 typetext(self._frame_surface,Sstr[self.exeno][self.Dtw['oidx']],(100,10),(255,0,0),fontsize=100,bold=True)
-#         #                                 self.Dtw['finishcnt'] += 1
-#         #                             else:
-#         #                                 typetext(self._frame_surface,Sstr[self.exeno][self.Dtw['oidx']],(100,10),fontsize=100,bold=True)
-#         #                             self.Dtw['fcnt'] += 1
+        #                     if self.Dtw['idxlist'].count(4) < 1:
+        #                         typetext(self._frame_surface,Sstr[self.exeno][self.Dtw['oidx']],(100,10),fontsize=100,bold=True) 
+        # #                             elif self.Dtw['oidx'] != 4:
+        # # #                                print('oidx is %r' %self.Dtw['oidx'])
+        # # #                                print('gt_idx is      %r' %self.Dtw['gt_idx'])                                
+        # #                                 typetext(self._frame_surface,Sstr[self.exeno][self.Dtw['oidx']],(100,10),fontsize=100,bold=True)
+        #                     else:
+        #                         if self.Dtw['finishcnt'] < 40:
+        #                             if self.Dtw['fcnt'] > 100:   
+        #                                 self.Dtw['oidx'] = 5
+        #                                 typetext(self._frame_surface,Sstr[self.exeno][self.Dtw['oidx']],(100,10),(255,0,0),fontsize=100,bold=True)
+        #                                 self.Dtw['finishcnt'] += 1
+        #                             else:
+        #                                 typetext(self._frame_surface,Sstr[self.exeno][self.Dtw['oidx']],(100,10),fontsize=100,bold=True)
+        #                             self.Dtw['fcnt'] += 1
                                     
-#         #                         else:
-#         #                             typetext(self._frame_surface,'Finish',(100,10),(255,0,0),fontsize=100,bold=True)
+        #                         else:
+        #                             typetext(self._frame_surface,'Finish',(100,10),(255,0,0),fontsize=100,bold=True)
 
-#                     else:
-#                         print self.Dtw['idxlist']        
+                    else:
+                        print self.Dtw['idxlist']        
 
                                 
                     #draw unify human model

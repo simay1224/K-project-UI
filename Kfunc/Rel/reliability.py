@@ -117,7 +117,7 @@ def rel_rate(Rb,Rk,Rt,order,flen = 2):
             raise ImportError('joints order not match !!')
             
     else:
-        return rel,[]
+        return rel,np.array([])
     return Rel,Relary
 
 

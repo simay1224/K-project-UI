@@ -249,7 +249,7 @@ def draw_human_mod_pts(Joints,surface,keys):
     plt.draw()
     plt.pause(1.0/120)
 
-def reconJ2joints(joint,recon_body):
+def reconJ2joints(joint, recon_body):
     #LSpos : ShoulderLeft position
 
 

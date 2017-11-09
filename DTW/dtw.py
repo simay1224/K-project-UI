@@ -18,7 +18,7 @@ class Dtw(object):
             initailize dtw parameters
         """
         # dtw parameters initialization
-        self.decTh       = 2000
+        self.decTh       = 1800
         self.cnt         = 0
         self.distp_prev  = 0         
         self.distp_cmp   = np.inf             
@@ -148,14 +148,14 @@ class Dtw(object):
         self.segini     = True
 
 
-    def matching2(self, test_data, j, gt_data):
+    def matching2(self, test_data, j, gt_data,exeno):
         self.segend      = False 
 
         if self.segini:  # new segement/movement start
             self.segini = False
             
-            if (len(self.order[3][self.oidx])==1 ):
-               self.gt_idx = self.order[3][self.oidx][0]
+            if (len(self.order[exeno][self.oidx])==1 ):
+               self.gt_idx = self.order[exeno][self.oidx][0]
                self.idxlist.append(self.gt_idx) 
 
         if len(self.seqlist_reg) == 0: #build sequence list            
@@ -166,16 +166,16 @@ class Dtw(object):
             self.seqlist_reg = np.vstack([self.seqlist_reg,test_data[j,:]])                
             self.seqlist_gf = gf(self.seqlist_reg,3,axis = 0)
 
-            self.seqlist = self.seqlist_reg
-            # self.seqlist = self.seqlist_gf
+            # self.seqlist = self.seqlist_reg
+            self.seqlist = self.seqlist_gf
    
 
         if not self.deflag:
             if np.mod(self.seqlist.shape[0]-self.presv_size-1,10) == 0: # check every 10 frames
 
-                if (len(self.order[3][self.oidx])>1 ):# 
+                if (len(self.order[exeno][self.oidx])>1 ):# 
                     if self.seqlist.shape[0]>1:
-                        result = clip(self.seqlist)
+                        result = self.clip(self.seqlist,exeno)
                         if result != []:
                             endidx = result[0]
                             if self.seqlist[endidx,7] <150:
@@ -194,11 +194,11 @@ class Dtw(object):
                             self.seg_update(endidx)
                 else:  
                     test_data_p  = self.seqlist + np.atleast_2d((gt_data[self.gt_idx][0,:]-self.seqlist[0,:]))
-                    self.dist_p, _ = fastdtw(gt_data[self.gt_idx], test_data_p, self.jweight[3], dist=self.wt_euclidean)
+                    self.dist_p, _ = fastdtw(gt_data[self.gt_idx], test_data_p, self.jweight[exeno], dist=self.wt_euclidean)
                     
                     if (self.seqlist.shape[0] == 1+self.presv_size): # new movement initail setting
 
-                        self.dpfirst,_ = fastdtw(gt_data[self.gt_idx], test_data_p[:2],self.jweight[3], dist=self.wt_euclidean)   
+                        self.dpfirst,_ = fastdtw(gt_data[self.gt_idx], test_data_p[:2],self.jweight[exeno], dist=self.wt_euclidean)   
                         
                         print('dpfirst is : %f' %self.dpfirst)
                     else: 
@@ -216,7 +216,7 @@ class Dtw(object):
           
         else: 
             test_data_p  = self.seqlist + np.atleast_2d((gt_data[self.gt_idx][0,:]-self.seqlist[0,:]))
-            self.dist_p, path_p = fastdtw(gt_data[self.gt_idx], test_data_p,self.jweight[3], dist=self.wt_euclidean) 
+            self.dist_p, path_p = fastdtw(gt_data[self.gt_idx], test_data_p,self.jweight[exeno], dist=self.wt_euclidean) 
                 
             if self.chk_flag:  # in check global min status
                 self.cnt +=1

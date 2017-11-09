@@ -20,21 +20,15 @@ from collections import defaultdict
 
 import movie
 from dtw    import Dtw
+from denoise import Denoise
 from kparam import Kparam 
 
 
-#if sys.hexversion >= 0x03000000:
-#    import _thread as thread
-#else:
-#    import thread
 fps = 60
 
 bkimg = np.zeros([1080, 1920])
 
 username = 'Yao_' # user name
-
-
-
 
 # colors for drawing different bodies 
 SKELETON_COLORS = [pygame.color.THECOLORS["red"], 
@@ -44,10 +38,10 @@ SKELETON_COLORS = [pygame.color.THECOLORS["red"],
                    pygame.color.THECOLORS["purple"], 
                    pygame.color.THECOLORS["yellow"], 
                    pygame.color.THECOLORS["violet"]]
-# GPR
+# # GPR
 limbidx = np.array([4,5,6,8,9,10,20]) 
-gp      = joblib.load('GPR_cluster_800_meter_fix_ex4.pkl')
-[MIN,MAX] = h5py.File('model_CNN_0521_K2M_rel.h5', 'r')['minmax'][:]
+# gp      = joblib.load('GPR_cluster_800_meter_fix_ex4.pkl')
+# [MIN,MAX] = h5py.File('model_CNN_0521_K2M_rel.h5', 'r')['minmax'][:]
 
 
 # DTW
@@ -65,15 +59,6 @@ gt_data[3][2] = data['GT_2'][:]
 gt_data[3][3] = data['GT_3'][:]
 gt_data[3][4] = data['GT_4'][:]
 data.close()
-
-
-
-#status string
-Sstr = {}
-Sstr[3] = ['raise hands to the Top', ' vertical push down ', 'finish', 'vertical push up',\
-           'vertical push down', 'put hands down']
-Sstr[4] = ['from hands down to T-pose', 'from T-pose to hands close', 'finish', 'from hand close to T-pose',\
-           'from T-pose to hands close', 'from T-pose to hands down']
 
 
 class BodyGameRuntime(object):
@@ -133,8 +118,8 @@ class BodyGameRuntime(object):
      
         self.kp = Kparam(self.exeno, username)
         self.dtw = Dtw()
+        self.denoise = Denoise()
         
-
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()       
         address = self._kinect.surface_as_array(target_surface.get_buffer())
@@ -204,25 +189,25 @@ class BodyGameRuntime(object):
             self.kp.scale = max(self.kp.scale/1.1,1)
         if press[pygame.K_1]:# use '1' to change to execise 1
             self.exeno = 1
-            print('====  doing exercise 1 ===')
+            print('====  doing exercise 1 ====')
             self.reset(change=True)  
         if press[pygame.K_2]:# use '2' to change to execise 2
             self.exeno = 2
-            print('====  doing exercise 2 ===')
+            print('====  doing exercise 2 ====')
             self.reset(change=True)  
         if press[pygame.K_3]:# use '3' to change to execise 3
             self.exeno = 3
-            print('====  doing exercise 3 ===')
+            print('====  doing exercise 3 ====')
             self.reset(change=True)  
         if press[pygame.K_4]:# use '4' to change to execise 4
             self.exeno = 4
-            print('====  doing exercise 4 ===')
+            print('====  doing exercise 4 ====')
             self.reset(change=True)   
 
     def run(self):
         #--------- initial -------       
         global video
-   
+        finish = False
         cur_frame=0
         
         Rb = defaultdict(list)
@@ -322,54 +307,32 @@ class BodyGameRuntime(object):
 #                    skel.draw_Rel_joints(jps,Rel,self._frame_surface)
                     
                     if self.dtw.exechk:
-                    
-                        if not Relary == []:
-                            # =================  GPR ====================
-#                            
+                        if not len(Relary) == 0:
+                                                       
                             _, modJary = Hmod.human_mod_pts(joints,True) #modJary is 7*3 array 
                             modJary = modJary.flatten().reshape(-1,21)   #change shape to 1*21 array
-                            reconJ = modJary
-#                            if all(ii>0.6 for ii in Relary[limbidx]): # all joints are reliable
-##                                print('================ All GOOD ================')
-#                                reconJ = modJary      # reconJ is 1*21 array                                
-#
-#                            else: #contains unreliable joints
-#
-#                                print('==================')
-#                                print('=======GPR========')
-#                                print('==================')
-#                                mask = np.zeros([7,3])
-#                                modJary_norm = (modJary-MIN)/(MAX-MIN)                        
-#                                reconJ       = (GPR.gp_pred(modJary_norm, gp)*(MAX-MIN)+MIN)  # reconJ is 1*21 array
-#                                unrelidx = np.where(Relary[limbidx]<0.6)[0]   # limbidx = [4,5,6,8,9,10,20]
-#    
-#                                mask[unrelidx,:] = np.array([1,1,1])
-##                                if np.sum(np.isnan(reconJ))==21:
-##                                    pdb.set_trace()
-##                                    _,_ = Hmod.human_mod_pts2(joints,True)
-##                                    skel.draw_body(joints, jps, SKELETON_COLORS[i],self._frame_surface,15)
-#                                modJary[:,mask.flatten()==1] = reconJ[:,mask.flatten()==1]
-#                                reconJ =   modJary                          
-#                                # use unrelidx and reconJ to replace unreliable joints in modJary 
-#
-#                                #  === GPR recon ===
-#
-#                                JJ = Hmod.reconJ2joints(rec_joints,reconJ.reshape(7,3))
-#                                for ii in [4,5,6,8,9,10]:
-#                                    rec_joints[ii].Position.x = JJ[i][0]
-#                                    rec_joints[ii].Position.y = JJ[i][1]
-#                                    rec_joints[ii].Position.z = JJ[i][2]
-# 
-#                                tmp_jps    = self._kinect.body_joints_to_color_space(rec_joints) #joint points in color domain
-#                                rec_jps    = jps
-#                                for ii in unrelidx:
-#                                    rec_jps[ii].x = tmp_jps[ii].x
-#                                    rec_jps[ii].y = tmp_jps[ii].y
-#                                skel.draw_body(rec_joints, rec_jps, SKELETON_COLORS[-1],self._frame_surface,15)                            
+                            # reconJ = modJary
+                            # === GPR denoising ===
+                            if all(ii>0.6 for ii in Relary[limbidx]):  # all joints are reliable
+                                reconJ = modJary  # reconJ is 1*21 array                                
+                            else:  # contains unreliable joints
+                                reconJ, unrelidx = self.denoise.run(modJary, Relary)
+                                #  === recon 2D joints in color domain ===
+                                JJ = Hmod.reconJ2joints(rec_joints, reconJ.reshape(7, 3))
+                                for ii in [4,5,6,8,9,10]:
+                                    rec_joints[ii].Position.x = JJ[i][0]
+                                    rec_joints[ii].Position.y = JJ[i][1]
+                                    rec_joints[ii].Position.z = JJ[i][2]
+
+                                tmp_jps    = self._kinect.body_joints_to_color_space(rec_joints)  # joints in color domain
+                                rec_jps    = jps
+                                for ii in unrelidx:
+                                    rec_jps[ii].x = tmp_jps[ii].x
+                                    rec_jps[ii].y = tmp_jps[ii].y
+                                skel.draw_body(rec_joints, rec_jps, SKELETON_COLORS[-1],self._frame_surface,15)                            
                             
                             # === DTW matching ===
                             self.dtw.matching(reconJ, gt_data[self.exeno], self.exeno)
-
 
                             # if (body.hand_left_state == 2)| (body.hand_left_state == 0): #Lhand open
                             #     Lhstatus = 'open'
@@ -403,7 +366,9 @@ class BodyGameRuntime(object):
                             #             self.dtw.evalstr = 'finish'                          
 
                     else:
-                        print self.dtw.idxlist       
+                        if not finish:
+                            print self.dtw.idxlist
+                            finish = True       
 
                                 
                     #draw unify human model

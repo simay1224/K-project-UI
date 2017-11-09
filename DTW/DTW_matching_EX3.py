@@ -92,8 +92,8 @@ gt_data[4] = data['GT_4'][:]
 
 
 # src_path  = './test data/ex4/'
-# src_path  = 'D:/AllData_0327(0712)/AllData_0327/unified data array/Unified_KData/'
-src_path  = 'I:/AllData_0327/unified data array/Unified_KData/ex4/'
+src_path  = 'D:/AllData_0327(0712)/AllData_0327/unified data array/Unified_KData/'
+# src_path  = 'I:/AllData_0327/unified data array/Unified_KData/ex4/'
 #dst_path  = 'C:/Users/Dawnknight/Documents/GitHub/K_project/DTW/figure/0912/7 joints/'
 #dst_path  = './figure/1016/7 joints Weight/'
 dst_path  = './figure/EX4/'
@@ -165,8 +165,10 @@ for infile in glob.glob(os.path.join(src_path,'*.pkl'))[:1]:
 #    for j in  range(test_data.shape[0]): 
     
         
-    while not ((order[Dtw['oidx']] == 'end') | (j == 200)):#(test_data.shape[0]-1))):
+    while not ((order[Dtw['oidx']] == 'end') | (j == test_data.shape[0]-1)):
         print j
+
+
         Dtw['segend']      = False 
 
         if Dtw['segini']:  # new segement/movement start
