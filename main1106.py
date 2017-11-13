@@ -6,8 +6,8 @@ from Kfunc.IO     import *
 from Kfunc.finger import *
 from Kfunc.skel   import skel
 from Kfunc.model  import Human_mod   as Hmod
-# from Kfunc.Rel    import reliability as REL
-from Kfunc.GPR    import GPR
+
+# from Kfunc.GPR    import GPR
 import ctypes, os, datetime
 import pygame, h5py, sys
 import pdb, time, cv2, cPickle
@@ -16,8 +16,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.externals import joblib
 from collections import defaultdict
-import movie
+
 # import class
+import movie
 from dtw     import Dtw
 from denoise import Denoise
 from kparam  import Kparam
@@ -79,7 +80,7 @@ class BodyGameRuntime(object):
         self.h_to_w = float(self.default_h) / self.default_w
         # here we will store skeleton data
         self._bodies = None
-        self.jorder  = [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 20]  # joints order we care
+        self.jorder  = [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 20]  # upper body joints' order
 
         time.sleep(5)
 
@@ -91,7 +92,7 @@ class BodyGameRuntime(object):
         else:
             print 'failed to extract .....'
 
-        self.exeno = 3
+        self.exeno = 3  # exercise number
         self.__param_init__()
         self.movie = movie.Movie(self.exeno)
 
@@ -131,6 +132,7 @@ class BodyGameRuntime(object):
         if press[pygame.K_ESCAPE]:
             self.kp._done = True
             self.movie.stop()
+
         if press[pygame.K_h]:  # use 'h' to open, 'ctrl+h' to close finger detection
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
                 print('finger detection disable .....')
@@ -138,6 +140,7 @@ class BodyGameRuntime(object):
             else:
                 print('finger detection enable .....')
                 self.kp.handmode = True
+
         if press[pygame.K_m]:  # use 'm' to open, 'ctrl+m' to close human model
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
                 print('human model disable .....')
@@ -164,6 +167,7 @@ class BodyGameRuntime(object):
                 print('recording .....')
                 self.kp.vid_rcd = True
                 self.kp.clipNo += 1
+
         if press[pygame.K_g]:  # use 'g' to to open, 'ctrl+g' to close gpr denoise
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
                 print('close denoising process .....')
@@ -171,6 +175,7 @@ class BodyGameRuntime(object):
             else:
                 print('start denoising process .....')
                 self.denoise._done = False
+
         if press[pygame.K_d]:  # use 'd' to to open, 'ctrl+d' to close dtw
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
                 print('disable human behavior analyze .....')
@@ -178,17 +183,20 @@ class BodyGameRuntime(object):
             else:
                 print('enable human behavior analyze .....')
                 self.dtw._done = False
+
         if press[pygame.K_i]:  # use 'i' to reset every parameter
             print('Reseting ............................')
             self.reset()
         if press[pygame.K_u]:  # use 'u' to reset every parameter and remove the save data
             print('Reseting & removing the saved file ................')
             self.reset(True)
+
         if press[pygame.K_b]:  # use 'b' to lager the scale
             if (self.kp.scale < 1.8):
                 self.kp.scale = self.kp.scale*1.1
         if press[pygame.K_s]:  # use 's' to smaller the scale
             self.kp.scale = max(self.kp.scale/1.1, 1)
+
         if press[pygame.K_1]:  # use '1' to change to execise 1
             self.exeno = 1
             print('====  doing exercise 1 ====')
@@ -207,23 +215,21 @@ class BodyGameRuntime(object):
             self.reset(change=True)
 
     def run(self):
-        # --------- initial -------
         finish = False
-        wait_key_count = 3
-        # Rb = defaultdict(list)
-        # Rt = defaultdict(list)
-        # Rk = defaultdict(list)
-        # -------- Main Program Loop -----------
+        wait_key_cnt = 3
+
         while not self.kp._done:
             bddic = {}
             jdic  = {}
+
             # === key pressing ===
-            if(wait_key_count < 3):
-                wait_key_count += 1
-            if(pygame.key.get_focused() and wait_key_count >= 3):
+            if(wait_key_cnt < 3):
+                wait_key_cnt += 1
+            if(pygame.key.get_focused() and wait_key_cnt >= 3):
                 press = pygame.key.get_pressed()
                 self.press_event(press)
-                wait_key_count = 0
+                wait_key_cnt = 0
+
             # === Main event loop ===
             for event in pygame.event.get():  # User did something
                 if event.type == pygame.QUIT:  # If user clicked close
@@ -274,19 +280,6 @@ class BodyGameRuntime(object):
 
                     # === joint reliability ===
                     Rel, Relary = self.rel.run(jdic,self.jorder)
-                    # rt = REL.rel_trk(jdic)
-                    # rk = REL.rel_kin(jdic)
-                    # for jj, ii in enumerate(self.jorder):
-                    #     try:
-                    #         self.kp.jointary[ii].append(np.array([jdic[ii].Position.x, jdic[ii].Position.y, jdic[ii].Position.z]))
-                    #     except:
-                    #         self.kp.jointary[ii] = []
-                    #         Rb[ii] = []
-                    #         self.kp.jointary[ii].append(np.array([jdic[ii].Position.x, jdic[ii].Position.y, jdic[ii].Position.z]))
-                    #     Rb[ii].append(REL.rel_behav(self.kp.jointary[ii]))
-                    #     Rt[ii].append(rt[jj])
-                    #     Rk[ii].append(rk[jj])
-                    # Rel, Relary = REL.rel_rate(Rb, Rk, Rt, self.jorder)
                     # joint's reliability visulization
                     skel.draw_Rel_joints(jps, Rel, self._frame_surface)
 
@@ -318,6 +311,7 @@ class BodyGameRuntime(object):
                                 reconJ = modJary
                         else:
                             reconJ = modJary
+
                         # === DTW matching ===
                         self.dtw.matching(reconJ, gt_data[self.exeno], self.exeno)
 
@@ -336,7 +330,8 @@ class BodyGameRuntime(object):
                             finish = True
                     # draw skel
                     skel.draw_body(joints, jps, SKELETON_COLORS[i], self._frame_surface, 8)
-                    # draw unify human model
+
+                    # === draw unify human model ===
                     if self.kp.model_draw:
                         modJoints = Hmod.human_mod_pts(joints)
                         if not self.kp.model_frame:
@@ -347,19 +342,21 @@ class BodyGameRuntime(object):
                         else:
                             plt.cla()
                         Hmod.draw_human_mod_pts(modJoints, ax, keys)
-                    # save data
+
+                    # === save data ===
                     bddic['timestamp'] = timestamp
-                    bddic['jointspts'] = jps   # joint coordinate in color space (2D)
+                    bddic['jointspts'] = jps   # joints' coordinate in color space (2D)
                     bddic['depth_jointspts'] = djps
-                    bddic['joints'] = jdic  # joint coordinate in camera space (3D)
+                    bddic['joints'] = jdic  # joints' coordinate in camera space (3D)
                     bddic['vidclip'] = self.kp.clipNo
                     bddic['Rel'] = Rel
                     bddic['LHS'] = body.hand_left_state
                     bddic['RHS'] = body.hand_right_state
             else:
                 typetext(self._frame_surface, 'No human be detected ', (100, 100))
-            # video recoding text
-            if self.kp.vid_rcd:
+
+            # === text infomation on the surface ===
+            if self.kp.vid_rcd:  # video recoding text
                 typetext(self._frame_surface, 'Video Recording', (1550, 20), (255, 0, 0))
 #                self.cimgs.create_dataset('img_'+repr(self.kp.fno).zfill(4), data = frame)
                 self.bdimgs.create_dataset('bd_' + repr(self.kp.fno).zfill(4), data=np.dstack((bodyidx, bodyidx, bodyidx)))
@@ -368,6 +365,7 @@ class BodyGameRuntime(object):
                 self.kp.bdjoints.append(bddic)
             else:
                 typetext(self._frame_surface, 'Not Recording', (1550, 20), (0, 255, 0))
+
             # if size of the display window is changed
             if (float(self._screen.get_height())/self._screen.get_width()) > self.h_to_w:
                 target_height = int(self.h_to_w * self._screen.get_width())
@@ -384,6 +382,7 @@ class BodyGameRuntime(object):
                     self.default_h = target_height
             surface_to_draw = pygame.transform.scale(self._frame_surface, (self.default_w, self.default_h))
             self._screen.blit(surface_to_draw, (0, 0))
+
             # user change the avatar's sacle
             if self.kp.scale != self.kp.pre_scale:
                 self.movie.draw(self._screen, self.default_w, self.default_h, self.kp.scale, True)
