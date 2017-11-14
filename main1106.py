@@ -24,7 +24,7 @@ from denoise import Denoise
 from kparam  import Kparam
 from rel     import Rel
 
-fps = 60
+fps = 30
 bkimg = np.zeros([1080, 1920])
 username = 'Yao_'  # user name
 # colors for drawing different bodies
@@ -50,6 +50,10 @@ gt_data[3][1] = data['GT_1'][:]
 gt_data[3][2] = data['GT_2'][:]
 gt_data[3][3] = data['GT_3'][:]
 gt_data[3][4] = data['GT_4'][:]
+data.close()
+data = h5py.File('GT_V_data_mod_EX2_seg_2.h5', 'r')
+gt_data[2][1] = data['GT_1'][:]
+gt_data[2][2] = data['GT_2'][:]
 data.close()
 
 
@@ -92,7 +96,7 @@ class BodyGameRuntime(object):
         else:
             print 'failed to extract .....'
 
-        self.exeno = 3  # exercise number
+        self.exeno = 2  # exercise number
         self.__param_init__()
         self.movie = movie.Movie(self.exeno)
 
@@ -281,7 +285,7 @@ class BodyGameRuntime(object):
                     # === joint reliability ===
                     Rel, Relary = self.rel.run(jdic,self.jorder)
                     # joint's reliability visulization
-                    skel.draw_Rel_joints(jps, Rel, self._frame_surface)
+                    # skel.draw_Rel_joints(jps, Rel, self._frame_surface)
 
                     # === dtw analyze & denoising process ===
                     if not self.dtw._done:
@@ -293,7 +297,6 @@ class BodyGameRuntime(object):
                                 if all(ii > 0.6 for ii in Relary[limbidx]):  # all joints are reliable
                                     reconJ = modJary  # reconJ is 1*21 array
                                 else:  # contains unreliable joints
-                                    print 'unreliable'
                                     reconJ, unrelidx = self.denoise.run(modJary, Relary)
                                     #  === recon 2D joints in color domain ===
                                     JJ = Hmod.reconJ2joints(rec_joints, reconJ.reshape(7, 3))
@@ -301,8 +304,8 @@ class BodyGameRuntime(object):
                                         rec_joints[ii].Position.x = JJ[i][0]
                                         rec_joints[ii].Position.y = JJ[i][1]
                                         rec_joints[ii].Position.z = JJ[i][2]
-                                    tmp_jps    = self._kinect.body_joints_to_color_space(rec_joints)  # joints in color domain
-                                    rec_jps    = jps
+                                    tmp_jps = self._kinect.body_joints_to_color_space(rec_joints)  # joints in color domain
+                                    rec_jps = jps
                                     for ii in unrelidx:
                                         rec_jps[ii].x = tmp_jps[ii].x
                                         rec_jps[ii].y = tmp_jps[ii].y
@@ -313,7 +316,8 @@ class BodyGameRuntime(object):
                             reconJ = modJary
 
                         # === DTW matching ===
-                        self.dtw.matching(reconJ, gt_data[self.exeno], self.exeno)
+                        self.dtw.run(reconJ, gt_data[self.exeno], self.exeno,\
+                                     body.hand_left_state, body.hand_right_state)
 
                         # if self.dtw.evalstr != '':
                         #     typetext(self._frame_surface,self.dtwevalstr, (100, 300),(255, 0, 0), fontsize=100)
@@ -398,6 +402,7 @@ class BodyGameRuntime(object):
         self.movie.stop(True)   # close avatar
         self._kinect.close()    # close Kinect sensor
         print self.dtw.idxlist  # show the analyzed result
+        print self.dtw.hstate_cnt
         # save the recording data
         if self.kp.bdjoints != []:
             cPickle.dump(self.kp.bdjoints, file(self.kp.dstr+'.pkl', 'wb'))
