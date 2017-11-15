@@ -33,7 +33,7 @@ fps = 30
 
 bkimg = np.zeros([1080, 1920])
 
-Uname = 'Andy_' # user name
+Uname = 'abc_' # user name
 Eno   = '_ex2'  # execise number 
 
 

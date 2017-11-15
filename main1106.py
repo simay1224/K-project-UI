@@ -2,7 +2,7 @@
 from pykinect2 import PyKinectV2
 from pykinect2.PyKinectV2 import *
 from pykinect2 import PyKinectRuntime
-from Kfunc.IO     import *
+# from Kfunc.IO     import *
 from Kfunc.finger import *
 from Kfunc.skel   import skel
 from Kfunc.model  import Human_mod   as Hmod
@@ -23,10 +23,10 @@ from dtw     import Dtw
 from denoise import Denoise
 from kparam  import Kparam
 from rel     import Rel
-
+from dataoutput import Dataoutput
 fps = 30
 bkimg = np.zeros([1080, 1920])
-username = 'Yao_'  # user name
+username = 'Andy_'  # user name
 # colors for drawing different bodies
 SKELETON_COLORS = [pygame.color.THECOLORS["red"],
                    pygame.color.THECOLORS["blue"],
@@ -85,7 +85,6 @@ class BodyGameRuntime(object):
         # here we will store skeleton data
         self._bodies = None
         self.jorder  = [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 20]  # upper body joints' order
-
         time.sleep(5)
 
         if self._kinect.has_new_color_frame():
@@ -114,6 +113,7 @@ class BodyGameRuntime(object):
         self.dtw = Dtw()
         self.denoise = Denoise()
         self.rel = Rel()
+        self.io  = Dataoutput()
 
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
@@ -128,6 +128,15 @@ class BodyGameRuntime(object):
             self.movie.stop(True)
             self.movie = movie.Movie(self.exeno)
         self.movie.rewind()
+
+    def getcoord(self, data, order=[1, 4, 8, 20]):
+        foo = []
+        for i in order:
+            if i == 1:
+                foo = np.array([data[i].x, data[i].y])
+            else:
+                foo = np.vstack([foo, np.array([data[i].x, data[i].y])])
+        return foo
 
     def press_event(self, press):
         """ According to the button which is pressed by the user
@@ -316,11 +325,42 @@ class BodyGameRuntime(object):
                             reconJ = modJary
 
                         # === DTW matching ===
-                        self.dtw.run(reconJ, gt_data[self.exeno], self.exeno,\
-                                     body.hand_left_state, body.hand_right_state)
+                        if self.exeno in [1, 2]:
+                            bdry = self.getcoord(djps)
+                            self.dtw.run(reconJ, gt_data[self.exeno], self.exeno,\
+                                         self._frame_surface, body.hand_left_state,
+                                         body.hand_right_state, dframe,bdry)                        
+                        else:
+                            self.dtw.run(reconJ, gt_data[self.exeno], self.exeno,\
+                                         body.hand_left_state, body.hand_right_state)
+
+                        if (body.hand_left_state == 2): #Lhand open
+                            Lhstatus = 'open'
+                        elif body.hand_left_state == 0:
+                            Lhstatus = 'unknown'
+                        elif body.hand_left_state == 3:
+                            Lhstatus = 'closed'
+                        elif body.hand_left_state == 4:
+                            Lhstatus = 'Lasso'
+                        else:
+                            Lhstatus = 'Not be detected'                            
+
+                        if (body.hand_right_state == 2): #Lhand open
+                            Rhstatus = 'open'
+                        elif body.hand_right_state == 0:
+                            Rhstatus = 'unknown'
+                        elif body.hand_right_state ==3:
+                            Rhstatus = 'closed'
+                        elif body.hand_right_state == 4:
+                            Rhstatus = 'Lasso'
+                        else:
+                            Rhstatus = 'Not be detected'
+                        
+                        self.io.typetext(self._frame_surface, 'Lhand : '+Lhstatus, (100, 800), (0, 0, 255), fontsize=60, bold=True)        
+                        self.io.typetext(self._frame_surface, 'Rhand : '+Rhstatus, (100, 900), (0, 0, 255), fontsize=60, bold=True) 
 
                         # if self.dtw.evalstr != '':
-                        #     typetext(self._frame_surface,self.dtwevalstr, (100, 300),(255, 0, 0), fontsize=100)
+                        #     self.io.typetext(self._frame_surface,self.dtwevalstr, (100, 300),(255, 0, 0), fontsize=100)
                         #     self.dtw.fcnt += 1
                         #     if self.dtw.fcnt > 40 :
                         #         if self.dtw.oidx !=5:
@@ -330,6 +370,7 @@ class BodyGameRuntime(object):
                         #             self.dtw.evalstr = 'finish'
                     else:
                         if not finish:
+                            self.dtw.evaluation(self.exeno)
                             print self.dtw.idxlist
                             finish = True
                     # draw skel
@@ -350,25 +391,26 @@ class BodyGameRuntime(object):
                     # === save data ===
                     bddic['timestamp'] = timestamp
                     bddic['jointspts'] = jps   # joints' coordinate in color space (2D)
-                    bddic['depth_jointspts'] = djps
+                    bddic['depth_jointspts'] = djps  # joints' coordinate in depth space (2D)
                     bddic['joints'] = jdic  # joints' coordinate in camera space (3D)
                     bddic['vidclip'] = self.kp.clipNo
                     bddic['Rel'] = Rel
                     bddic['LHS'] = body.hand_left_state
                     bddic['RHS'] = body.hand_right_state
+
             else:
-                typetext(self._frame_surface, 'No human be detected ', (100, 100))
+                self.io.typetext(self._frame_surface, 'No human be detected ', (100, 100))
 
             # === text infomation on the surface ===
             if self.kp.vid_rcd:  # video recoding text
-                typetext(self._frame_surface, 'Video Recording', (1550, 20), (255, 0, 0))
+                self.io.typetext(self._frame_surface, 'Video Recording', (1550, 20), (255, 0, 0))
 #                self.cimgs.create_dataset('img_'+repr(self.kp.fno).zfill(4), data = frame)
                 self.bdimgs.create_dataset('bd_' + repr(self.kp.fno).zfill(4), data=np.dstack((bodyidx, bodyidx, bodyidx)))
                 self.dimgs.create_dataset('d_' + repr(self.kp.fno).zfill(4), data=np.dstack((dframe, dframe, dframe)))
                 self.kp.fno += 1
                 self.kp.bdjoints.append(bddic)
             else:
-                typetext(self._frame_surface, 'Not Recording', (1550, 20), (0, 255, 0))
+                self.io.typetext(self._frame_surface, 'Not Recording', (1550, 20), (0, 255, 0))
 
             # if size of the display window is changed
             if (float(self._screen.get_height())/self._screen.get_width()) > self.h_to_w:
@@ -402,8 +444,8 @@ class BodyGameRuntime(object):
         self.movie.stop(True)   # close avatar
         self._kinect.close()    # close Kinect sensor
         print self.dtw.idxlist  # show the analyzed result
-        print self.dtw.hstate_cnt
         # save the recording data
+
         if self.kp.bdjoints != []:
             cPickle.dump(self.kp.bdjoints, file(self.kp.dstr+'.pkl', 'wb'))
         try:

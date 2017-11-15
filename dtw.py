@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 from scipy.spatial.distance import _validate_vector
 from scipy.ndimage.filters import gaussian_filter1d as gf
+from scipy.ndimage.filters import gaussian_filter as gf_2D
 from scipy.linalg import norm
 from collections import defaultdict
 from w_fastdtw import fastdtw
 import numpy as np
 from scipy.signal import argrelextrema
+from scipy import signal
+from dataoutput import Dataoutput
+import matplotlib.pyplot as plt
 import pdb
 
 
@@ -23,7 +27,9 @@ class Dtw(object):
             initailize dtw parameters
         """
         # dtw parameters initialization
+        self.io          = Dataoutput()
         self._done       = False
+        self.do_once     = False
         self.decTh       = 1800
         self.cnt         = 0
         self.distp_prev  = 0
@@ -35,17 +41,24 @@ class Dtw(object):
         self.idxlist     = []
         self.idx_cmp     = 0
         self.fcnt        = 0
-        self.finishcnt   = 0
+        # self.finishcnt   = 0
         self.srchfw      = 10  # forward search range
         self.srchbw      = 20  # backward search range
+        self.error       = []
+        # exe1 parameters
+        self.cntdown     = 90
         # exe2 parameters
-        self.hcnt        = 0
+        # self.hcnt        = 0
         self.hstate      = np.array([])
-        self.hstate_cnt  = np.array([0,0])
-        self.hopen_list  = []
-        self.hclose_list = []
+        self.rawhstate   = np.array([0,0])
+        # self.hstate_cnt  = np.array([0,0])
+        # self.hopen_list  = []
+        # self.hclose_list = []
         self.holdstate   = True
         self.holdlist    = np.array([])
+        self.ref_dmap    = None
+        self.ref_bdry    = np.array([])
+        self.breath_list = []
         # updatable parameters
         self.dpfirst     = {}
         self.dist_p      = {}
@@ -62,6 +75,9 @@ class Dtw(object):
         # exercise order
         self.order = defaultdict(dict)
         # exercise 1
+        self.order[1][0] = [1]
+        self.order[1][1] = [2]
+        self.order[1][2] = 'end'          
         # exercise 2
         self.order[2][0] = [1]
         self.order[2][1] = [2]
@@ -80,22 +96,11 @@ class Dtw(object):
         self.order[4][3] = [4]
         self.order[4][4] = [2, 3]
         self.order[4][5] = 'end'
-        # animation order
-        self.aniorder = defaultdict(dict)
-        # exercise 3
-        self.aniorder[3][0] = 1
-        self.aniorder[3][1] = 3
-        self.aniorder[3][2] = 2
-        self.aniorder[3][3] = 4
-        self.aniorder[3][4] = 3
-        # exercise 4
-        self.aniorder[4][0] = 1
-        self.aniorder[4][1] = 3
-        self.aniorder[4][2] = 2
-        self.aniorder[4][3] = 4
-        self.aniorder[4][4] = 3
         # weight
         self.jweight = {}
+        self.jweight[1] = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
+                                    0., 0., 0., 3., 3., 3., 9., 9., 9.,
+                                    0., 0., 0.])        
         self.jweight[2] = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
                                     0., 0., 0., 3., 3., 3., 9., 9., 9.,
                                     0., 0., 0.])
@@ -149,26 +154,49 @@ class Dtw(object):
         self.onedeflag   = False
         self.segini      = True
 
-    def run(self, reconJ, gt_data, exeno, lhs=0, rhs=0, lowpass=True):
+    def run(self, reconJ, gt_data, exeno, surface, lhs=0, rhs=0, dmap=[], bdry=[], lowpass=True):
         """ according to different exercise, doing different processing
         """
         if not self.order[exeno][self.oidx] == 'end':
             if exeno == 1:
-                pass
+                if self.cntdown < 0:
+                    if len(self.holdlist) == 0:  # hand in the holding state or not
+                        self.holdlist = reconJ
+                    else:
+                        self.holdlist = np.vstack([self.holdlist, reconJ]) 
+                        # print np.sum(np.abs(self.holdlist[0]-self.holdlist[-1])[self.jweight[2] != 0])
+                        if np.sum(np.abs(self.holdlist[0]-self.holdlist[-1])[self.jweight[2] != 0]) > 400:
+                            self.holdstate = False
+                    if self.holdstate:
+                        self.io.typetext(surface,'Starting breath in/out' ,(100,100),(255,0,0))
+                        self.breathIO(bdry, dmap)
+                    else:
+                        if not self.do_once:
+                            self.breath_analyze(self.fcnt)
+                            self.do_once = True
+                            self._done = True
+                else:
+                    self.io.typetext(surface,'will Starting at '+str(np.round(self.cntdown/30.,2))+' second' ,(100,100),(255,0,0))
+                    self.cntdown -= 1
             elif exeno == 2:
                 if self.order[exeno][self.oidx] == [2]:
-                    if len(self.holdlist) == 0:
+                    if len(self.holdlist) == 0:  # hand in the holding state or not
                        self.holdlist = reconJ
                     else:
                         self.holdlist = np.vstack([self.holdlist, reconJ]) 
-                        if np.sum(np.abs(self.holdlist[0]-self.holdlist[-1])[self.jweight[2] != 0]) > 400:
-                            print('hold state close .....')
+                        # print np.sum(np.abs(self.holdlist[0]-self.holdlist[-1])[self.jweight[2] != 0])
+                        if np.sum(np.abs(self.holdlist[0]-self.holdlist[-1])[self.jweight[2] != 0]) > 1000:
                             self.holdstate = False
-                            print self.hstate_cnt
                     if self.holdstate:
+                        self.io.typetext(surface,'Starting breath in/out with hand close/open ' ,(100,100),(255,0,0))
                         self.handstate(lhs, rhs)
+                        self.breathIO(bdry, dmap)
                     else:
-                        self.matching(reconJ, gt_data, exeno)    
+                        if not self.do_once:
+                            self.breath_analyze(self.fcnt)
+                            self.hand_analyze(self.fcnt)
+                            self.do_once = True                        
+                        self.matching(reconJ, gt_data, exeno)
                 else:
                     self.matching(reconJ, gt_data, exeno)    
             elif exeno == 3:
@@ -184,6 +212,7 @@ class Dtw(object):
     def matching(self, reconJ, gt_data, exeno, lowpass=True):
         """the main part of dtw matching algorithm
         """
+        self.fcnt += 1
         if self.segini:  # new segement/movement start
             self.segini = False
             # self.Ani_idx = self.aniorder[exeno][self.Ani_idx]
@@ -192,7 +221,7 @@ class Dtw(object):
                 self.idxlist.append(self.gt_idx)
         if len(self.seqlist_reg) == 0:  # build sequence list
             self.seqlist_reg = reconJ
-            print self.seqlist_reg.shape
+            # print self.seqlist_reg.shape
             self.seqlist_reg = self.seqlist_reg.reshape(-1, 21)
             self.seqlist = self.seqlist_reg
         else:
@@ -270,10 +299,14 @@ class Dtw(object):
             3: closed
             4: lasso
         """
-        self.hcnt += 1
-        if (lhs == 0 | lhs == 1 | lhs == 4) and (rhs == 2 or rhs == 3): # if left hand is no tracking , using right
+        self.rawhstate = np.vstack([self.rawhstate, np.array([lhs,rhs]).reshape(-1, 2)])
+        if lhs == 4:
+            lhs = 0
+        if rhs == 4:
+            rhs = 0
+        if (lhs == 0 | lhs == 1 ) and (rhs == 2 or rhs == 3): # if left hand is no tracking , using right
             lhs = rhs
-        elif (rhs == 0 | rhs == 1 | rhs == 4) and (lhs == 2 or lhs == 3): # if right hand is no tracking , using left
+        elif (rhs == 0 | rhs == 1 ) and (lhs == 2 or lhs == 3): # if right hand is no tracking , using left
             rhs = lhs
         # if hand state unknown, assign defalut state
         if lhs == 0:
@@ -293,24 +326,149 @@ class Dtw(object):
         else:
             self.hstate = np.vstack([self.hstate, np.array([lhs,rhs]).reshape(-1, 2)])
 
-        if np.mod(self.hcnt, 5) == 0:
-            hstate_diff = self.hstate - np.roll(self.hstate, -1, axis=0)
-            hand_chg = hstate_diff[-6:-1, 0]+hstate_diff[-6:-1, 1]
-            if np.sum(hand_chg) == 2:  # hand close -> open
-                self.hopen_list.append(self.hcnt)
-                self.hstate_cnt[0] += 1
-            elif np.sum(hand_chg) == -2:  # hand open -> close
-                self.hclose_list.append(self.hcnt)
-                self.hstate_cnt[1] += 1
-            # two hand state are not the same    
-            elif np.sum(hand_chg) == 1:  # open state, one hand not open
-                if np.sum(hand_chg[0]) == 1:
-                    print('please open your left hand')
-                else:
-                    print('please open your right hand')
-            elif np.sum(hand_chg) == -1:  # close state, one hand not close
-                if np.sum(hand_chg[0]) == -1:
-                    print('please close your left hand')
-                else:
-                    print('please close your right hand') 
+        # if np.mod(self.hcnt, 10) == 0:
+        #     hstate_diff = self.hstate - np.roll(self.hstate, -1, axis=0)
+        #     hand_chg = hstate_diff[-11:-1, 0]+hstate_diff[-11:-1, 1]
+        #     if np.sum(hand_chg) == 2:  # hand close -> open
+        #         self.hopen_list.append(self.hcnt)
+        #         self.hstate_cnt[0] += 1
+        #     elif np.sum(hand_chg) == -2:  # hand open -> close
+        #         self.hclose_list.append(self.hcnt)
+        #         self.hstate_cnt[1] += 1
+        #     # two hand state are not the same    
+        #     elif np.sum(hand_chg) == 1:  # open state, one hand not open
+        #         if np.sum(hand_chg[0]) == 1:
+        #             print('please open your left hand')
+        #         else:
+        #             print('please open your right hand')
+        #     elif np.sum(hand_chg) == -1:  # close state, one hand not close
+        #         if np.sum(hand_chg[0]) == -1:
+        #             print('please close your left hand')
+        #         else:
+        #             print('please close your right hand')
+
+    def breathIO(self, bdry, dmap):
+        """according to the depth map in the chest region,
+           detect breath in and breath out.
+        """
+        cur_bdry = np.array([bdry[0][1], bdry[3][1], bdry[1][0], bdry[2][0]])
+        if len(self.ref_bdry) == 0:
+            # setup reference frame's boundary (up, down, left and right)
+            self.ref_bdry = cur_bdry
+            self.ref_dmap = dmap
+        else:
+            ubdry = np.array([int(min(cur_bdry[0], self.ref_bdry[0])),
+                              int(max(cur_bdry[1], self.ref_bdry[1])),
+                              int(max(cur_bdry[2], self.ref_bdry[2])),
+                              int(min(cur_bdry[3], self.ref_bdry[3]))])
+            blk_diff = gf_2D(abs(dmap-self.ref_dmap)[ubdry[1]:ubdry[0], ubdry[2]:ubdry[3]], 5)
+            self.breath_list.append(np.mean(blk_diff))
+
+    def find_pair_within(self, l1, l2, dist=10):
+        """ from list 1 and list 2 find pairs
+        """
+        b = 0
+        e = 0
+        ans = []
+        for idx,a in enumerate(l1):
+            while b < len(l2) and a - l2[b] > dist:
+                b += 1
+            while e < len(l2) and l2[e] - a <= dist:
+                e += 1
+            ans.extend([(idx,b) for x in l2[b:e]])
+        return ans
+    
+    def breath_analyze(self, offset=0, th=10):
+        """ Analyze the human and breath in/out behavior
             
+        """
+        # breath part
+        breath_gd = np.gradient(gf_2D(self.breath_list, 10))
+        breath_gd[breath_gd > 0] = 0
+        breath_gd[breath_gd < 0] = 1
+        breath_pulse = breath_gd[:-1]-np.roll(breath_gd, -1)[:-1]
+        breath_in = argrelextrema(breath_pulse, np.less, order=10)[0]+offset
+        breath_out = argrelextrema(breath_pulse, np.greater, order=10)[0]+offset
+        breath = np.sort(np.hstack([breath_in, breath_out]))
+
+        if breath_in[0] == breath[0]:  # breath in happen first
+            string = ['in', 'out']
+        else:
+            string = ['out', 'in']
+        print('\n')
+        for idx in xrange(len(breath)-1):
+            print('breath '+string[np.mod(idx, 2)]+' from frame '+str(breath[idx])
+                  +' to frame '+str(breath[idx+1]-1))
+        diff = (np.roll(breath,-1)-breath)[:-1]
+        print('\naverage breath '+string[0]+' freq is: '+str(np.round(30./np.mean(diff[0::2]),2))+' Hz')
+        print('average breath '+string[1]+' freq is: '+str(np.round(30./np.mean(diff[1::2]),2))+' Hz\n')
+
+    def hand_analyze(self, offset=0, th=10):
+        """Analyze the human and hand open/close behavior
+        """
+        # === hand close/open part ===
+        foo = signal.medfilt(self.hstate, kernel_size=3)
+        self.hstate[1:-1] = foo[1:-1]
+        if np.sum(self.hstate[0]) != 4:
+            self.error.append('two hand must open when you rise you hands')
+        if np.sum(self.hstate[-1]) != 4:
+            self.error.append('two hand must open when you put down your hands')
+        hand_pulse = (self.hstate - np.roll(self.hstate, -1, axis=0))[:-1]
+        lh         = np.where(hand_pulse[:, 0] != 0)[0]
+        lh_open    = np.where(hand_pulse[:, 0] == 1)[0]
+        lh_close   = np.where(hand_pulse[:, 0] == -1)[0]
+        rh         = np.where(hand_pulse[:, 1] != 0)[0]
+        rh_open    = np.where(hand_pulse[:, 1] == 1)[0]
+        rh_close   = np.where(hand_pulse[:, 1] == -1)[0]
+        # open test
+        pair = self.find_pair_within(lh_open, rh_open)
+        if len(lh_open) != len(rh_open):
+            foo = np.array(pair)
+            res = list(set(foo[:,0])-set(foo[:,1]))
+            if len(lh_open) > len(rh_open):
+                string = 'right hand'
+            else:
+                string = 'left hand'
+            for i in res:
+                self.error.append(string+' did not open at '+str(i+1)+' time')
+            print('hand open '+str(max(len(lh_open), len(rh_open)))+' times,')
+        else:
+            print('hand open '+str(len(lh_open))+' times')
+        # close test
+        pair = self.find_pair_within(lh_open, rh_open)
+        if len(lh_close) != len(rh_close):
+            foo = np.array(pair)
+            res = list(set(foo[:,0])-set(foo[:,1]))
+            if len(lh_close) > len(rh_close):
+                string = 'right hand'
+            else:
+                string = 'left hand'
+            for i in res:
+                self.error.append(string+' did not close at '+str(i+1)+' time')       
+            print('hand close '+str(max(len(lh_close), len(rh_close)))+' times,')
+        else:
+            print('hand close '+str(len(lh_close))+ ' times\n')
+
+    def evaluation(self, exeno, err=[]):
+        """ exercise performance evaluation
+        """
+        fig = plt.figure(1)
+        if exeno == 1:       
+            plt.plot(gf_2D(self.breath_list, 10)/self.breath_list[0]*2, color='g')
+            plt.title('Breath in and out')
+            fig.savefig('./output/bio.jpg')
+        elif exeno == 2:
+            plt.plot(self.hstate[:,0], color='b')
+            plt.plot(self.hstate[:,1]-5, color='r')
+            plt.plot(gf_2D(self.breath_list, 10)/self.breath_list[0]*2, color='g')
+            plt.title('Breath in and out & hands open and close')
+            fig.savefig('./output/biohoc.jpg')
+        plt.close(fig)
+
+        print('\nevaluation:')
+        if len(self.error) != 0:
+            for i in self.error:
+                print i
+            print('\n')
+        else:
+            print('perfect !!\n')

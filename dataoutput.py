@@ -9,23 +9,23 @@ import win32com.client
 import numpy as np
 
 
-class IO(Object):
+class Dataoutput(object):
     """
     """
-    def typetext(frame_surface, string, pos, color=(255, 255, 0), fontsize=60, bold=False):
+    def typetext(self, frame_surface, string, pos, color=(255, 255, 0), fontsize=60, bold=False):
         """showing the text information on the surface
         """
         myfont = pygame.font.SysFont("Arial", fontsize, bold)
         label = myfont.render(string, 1, color)
         frame_surface.blit(label, pos)
 
-    def folder_retarget(src_path, shortcut):
+    def folder_retarget(self, src_path, shortcut):
         """redirct the shortcut folder to the real path
         """
         shell = win32com.client.Dispatch("WScript.Shell")
         return str(shell.CreateShortCut(src_path+shortcut).Targetpath)
 
-    def makevid(src_path, dst_path, fps=30):
+    def makevid(self, src_path, dst_path, fps=30):
         """ convert the saved file into video
         """
         for subfolder in os.listdir(src_path):

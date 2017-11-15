@@ -200,28 +200,28 @@ for infile, hand_file, breath_file in zip(glob.glob(os.path.join(src_path, '*.pk
             hold_change=np.sum(np.abs(Dtw['hold_list'][0]-Dtw['hold_list'][-1]))
             if hold_change>400:                                                # if there is a huge change go to DTW step
                 Dtw['hold'][1] = False
-            hand_change    = Dtw['hand_list'] - np.roll(Dtw['hand_list'],-1, axis = 0)
-            if np.mod(Dtw['hcnt'],5) == 0:                                     # check open and close in every n frames
-                hand_chg = hand_change[-6:-1,0]+hand_change[-6:-1,1]
-                print(hand_chg)
-                if np.sum(hand_chg) == 2:                                      # hand open to hand close change
-                    open_cnt_list.append(Dtw['hcnt'])
-                    Dtw['cnt_hand'][0] += 1
-                if np.sum(hand_chg) == -2:                                     # hand close to hand open change
-                    close_cnt_list.append(Dtw['hcnt'])
-                    Dtw['cnt_hand'][1] += 1
+            # hand_change    = Dtw['hand_list'] - np.roll(Dtw['hand_list'],-1, axis = 0)
+            # if np.mod(Dtw['hcnt'],5) == 0:                                     # check open and close in every n frames
+            #     hand_chg = hand_change[-6:-1,0]+hand_change[-6:-1,1]
+            #     print(hand_chg)
+            #     if np.sum(hand_chg) == 2:                                      # hand open to hand close change
+            #         open_cnt_list.append(Dtw['hcnt'])
+            #         Dtw['cnt_hand'][0] += 1
+            #     if np.sum(hand_chg) == -2:                                     # hand close to hand open change
+            #         close_cnt_list.append(Dtw['hcnt'])
+            #         Dtw['cnt_hand'][1] += 1
 
-                if np.sum(hand_chg) == 1:                                      # if only one hand close
-                    if np.sum(hand_chg[0]) ==1 and np.sum(hand_chg[1]) == 0 :
-                        print('please open your left hand')
-                    if np.sum(hand_chg[1]) ==1 and np.sum(hand_chg[0]) == 0 :
-                        print('please open your right hand')
+            #     if np.sum(hand_chg) == 1:                                      # if only one hand close
+            #         if np.sum(hand_chg[0]) ==1 and np.sum(hand_chg[1]) == 0 :
+            #             print('please open your left hand')
+            #         if np.sum(hand_chg[1]) ==1 and np.sum(hand_chg[0]) == 0 :
+            #             print('please open your right hand')
 
-                if np.sum(hand_chg) == -1:                                     # if only one hand open
-                    if np.sum(hand_chg[0]) == -1 and np.sum(hand_chg[1]) == 0 :
-                        print('please close your left hand')
-                    if np.sum(hand_chg[1]) == -1 and np.sum(hand_chg[0]) == 0 :
-                        print('please close your right hand')
+            #     if np.sum(hand_chg) == -1:                                     # if only one hand open
+            #         if np.sum(hand_chg[0]) == -1 and np.sum(hand_chg[1]) == 0 :
+            #             print('please close your left hand')
+            #         if np.sum(hand_chg[1]) == -1 and np.sum(hand_chg[0]) == 0 :
+            #             print('please close your right hand')
 
 #===============================================================================#
         if (Dtw['hold'][0] == False) or (Dtw['hold'][1] == False):
@@ -398,101 +398,75 @@ for infile, hand_file, breath_file in zip(glob.glob(os.path.join(src_path, '*.pk
 
             Dtw['oidx'] = Dtw['gt_idx']           
 #===============================================================================================#
+
+
+    # hand_open_flag       = [False,False]
+    # hand_cnt        = 0
+    Dtw['hand_list'] = signal.medfilt(Dtw['hand_list'], kernel_size=3)
+    if np.sum(Dtw['hand_list'][0]) != 4: 
+        Dtw['hand_list'][:10] = 2
+    if np.sum(Dtw['hand_list'][-1])!= 4: 
+        Dtw['hand_list'][-10:] = 2
+    pdb.set_trace()
+    hand_change     = (Dtw['hand_list'] - np.roll(Dtw['hand_list'],-1, axis = 0))[:-1]
+    l_open_idx      = np.where(hand_change[:,0] == 1)[0]  # find the left open index
+    r_open_idx      = np.where(hand_change[:,1] == 1)[0]  # find the right open index
+    l_close_idx     = np.where(hand_change[:,0] == -1)[0] # find the left close index
+    r_close_idx     = np.where(hand_change[:,1] == -1)[0] # find the right close index
+    cnt_open        = 0
+    cnt_close       = 0
+    hand_seg        = []
+
+    if len(l_open_idx)>len(r_open_idx):
+        for i in l_open_idx:
+            right_state = hand_change[i-5:i+5,1]
+            if np.sum(right_state) == 1:
+                cnt_open += 1
+                print('both hand open at frame'+str(i))
+            else: 
+                print('please open right')
+    else:
+        for i in r_open_idx:
+            left_state = hand_change[i-5:i+5,0]
+            if np.sum(left_state) == 1:
+                cnt_open += 1
+                print('both hand open at frame'+str(i))
+            else: 
+                print('please open left')
+
+    if len(l_close_idx)>len(r_close_idx):
+        for i in l_close_idx[:]:
+            right_state = hand_change[i-5:i+5,1]
+            if np.sum(right_state) == -1:
+                cnt_close += 1
+                print('both hand close at frame'+str(i))
+            else:
+                print('please close right')
+    else:
+        for i in r_close_idx:
+            left_state = hand_change[i-5:i+5,0]
+            if np.sum(left_state) == -1:
+                cnt_close += 1
+                print('both hand close at frame'+str(i))
+            else: 
+                print('please close left')
+        
+
+    print('open '+str(cnt_open)+'    close ' +str(cnt_close))
+
     # plot the state of hold section
 
-    impluse = np.zeros(Dtw['hand_list'][:,0].shape)                 # using for plot the change (hand change state)
-    impluse[np.array(open_cnt_list)-1] = 10
-    impluse[np.array(close_cnt_list)-1] = -10
     breath_chg_list = np.gradient(Dtw['breath_list'][:])
-    breath_chg_list[breath_chg_list>0]  = 0
-    breath_chg_list[breath_chg_list<0]  = 1
-    breath_chg = breath_chg_list[:-1]-np.roll(breath_chg_list,-1)[:-1]
-    pdb.set_trace()
+    breath_chg_list[breath_chg_list>0]  = 1
+    breath_chg_list[breath_chg_list<0]  = 0
+    breath_chg = breath_chg_list[:-2]-np.roll(breath_chg_list,-1)[:-2]
+
     plt.plot((Dtw['breath_list'][:]-Dtw['breath_list'][0])/1000,label = 'depth of chest')
-    # plt.plot((Dtw['breath_list1'][:]-Dtw['breath_list1'][0])/10,label = 'depth of chest1')
     plt.plot(Dtw['hand_list'][:,0],label = 'left hand state')
-    plt.plot(Dtw['hand_list'][:,1]-5,label = 'right hand state')
-    # plt.plot(impluse)
-    # plt.plot(breath_chg)
+    plt.plot(Dtw['hand_list'][:,1],label = 'right hand state')
     plt.legend()
     plt.title('hand and breath state of '+foldername)
     plt.show()
-
-    # produce report for the hold section
-    breath_in_flag  = False
-    breath_out_flag = False
-    hand_flag       = [False,False]                                            # hand open/close flag , all false is open , all True is close
-    breath_state    = []
-    breath_state_cnt_flag = False
-    breath_state_cnt= 0                                                        # breath state change should exceed 10 frames
-    for i in range(1,len(breath_chg_list)):# may modify in the future
-        if breath_state_cnt_flag:
-            breath_state_cnt += 1 
-        if (breath_chg_list[i] == 1 and breath_chg_list[i-1] == 0) \
-            and (breath_state_cnt>10 or breath_state_cnt_flag == False):
-
-            print('breath in start at frame:'+str(Dtw['seglist'][0][1]+i))
-            breath_in_flag  = True                                             # open breath in flag
-            breath_out_flag = False                                            # close breath out flag
-            breath_state.append([Dtw['seglist'][0][1]+i , 1])                  # save state
-            breath_state_cnt_flag = True
-            breath_state_cnt = 0
-
-        if (breath_chg_list[i] == 0 and breath_chg_list[i-1] == 1) \
-            and (breath_state_cnt>10 or breath_state_cnt_flag == False) :
-
-            print('breath out start at frame:'+str(Dtw['seglist'][0][1]+i))
-            breath_in_flag  = False                                            # open breath out flag
-            breath_out_flag = True                                             # close breath in flag
-            breath_state.append([Dtw['seglist'][0][1]+i , 0])                  # save state
-            breath_state_cnt_flag = True
-            breath_state_cnt = 0
-
-        if breath_in_flag :                                                    # in breath in period
-
-            if Dtw['hand_list'][i,0] == 3 and Dtw['hand_list'][i-1,0] == 2:    # when left hand close 
-                print('left hand close at frame:'+str(Dtw['seglist'][0][1]+i))
-                hand_flag[0] = True
-            if Dtw['hand_list'][i,1] == 3 and Dtw['hand_list'][i-1,1] == 2:    # when right hand close 
-                print('right hand close at frame:'+str(Dtw['seglist'][0][1]+i))
-                hand_flag[1] = True
-
-            if Dtw['hand_list'][i,0] == 2 and Dtw['hand_list'][i-1,0] == 3:    # when left hand open 
-                print('left hand open at frame:'+str(Dtw['seglist'][0][1]+i))
-                print('your left hand cannot open')
-                hand_flag[1] = False
-            if Dtw['hand_list'][i,1] == 2 and Dtw['hand_list'][i-1,1] == 3:    # when right hand open 
-                print('right hand open at frame:'+str(Dtw['seglist'][0][1]+i))
-                print('your right hand cannot open')
-                hand_flag[1] = False
-
-        if breath_out_flag :                                                   # in breath out period
-
-            if Dtw['hand_list'][i,0] == 3 and Dtw['hand_list'][i-1,0] == 2:    # when left hand close 
-                print('left hand close at frame:'+str(Dtw['seglist'][0][1]+i))
-                print('your left hand cannot close')
-                hand_flag[0] = True
-            if Dtw['hand_list'][i,1] == 3 and Dtw['hand_list'][i-1,1] == 2:    # when right hand close 
-                print('right hand close at frame:'+str(Dtw['seglist'][0][1]+i))
-                print('your right hand cannot close')
-                hand_flag[1] = True
-
-            if Dtw['hand_list'][i,0] == 2 and Dtw['hand_list'][i-1,0] == 3:    # when left hand open 
-                print('left hand open at frame:'+str(Dtw['seglist'][0][1]+i))
-                hand_flag[1] = False
-            if Dtw['hand_list'][i,1] == 2 and Dtw['hand_list'][i-1,1] == 3:    # when right hand open 
-                print('right hand open at frame:'+str(Dtw['seglist'][0][1]+i))
-                hand_flag[1] = False
-    print('===========================================================\n\n\n')
-    for j in range(1,len(breath_state)):
-        if breath_state[j][1]-breath_state[j-1][1] == 1:
-            print('breath in from frame ' + str(breath_state[j-1][0])+ ' to frame '+str(breath_state[j][0]) )
-            print('frequency = '+ str(30.0/(breath_state[j][0]-breath_state[j-1][0]))+'Hz')
-        if breath_state[j][1]-breath_state[j-1][1] == -1:
-            print('breath out from frame ' + str(breath_state[j-1][0])+ ' to frame '+str(breath_state[j][0]) )
-            print('frequency = '+ str(30.0/(breath_state[j][0]-breath_state[j-1][0]))+'Hz')
-        
-
         
 
 

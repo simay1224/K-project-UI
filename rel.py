@@ -114,7 +114,7 @@ class Rel(object):
            calculate overall reliability score
         """
         Relary = np.zeros(21)
-        Rel = defaultdict(lambda: int(0))
+        Rel = defaultdict(int)
         if (len(Rb[0]) >= flen) & (len(Rk[0]) >= flen) & (len(Rt[0]) >= flen):
             if order == self.trg_jorder:
                 for j in order:
