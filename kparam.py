@@ -15,6 +15,7 @@ class Kparam(object):
         self.scale       = 1.0
         self.pre_scale   = 1.0  
         self._done       = False
+        self.finish      = False
         self.handmode    = False
         self.vid_rcd     = False
         self.model_draw  = False

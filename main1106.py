@@ -2,12 +2,6 @@
 from pykinect2 import PyKinectV2
 from pykinect2.PyKinectV2 import *
 from pykinect2 import PyKinectRuntime
-# from Kfunc.IO     import *
-from Kfunc.finger import *
-from Kfunc.skel   import skel
-from Kfunc.model  import Human_mod   as Hmod
-
-# from Kfunc.GPR    import GPR
 import ctypes, os, datetime
 import pygame, h5py, sys
 import pdb, time, cv2, cPickle
@@ -19,14 +13,19 @@ from collections import defaultdict
 
 # import class
 import movie
-from dtw     import Dtw
-from denoise import Denoise
-from kparam  import Kparam
-from rel     import Rel
-from dataoutput import Dataoutput
+from dtw         import Dtw
+from denoise     import Denoise
+from kparam      import Kparam
+from rel         import Rel
+from dataoutput  import Dataoutput
+from human_model import Human_model
+from skeleton    import Skeleton
+from fextract    import Finger_extract
+
 fps = 30
 bkimg = np.zeros([1080, 1920])
 username = 'Andy_'  # user name
+
 # colors for drawing different bodies
 SKELETON_COLORS = [pygame.color.THECOLORS["red"],
                    pygame.color.THECOLORS["blue"],
@@ -95,7 +94,7 @@ class BodyGameRuntime(object):
         else:
             print 'failed to extract .....'
 
-        self.exeno = 2  # exercise number
+        self.exeno = 4  # exercise number
         self.__param_init__()
         self.movie = movie.Movie(self.exeno)
 
@@ -108,12 +107,15 @@ class BodyGameRuntime(object):
                 print('remove h5py ....')
         except:
             pass
-
+        self.fig = None
         self.kp = Kparam(self.exeno, username)
         self.dtw = Dtw()
         self.denoise = Denoise()
         self.rel = Rel()
         self.io  = Dataoutput()
+        self.h_mod = Human_model()
+        self.skel = Skeleton()
+        self.fextr = Finger_extract()
 
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
@@ -157,7 +159,7 @@ class BodyGameRuntime(object):
         if press[pygame.K_m]:  # use 'm' to open, 'ctrl+m' to close human model
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
                 print('human model disable .....')
-                plt.close(fig)
+                plt.close(self.fig)
                 self.kp.model_draw = False
                 self.kp.model_frame = False
             else:
@@ -193,9 +195,11 @@ class BodyGameRuntime(object):
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
                 print('disable human behavior analyze .....')
                 self.dtw._done = True
+                self.kp.finish = True
             else:
                 print('enable human behavior analyze .....')
                 self.dtw._done = False
+                self.kp.finish = False
 
         if press[pygame.K_i]:  # use 'i' to reset every parameter
             print('Reseting ............................')
@@ -228,7 +232,6 @@ class BodyGameRuntime(object):
             self.reset(change=True)
 
     def run(self):
-        finish = False
         wait_key_cnt = 3
 
         while not self.kp._done:
@@ -289,16 +292,16 @@ class BodyGameRuntime(object):
 
                     # === fingers detection ===
                     if self.kp.handmode:  # finger detect and draw
-                        fextr(frame, bkimg, body, bddic, jps, SKELETON_COLORS[i], self._frame_surface)
+                        self.fextr.run(frame, bkimg, body, bddic, jps, SKELETON_COLORS[i], self._frame_surface)
 
                     # === joint reliability ===
                     Rel, Relary = self.rel.run(jdic,self.jorder)
                     # joint's reliability visulization
-                    # skel.draw_Rel_joints(jps, Rel, self._frame_surface)
+                    # self.skel.draw_Rel_joints(jps, Rel, self._frame_surface)
 
                     # === dtw analyze & denoising process ===
                     if not self.dtw._done:
-                        _, modJary = Hmod.human_mod_pts(joints, True)  # modJary is 7*3 array
+                        modJary = self.h_mod.human_mod_pts(joints)  # modJary is 7*3 array
                         modJary = modJary.flatten().reshape(-1, 21)  # change shape to 1*21 array
                         if not self.denoise._done:
                             if not len(Relary) == 0:
@@ -308,7 +311,7 @@ class BodyGameRuntime(object):
                                 else:  # contains unreliable joints
                                     reconJ, unrelidx = self.denoise.run(modJary, Relary)
                                     #  === recon 2D joints in color domain ===
-                                    JJ = Hmod.reconJ2joints(rec_joints, reconJ.reshape(7, 3))
+                                    JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
                                     for ii in [4, 5, 6, 8, 9, 10]:
                                         rec_joints[ii].Position.x = JJ[i][0]
                                         rec_joints[ii].Position.y = JJ[i][1]
@@ -318,7 +321,7 @@ class BodyGameRuntime(object):
                                     for ii in unrelidx:
                                         rec_jps[ii].x = tmp_jps[ii].x
                                         rec_jps[ii].y = tmp_jps[ii].y
-                                    skel.draw_body(rec_joints, rec_jps, SKELETON_COLORS[-1], self._frame_surface, 15)
+                                    self.skel.draw_body(rec_joints, rec_jps, SKELETON_COLORS[-1], self._frame_surface, 15)
                             else:
                                 reconJ = modJary
                         else:
@@ -369,25 +372,24 @@ class BodyGameRuntime(object):
                         #         else:
                         #             self.dtw.evalstr = 'finish'
                     else:
-                        if not finish:
+                        if not self.kp.finish:
                             self.dtw.evaluation(self.exeno)
                             print self.dtw.idxlist
-                            finish = True
+                            self.kp.finish = True
                     # draw skel
-                    skel.draw_body(joints, jps, SKELETON_COLORS[i], self._frame_surface, 8)
+                    self.skel.draw_body(joints, jps, SKELETON_COLORS[i], self._frame_surface, 8)
 
                     # === draw unify human model ===
                     if self.kp.model_draw:
-                        modJoints = Hmod.human_mod_pts(joints)
+                        modJoints = self.h_mod.human_mod_pts(joints, limb=False)
                         if not self.kp.model_frame:
-                            fig = plt.figure(1)
-                            ax = fig.add_subplot(111, projection='3d')
-                            keys = modJoints.keys()
+                            self.fig = plt.figure(1)
+                            ax = self.fig.add_subplot(111, projection='3d')
+                            # keys = modJoints.keys()
                             self.kp.model_frame = True
                         else:
                             plt.cla()
-                        Hmod.draw_human_mod_pts(modJoints, ax, keys)
-
+                        self.h_mod.draw_human_mod_pts(modJoints, ax)
                     # === save data ===
                     bddic['timestamp'] = timestamp
                     bddic['jointspts'] = jps   # joints' coordinate in color space (2D)

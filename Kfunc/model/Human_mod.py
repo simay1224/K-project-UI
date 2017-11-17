@@ -56,9 +56,17 @@ J = {}
 oripos = np.array([80,100,0])
 
 def uni_vec(Body,start,end):
-    tmp = Body[start]-Body[end]
-    vlen = sum(tmp**2)**.5
-    vlen[vlen==0] = 10**-6
+    if isinstance(Body, dict):
+        tmp = Body[start]-Body[end]
+        vlen = sum(tmp**2)**.5
+        vlen[vlen == 0] = 10**-6
+    elif isinstance(Body, np.ndarray):
+        tmp = Body[start, :]-Body[end, :]
+        vlen = sum(tmp**2)**.5
+        if vlen == 0:
+            vlen = 10**-6
+    else:
+        raise ImportError('Only support dict and array object !!')
     return tmp/vlen
 
 def uni_vec_pts(Body,start,end):
@@ -249,6 +257,24 @@ def draw_human_mod_pts(Joints,surface,keys):
     plt.draw()
     plt.pause(1.0/120)
 
+def draw_human_mod_pts_ary(joints, surface):
+    """ (online version) draw an unified model.
+        joints : ary-like object
+    """ 
+    try:       
+        x = joints[:, 0]
+        y = joints[:, 1]
+        z = joints[:, 2]
+    except:
+        pdb.set_trace()
+
+    surface.scatter(z, x, y, c='red', s=100)    
+    surface.set_xlim(-200, 200)
+    surface.set_ylim(-400, 400)
+    surface.set_zlim(100, 500)
+    plt.draw()
+    plt.pause(1.0/120)  
+
 def reconJ2joints(joint, recon_body):
     #LSpos : ShoulderLeft position
 
@@ -257,13 +283,19 @@ def reconJ2joints(joint, recon_body):
     for i in [4,5,6,8,9,10]:
         ori_body[i] = np.array([joint[i].Position.x,joint[i].Position.y,joint[i].Position.z])
 
-    Vec45 = (recon_body[1,:]  - recon_body[0,:])/np.sum((recon_body[1,:]-recon_body[0,:])**2,0)**0.5
-    Vec56 = (recon_body[2,:]  - recon_body[1,:])/np.sum((recon_body[2,:]-recon_body[1,:])**2,0)**0.5 
-#    Vec48 = (recon_body[3,:]  - recon_body[0,:])/np.sum((recon_body[3,:]-recon_body[0,:])**2,0)**0.5 
-    Vec89 = (recon_body[4,:]  - recon_body[3,:])/np.sum((recon_body[4,:]-recon_body[3,:])**2,0)**0.5 
-    Vec90 = (recon_body[5,:]  - recon_body[4,:])/np.sum((recon_body[5,:]-recon_body[4,:])**2,0)**0.5  
     
+#     Vec45 = (recon_body[1,:]  - recon_body[0,:])/np.sum((recon_body[1,:]-recon_body[0,:])**2,0)**0.5
+#     Vec56 = (recon_body[2,:]  - recon_body[1,:])/np.sum((recon_body[2,:]-recon_body[1,:])**2,0)**0.5 
+# #    Vec48 = (recon_body[3,:]  - recon_body[0,:])/np.sum((recon_body[3,:]-recon_body[0,:])**2,0)**0.5 
+#     Vec89 = (recon_body[4,:]  - recon_body[3,:])/np.sum((recon_body[4,:]-recon_body[3,:])**2,0)**0.5 
+#     Vec90 = (recon_body[5,:]  - recon_body[4,:])/np.sum((recon_body[5,:]-recon_body[4,:])**2,0)**0.5  
     
+    Vec45 = uni_vec(recon_body,1,0)
+    Vec56 = uni_vec(recon_body,2,1)
+    Vec89 = uni_vec(recon_body,4,3)
+    Vec90 = uni_vec(recon_body,5,4)
+
+
     Len45 = np.mean(np.sum((ori_body[5 ]  - ori_body[4])**2,axis = 0)**0.5)  
     Len56 = np.mean(np.sum((ori_body[6 ]  - ori_body[5])**2,axis = 0)**0.5)
 #    Len48 = np.mean(np.sum((ori_body[8 ]  - ori_body[4])**2,axis = 0)**0.5) 
