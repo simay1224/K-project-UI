@@ -85,7 +85,7 @@ Mkeys = ['LShoulder_1','RUArm_2','LShoulder_2',
          'RHand_3', 'RHand_2']
 
 
-frame_no = 230
+frame_no = 30
 mdata_all  = cPickle.load(file('Andy_2016-12-15 04.15.27 PM_ex4_raw.pkl'))
 kdata_all  = cPickle.load(file('F:/AllData_0327/Motion and Kinect raw data/20161216/pkl/Andy/Andy_data12151615_ex4.pkl'))[frame_no]['joints']
 
@@ -121,8 +121,8 @@ yoft = My[RShoulder_1] - Ky[SpineShoulder]
 zoft = Mz[Head_1]  - Kz[Head] 
 
 
-My = [i-yoft for i in My]
-Mz = [i-zoft for i in Mz]
+# My = [i-yoft for i in My]
+# Mz = [i-zoft for i in Mz]
     
 
 fig = plt.figure(1)
