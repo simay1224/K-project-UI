@@ -14,6 +14,8 @@ class Kparam(object):
                                +repr(self.now.minute).zfill(2)+repr(self.now.second).zfill(2)+str(exeno)
         self.scale       = 1.0
         self.pre_scale   = 1.0  
+        self.ini_scale   = 1.0
+        self.ratio       = 0.5  # propotion of avatar and color frame
         self._done       = False
         self.finish      = False
         self.handmode    = False
