@@ -161,7 +161,7 @@ class Dtw(object):
         self.onedeflag   = False
         self.segini      = True
 
-    def run(self, reconJ, gt_data, exeno, surface, lhs=0, rhs=0, dmap=[], bdry=[], frameno=0, lowpass=True):
+    def run(self, reconJ, gt_data, exeno, surface=None, evalinst=None, ratio=1, stype=2, lhs=0, rhs=0, dmap=[], bdry=[], frameno=0, lowpass=True):
         """ according to different exercise, doing different processing
         """
         if not self.order[exeno][self.oidx] == 'end':
@@ -177,7 +177,9 @@ class Dtw(object):
                         if np.sum(np.abs(self.holdlist[0]-self.holdlist[-1])[self.jweight[2] != 0]) > 400:
                             self.holdstate = False
                     if self.holdstate:
-                        self.io.typetext(surface,'Starting breath in/out' ,(20, surface.get_height()*0.75), (255, 0, 0))
+                        # self.io.typetext(surface,'Starting breath in/out' ,(20, surface.get_height()*0.75), (255, 0, 0))
+                        evalinst.blit_text(surface, exeno, ratio, stype, 'Starting breath in/out', 1, 'red')
+
                         self.breathIO(bdry, dmap)
                     else:
                         if not self.do_once:
@@ -185,7 +187,8 @@ class Dtw(object):
                             self.do_once = True
                             self._done = True
                 else:
-                    self.io.typetext(surface,'will Starting at '+str(np.round(self.cntdown/30., 2))+' second' ,(20, surface.get_height()*0.75),(255, 0, 0))
+                    # self.io.typetext(surface,'will Starting at '+str(np.round(self.cntdown/30., 2))+' second' ,(20, surface.get_height()*0.75),(255, 0, 0))
+                    evalinst.blit_text(surface, exeno, ratio, stype, 'will Starting at '+str(np.round(self.cntdown/30., 2))+' second', 1, 'red')
                     self.cntdown -= 1
             elif exeno == 2:
                 if self.order[exeno][self.oidx] == [2]:
@@ -197,7 +200,8 @@ class Dtw(object):
                         if np.sum(np.abs(self.holdlist[0]-self.holdlist[-1])[self.jweight[2] != 0]) > 1000:
                             self.holdstate = False
                     if self.holdstate:
-                        self.io.typetext(surface,'Starting breath in (hand close) and breath out (hand open)' ,(20, surface.get_height()*0.75), (255, 0, 0))
+                        # self.io.typetext(surface,'Starting breath in (hand close) and breath out (hand open)' ,(20, surface.get_height()*0.75), (255, 0, 0))
+                        evalinst.blit_text(surface, exeno, ratio, stype, 'Starting breath in (hand close) and breath out (hand open)', 1, 'red')
                         self.handstate(lhs, rhs)
                         self.breathIO(bdry, dmap)
                     else:

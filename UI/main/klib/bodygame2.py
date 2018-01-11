@@ -361,11 +361,13 @@ class BodyGameRuntime(object):
                         if self.exeno in [1, 2]:
                             bdry = self.getcoord(djps)
                             self.dtw.run(reconJ, gt_data[self.exeno], self.exeno,\
-                                         self.bk_frame_surface, body.hand_left_state,
+                                         self.bk_frame_surface, self.evalinst, self.kp.ratio,\
+                                         self.scene_type, body.hand_left_state,\
                                          body.hand_right_state, dframe, bdry, self.kp.framecnt)                        
                         else:
                             self.dtw.run(reconJ, gt_data[self.exeno], self.exeno,\
-                                         body.hand_left_state, body.hand_right_state)
+                                         self.evalinst, ratio=self.kp.ratio, stype=self.scene_type,\
+                                         lhs=body.hand_left_state, rhs=body.hand_right_state)
 
                         if (body.hand_left_state == 2): #Lhand open
                             Lhstatus = 'Open'
@@ -393,16 +395,22 @@ class BodyGameRuntime(object):
                         # self.io.typetext(self.bk_frame_surface, 'Rhand : '+Rhstatus, (20, self._screen.get_height()-20), (255, 69, 0), fontsize=40, bold=True) 
 
                         handtext = 'Lhand : '+Lhstatus +'\nRhand : '+Rhstatus
-                        self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, handtext)
+                        self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, handtext, 4 ,(255, 130, 45))
 
                         if self.dtw.evalstr != '':
-                            self.io.typetext(self.bk_frame_surface, self.dtw.evalstr, (900, self.bk_frame_surface.get_height()*0.85),(0, 255, 0), fontsize=100)
+                            # self.io.typetext(self.bk_frame_surface, self.dtw.evalstr, (900, self.bk_frame_surface.get_height()*0.85),(0, 255, 0), fontsize=100)
+                            self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, self.dtw.evalstr, 2, 'green')
+
                             self.dtw.fcnt += 1
                             if self.dtw.fcnt > 30 :
                                 self.dtw.evalstr = ''
                                 self.dtw.fcnt  = 0
                     else:
-                        self.io.typetext(self.bk_frame_surface, 'Exercise '+str(self.exeno)+' is done', (20, self.bk_frame_surface.get_height()*(1-self.kp.ratio)),(255, 0, 0), fontsize=100)
+                        # self.io.typetext(self.bk_frame_surface, 'Exercise '+str(self.exeno)+' is done', (20, self.bk_frame_surface.get_height()*(1-self.kp.ratio)),(255, 0, 0), fontsize=100)
+
+                        self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, 'Exercise '+str(self.exeno)+' is done', 1)
+
+
                         if not self.kp.finish:
                             self.dtw.evaluation(self.exeno)
                             print self.dtw.idxlist
@@ -433,8 +441,8 @@ class BodyGameRuntime(object):
 
                 self.kp.framecnt += 1  # frame no
             else:
-                self.io.typetext(self._frame_surface, 'No human be detected ', (20, 100))
-
+                self.io.typetext(self._frame_surface, 'Kinect does not connect!!', (20, 100))
+            self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, 'Exercise '+str(self.exeno)+' is done', 1)
             # === text infomation on the surface ===
             if self.kp.vid_rcd:  # video recoding text
                 #self.io.typetext(self._frame_surface, 'Video Recording', (1580, 20), (255, 0, 0))
