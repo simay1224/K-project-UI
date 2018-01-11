@@ -21,6 +21,7 @@ from dataoutput  import Dataoutput
 from human_model import Human_model
 from skeleton    import Skeleton
 from fextract    import Finger_extract
+from instruction import Exeinst, Evalinst
 
 fps = 30
 bkimg = np.zeros([1080, 1920])
@@ -125,7 +126,8 @@ class BodyGameRuntime(object):
         self.h_mod = Human_model()
         self.skel = Skeleton()
         self.fextr = Finger_extract()
-        self.suface_ratio_chang = False
+        self.exeinst = Exeinst()
+        self.evalinst = Evalinst()
 
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
@@ -216,19 +218,30 @@ class BodyGameRuntime(object):
             print('Reseting & removing the saved file ................')
             self.reset(True)
 
-        if press[pygame.K_b]:  # use 'b' to lager the scale
-            self.kp.scale = min(self.kp.scale*1.1, self.kp.ini_scale*1.8)
-        if press[pygame.K_s]:  # use 's' to smaller the scale
-            self.kp.scale = max(self.kp.scale/1.1, 1)
+        # if press[pygame.K_b]:  # use 'b' to lager the scale
+        #     self.kp.scale = min(self.kp.scale*1.1, self.kp.ini_scale*1.8)
+        # if press[pygame.K_s]:  # use 's' to smaller the scale
+        #     self.kp.scale = max(self.kp.scale/1.1, 1)
+
+        if press[pygame.K_z]:  # use 'z' to lower the ratio of avatar to color frame
+                               # 'ctrl+z' to larger the ratio of avatar to color frame
+            if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
+                if self.kp.ratio < 0.8:
+                    self.kp.ratio += 0.05  
+                    self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)                  
+            else:    
+                if self.kp.ratio > 0.2:
+                    self.kp.ratio -= 0.05
+                    self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
+        
+
 
         if press[pygame.K_0]:  # use '0' to change the scene type
             print('scene change')
             if self.scene_type == 2:
                self.scene_type = 1
-               self.ori = (0,0)
             else:
                self.scene_type += 1
-               self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))     
 
         if press[pygame.K_1]:  # use '1' to change to execise 1
             self.exeno = 1
@@ -376,8 +389,11 @@ class BodyGameRuntime(object):
                         else:
                             Rhstatus = 'Not detect'
                         
-                        self.io.typetext(self.bk_frame_surface, 'Lhand : '+Lhstatus, (20, self._screen.get_height()-80), (255, 69, 0), fontsize=40, bold=True)        
-                        self.io.typetext(self.bk_frame_surface, 'Rhand : '+Rhstatus, (20, self._screen.get_height()-20), (255, 69, 0), fontsize=40, bold=True) 
+                        # self.io.typetext(self.bk_frame_surface, 'Lhand : '+Lhstatus, (20, self._screen.get_height()-80), (255, 69, 0), fontsize=40, bold=True)        
+                        # self.io.typetext(self.bk_frame_surface, 'Rhand : '+Rhstatus, (20, self._screen.get_height()-20), (255, 69, 0), fontsize=40, bold=True) 
+
+                        handtext = 'Lhand : '+Lhstatus +'\nRhand : '+Rhstatus
+                        self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, handtext)
 
                         if self.dtw.evalstr != '':
                             self.io.typetext(self.bk_frame_surface, self.dtw.evalstr, (900, self.bk_frame_surface.get_height()*0.85),(0, 255, 0), fontsize=100)
@@ -430,88 +446,42 @@ class BodyGameRuntime(object):
             else:
                 pass
                 #self.io.typetext(self._frame_surface, 'Not Recording', (1580, 20), (0, 255, 0))  
-            self.io.typetext(self.bk_frame_surface, 'Exercise '+str(self.exeno), (int(self.bk_frame_surface.get_width()*(1-self.kp.ratio)), 20), (0, 255, 0), fontsize=40)
+            # self.io.typetext(self.bk_frame_surface, 'Exercise '+str(self.exeno), (int(self.bk_frame_surface.get_width()*(1-self.kp.ratio)), 20), (0, 255, 0), fontsize=40)
+            # self.io.typetext(self.bk_frame_surface, self.exeinst.str['exename'][self.exeno], \
+            #                  self.exeinst.position(self.bk_frame_surface, self.kp.ratio, self.scene_type)['exename'], (0, 255, 0), fontsize=40)
+            # self.io.typetext(self.bk_frame_surface, self.exeinst.str['exeinst'][self.exeno], \
+            #                  self.exeinst.position(self.bk_frame_surface, self.kp.ratio, self.scene_type)['exeinst'], (0, 255, 0), fontsize=40)
+         
+            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type) 
 
             # draw back ground
             bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
             self._screen.blit(bksurface_to_draw, (0, 0))
 
+            if self.scene_type == 1:
+                self.ori = (0, 0)
+            else:
+                self.ori = (int(self._screen.get_width()*self.kp.ratio), int(self._screen.get_height()*self.kp.ratio))
 
-            self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))
-            
             h_scale = 1.*self._screen.get_height()/self.h
             w_scale = 1.*self._screen.get_width()/self.w
-            scale = 1
+            # scale = 1
             if h_scale > w_scale:
                 scale = w_scale
             else:
                 scale = h_scale
             self.w = self.w *scale
             self.h = self.h *scale  
-
-            # if (float(self._screen.get_height())/self._screen.get_width()) != self.h_to_w:
-            #      self.h_to_w = (float(self._screen.get_height())/self._screen.get_width())
-            #      pdb.set_trace()
-
+ 
 
             self.kp.scale = self.kp.scale * scale
             self.movie.draw(self._screen, self.w, self.h, self.kp.scale, self.kp.pre_scale, self.scene_type)
             self.kp.pre_scale = self.kp.scale
 
-
-
-            # if size of the display window is changed
-            # if (float(self._screen.get_height())/self._screen.get_width()) > self.h_to_w:
-            #     target_height = int(self.h_to_w * self._screen.get_width())
-            #     self.w = self._screen.get_width()
-            #     self.h = target_height
-            #     self.suface_ratio_chang = True
-            # elif (float(self._screen.get_height())/self._screen.get_width()) < self.h_to_w:
-            #     pdb.set_trace()
-            #     target_width = self._screen.get_height()/self.h_to_w
-            #     self.w = target_width
-            #     self.h = self._screen.get_height()
-            #     self.suface_ratio_chang = True
-            # else:  # ration not change, then check the whether the H or W change
-            #     if self._screen.get_width() != self.w:
-            #         # print 'width'
-            #         # print self._screen.get_width()
-            #         # print self.w
-            #         target_height = int(self.h_to_w * self._screen.get_width())
-            #         self.w = self._screen.get_width()
-            #         self.h = target_height
-            #         self.suface_ratio_chang = True
-
-
-            # if self.suface_ratio_chang:
-            #     self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))
-            #     self.kp.scale = self.kp.scale * (self.w*2./self.default_w)
-            #     self.movie.draw(self._screen, self.w, self.h, self.kp.scale, self.suface_ratio_chang, self.scene_type)
-            #     self.kp.pre_scale = self.kp.scale
-
-            #     self.suface_ratio_chang = False
-            # else:
-            #     if self.kp.scale != self.kp.pre_scale:
-            #         self.movie.draw(self._screen, self.w, self.h, self.kp.scale, self.suface_ratio_chang, self.scene_type)
-            #         self.kp.pre_scale = self.kp.scale
-            #     else:
-            #         self.movie.draw(self._screen, self.w, self.h, self.kp.scale, self.suface_ratio_chang, Type=self.scene_type)
-
-
             
             surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*(1-self.kp.ratio)), int(self.h*(1-self.kp.ratio))))     
             self._screen.blit(surface_to_draw, self.ori)
 
-            # print 'before'
-            # print self.kp.scale
-            # print self.w*2./self.default_w
-            # print self.kp.pre_scale
-
-            # if self.kp.scale != self.kp.pre_scale:
-            #     self.movie.draw(self._screen, self.w, self.h, self.kp.scale, self.w*2./self.default_w, self.scene_type)
-            #     self.kp.pre_scale = self.kp.scale * self.w*2./self.default_w
-            # else:
-            #     self.movie.draw(self._screen, self.w, self.h, self.kp.scale, self.w*2./self.default_w, Type=self.scene_type)
 
             # update
             surface_to_draw = None
