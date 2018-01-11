@@ -101,7 +101,7 @@ class BodyGameRuntime(object):
         else:
             print 'Failed to extract .....'
 
-        self.exeno = 2  # exercise number
+        self.exeno = 3  # exercise number
         self.__param_init__()
 
     def __param_init__(self, clean=False):
@@ -365,7 +365,7 @@ class BodyGameRuntime(object):
                                          self.scene_type, body.hand_left_state,\
                                          body.hand_right_state, dframe, bdry, self.kp.framecnt)                        
                         else:
-                            self.dtw.run(reconJ, gt_data[self.exeno], self.exeno,\
+                            self.dtw.run(reconJ, gt_data[self.exeno], self.exeno, self.bk_frame_surface,\
                                          self.evalinst, ratio=self.kp.ratio, stype=self.scene_type,\
                                          lhs=body.hand_left_state, rhs=body.hand_right_state)
 
@@ -395,11 +395,11 @@ class BodyGameRuntime(object):
                         # self.io.typetext(self.bk_frame_surface, 'Rhand : '+Rhstatus, (20, self._screen.get_height()-20), (255, 69, 0), fontsize=40, bold=True) 
 
                         handtext = 'Lhand : '+Lhstatus +'\nRhand : '+Rhstatus
-                        self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, handtext, 4 ,(255, 130, 45))
+                        self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, handtext, 4 ,(255, 130, 45, 255))
 
                         if self.dtw.evalstr != '':
                             # self.io.typetext(self.bk_frame_surface, self.dtw.evalstr, (900, self.bk_frame_surface.get_height()*0.85),(0, 255, 0), fontsize=100)
-                            self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, self.dtw.evalstr, 2, 'green')
+                            self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, self.dtw.evalstr, 2, (0, 255, 0, 255))
 
                             self.dtw.fcnt += 1
                             if self.dtw.fcnt > 30 :
@@ -410,6 +410,10 @@ class BodyGameRuntime(object):
 
                         self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, 'Exercise '+str(self.exeno)+' is done', 1)
 
+                        if self.exeno in [3, 4]:
+                            if min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4)) != 4: 
+                                self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type,\
+                                                  'You do '+str(min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4)))+' times, only need to do 4 times', 3)
 
                         if not self.kp.finish:
                             self.dtw.evaluation(self.exeno)
@@ -442,7 +446,7 @@ class BodyGameRuntime(object):
                 self.kp.framecnt += 1  # frame no
             else:
                 self.io.typetext(self._frame_surface, 'Kinect does not connect!!', (20, 100))
-            self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, 'Exercise '+str(self.exeno)+' is done', 1)
+
             # === text infomation on the surface ===
             if self.kp.vid_rcd:  # video recoding text
                 #self.io.typetext(self._frame_surface, 'Video Recording', (1580, 20), (255, 0, 0))
@@ -460,7 +464,8 @@ class BodyGameRuntime(object):
             # self.io.typetext(self.bk_frame_surface, self.exeinst.str['exeinst'][self.exeno], \
             #                  self.exeinst.position(self.bk_frame_surface, self.kp.ratio, self.scene_type)['exeinst'], (0, 255, 0), fontsize=40)
          
-            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type) 
+            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, strtype='exe', region=1) 
+            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, strtype='note', region=2, color=(255, 0, 0, 0))
 
             # draw back ground
             bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
