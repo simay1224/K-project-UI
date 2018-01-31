@@ -82,7 +82,6 @@ class BodyGameRuntime(object):
         self.h = self.default_h/2
         self.w = self.default_w/2
 
-
         self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
         self.h_to_w = float(self.default_h) / self.default_w
@@ -90,7 +89,7 @@ class BodyGameRuntime(object):
         self._bodies = None
         self.scene_type = 2
         
-        self.jorder  = [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 20]  # upper body joints' order
+        self.jorder = [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 20]  # upper body joints' order
         time.sleep(5)
 
         if self._kinect.has_new_color_frame():
