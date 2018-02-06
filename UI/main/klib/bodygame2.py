@@ -22,6 +22,7 @@ from human_model import Human_model
 from skeleton    import Skeleton
 from fextract    import Finger_extract
 from instruction import Exeinst, Evalinst
+from handstatus import Hand_status
 
 fps = 30
 bkimg = np.zeros([1080, 1920])
@@ -69,7 +70,11 @@ class BodyGameRuntime(object):
         self._screen = pygame.display.set_mode((self._infoObject.current_w >> 1, self._infoObject.current_h >> 1),
                                                 pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
-        pygame.display.set_caption("Kinect Body detection")
+        pygame.display.set_caption("In-Home Exercise Intervention System")
+        try :
+            pygame.display.set_icon(pygame.image.load('./data/icon.png'))
+        except:
+            pass
 
         # Kinect runtime object, we want only color and body frames
         self._kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color |
@@ -125,6 +130,7 @@ class BodyGameRuntime(object):
         self.h_mod = Human_model()
         self.skel = Skeleton()
         self.fextr = Finger_extract()
+        self.hstus = Hand_status()
         self.exeinst = Exeinst()
         self.evalinst = Evalinst()
 
@@ -261,7 +267,7 @@ class BodyGameRuntime(object):
 
     def run(self):
         wait_key_cnt = 3
-        
+        # pdb.set_trace()
         while not self.kp._done:
             bddic = {}
             jdic  = {}
@@ -283,11 +289,12 @@ class BodyGameRuntime(object):
                     self._screen = pygame.display.set_mode(event.dict['size'],
                                    pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
+            # initail background frame 
+            self.draw_color_frame(np.zeros(1920*1080*4).astype(np.uint8), self.bk_frame_surface)
             # === extract data from kinect ===
             if self._kinect.has_new_color_frame():
                 frame = self._kinect.get_last_color_frame()
                 self.draw_color_frame(frame, self._frame_surface)
-                self.draw_color_frame(np.zeros(frame.shape).astype(np.uint8), self.bk_frame_surface)
                 frame = frame.reshape(1080, 1920, 4)[:, :, :3]
             if self._kinect.has_new_body_frame():
                 self._bodies = self._kinect.get_last_body_frame()
@@ -368,33 +375,10 @@ class BodyGameRuntime(object):
                                          self.evalinst, ratio=self.kp.ratio, stype=self.scene_type,\
                                          lhs=body.hand_left_state, rhs=body.hand_right_state)
 
-                        if (body.hand_left_state == 2): #Lhand open
-                            Lhstatus = 'Open'
-                        elif body.hand_left_state == 0:
-                            Lhstatus = 'Unknown'
-                        elif body.hand_left_state == 3:
-                            Lhstatus = 'Closed'
-                        elif body.hand_left_state == 4:
-                            Lhstatus = 'Lasso'
-                        else:
-                            Lhstatus = 'Not detect'                            
-
-                        if (body.hand_right_state == 2): #Lhand open
-                            Rhstatus = 'Open'
-                        elif body.hand_right_state == 0:
-                            Rhstatus = 'Unknown'
-                        elif body.hand_right_state ==3:
-                            Rhstatus = 'Closed'
-                        elif body.hand_right_state == 4:
-                            Rhstatus = 'Lasso'
-                        else:
-                            Rhstatus = 'Not detect'
-                        
-                        # self.io.typetext(self.bk_frame_surface, 'Lhand : '+Lhstatus, (20, self._screen.get_height()-80), (255, 69, 0), fontsize=40, bold=True)        
-                        # self.io.typetext(self.bk_frame_surface, 'Rhand : '+Rhstatus, (20, self._screen.get_height()-20), (255, 69, 0), fontsize=40, bold=True) 
-
-                        handtext = 'Lhand : '+Lhstatus +'\nRhand : '+Rhstatus
-                        self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, handtext, 4 ,(255, 130, 45, 255))
+                        # hand status 
+                        self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type,\
+                                                self.hstus.htext(body.hand_left_state, body.hand_right_state), 4 ,\
+                                                (255, 130, 45, 255))
 
                         if self.dtw.evalstr != '':
                             # self.io.typetext(self.bk_frame_surface, self.dtw.evalstr, (900, self.bk_frame_surface.get_height()*0.85),(0, 255, 0), fontsize=100)
@@ -405,8 +389,6 @@ class BodyGameRuntime(object):
                                 self.dtw.evalstr = ''
                                 self.dtw.fcnt  = 0
                     else:
-                        # self.io.typetext(self.bk_frame_surface, 'Exercise '+str(self.exeno)+' is done', (20, self.bk_frame_surface.get_height()*(1-self.kp.ratio)),(255, 0, 0), fontsize=100)
-
                         self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, 'Exercise '+str(self.exeno)+' is done', 1)
 
                         if self.exeno in [3, 4]:
@@ -446,6 +428,7 @@ class BodyGameRuntime(object):
             else:
                 self.io.typetext(self._frame_surface, 'Kinect does not connect!!', (20, 100))
 
+
             # === text infomation on the surface ===
             if self.kp.vid_rcd:  # video recoding text
                 #self.io.typetext(self._frame_surface, 'Video Recording', (1580, 20), (255, 0, 0))
@@ -457,21 +440,16 @@ class BodyGameRuntime(object):
             else:
                 pass
                 #self.io.typetext(self._frame_surface, 'Not Recording', (1580, 20), (0, 255, 0))  
-            # self.io.typetext(self.bk_frame_surface, 'Exercise '+str(self.exeno), (int(self.bk_frame_surface.get_width()*(1-self.kp.ratio)), 20), (0, 255, 0), fontsize=40)
-            # self.io.typetext(self.bk_frame_surface, self.exeinst.str['exename'][self.exeno], \
-            #                  self.exeinst.position(self.bk_frame_surface, self.kp.ratio, self.scene_type)['exename'], (0, 255, 0), fontsize=40)
-            # self.io.typetext(self.bk_frame_surface, self.exeinst.str['exeinst'][self.exeno], \
-            #                  self.exeinst.position(self.bk_frame_surface, self.kp.ratio, self.scene_type)['exeinst'], (0, 255, 0), fontsize=40)
-         
+
+            
             self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, strtype='exe', region=1) 
             self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.scene_type, strtype='note', region=2, color=(255, 0, 0, 0))
-
             # draw back ground
             bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
             self._screen.blit(bksurface_to_draw, (0, 0))
 
             if self.scene_type == 1:
-                self.ori = (0, 0)
+                self.ori = (0, 0) 
             else:
                 self.ori = (int(self._screen.get_width()*self.kp.ratio), int(self._screen.get_height()*self.kp.ratio))
 
