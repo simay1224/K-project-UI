@@ -14,6 +14,7 @@ class Breath_status(object):
         self.ngframe       = []
         self.brthtype      = 'out'
         self.missingbreath = []
+        self.err           = []
 
     def breathIO(self, bdry, dmap):
         """according to the depth map in the chest region,

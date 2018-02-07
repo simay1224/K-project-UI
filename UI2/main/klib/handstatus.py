@@ -5,7 +5,7 @@ class Hand_status(object):
     def __init__(self):
         self.hstate        = np.array([])
         self.rawhstate     = np.array([0,0])        
-        self.error         = []
+        self.err           = []
 
 
     def hstus(self, hstus):
@@ -85,9 +85,9 @@ class Hand_status(object):
         print('left and right hand synchronize rate is '+str(np.round(sync_rate, 2))+'%')
         self.hstate[1:-1] = foo[1:-1]
         if np.sum(self.hstate[0]) != 4:
-            self.error.append('two hand must open when you rise you hands')
+            self.err.append('two hand must open when you rise you hands')
         if np.sum(self.hstate[-1]) != 4:
-            self.error.append('two hand must open when you put down your hands')
+            self.err.append('two hand must open when you put down your hands')
         hand_pulse = (self.hstate - np.roll(self.hstate, -1, axis=0))[:-1]
         lh         = np.where(hand_pulse[:, 0] != 0)[0]
         lh_open    = np.where(hand_pulse[:, 0] == 1)[0]
@@ -105,7 +105,7 @@ class Hand_status(object):
             else:
                 string = 'left hand'
             for i in res:
-                self.error.append(string+' did not open at '+str(i+1)+' time')
+                self.err.append(string+' did not open at '+str(i+1)+' time')
             print('hand open '+str(max(len(lh_open), len(rh_open)))+' times,')
         else:
             print('hand open '+str(len(lh_open))+' times')
@@ -119,7 +119,7 @@ class Hand_status(object):
             else:
                 string = 'left hand'
             for i in res:
-                self.error.append(string+' did not close at '+str(i+1)+' time')       
+                self.err.append(string+' did not close at '+str(i+1)+' time')       
             print('hand close '+str(max(len(lh_close), len(rh_close)))+' times,')
         else:
             print('hand close '+str(len(lh_close))+ ' times\n')

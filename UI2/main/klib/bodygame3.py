@@ -395,7 +395,8 @@ class BodyGameRuntime(object):
                         #                           'You do '+str(min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4)))+' times, only need to do 4 times', 3)
 
                         if not self.kp.finish:
-                            self.eval.run(self.exeno, self.ana.brth)
+                            err = [self.ana.brth.err, self.ana.hs.err]  # append err msg here
+                            self.eval.run(self.exeno, self.ana.brth, err)
                             print self.ana.dtw.idxlist
                             self.kp.finish = True
                     # draw skel
