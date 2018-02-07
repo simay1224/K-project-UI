@@ -179,7 +179,7 @@ class Dtw(object):
                             self.holdstate = False
                     if self.holdstate:
                         # self.io.typetext(surface,'Starting breath in/out' ,(20, surface.get_height()*0.75), (255, 0, 0))
-                        evalinst.blit_text(surface, exeno, ratio, stype, 'Starting breath in/out', 1, (255, 0, 0, 255))
+                        evalinst.blit_text(surface, exeno, ratio, stype, 'Starting breath in/out', 1, 'red')
 
                         self.breathIO(bdry, dmap)
                     else:
@@ -313,7 +313,7 @@ class Dtw(object):
 
 
     def handstate(self, lhs, rhs):
-        """ check the hand status and analyze it.
+        """ check the hand state and analyze it.
             the value of the lhs and rhs represent the tracking
             state given foem Kinect sensor. 
             0: unknown
@@ -436,7 +436,7 @@ class Dtw(object):
 
         if len(self.breath) != 0:       
             for i, j in zip(self.breath[:-1], self.breath[1:]):
-                breath_diff = self.breath_list[j]-self.breath_list[i]
+                breath_diff = abs(self.breath_list[j]-self.breath_list[i])
                 if abs(breath_diff) > 3000:  # really breath in/out
                     if abs(breath_diff) < 30000:  # not deep breath
                         if breath_diff > 0:  # breath out
