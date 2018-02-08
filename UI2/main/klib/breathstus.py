@@ -16,7 +16,7 @@ class Breath_status(object):
         self.missingbreath = []
         self.err           = []
 
-    def breathIO(self, bdry, dmap):
+    def breathextract(self, bdry, dmap):
         """according to the depth map in the chest region,
            detect breath in and breath out.
         """
@@ -39,18 +39,18 @@ class Breath_status(object):
         """
         # breath part
         breath_gd = np.gradient(gf(self.breath_list, 10))
-        breath_gd[breath_gd > 0] = 1
-        breath_gd[breath_gd < 0] = 0
+        breath_gd[breath_gd > 0.3] = 1
+        breath_gd[breath_gd <= 0.3] = 0
         breath_pulse = breath_gd[:-1]-np.roll(breath_gd, -1)[:-1]
         breath_in = argrelextrema(breath_pulse, np.less, order=10)[0]#+offset
         breath_out = argrelextrema(breath_pulse, np.greater, order=10)[0]#+offset
         self.breath = np.sort(np.hstack([breath_in, breath_out, len(self.breath_list)-1]))
-      
+
         if self.breath[0] == breath_in[0]:
             self.brthtype = 'in'
         else:
             self.brthtype = 'out'
-  
+
         b_in = []
         b_out = []
         delidx = []
@@ -88,7 +88,7 @@ class Breath_status(object):
         """calculate breath and hand open/close relation
         """
         hand = np.sort(np.hstack([lhopen, lhclose]))
-        if self.breath[0]==0:
+        if self.breath[0] == 0:
             breath_data = self.breath[1:]
         else:
             breath_data = self.breath
@@ -107,17 +107,17 @@ class Breath_status(object):
             hand_trunc_close = hand_trunc[1::2,:]
             hand_trunc_open = hand_trunc[::2,:]            
 
-        if self.brthtype == 'out':
+        if self.brthtype == 'in':
             breath_in = breath_data[1::2]
             breath_out = breath_data[::2]
         else:
             breath_out = breath_data[::2]
-            breath_in = breath_data[1::2]            
+            breath_in = breath_data[1::2] 
+                   
         hand_chk = np.ones(len(hand_trunc))
         # print hand_trunc
         cnt = 0
-        # pdb.set_trace()
-        for idx, i in enumerate(breath_out):
+        for idx, i in enumerate(breath_in):
             loc = np.where(((i >= hand_trunc_close[:, 0]) & (i <= hand_trunc_close[:, 1])) == True)[0]
             if len(loc) == 1:
                 cnt += 1
@@ -127,7 +127,7 @@ class Breath_status(object):
                 pass
             else:
                 print hand_trunc
-        for idx, i in enumerate(breath_in):
+        for idx, i in enumerate(breath_out):
             loc = np.where(((i >= hand_trunc_open[:, 0]) & (i <= hand_trunc_open[:, 1])) == True)[0]
             if len(loc) == 1:
                 cnt += 1
@@ -137,7 +137,6 @@ class Breath_status(object):
                 pass
             else:
                 print hand_trunc
-
         self.missingbreath = hand_trunc[hand_chk==1]
 
         sync_rate = cnt*1./len(hand_trunc)*100

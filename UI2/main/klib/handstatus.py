@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import signal
 
 class Hand_status(object):
 
@@ -123,4 +124,5 @@ class Hand_status(object):
             print('hand close '+str(max(len(lh_close), len(rh_close)))+' times,')
         else:
             print('hand close '+str(len(lh_close))+ ' times\n')
+        return lh_open, lh_close
         

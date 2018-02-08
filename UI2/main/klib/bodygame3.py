@@ -107,7 +107,7 @@ class BodyGameRuntime(object):
         else:
             print 'Failed to extract .....'
 
-        self.exeno = 1  # exercise number
+        self.exeno = 2  # exercise number
         self.__param_init__()
 
     def __param_init__(self, clean=False):
@@ -396,7 +396,7 @@ class BodyGameRuntime(object):
 
                         if not self.kp.finish:
                             err = [self.ana.brth.err, self.ana.hs.err]  # append err msg here
-                            self.eval.run(self.exeno, self.ana.brth, err)
+                            self.eval.run(self.exeno, self.ana.brth, self.ana.hs,err)
                             print self.ana.dtw.idxlist
                             self.kp.finish = True
                     # draw skel

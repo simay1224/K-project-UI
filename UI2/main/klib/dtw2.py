@@ -6,7 +6,6 @@ from collections import defaultdict
 from w_fastdtw import fastdtw
 import numpy as np
 from scipy.signal import argrelextrema
-from scipy import signal
 from dataoutput import Dataoutput
 import pdb
 
@@ -56,13 +55,20 @@ class Dynamic_time_warping(object):
         self.evalstr       = ''
         # self.offset        = 0
 
+    def wt_euclidean(self, u, v, w):
+        """ normal euclidean dist with the weighting
+        """
+        u = _validate_vector(u)
+        v = _validate_vector(v)
+        dist = norm(w*(u-v))
+        return dist
 
-    def clip(self, seqlist, exeno):
+    def clip(self, seqlist, weight):
         """ try find the subsequence from current sequence
         """
         tgrad = 0
         for ii in [3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17]:
-            tgrad += (np.gradient(gf(seqlist[:, ii], 1))**2)*self.jweight[ii]
+            tgrad += (np.gradient(gf(seqlist[:, ii], 1))**2)*weight[ii]
         tgrad = tgrad**0.5
         lcalminm = argrelextrema(tgrad, np.less, order=5)[0]
         foo = np.where(((tgrad < 1)*1) == 0)[0]
@@ -90,15 +96,15 @@ class Dynamic_time_warping(object):
         self.onedeflag   = False
         self.segini      = True
 
-    def matching(self, reconJ, gt_data, exeno, lowpass=True):
+    def matching(self, reconJ, exer, lowpass=True):
         """the main part of dtw matching algorithm
         """
         # self.fcnt += 1
         if self.segini:  # new segement/movement start
             self.segini = False
             # self.Ani_idx = self.aniorder[exeno][self.Ani_idx]
-            if len(self.order[self.oidx]) == 1:
-                self.gt_idx = self.order[self.oidx][0]
+            if len(exer.order[self.oidx]) == 1:
+                self.gt_idx = exer.order[self.oidx][0]
                 self.idxlist.append(self.gt_idx)
         if len(self.seqlist_reg) == 0:  # build sequence list
             self.seqlist_reg = reconJ
@@ -115,9 +121,9 @@ class Dynamic_time_warping(object):
         if not self.deflag:  # Not yet decreasing
             if np.mod(self.seqlist.shape[0]-self.presv_size-1, 10) == 0:
                 # check every 10 frames
-                if len(self.order[self.oidx]) > 1:
+                if len(exer.order[self.oidx]) > 1:
                     if self.seqlist.shape[0] > 1:
-                        result = self.clip(self.seqlist, exeno)
+                        result = self.clip(self.seqlist, exer.jweight)
                         if result != []:
                             endidx = result[0]
                             if self.seqlist[endidx, 7] < 150:
@@ -129,10 +135,10 @@ class Dynamic_time_warping(object):
                             self.evalstr = 'well done'
                             self.seg_update(endidx)
                 else:
-                    test_data_p = self.seqlist + np.atleast_2d((gt_data[self.gt_idx][0, :]-self.seqlist[0, :]))
-                    self.dist_p, _ = fastdtw(gt_data[self.gt_idx], test_data_p, self.jweight, dist=self.wt_euclidean)
+                    test_data_p = self.seqlist + np.atleast_2d((exer.gt_data[self.gt_idx][0, :]-self.seqlist[0, :]))
+                    self.dist_p, _ = fastdtw(exer.gt_data[self.gt_idx], test_data_p, exer.jweight, dist=self.wt_euclidean)
                     if (self.seqlist.shape[0] == 1+self.presv_size):  # new movement initail setting
-                        self.dpfirst, _ = fastdtw(gt_data[self.gt_idx], test_data_p[:2], self.jweight, dist=self.wt_euclidean)
+                        self.dpfirst, _ = fastdtw(exer.gt_data[self.gt_idx], test_data_p[:2], exer.jweight, dist=self.wt_euclidean)
                         print('dpfirst is : %f' % self.dpfirst)
                     else:
                         print('de diff is :%f' % (self.dpfirst - self.dist_p))
@@ -143,8 +149,8 @@ class Dynamic_time_warping(object):
                             self.deflag = True
                             self.distp_prev = self.dist_p
         else:  # already start decreasing
-            test_data_p = self.seqlist + np.atleast_2d((gt_data[self.gt_idx][0, :] - self.seqlist[0, :]))
-            self.dist_p, path_p = fastdtw(gt_data[self.gt_idx], test_data_p, self.jweight, dist=self.wt_euclidean)
+            test_data_p = self.seqlist + np.atleast_2d((exer.gt_data[self.gt_idx][0, :] - self.seqlist[0, :]))
+            self.dist_p, path_p = fastdtw(exer.gt_data[self.gt_idx], test_data_p, exer.jweight, dist=self.wt_euclidean)
             if self.chk_flag:  # in check global min status
                 self.cnt += 1
                 if self.dist_p < self.distp_cmp:  # find smaller value
@@ -157,7 +163,7 @@ class Dynamic_time_warping(object):
                     self.chk_flag = False
                     tgrad = 0
                     for ii in xrange(self.seqlist.shape[1]):  # maybe can include jweight
-                        tgrad += (np.gradient(gf(self.seqlist[:, ii], 1))**2)*self.jweight[ii]
+                        tgrad += (np.gradient(gf(self.seqlist[:, ii], 1))**2)*exer.jweight[ii]
                     tgrad = tgrad**0.5
                     endidx = np.argmin(tgrad[self.idx_cmp-self.srchbw:self.idx_cmp+self.srchfw-1])\
                                 + (self.idx_cmp-self.srchbw)
@@ -175,12 +181,8 @@ class Dynamic_time_warping(object):
     #def run(self, exer, ):
         """ according to different exercise, doing different processing
         """
-
-
-
-
-
         if not exer.order[self.oidx] == 'end':
+            
             if exer.no == 1:
                 if exer.cntdown <= 0:
                     if self.offset == 0:
@@ -206,7 +208,7 @@ class Dynamic_time_warping(object):
                     evalinst.blit_text(surface, exeno, ratio, stype, 'will Starting at '+str(np.round(self.cntdown/30., 2))+' second', 1)
                     self.cntdown -= 1
             elif exeno == 2:
-                if self.order[exeno][self.oidx] == [2]:
+                if exer.order[exeno][self.oidx] == [2]:
                     if len(self.holdlist) == 0:  # hand in the holding state or not
                        self.holdlist = reconJ
                     else:
@@ -223,8 +225,9 @@ class Dynamic_time_warping(object):
                         if not self.do_once:
                             self.breath_analyze(self.offset)
                             self.hand_analyze(self.offset)
-                            self.do_once = True                        
-                        self.matching(reconJ, gt_data, exeno)
+                            self.do_once = True
+                            # self._done = True                        
+                        # self.matching(reconJ, gt_data, exeno)
                 else:
                     self.matching(reconJ, gt_data, exeno)    
             elif exeno == 3:

@@ -1,6 +1,6 @@
 import numpy as np
 from exercise import Exer1, Exer2, Exer3, Exer4
-from dtw2 import Dynamic_time_warping as dtw
+from dtw2 import Dynamic_time_warping
 from breathstus import Breath_status
 from handstatus import Hand_status
 
@@ -16,7 +16,7 @@ class Analysis(object):
         self.exer[3] = Exer3()
         self.exer[4] = Exer4()
         #
-        self.dtw = dtw()
+        self.dtw = Dynamic_time_warping()
         self.brth = Breath_status()
         self.hs = Hand_status()
         #
@@ -39,7 +39,7 @@ class Analysis(object):
                         self.holdstate = False
                 if self.holdstate: 
                     evalinst.blit_text(surface, exeno, kp.ratio, kp.scene_type, 'Starting breath in/out', 1, (255, 0, 0, 255))
-                    self.brth.breathIO(bdry, dmap)
+                    self.brth.breathextract(bdry, dmap)
                 else:
                     if not self.do_once:
                         self.brth.breath_analyze(self.offset)
@@ -50,7 +50,7 @@ class Analysis(object):
                                    +str(np.round(self.exer[1].cntdown/30., 2))+' second', 1)
                 self.exer[1].cntdown -= 1             
         elif exeno == 2:
-            if self.exer.order[self.dtw.oidx] == [2]:
+            if self.exer[2].order[self.dtw.oidx] == [2]:
                 if len(self.holdlist) == 0:  # hand in the holding state or not
                     self.holdlist = reconJ
                 else:
@@ -60,19 +60,18 @@ class Analysis(object):
                 if self.holdstate:
                     evalinst.blit_text(surface, exeno, kp.ratio, kp.scene_type, 'Starting breath in (hand close) and breath out (hand open)', 1)
                     self.hs.hstus_proc(body.hand_left_state, body.hand_right_state)
-                    self.brth.breathIO(bdry, dmap)
+                    self.brth.breathextract(bdry, dmap)
                 else:
                     if not self.do_once:
-                        self.brth.breath_analyze(self.offset)
-                        hopen, hclose = self.hs.hstus_ana(self.offset)
+                        self.brth.breath_analyze()
+                        hopen, hclose = self.hs.hstus_ana()
                         self.brth.brth_hand_sync(hopen, hclose) 
-                        self.do_once = True                        
+                        self.do_once = True
+                                                
                     self.dtw.matching(reconJ, self.exer[2])
+                    self._done = True
             else:
                 self.dtw.matching(reconJ, self.exer[2])  
-
-
-
         elif exeno == 3:
             pass
         elif exeno == 4:
