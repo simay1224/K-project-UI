@@ -24,36 +24,32 @@ class Dynamic_time_warping(object):
         """    
         # dtw parameters initialization
         self.io            = Dataoutput()
-        # self._done         = False
-        #self.do_once       = False
         self.decTh         = 1800
-        self.cnt           = 0
         self.distp_prev    = 0
-        self.distp_cmp     = np.inf
-        self.oidx          = 0  # initail
-        self.gt_idx        = 0
-        self.Ani_idx       = 0
-        self.presv_size    = 0
+        self.distp_cmp     = np.inf      
+        self.gt_idx        = 0   
         self.idxlist       = []
         self.idx_cmp       = 0
-        self.fcnt          = 0
         self.srchfw        = 10  # forward search range
         self.srchbw        = 20  # backward search range
-        self.error         = []
+        self.seqlist_gf    = np.array([])
+        self.err           = []
+        self.evalstr       = ''
+        self.do            = False
         # updatable parameters
         self.dpfirst       = {}
         self.dist_p        = {}
-        self.deflag_mul    = defaultdict(lambda: (bool(False)))
+        #self.deflag_mul    = defaultdict(lambda: (bool(False)))
         self.seqlist       = np.array([])
         self.seqlist_reg   = np.array([])
-        self.seqlist_gf    = np.array([])
-        self.dcnt          = 0
+        self.presv_size    = 0
+        self.oidx          = 0  # initail
+        self.cnt           = 0        
         self.chk_flag      = False
         self.deflag        = False  # decreasing flag
-        self.onedeflag     = False
         self.segini        = True
-        self.evalstr       = ''
-        # self.offset        = 0
+        
+        
 
     def wt_euclidean(self, u, v, w):
         """ normal euclidean dist with the weighting
@@ -88,21 +84,20 @@ class Dynamic_time_warping(object):
         self.seqlist_reg = self.seqlist_reg[endidx+1:, :]  # update the seqlist
         self.presv_size  = self.seqlist_reg.shape[0]
         self.oidx        = self.gt_idx
-        self.deflag_mul  = defaultdict(lambda: (bool(False)))
+        #self.deflag_mul  = defaultdict(lambda: (bool(False)))
         self.cnt         = 0
         self.dpfirst     = {}
         self.dist_p      = {}
         self.deflag      = False
-        self.onedeflag   = False
         self.segini      = True
+        self.chk_flag    = False
 
     def matching(self, reconJ, exer, lowpass=True):
         """the main part of dtw matching algorithm
         """
-        # self.fcnt += 1
+        self.do = True
         if self.segini:  # new segement/movement start
             self.segini = False
-            # self.Ani_idx = self.aniorder[exeno][self.Ani_idx]
             if len(exer.order[self.oidx]) == 1:
                 self.gt_idx = exer.order[self.oidx][0]
                 self.idxlist.append(self.gt_idx)
@@ -160,7 +155,6 @@ class Dynamic_time_warping(object):
                     print(' ==== reset ====')
                 elif self.cnt == self.srchfw:
                     self.evalstr = 'Well done'
-                    self.chk_flag = False
                     tgrad = 0
                     for ii in xrange(self.seqlist.shape[1]):  # maybe can include jweight
                         tgrad += (np.gradient(gf(self.seqlist[:, ii], 1))**2)*exer.jweight[ii]

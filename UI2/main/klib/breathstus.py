@@ -14,7 +14,24 @@ class Breath_status(object):
         self.ngframe       = []
         self.brthtype      = 'out'
         self.missingbreath = []
+        self.do            = False
         self.err           = []
+
+    def rm_pulse(self, ary, th=10):
+        """ remove small pulse in the binary array
+        """
+        split_ary = np.split(ary, np.where(np.diff(ary)!=0)[0]+1)
+        ary_len = [len(a) for a in split_ary]
+        merge_idx = np.where(np.array(ary_len) < th)[0]
+        if len(merge_idx) > 0:
+            ary_idx = [sum(ary_len[:i]) for i in xrange(1, len(ary_len))]
+            ary_idx.append(len(ary))
+            for i in merge_idx:
+                if i == 0:
+                    ary[:ary_idx[i]] = ary[ary_idx[i]]
+                else:
+                    ary[ary_idx[i-1]:ary_idx[i]] = ary[ary_idx[i-1]-1]
+        return ary
 
     def breathextract(self, bdry, dmap):
         """according to the depth map in the chest region,
@@ -34,22 +51,24 @@ class Breath_status(object):
             self.breath_list.append(np.mean(blk_diff))
 
     def breath_analyze(self, offset=0, th=10):
-        """ Analyze the human and breath in/out behavior
-            
+        """ Analyze the human and breath in/out behavior  
         """
+        self.do = True
         # breath part
         breath_gd = np.gradient(gf(self.breath_list, 10))
-        breath_gd[breath_gd > 0.3] = 1
-        breath_gd[breath_gd <= 0.3] = 0
+        breath_gd[breath_gd > 0] = 1
+        breath_gd[breath_gd < 0] = 0
+        breath_gd = self.rm_pulse(breath_gd)
         breath_pulse = breath_gd[:-1]-np.roll(breath_gd, -1)[:-1]
-        breath_in = argrelextrema(breath_pulse, np.less, order=10)[0]#+offset
-        breath_out = argrelextrema(breath_pulse, np.greater, order=10)[0]#+offset
+        breath_out = argrelextrema(breath_pulse, np.less, order=10)[0]#+offset  # endpoint of each b out
+        breath_in = argrelextrema(breath_pulse, np.greater, order=10)[0]#+offset # endpoint of each b in
         self.breath = np.sort(np.hstack([breath_in, breath_out, len(self.breath_list)-1]))
 
         if self.breath[0] == breath_in[0]:
             self.brthtype = 'in'
         else:
             self.brthtype = 'out'
+        print('breath '+self.brthtype+' from frame '+str(0)+' to frame '+str(self.breath[0]))
 
         b_in = []
         b_out = []
@@ -60,7 +79,7 @@ class Breath_status(object):
                 breath_diff = self.breath_list[j]-self.breath_list[i]
                 if abs(breath_diff) > 3000:  # really breath in/out
                     if abs(breath_diff) < 30000:  # not deep breath
-                        if breath_diff > 0:  # breath out
+                        if breath_diff < 0:  # breath out
                             print('breath out from frame '+str(i)+' to frame '+str(j)
                                 +' <== breath not deep enough')
                             b_out.append(j-i)
@@ -69,6 +88,7 @@ class Breath_status(object):
                             print('breath in from frame '+str(i)+' to frame '+str(j)
                             +' <== breath not deep enough')
                             b_in.append(j-i)
+                            self.ngframe.append(i)
                     else: 
                         if breath_diff > 0:  # breath out
                             print('breath out from frame '+str(i)+' to frame '+str(j))
@@ -78,7 +98,8 @@ class Breath_status(object):
                             b_in.append(j-i)
                 else:
                     delidx.append(np.argwhere(self.breath==j)[0][0])
-            self.breath = np.delete(self.breath, np.array(delidx))
+            if len(delidx) > 0:
+                self.breath = np.delete(self.breath, np.array(delidx))
             print('\naverage breath out freq is: '+str(np.round(30./np.mean(b_out), 2))+' Hz')
             print('\naverage breath in freq is: '+str(np.round(30./np.mean(b_in), 2))+' Hz')
         else:
@@ -107,12 +128,16 @@ class Breath_status(object):
             hand_trunc_close = hand_trunc[1::2,:]
             hand_trunc_open = hand_trunc[::2,:]            
 
-        if self.brthtype == 'in':
+        if self.brthtype == 'out':
             breath_in = breath_data[1::2]
             breath_out = breath_data[::2]
+            if abs(breath_out[0]-hand_trunc_open[0, 0]) < 10:
+                breath_out[0] =  hand_trunc_open[0, 0]            
         else:
-            breath_out = breath_data[::2]
-            breath_in = breath_data[1::2] 
+            breath_in = breath_data[::2]
+            breath_out = breath_data[1::2]
+            if abs(breath_in[0]-hand_trunc_close[0, 0]) < 10:
+                breath_in[0] =  hand_trunc_close[0, 0]
                    
         hand_chk = np.ones(len(hand_trunc))
         # print hand_trunc

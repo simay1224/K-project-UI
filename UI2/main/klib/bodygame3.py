@@ -40,25 +40,6 @@ SKELETON_COLORS = [pygame.color.THECOLORS["red"],
                    pygame.color.THECOLORS["violet"]]
 # GPR
 limbidx = np.array([4, 5, 6, 8, 9, 10, 20])
-# DTW
-# data    = h5py.File('data/GT_V_data_mod_EX4.h5', 'r')
-# gt_data = defaultdict(dict)
-# gt_data[4][1] = data['GT_1'][:]
-# gt_data[4][2] = data['GT_2'][:]
-# gt_data[4][3] = data['GT_3'][:]
-# gt_data[4][4] = data['GT_4'][:]
-# data.close()
-# data = h5py.File('data/GT_V_data_mod_EX3.h5', 'r')
-# gt_data[3][1] = data['GT_1'][:]
-# gt_data[3][2] = data['GT_2'][:]
-# gt_data[3][3] = data['GT_3'][:]
-# gt_data[3][4] = data['GT_4'][:]
-# data.close()
-# data = h5py.File('data/GT_V_data_mod_EX2.h5', 'r')
-# gt_data[2][1] = data['GT_1'][:]
-# gt_data[2][2] = data['GT_2'][:]
-# data.close()
-
 
 class BodyGameRuntime(object):
 
@@ -107,7 +88,7 @@ class BodyGameRuntime(object):
         else:
             print 'Failed to extract .....'
 
-        self.exeno = 2  # exercise number
+        self.exeno = 4  # exercise number
         self.__param_init__()
 
     def __param_init__(self, clean=False):
@@ -271,7 +252,6 @@ class BodyGameRuntime(object):
 
     def run(self):
         wait_key_cnt = 3
-        # pdb.set_trace()
         while not self.kp._done:
             bddic = {}
             jdic  = {}
@@ -378,14 +358,6 @@ class BodyGameRuntime(object):
                                                 self.hstus.htext(body.hand_left_state, body.hand_right_state), 4 ,\
                                                 (255, 130, 45, 255))
 
-                        # if self.dtw.evalstr != '':
-                        #     # self.io.typetext(self.bk_frame_surface, self.dtw.evalstr, (900, self.bk_frame_surface.get_height()*0.85),(0, 255, 0), fontsize=100)
-                        #     self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.kp.scene_type, self.dtw.evalstr, 2, (0, 255, 0, 255))
-
-                        #     self.dtw.fcnt += 1
-                        #     if self.dtw.fcnt > 30 :
-                        #         self.dtw.evalstr = ''
-                        #         self.dtw.fcnt  = 0
                     else:
                         self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.kp.scene_type, 'Exercise '+str(self.exeno)+' is done', 1)
 
@@ -395,8 +367,10 @@ class BodyGameRuntime(object):
                         #                           'You do '+str(min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4)))+' times, only need to do 4 times', 3)
 
                         if not self.kp.finish:
-                            err = [self.ana.brth.err, self.ana.hs.err]  # append err msg here
-                            self.eval.run(self.exeno, self.ana.brth, self.ana.hs,err)
+                            errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err]  # append err msg here
+                            dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.dtw.do]
+                            self.eval.run(self.exeno, self.ana.brth, self.ana.hs)
+                            self.eval.errmsg(errs, dolist) 
                             print self.ana.dtw.idxlist
                             self.kp.finish = True
                     # draw skel
@@ -408,7 +382,6 @@ class BodyGameRuntime(object):
                         if not self.kp.model_frame:
                             self.fig = plt.figure(1)
                             ax = self.fig.add_subplot(111, projection='3d')
-                            # keys = modJoints.keys()
                             self.kp.model_frame = True
                         else:
                             plt.cla()

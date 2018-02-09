@@ -4,9 +4,10 @@ from scipy import signal
 class Hand_status(object):
 
     def __init__(self):
-        self.hstate        = np.array([])
-        self.rawhstate     = np.array([0,0])        
-        self.err           = []
+        self.hstate    = np.array([])
+        self.rawhstate = np.array([0,0])
+        self.do        = False       
+        self.err       = []
 
 
     def hstus(self, hstus):
@@ -80,6 +81,7 @@ class Hand_status(object):
     def hstus_ana(self, offset=0, th=10):
         """Analyze the human and hand open/close behavior
         """
+        self.do = True 
         # === hand close/open part ===
         foo = signal.medfilt(self.hstate, kernel_size=3)
         sync_rate = sum((foo[:, 0] == foo[:, 1])*1.)/len(foo[:, 0])*100

@@ -30,7 +30,7 @@ class Analysis(object):
         if exeno == 1:
             if self.exer[1].cntdown <= 0:
                 if self.offset == 0:
-                    self.offset = kp.frameno
+                    self.offset = kp.framecnt
                 if len(self.holdlist) == 0:  # hand in the holding state or not
                     self.holdlist = reconJ
                 else:
@@ -44,7 +44,8 @@ class Analysis(object):
                     if not self.do_once:
                         self.brth.breath_analyze(self.offset)
                         self.do_once = True
-                        self._done = True            
+                        self._done = True
+                        print('================= exe END ======================')            
             else:
                 evalinst.blit_text(surface, self.exer[1].no, kp.ratio, kp.scene_type, 'will Starting at '\
                                    +str(np.round(self.exer[1].cntdown/30., 2))+' second', 1)
@@ -66,16 +67,40 @@ class Analysis(object):
                         self.brth.breath_analyze()
                         hopen, hclose = self.hs.hstus_ana()
                         self.brth.brth_hand_sync(hopen, hclose) 
-                        self.do_once = True
-                                                
+                        self.do_once = True                       
                     self.dtw.matching(reconJ, self.exer[2])
+                    print('================= exe END ======================')
                     self._done = True
             else:
                 self.dtw.matching(reconJ, self.exer[2])  
         elif exeno == 3:
-            pass
+            if not self.exer[3].order[self.dtw.oidx] == 'end':
+                self.dtw.matching(reconJ, self.exer[3])
+                if self.dtw.idxlist.count(3) > 4:
+                    evalinst.blit_text(surface, exeno, kp.ratio, kp.scene_type,\
+                                      'Only need to do 4 times', 3)
+                    self.dtw.err.append('Only need to do 4 times')
+                elif self.dtw.idxlist.count(3) > 0:
+                   evalinst.blit_text(surface, exeno, kp.ratio, kp.scene_type,\
+                                      str(4-min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4)))\
+                                      + ' to go !!', 3, (55,173,245,255))                
+            else:
+                print('================= exe END ======================')
+                self._done = True                
         elif exeno == 4:
-            pass
+            if not self.exer[4].order[self.dtw.oidx] == 'end':
+                self.dtw.matching(reconJ, self.exer[4])
+                if self.dtw.idxlist.count(3) > 4:
+                    evalinst.blit_text(surface, exeno, kp.ratio, kp.scene_type,\
+                                      'Only need to do 4 times', 3)
+                    self.dtw.err.append('Only need to do 4 times')
+                elif self.dtw.idxlist.count(3) > 0:
+                   evalinst.blit_text(surface, exeno, kp.ratio, kp.scene_type,\
+                                      str(4-min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4)))\
+                                      + ' to go !!', 3, (55,173,245,255))
+            else:
+                print('================= exe END ======================')
+                self._done = True 
         elif exeno == 5:
             pass
         elif exeno == 6:

@@ -30,8 +30,6 @@ class Exer2(object):
         self.gt_data = {}
         self.gt_data[1] = data2['GT_1'][:]
         self.gt_data[2] = data2['GT_2'][:]
-        # parameters
-
         # order
         self.order = {}
         self.order[0] = [1]
