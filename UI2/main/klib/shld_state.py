@@ -1,20 +1,22 @@
-class Shld_statue(object):
+class Shld_state(object):
 """ detect the shoulder state.
     So far, we detect 1. shoulder rotate 2. shoulder up-and-down. 
 """
 
     def __init__(self):
-        self.cnt = 0
-        self.fcnt = 0
+        self.cnt    = 0
+        self.fcnt   = 0
         self.ignore = 30  # ignore first XX frames
-        self.range = 50   # find local min max within this range
-        self.cycle = False
-        self.flag = True
-        self.type = 0
+        self.range  = 50   # find local min max within this range
+        self.cycle  = False
+        self.flag   = True
+        self.type   = 0
         self.lylist = []
         self.ldlist = []
         self.rylist = []
-        self.rdlist = []        
+        self.rdlist = []
+        self.do     = False
+        self.err    = []       
 
     def findtops(self, bdimg, shld, bdidx):
         """ find the shoulder top. 

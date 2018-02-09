@@ -10,7 +10,7 @@ class Exer1(object):
 
     def __init__(self):
         self.no = 1
-        self.cntdown       = 90     
+        self.cntdown = 90     
         # order
         self.order = {}
         self.order[0] = [1]
@@ -83,6 +83,37 @@ class Exer4(object):
         self.order[3] = [4]
         self.order[4] = [2, 3]
         self.order[5] = 'end'
+        # weight
+        self.jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
+                                 0., 0., 0., 3., 3., 3., 9., 9., 9.,
+                                 0., 0., 0.])
+        self.jweight = self.jweight/sum(self.jweight)*1.5
+
+class Exer5(object):
+
+    def __init__(self):
+        self.no = 5
+        # weight
+        self.jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
+                                 0., 0., 0., 3., 3., 3., 9., 9., 9.,
+                                 0., 0., 0.])
+        self.jweight = self.jweight/sum(self.jweight)*1.5
+
+class Exer6(object):
+
+    def __init__(self):
+        self.no = 6
+        self.cntdown = 90
+        # weight
+        self.jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
+                                 0., 0., 0., 3., 3., 3., 9., 9., 9.,
+                                 0., 0., 0.])
+        self.jweight = self.jweight/sum(self.jweight)*1.5
+
+class Exer7(object):
+
+    def __init__(self):
+        self.no = 7
         # weight
         self.jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
                                  0., 0., 0., 3., 3., 3., 9., 9., 9.,

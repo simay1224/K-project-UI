@@ -115,9 +115,9 @@ class BodyGameRuntime(object):
         self.h_mod = Human_model()
         self.skel = Skeleton()
         self.fextr = Finger_extract()
-        self.hstus = Hand_status()
+        # self.hstus = Hand_status()
         self.exeinst = Exeinst()
-        self.evalinst = Evalinst()
+        # self.evalinst = Evalinst()
 
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
@@ -131,14 +131,14 @@ class BodyGameRuntime(object):
         del self.movie
         self.__param_init__(clean)
 
-    def getcoord(self, data, order=[1, 4, 8, 20]):
-        foo = []
-        for i in order:
-            if i == 1:
-                foo = np.array([data[i].x, data[i].y])
-            else:
-                foo = np.vstack([foo, np.array([data[i].x, data[i].y])])
-        return foo
+    # def getcoord(self, data, order=[1, 4, 8, 20]):
+    #     foo = []
+    #     for i in order:
+    #         if i == 1:
+    #             foo = np.array([data[i].x, data[i].y])
+    #         else:
+    #             foo = np.vstack([foo, np.array([data[i].x, data[i].y])])
+    #     return foo
 
     def press_event(self, press):
         """ According to the button which is pressed by the user
@@ -348,23 +348,19 @@ class BodyGameRuntime(object):
                             reconJ = modJary
 
                         # === DTW matching ===
-                        bdry = self.getcoord(djps)
+                        # bdry = self.getcoord(djps)
      
                         self.ana.run(self.exeno, reconJ, self.bk_frame_surface,\
-                                     self.evalinst, self.kp, body, dframe, bdry)                        
+                                     self.eval, self.kp, body, dframe, djps)                        
 
                         # hand status 
-                        self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.kp.scene_type,\
-                                                self.hstus.htext(body.hand_left_state, body.hand_right_state), 4 ,\
-                                                (255, 130, 45, 255))
+                        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                            self.ana.hs.htext(body.hand_left_state, body.hand_right_state), 4 ,\
+                                            (255, 130, 45, 255))
 
                     else:
-                        self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.kp.scene_type, 'Exercise '+str(self.exeno)+' is done', 1)
-
-                        # if self.exeno in [3, 4]:
-                        #     if min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4)) != 4: 
-                        #         self.evalinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.kp.scene_type,\
-                        #                           'You do '+str(min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4)))+' times, only need to do 4 times', 3)
+                        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                            'Exercise '+str(self.exeno)+' is done', 1)
 
                         if not self.kp.finish:
                             errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err]  # append err msg here
@@ -414,8 +410,8 @@ class BodyGameRuntime(object):
                 #self.io.typetext(self._frame_surface, 'Not Recording', (1580, 20), (0, 255, 0))  
 
             
-            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.kp.scene_type, strtype='exe', region=1) 
-            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp.ratio, self.kp.scene_type, strtype='note', region=2, color=(255, 0, 0, 0))
+            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='exe', region=1) 
+            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='note', region=2, color=(255, 0, 0, 0))
             # draw back ground
             bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
             self._screen.blit(bksurface_to_draw, (0, 0))

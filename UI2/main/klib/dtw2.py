@@ -48,8 +48,6 @@ class Dynamic_time_warping(object):
         self.chk_flag      = False
         self.deflag        = False  # decreasing flag
         self.segini        = True
-        
-        
 
     def wt_euclidean(self, u, v, w):
         """ normal euclidean dist with the weighting
@@ -169,78 +167,3 @@ class Dynamic_time_warping(object):
                     self.idx_cmp = self.seqlist.shape[0]
                     self.chk_flag = True
             self.distp_prev = self.dist_p
-
-    def run(self, reconJ, gt_data, exeno, surface=None, evalinst=None, ratio=1, stype=2, \
-            lhs=0, rhs=0, dmap=[], bdry=[], frameno=0, lowpass=True):
-    #def run(self, exer, ):
-        """ according to different exercise, doing different processing
-        """
-        if not exer.order[self.oidx] == 'end':
-            
-            if exer.no == 1:
-                if exer.cntdown <= 0:
-                    if self.offset == 0:
-                        self.offset = frameno
-                    if len(exer.holdlist) == 0:  # hand in the holding state or not
-                        exer.holdlist = reconJ
-                    else:
-                        exer.holdlist = np.vstack([exer.holdlist, reconJ]) 
-                        if np.sum(np.abs(exer.holdlist[0]-exer.holdlist[-1])[exer.jweight[exer.no] != 0]) > 400:
-                            exer.holdstate = False
-                            
-                    if exer.holdstate:
-                        evalinst.blit_text(surface, exer.no, ratio, stype, 'Starting breath in/out', 1, 'red')
-
-                        self.breathIO(bdry, dmap)
-                    else:
-                        if not self.do_once:
-                            self.breath_analyze(self.offset)
-                            self.do_once = True
-                            self._done = True
-                else:
-                    # self.io.typetext(surface,'will Starting at '+str(np.round(self.cntdown/30., 2))+' second' ,(20, surface.get_height()*0.75),(255, 0, 0))
-                    evalinst.blit_text(surface, exeno, ratio, stype, 'will Starting at '+str(np.round(self.cntdown/30., 2))+' second', 1)
-                    self.cntdown -= 1
-            elif exeno == 2:
-                if exer.order[exeno][self.oidx] == [2]:
-                    if len(self.holdlist) == 0:  # hand in the holding state or not
-                       self.holdlist = reconJ
-                    else:
-                        self.holdlist = np.vstack([self.holdlist, reconJ]) 
-                        # print np.sum(np.abs(self.holdlist[0]-self.holdlist[-1])[self.jweight[2] != 0])
-                        if np.sum(np.abs(self.holdlist[0]-self.holdlist[-1])[self.jweight[2] != 0]) > 1000:
-                            self.holdstate = False
-                    if self.holdstate:
-                        # self.io.typetext(surface,'Starting breath in (hand close) and breath out (hand open)' ,(20, surface.get_height()*0.75), (255, 0, 0))
-                        evalinst.blit_text(surface, exeno, ratio, stype, 'Starting breath in (hand close) and breath out (hand open)', 1)
-                        self.handstate(lhs, rhs)
-                        self.breathIO(bdry, dmap)
-                    else:
-                        if not self.do_once:
-                            self.breath_analyze(self.offset)
-                            self.hand_analyze(self.offset)
-                            self.do_once = True
-                            # self._done = True                        
-                        # self.matching(reconJ, gt_data, exeno)
-                else:
-                    self.matching(reconJ, gt_data, exeno)    
-            elif exeno == 3:
-                self.matching(reconJ, gt_data, exeno)
-                if self.idxlist.count(3) > 4:
-                    evalinst.blit_text(surface, exeno, ratio, stype, 'Only need to do 4 times', 3)
-                elif self.idxlist.count(3) > 0:
-                   evalinst.blit_text(surface, exeno, ratio, stype, str(4-min(self.idxlist.count(3), self.idxlist.count(4))) + ' to go !!', 3, (55,173,245,255))
-            elif exeno == 4:
-                self.matching(reconJ, gt_data, exeno)
-                if self.idxlist.count(3) > 4:
-                    evalinst.blit_text(surface, exeno, ratio, stype, 'Only need to do 4 times', 3)
-                elif self.idxlist.count(3) > 0:
-                   evalinst.blit_text(surface, exeno, ratio, stype, str(4-min(self.idxlist.count(3), self.idxlist.count(4))) + ' to go !!', 3, (55,173,245,255))                
-            else:
-                raise ImportError('No such exercise !!')
-        else:
-            print('================= exe END ======================')
-            self._done = True
-  
-        
-                

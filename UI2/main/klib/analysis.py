@@ -1,8 +1,9 @@
 import numpy as np
-from exercise import Exer1, Exer2, Exer3, Exer4
+from exercise import *
 from dtw2 import Dynamic_time_warping
 from breathstus import Breath_status
 from handstatus import Hand_status
+from shld_state import Shld_state
 
 import pdb
 
@@ -15,10 +16,14 @@ class Analysis(object):
         self.exer[2] = Exer2()
         self.exer[3] = Exer3()
         self.exer[4] = Exer4()
+        self.exer[5] = Exer5()
+        self.exer[6] = Exer6()
+        self.exer[7] = Exer7()
         #
         self.dtw = Dynamic_time_warping()
         self.brth = Breath_status()
         self.hs = Hand_status()
+        self.shld = Shld_state()
         #
         self.do_once = False
         self._done = False
@@ -26,8 +31,18 @@ class Analysis(object):
         self.holdstate = True
         self.holdlist = np.array([])
 
-    def run(self, exeno, reconJ, surface, evalinst, kp, body, dmap=[], bdry=[]):
+    def getcoord(self, data, order=[1, 4, 8, 20]):
+        foo = []
+        for i in order:
+            if i == 1:
+                foo = np.array([data[i].x, data[i].y])
+            else:
+                foo = np.vstack([foo, np.array([data[i].x, data[i].y])])
+        return foo    
+
+    def run(self, exeno, reconJ, surface, evalinst, kp, body, dmap=[], djps=[]):
         if exeno == 1:
+            
             if self.exer[1].cntdown <= 0:
                 if self.offset == 0:
                     self.offset = kp.framecnt
@@ -38,7 +53,8 @@ class Analysis(object):
                     if np.sum(np.abs(self.holdlist[0]-self.holdlist[-1])[self.exer[1].jweight != 0]) > 400:
                         self.holdstate = False
                 if self.holdstate: 
-                    evalinst.blit_text(surface, exeno, kp.ratio, kp.scene_type, 'Starting breath in/out', 1, (255, 0, 0, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Starting breath in/out', 1, (255, 0, 0, 255))
+                    bdry = self.getcoord(djps)
                     self.brth.breathextract(bdry, dmap)
                 else:
                     if not self.do_once:
@@ -47,9 +63,9 @@ class Analysis(object):
                         self._done = True
                         print('================= exe END ======================')            
             else:
-                evalinst.blit_text(surface, self.exer[1].no, kp.ratio, kp.scene_type, 'will Starting at '\
+                evalinst.blit_text(surface, self.exer[1].no, kp, 'Detection will starting after '\
                                    +str(np.round(self.exer[1].cntdown/30., 2))+' second', 1)
-                self.exer[1].cntdown -= 1             
+                self.exer[1].cntdown -= 1       
         elif exeno == 2:
             if self.exer[2].order[self.dtw.oidx] == [2]:
                 if len(self.holdlist) == 0:  # hand in the holding state or not
@@ -59,8 +75,9 @@ class Analysis(object):
                     if np.sum(np.abs(self.holdlist[0]-self.holdlist[-1])[self.exer[2].jweight != 0]) > 1000:
                         self.holdstate = False
                 if self.holdstate:
-                    evalinst.blit_text(surface, exeno, kp.ratio, kp.scene_type, 'Starting breath in (hand close) and breath out (hand open)', 1)
+                    evalinst.blit_text(surface, exeno, kp, 'Starting breath in (hand close) and breath out (hand open)', 1)
                     self.hs.hstus_proc(body.hand_left_state, body.hand_right_state)
+                    bdry = self.getcoord(djps)
                     self.brth.breathextract(bdry, dmap)
                 else:
                     if not self.do_once:
@@ -77,13 +94,13 @@ class Analysis(object):
             if not self.exer[3].order[self.dtw.oidx] == 'end':
                 self.dtw.matching(reconJ, self.exer[3])
                 if self.dtw.idxlist.count(3) > 4:
-                    evalinst.blit_text(surface, exeno, kp.ratio, kp.scene_type,\
+                    evalinst.blit_text(surface, exeno, kp,\
                                       'Only need to do 4 times', 3)
                     self.dtw.err.append('Only need to do 4 times')
                 elif self.dtw.idxlist.count(3) > 0:
-                   evalinst.blit_text(surface, exeno, kp.ratio, kp.scene_type,\
+                   evalinst.blit_text(surface, exeno, kp,\
                                       str(4-min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4)))\
-                                      + ' to go !!', 3, (55,173,245,255))                
+                                      + ' to go !!', 3, (55,173,245,255))          
             else:
                 print('================= exe END ======================')
                 self._done = True                
@@ -91,11 +108,11 @@ class Analysis(object):
             if not self.exer[4].order[self.dtw.oidx] == 'end':
                 self.dtw.matching(reconJ, self.exer[4])
                 if self.dtw.idxlist.count(3) > 4:
-                    evalinst.blit_text(surface, exeno, kp.ratio, kp.scene_type,\
+                    evalinst.blit_text(surface, exeno, kp,\
                                       'Only need to do 4 times', 3)
                     self.dtw.err.append('Only need to do 4 times')
                 elif self.dtw.idxlist.count(3) > 0:
-                   evalinst.blit_text(surface, exeno, kp.ratio, kp.scene_type,\
+                   evalinst.blit_text(surface, exeno, kp,\
                                       str(4-min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4)))\
                                       + ' to go !!', 3, (55,173,245,255))
             else:
@@ -104,4 +121,14 @@ class Analysis(object):
         elif exeno == 5:
             pass
         elif exeno == 6:
-            pass
+            if self.exer[6].cntdown <= 0:
+                if self.handpos(djps) = 'belly':
+                    shld.run(dmap, djps)
+                elif self.handpos(djps) = 'down':
+                    if 
+
+                
+            else:
+                evalinst.blit_text(surface, self.exer[6].no, kp, 'Detection will starting after '\
+                                   +str(np.round(self.exer[6].cntdown/30., 2))+' second', 1)
+                self.exer[6].cntdown -= 1  
