@@ -23,7 +23,7 @@ from dataoutput  import Dataoutput
 from human_model import Human_model
 from skeleton    import Skeleton
 from fextract    import Finger_extract
-from instruction import Exeinst, Evalinst
+from instruction import Exeinst
 from handstatus import Hand_status
 
 fps = 30
@@ -106,7 +106,8 @@ class BodyGameRuntime(object):
         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
         self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
-        # self.dtw = Dtw()
+        self.fcnt = 0
+        # import class
         self.ana = Analysis()
         self.eval = Evaluation()
         self.denoise = Denoise()
@@ -357,6 +358,14 @@ class BodyGameRuntime(object):
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                                             self.ana.hs.htext(body.hand_left_state, body.hand_right_state), 4 ,\
                                             (255, 130, 45, 255))
+
+                        if self.ana.evalstr != '':
+                            self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, (0, 255, 0, 255))
+
+                            self.fcnt += 1
+                            if self.fcnt > 30 :
+                                self.ana.evalstr = ''
+                                self.fcnt  = 0
 
                     else:
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\

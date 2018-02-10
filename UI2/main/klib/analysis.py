@@ -4,7 +4,7 @@ from dtw2 import Dynamic_time_warping
 from breathstus import Breath_status
 from handstatus import Hand_status
 from shld_state import Shld_state
-
+from math import acos
 import pdb
 
 class Analysis(object):
@@ -30,6 +30,7 @@ class Analysis(object):
         self.offset = 0
         self.holdstate = True
         self.holdlist = np.array([])
+        self.evalstr = ''
 
     def getcoord(self, data, order=[1, 4, 8, 20]):
         foo = []
@@ -38,7 +39,28 @@ class Analysis(object):
                 foo = np.array([data[i].x, data[i].y])
             else:
                 foo = np.vstack([foo, np.array([data[i].x, data[i].y])])
-        return foo    
+        return foo
+
+    def joint_angle(self, joints, idx=[4, 5, 6]):
+        """ finding the angle between 3 joints.
+            default joints are left shld, elbow, wrist.
+        """
+        vec1 = np.array([joints[idx[0]].x-joints[idx[1]].x, joints[idx[0]].y-joints[idx[1]].y])
+        vec2 = np.array([joints[idx[2]].x-joints[idx[1]].x, joints[idx[2]].y-joints[idx[1]].y])
+        costheta = vec1.dot(vec2)/sum(vec1**2)**.5/sum(vec2**2)**.5
+        return acos(costheta)*180/np.pi
+
+    def handpos(self, exer, djps, th=140, period=10):
+        exer.angle.append(self.joint_angle(djps))
+        if len(exer.angle) < period:
+            mean_angle = np.mean(exer.angle)
+        else:
+            mean_angle = np.mean(exer.angle[-10:])
+        if mean_angle >= th:
+            return 'down'
+        else:
+            return 'belly'
+
 
     def run(self, exeno, reconJ, surface, evalinst, kp, body, dmap=[], djps=[]):
         if exeno == 1:
@@ -93,6 +115,8 @@ class Analysis(object):
         elif exeno == 3:
             if not self.exer[3].order[self.dtw.oidx] == 'end':
                 self.dtw.matching(reconJ, self.exer[3])
+                if self.evalstr == '':
+                    self.evalstr = self.dtw.evalstr
                 if self.dtw.idxlist.count(3) > 4:
                     evalinst.blit_text(surface, exeno, kp,\
                                       'Only need to do 4 times', 3)
@@ -107,6 +131,8 @@ class Analysis(object):
         elif exeno == 4:
             if not self.exer[4].order[self.dtw.oidx] == 'end':
                 self.dtw.matching(reconJ, self.exer[4])
+                if self.evalstr == '':
+                    self.evalstr = self.dtw.evalstr
                 if self.dtw.idxlist.count(3) > 4:
                     evalinst.blit_text(surface, exeno, kp,\
                                       'Only need to do 4 times', 3)
@@ -117,17 +143,28 @@ class Analysis(object):
                                       + ' to go !!', 3, (55,173,245,255))
             else:
                 print('================= exe END ======================')
-                self._done = True 
+                self._done = True
+ 
         elif exeno == 5:
             pass
+
         elif exeno == 6:
             if self.exer[6].cntdown <= 0:
-                if self.handpos(djps) = 'belly':
-                    shld.run(dmap, djps)
-                elif self.handpos(djps) = 'down':
-                    if 
-
-                
+                stus = self.handpos(self.exer[6], djps)
+                if stus == 'belly':
+                    self.shld.run(dmap, djps)
+                    if self.evalstr == '':
+                        self.evalstr = self.shld.evalstr
+                    self.exer[6].hraise = True
+                elif stus == 'down':
+                    if self.exer[6].hraise:
+                        self._done = True
+                if self.shld.cnt > 4:
+                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
+                    self.shld.err.append('Only need to do 4 times')
+                else:
+                   evalinst.blit_text(surface, exeno, kp, str(4-self.shld.cnt)\
+                                      + ' to go !!', 3, (55,173,245,255)) 
             else:
                 evalinst.blit_text(surface, self.exer[6].no, kp, 'Detection will starting after '\
                                    +str(np.round(self.exer[6].cntdown/30., 2))+' second', 1)

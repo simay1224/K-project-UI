@@ -104,6 +104,8 @@ class Exer6(object):
     def __init__(self):
         self.no = 6
         self.cntdown = 90
+        self.angle = []
+        self.hraise = False  # hand raise
         # weight
         self.jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
                                  0., 0., 0., 3., 3., 3., 9., 9., 9.,

@@ -1,22 +1,30 @@
+import inflect
+import numpy as np
+from scipy.signal import argrelextrema
+from scipy.ndimage.filters import gaussian_filter1d as gf
+
 class Shld_state(object):
 """ detect the shoulder state.
     So far, we detect 1. shoulder rotate 2. shoulder up-and-down. 
 """
 
     def __init__(self):
-        self.cnt    = 0
-        self.fcnt   = 0
-        self.ignore = 30  # ignore first XX frames
-        self.range  = 50   # find local min max within this range
-        self.cycle  = False
-        self.flag   = True
-        self.type   = 0
-        self.lylist = []
-        self.ldlist = []
-        self.rylist = []
-        self.rdlist = []
-        self.do     = False
-        self.err    = []       
+        self.cnt     = 0
+        self.ngcnt   = 0
+        self.fcnt    = 0
+        self.ignore  = 30  # ignore first XX frames
+        self.range   = 50   # find local min max within this range
+        self.cycle   = False
+        self.flag    = True
+        self.cnvt    = inflect.engine()  # converting numerals into ordinals
+        self.type    = 0
+        self.lylist  = []
+        self.ldlist  = []
+        self.rylist  = []
+        self.rdlist  = []
+        self.evalstr = ''
+        self.do      = False
+        self.err     = []       
 
     def findtops(self, bdimg, shld, bdidx):
         """ find the shoulder top. 
@@ -81,13 +89,15 @@ class Shld_state(object):
 
         if self.type == 1:
             self.cnt += self.type  # cycle number
+            self.evalstr = 'well done'
             self.type = 0
         elif self.type == 2:
             print('simple up and down')
+            self.ngcnt += 1
+            self.err.append('The '+self.cnvt.ordinal(self.ngcnt+self.cnt)+ 'time try, is not good.')
             self.type = 0
-            pass
         else:
-            pass
+            self.evalstr = ''
 
     def run(self, depth, joints):
         self.fcnt += 1
