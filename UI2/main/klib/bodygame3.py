@@ -88,7 +88,7 @@ class BodyGameRuntime(object):
         else:
             print 'Failed to extract .....'
 
-        self.exeno = 4  # exercise number
+        self.exeno = 6  # exercise number
         self.__param_init__()
 
     def __param_init__(self, clean=False):
@@ -351,7 +351,7 @@ class BodyGameRuntime(object):
                         # === DTW matching ===
                         # bdry = self.getcoord(djps)
      
-                        self.ana.run(self.exeno, reconJ, self.bk_frame_surface,\
+                        self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
                                      self.eval, self.kp, body, dframe, djps)                        
 
                         # hand status 
@@ -372,8 +372,8 @@ class BodyGameRuntime(object):
                                             'Exercise '+str(self.exeno)+' is done', 1)
 
                         if not self.kp.finish:
-                            errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err]  # append err msg here
-                            dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.dtw.do]
+                            errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err, self.ana.shld.err]  # append err msg here
+                            dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.dtw.do, self.ana.shld.do]
                             self.eval.run(self.exeno, self.ana.brth, self.ana.hs)
                             self.eval.errmsg(errs, dolist) 
                             print self.ana.dtw.idxlist
@@ -408,7 +408,7 @@ class BodyGameRuntime(object):
 
             # === text infomation on the surface ===
             if self.kp.vid_rcd:  # video recoding text
-                #self.io.typetext(self._frame_surface, 'Video Recording', (1580, 20), (255, 0, 0))
+                self.io.typetext(self._frame_surface, 'Video Recording', (1580, 20), (255, 0, 0))
 #                self.cimgs.create_dataset('img_'+repr(self.kp.fno).zfill(4), data = frame)
                 self.bdimgs.create_dataset('bd_' + repr(self.kp.fno).zfill(4), data=np.dstack((bodyidx, bodyidx, bodyidx)))
                 self.dimgs.create_dataset('d_' + repr(self.kp.fno).zfill(4), data=np.dstack((dframe, dframe, dframe)))
@@ -416,7 +416,7 @@ class BodyGameRuntime(object):
                 self.kp.bdjoints.append(bddic)
             else:
                 pass
-                #self.io.typetext(self._frame_surface, 'Not Recording', (1580, 20), (0, 255, 0))  
+                self.io.typetext(self._frame_surface, 'Not Recording', (1580, 20), (0, 255, 0))  
 
             
             self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='exe', region=1) 

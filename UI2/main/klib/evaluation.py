@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 from scipy.ndimage.filters import gaussian_filter1d as gf
+from collections import defaultdict
 import pygame
+
 
 class Evaluation(object):
     def __init__(self):
@@ -56,7 +58,7 @@ class Evaluation(object):
                 fig.savefig('output/Exer'+str(exeno)+'_biohoc_1.jpg')        
         plt.close(fig)
 
-    def errmsg(self, errs=[], dolist=None, contents=['breath eval', 'hand eval', 'exercise motion']):
+    def errmsg(self, errs=[], dolist=None, contents=['Breath eval', 'Hand eval', 'Exercise motion', 'Shoulder State']):
         print('\nevaluation:\n')
         for idx, err in enumerate(errs):
             if len(err) != 0:
@@ -64,9 +66,9 @@ class Evaluation(object):
                     print (contents[idx]+' : '+text)
                     print('\n')
             elif dolist[idx]:  # done without err
-                print(contents[idx]+' : perfect !!')
+                print(('%18s' % contents[idx])+' : perfect !!')
             else:
-                print(contents[idx]+' : did not test this part.')
+                print(('%18s' % contents[idx])+' : did not test this part.')
 
     def position(self, surface, ratio, stype=2, region=1, height=0):
         """According to the scene type, ratio and the region number

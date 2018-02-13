@@ -45,12 +45,19 @@ class Analysis(object):
         """ finding the angle between 3 joints.
             default joints are left shld, elbow, wrist.
         """
-        vec1 = np.array([joints[idx[0]].x-joints[idx[1]].x, joints[idx[0]].y-joints[idx[1]].y])
-        vec2 = np.array([joints[idx[2]].x-joints[idx[1]].x, joints[idx[2]].y-joints[idx[1]].y])
+        # pdb.set_trace()
+        vec1 = np.array([joints[1*3+0]-joints[0*3+0],\
+                         joints[1*3+1]-joints[0*3+1],\
+                         joints[1*3+2]-joints[0*3+2]])
+
+        vec2 = np.array([joints[1*3+0]-joints[2*3+0],\
+                         joints[1*3+1]-joints[2*3+1],\
+                         joints[1*3+2]-joints[2*3+2]])
+
         costheta = vec1.dot(vec2)/sum(vec1**2)**.5/sum(vec2**2)**.5
         return acos(costheta)*180/np.pi
 
-    def handpos(self, exer, djps, th=140, period=10):
+    def handpos(self, exer, djps, th=160, period=10):
         exer.angle.append(self.joint_angle(djps))
         if len(exer.angle) < period:
             mean_angle = np.mean(exer.angle)
@@ -150,7 +157,7 @@ class Analysis(object):
 
         elif exeno == 6:
             if self.exer[6].cntdown <= 0:
-                stus = self.handpos(self.exer[6], djps)
+                stus = self.handpos(self.exer[6], reconJ)
                 if stus == 'belly':
                     self.shld.run(dmap, djps)
                     if self.evalstr == '':
@@ -163,9 +170,10 @@ class Analysis(object):
                     evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
                     self.shld.err.append('Only need to do 4 times')
                 else:
-                   evalinst.blit_text(surface, exeno, kp, str(4-self.shld.cnt)\
-                                      + ' to go !!', 3, (55,173,245,255)) 
+                   evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.shld.cnt)),\
+                                      3, (55,173,245,255)) 
             else:
-                evalinst.blit_text(surface, self.exer[6].no, kp, 'Detection will starting after '\
-                                   +str(np.round(self.exer[6].cntdown/30., 2))+' second', 1)
+                evalinst.blit_text(surface, self.exer[6].no, kp,\
+                                  ('Detection will starting after %.2f second' % (self.exer[6].cntdown/30.)), 1)
+                                   
                 self.exer[6].cntdown -= 1  

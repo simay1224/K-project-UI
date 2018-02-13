@@ -1,5 +1,6 @@
 from collections import defaultdict
 import pygame, pdb
+
 pygame.init()
 
 class Exeinst(object):
@@ -116,10 +117,10 @@ class Exeinst(object):
         self.font = pygame.font.SysFont('Calibri', self.font_size)
         self.space = self.font.size(' ')[0]  # The width of a space.
 
-    def position(self, surface, kp, region=1, height=0):
+    def position(self, surface, ratio, stype, region=1, height=0):
         """According to the scene type, ratio and the region number
            set up different upper bound and lower bound to the text"""
-        if kp.scene_type == 2:
+        if stype == 2:
             self.leftbnd = int(surface.get_width()*ratio)
             self.upperbnd = height*self.part[region-1]
         else:
@@ -145,7 +146,7 @@ class Exeinst(object):
             height = surface.get_height()*(1-kp.ratio)
         max_height = height*self.part[region]
 
-        (x, y) = self.position(surface, ratio, kp.scene_type, region, height)
+        (x, y) = self.position(surface, kp.ratio, kp.scene_type, region, height)
         x_ori, y_ori = x, y
 
         for line in words:

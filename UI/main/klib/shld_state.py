@@ -1,7 +1,7 @@
 class Shld_statue(object):
-""" detect the shoulder state.
-    So far, we detect 1. shoulder rotate 2. shoulder up-and-down. 
-"""
+    """ detect the shoulder state.
+        So far, we detect 1. shoulder rotate 2. shoulder up-and-down. 
+    """
 
     def __init__(self):
         self.cnt = 0
