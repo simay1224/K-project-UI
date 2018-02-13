@@ -116,6 +116,8 @@ class Exer7(object):
 
     def __init__(self):
         self.no = 7
+        self.angle = []
+        self.hraise = False  # hand raise
         # weight
         self.jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
                                  0., 0., 0., 3., 3., 3., 9., 9., 9.,

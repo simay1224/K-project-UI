@@ -360,7 +360,10 @@ class BodyGameRuntime(object):
                                             (255, 130, 45, 255))
 
                         if self.ana.evalstr != '':
-                            self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, (0, 255, 0, 255))
+                            if (ana.evalstr).lower() = 'well done':
+                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, (0, 255, 0, 255))
+                            else:
+                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, (255, 0, 0, 255))
 
                             self.fcnt += 1
                             if self.fcnt > 30 :

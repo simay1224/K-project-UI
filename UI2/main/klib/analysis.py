@@ -4,6 +4,7 @@ from dtw2 import Dynamic_time_warping
 from breathstus import Breath_status
 from handstatus import Hand_status
 from shld_state import Shld_state
+from clasp_spread import Clasp_spread
 from math import acos
 import pdb
 
@@ -24,6 +25,7 @@ class Analysis(object):
         self.brth = Breath_status()
         self.hs = Hand_status()
         self.shld = Shld_state()
+        self.clsp = Clasp_spread()
         #
         self.do_once = False
         self._done = False
@@ -67,7 +69,6 @@ class Analysis(object):
             return 'down'
         else:
             return 'belly'
-
 
     def run(self, exeno, reconJ, surface, evalinst, kp, body, dmap=[], djps=[]):
         if exeno == 1:
@@ -176,4 +177,18 @@ class Analysis(object):
                 evalinst.blit_text(surface, self.exer[6].no, kp,\
                                   ('Detection will starting after %.2f second' % (self.exer[6].cntdown/30.)), 1)
                                    
-                self.exer[6].cntdown -= 1  
+                self.exer[6].cntdown -= 1
+        elif exeno == 7:
+            stus = self.handpos(self.exer[7], reconJ)
+            if stus == 'down':
+                if self.exer[7].hraise:
+                    self._done = True 
+            else:
+                self.clsp.run(reconJ)
+            if self.clsp.cnt > 4:
+                evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
+                self.clsp.err.append('Only need to do 4 times')
+            else:
+                evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.clsp.cnt)),\
+                                    3, (55,173,245,255)) 
+

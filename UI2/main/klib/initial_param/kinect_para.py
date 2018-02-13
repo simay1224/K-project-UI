@@ -37,4 +37,41 @@ class Kinect_para(object):
         self.TrackingState_Inferred   = 1
         self.TrackingState_Tracked    = 2
 
+        # upperbody index
+        self.SpineBase_x   = 0
+        self.SpineBase_y   = 1
+        self.SpineBase_z   = 2
+        self.SpineMid_x    = 3
+        self.SpineMid_y    = 4
+        self.SpineMid_z    = 5
+        self.Neck_x        = 6
+        self.Neck_y        = 7
+        self.Neck_z        = 8
+        self.Head_x        = 9
+        self.Head_y        = 10
+        self.Head_z        = 11
+        self.LShld_x       = 12
+        self.LShld_y       = 13
+        self.LShld_z       = 14
+        self.LElbow_x      = 15
+        self.LElbow_y      = 16
+        self.LElbow_z      = 17
+        self.LWrist_x      = 18
+        self.LWrist_y      = 19
+        self.LWrist_z      = 20        
+        self.RShld_x       = 21
+        self.RShld_y       = 22
+        self.RShld_z       = 23
+        self.RElbow_x      = 24
+        self.RElbow_y      = 25
+        self.RElbow_z      = 26
+        self.RWrist_x      = 27
+        self.RWrist_y      = 28
+        self.RWrist_z      = 29
+        self.SpineShld_x   = 30
+        self.SpineShld_y   = 31
+        self.SpineShld_z   = 32
+
+
+
 
