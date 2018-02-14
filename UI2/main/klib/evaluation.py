@@ -58,7 +58,7 @@ class Evaluation(object):
                 fig.savefig('output/Exer'+str(exeno)+'_biohoc_1.jpg')        
         plt.close(fig)
 
-    def errmsg(self, errs=[], dolist=None, contents=['Breath eval', 'Hand eval', 'Exercise motion', 'Shoulder State', 'Clasp & Spread']):
+    def errmsg(self, errs=[], dolist=None, contents=['Breath eval', 'Hand eval', 'Exercise motion', 'Shoulder State', 'Clasp & Spread', 'Swing']):
         print('\nevaluation:\n')
         for idx, err in enumerate(errs):
             if len(err) != 0:

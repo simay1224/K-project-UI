@@ -5,6 +5,7 @@ from breathstus import Breath_status
 from handstatus import Hand_status
 from shld_state import Shld_state
 from clasp_spread import Clasp_spread
+from swing import Swing
 from initial_param.kinect_para import Kinect_para
 from math import acos
 import pdb
@@ -27,6 +28,7 @@ class Analysis(object):
         self.hs = Hand_status()
         self.shld = Shld_state()
         self.clsp = Clasp_spread()
+        self.swing = Swing()
         self.kpm  = Kinect_para()
         #
         self.cnt = 0
@@ -65,7 +67,7 @@ class Analysis(object):
         costheta = vec1.dot(vec2)/sum(vec1**2)**.5/sum(vec2**2)**.5
         return acos(costheta)*180/np.pi
 
-    def handpos(self, exer, joints, kpm, th=160, period=10, offeset=0):
+    def handpos(self, exer, joints, th=160, period=10, offeset=0):
         if joints.shape[0] == 21:
             offeset = 12
         exer.angle.append(self.joint_angle(joints))
@@ -74,13 +76,13 @@ class Analysis(object):
         else:
             mean_angle = np.mean(exer.angle[-10:])
         if mean_angle >= th:
-            if joints[kpm.SpineMid_y-offeset] > joints[kpm.LWrist_y-offeset]\
-                and joints[kpm.LElbow_y-offeset] > joints[kpm.LWrist_y-offeset]:
+            if joints[self.kpm.SpineMid_y-offeset] > joints[self.kpm.LWrist_y-offeset]\
+                and joints[self.kpm.LElbow_y-offeset] > joints[self.kpm.LWrist_y-offeset]:
                 return 'down'
-            elif joints[kpm.LWrist_y-offeset] > joints[kpm.Head_y-offeset]: 
+            elif joints[self.kpm.LWrist_y-offeset] > joints[self.kpm.Head_y-offeset]: 
                 return 'up'
-            elif abs(joints[kpm.LWrist_y-offeset] - joints[kpm.LElbow_y-offeset]) < 20 and\
-                 abs(joints[kpm.LWrist_y-offeset] - joints[kpm.LShld_y-offeset]) < 20:
+            elif abs(joints[self.kpm.LWrist_y-offeset] - joints[self.kpm.LElbow_y-offeset]) < 20 and\
+                 abs(joints[self.kpm.LWrist_y-offeset] - joints[self.kpm.LShld_y-offeset]) < 20:
                 return 'horizontal'
         else:
             return 'belly'
@@ -171,12 +173,31 @@ class Analysis(object):
                 self._done = True
  
         elif exeno == 5:
-            pass
+            stus = self.handpos(self.exer[5], reconJ)
+            if stus == 'up':
+                self.swing.do = True
+                evalinst.blit_text(surface, exeno, kp, 'Start bending to left and right', 1)
+                self.swing.run(reconJ)
+                if self.evalstr == '':
+                    self.evalstr = self.swing.evalstr
+                    self.shld.evalstr = ''
+            elif stus == 'down':
+                if self.swing.do:
+                    if self.cnt > 90:
+                        self._done = True
+                    self.cnt += 1
+
+            if self.swing.cnt/2 > 4:
+                evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
+                self.swing.err.append('Only need to do 4 times')
+            else:
+                evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.swing.cnt/2)),\
+                                    3, (55,173,245,255))             
 
         elif exeno == 6:
             if self.exer[6].cntdown <= 0:
                 evalinst.blit_text(surface, exeno, kp, 'Start rotating your shoulders', 1)
-                stus = self.handpos(self.exer[6], reconJ, self.kpm)
+                stus = self.handpos(self.exer[6], reconJ)
                 if stus == 'belly':
                     self.shld.run(dmap, djps)
                     if self.evalstr == '':
@@ -201,10 +222,9 @@ class Analysis(object):
         elif exeno == 7:
             if self.exer[7].cntdown <= 0:
                 evalinst.blit_text(surface, exeno, kp, 'Start to clasp and spread', 1)
-                stus = self.handpos(self.exer[7], reconJ, self.kpm)
+                stus = self.handpos(self.exer[7], reconJ)
                 if stus == 'down':
                     if self.clsp.do:
-                        print self.cnt
                         if self.cnt > 90:
                             self._done = True
                         self.cnt += 1

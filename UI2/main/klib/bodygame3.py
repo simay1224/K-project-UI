@@ -87,7 +87,7 @@ class BodyGameRuntime(object):
         else:
             print 'Failed to extract .....'
 
-        self.exeno = 6  # exercise number
+        self.exeno = 5  # exercise number
         self.__param_init__()
 
     def __param_init__(self, clean=False):
@@ -394,8 +394,10 @@ class BodyGameRuntime(object):
                                             'Exercise '+str(self.exeno)+' is done', 1)
 
                         if not self.kp.finish:
-                            errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err, self.ana.shld.err, self.ana.clsp.err]  # append err msg here
-                            dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.dtw.do, self.ana.shld.do, self.ana.clsp.do]
+                            errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err,\
+                                    self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
+                            dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.dtw.do,\
+                                      self.ana.shld.do, self.ana.clsp.do, self.ana.swing.do]
                             self.eval.run(self.exeno, self.ana.brth, self.ana.hs)
                             self.eval.errmsg(errs, dolist) 
                             print self.ana.dtw.idxlist

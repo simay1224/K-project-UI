@@ -97,6 +97,7 @@ class Exer5(object):
 
     def __init__(self):
         self.no = 5
+        self.angle = []
         self.limbjoints = False  # need limb joints + torso joints
         # weight
         self.jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
