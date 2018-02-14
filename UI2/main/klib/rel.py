@@ -109,7 +109,7 @@ class Rel(object):
 
         return trkrel
 
-    def rel_overall(self, Rb, Rk, Rt, order, flen=2):
+    def rel_overall(self, Rb, Rk, Rt, flen=2):
         """combine the behavior, kinematic and tracking reliability
            calculate overall reliability score
         """
@@ -127,7 +127,7 @@ class Rel(object):
             return Rel, np.array([])
         return Rel, Relary
 
-    def run(self, jdic, order):
+    def run(self, jdic):
         """calculate joints' relability for each frame
         """
         rt = self.rel_trk(jdic)
@@ -139,4 +139,4 @@ class Rel(object):
             self.Rt[ii].append(rt[jj])
             self.Rk[ii].append(rk[jj])
 
-        return self.rel_overall(self.Rb, self.Rk, self.Rt, order)
+        return self.rel_overall(self.Rb, self.Rk, self.Rt, self.trg_jorder)

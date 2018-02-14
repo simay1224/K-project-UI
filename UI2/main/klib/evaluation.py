@@ -58,17 +58,17 @@ class Evaluation(object):
                 fig.savefig('output/Exer'+str(exeno)+'_biohoc_1.jpg')        
         plt.close(fig)
 
-    def errmsg(self, errs=[], dolist=None, contents=['Breath eval', 'Hand eval', 'Exercise motion', 'Shoulder State']):
+    def errmsg(self, errs=[], dolist=None, contents=['Breath eval', 'Hand eval', 'Exercise motion', 'Shoulder State', 'Clasp & Spread']):
         print('\nevaluation:\n')
         for idx, err in enumerate(errs):
             if len(err) != 0:
                 for text in set(err):
-                    print (contents[idx]+' : '+text)
+                    print (('%18s' % contents[idx])+' : '+text)
                     print('\n')
             elif dolist[idx]:  # done without err
                 print(('%18s' % contents[idx])+' : perfect !!')
             else:
-                print(('%18s' % contents[idx])+' : did not test this part.')
+                print(('%18s' % contents[idx])+' : Did not test this part.')
 
     def position(self, surface, ratio, stype=2, region=1, height=0):
         """According to the scene type, ratio and the region number
@@ -110,7 +110,7 @@ class Evaluation(object):
                     y += word_height  # Start on new row.
                 surface.blit(word_surface, (x, y))
                 x += word_width + self.space
-            x = x_ori  # Reset the x.
+            x = x_ori  # Reset the x
             y += word_height  # Start on new row.
         if y > max_height + y_ori:
             if self.font_size > 12:

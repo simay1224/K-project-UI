@@ -5,6 +5,7 @@ from breathstus import Breath_status
 from handstatus import Hand_status
 from shld_state import Shld_state
 from clasp_spread import Clasp_spread
+from initial_param.kinect_para import Kinect_para
 from math import acos
 import pdb
 
@@ -26,7 +27,10 @@ class Analysis(object):
         self.hs = Hand_status()
         self.shld = Shld_state()
         self.clsp = Clasp_spread()
+        self.kpm  = Kinect_para()
         #
+        self.cnt = 0
+        self.offset = 0
         self.do_once = False
         self._done = False
         self.offset = 0
@@ -47,26 +51,37 @@ class Analysis(object):
         """ finding the angle between 3 joints.
             default joints are left shld, elbow, wrist.
         """
-        # pdb.set_trace()
-        vec1 = np.array([joints[1*3+0]-joints[0*3+0],\
-                         joints[1*3+1]-joints[0*3+1],\
-                         joints[1*3+2]-joints[0*3+2]])
+        if joints.shape == 33:
+            self.offset = 4
 
-        vec2 = np.array([joints[1*3+0]-joints[2*3+0],\
-                         joints[1*3+1]-joints[2*3+1],\
-                         joints[1*3+2]-joints[2*3+2]])
+        vec1 = np.array([joints[self.offset+1*3+0]-joints[self.offset*3+0],\
+                         joints[self.offset+1*3+1]-joints[self.offset*3+1],\
+                         joints[self.offset+1*3+2]-joints[self.offset*3+2]])
+
+        vec2 = np.array([joints[self.offset+1*3+0]-joints[self.offset+2*3+0],\
+                         joints[self.offset+1*3+1]-joints[self.offset+2*3+1],\
+                         joints[self.offset+1*3+2]-joints[self.offset+2*3+2]])
 
         costheta = vec1.dot(vec2)/sum(vec1**2)**.5/sum(vec2**2)**.5
         return acos(costheta)*180/np.pi
 
-    def handpos(self, exer, djps, th=160, period=10):
-        exer.angle.append(self.joint_angle(djps))
+    def handpos(self, exer, joints, kpm, th=160, period=10, offeset=0):
+        if joints.shape[0] == 21:
+            offeset = 12
+        exer.angle.append(self.joint_angle(joints))
         if len(exer.angle) < period:
             mean_angle = np.mean(exer.angle)
         else:
             mean_angle = np.mean(exer.angle[-10:])
         if mean_angle >= th:
-            return 'down'
+            if joints[kpm.SpineMid_y-offeset] > joints[kpm.LWrist_y-offeset]\
+                and joints[kpm.LElbow_y-offeset] > joints[kpm.LWrist_y-offeset]:
+                return 'down'
+            elif joints[kpm.LWrist_y-offeset] > joints[kpm.Head_y-offeset]: 
+                return 'up'
+            elif abs(joints[kpm.LWrist_y-offeset] - joints[kpm.LElbow_y-offeset]) < 20 and\
+                 abs(joints[kpm.LWrist_y-offeset] - joints[kpm.LShld_y-offeset]) < 20:
+                return 'horizontal'
         else:
             return 'belly'
 
@@ -125,6 +140,7 @@ class Analysis(object):
                 self.dtw.matching(reconJ, self.exer[3])
                 if self.evalstr == '':
                     self.evalstr = self.dtw.evalstr
+                    self.dtw.evalstr = ''
                 if self.dtw.idxlist.count(3) > 4:
                     evalinst.blit_text(surface, exeno, kp,\
                                       'Only need to do 4 times', 3)
@@ -141,6 +157,7 @@ class Analysis(object):
                 self.dtw.matching(reconJ, self.exer[4])
                 if self.evalstr == '':
                     self.evalstr = self.dtw.evalstr
+                    self.dtw.evalstr = ''
                 if self.dtw.idxlist.count(3) > 4:
                     evalinst.blit_text(surface, exeno, kp,\
                                       'Only need to do 4 times', 3)
@@ -158,13 +175,16 @@ class Analysis(object):
 
         elif exeno == 6:
             if self.exer[6].cntdown <= 0:
-                stus = self.handpos(self.exer[6], reconJ)
+                evalinst.blit_text(surface, exeno, kp, 'Start rotating your shoulders', 1)
+                stus = self.handpos(self.exer[6], reconJ, self.kpm)
                 if stus == 'belly':
                     self.shld.run(dmap, djps)
                     if self.evalstr == '':
                         self.evalstr = self.shld.evalstr
+                        self.shld.evalstr = ''
                     self.exer[6].hraise = True
                 elif stus == 'down':
+                    print 'down'
                     if self.exer[6].hraise:
                         self._done = True
                 if self.shld.cnt > 4:
@@ -179,16 +199,30 @@ class Analysis(object):
                                    
                 self.exer[6].cntdown -= 1
         elif exeno == 7:
-            stus = self.handpos(self.exer[7], reconJ)
-            if stus == 'down':
-                if self.exer[7].hraise:
-                    self._done = True 
+            if self.exer[7].cntdown <= 0:
+                evalinst.blit_text(surface, exeno, kp, 'Start to clasp and spread', 1)
+                stus = self.handpos(self.exer[7], reconJ, self.kpm)
+                if stus == 'down':
+                    if self.clsp.do:
+                        print self.cnt
+                        if self.cnt > 90:
+                            self._done = True
+                        self.cnt += 1
+                else:
+                    self.cnt = 0
+                    self.clsp.run(reconJ)
+                    if self.evalstr == '':
+                        self.evalstr = self.clsp.evalstr
+                        self.clsp.evalstr = ''
+                    
+                if self.clsp.cnt > 4:
+                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
+                    self.clsp.err.append('Only need to do 4 times')
+                else:
+                    evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.clsp.cnt)),\
+                                        3, (55,173,245,255))
             else:
-                self.clsp.run(reconJ)
-            if self.clsp.cnt > 4:
-                evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
-                self.clsp.err.append('Only need to do 4 times')
-            else:
-                evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.clsp.cnt)),\
-                                    3, (55,173,245,255)) 
+                evalinst.blit_text(surface, self.exer[7].no, kp,\
+                                  ('Detection will starting after %.2f second' % (self.exer[7].cntdown/30.)), 1)
+                self.exer[7].cntdown -= 1
 

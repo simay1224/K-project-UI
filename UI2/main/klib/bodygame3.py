@@ -77,7 +77,6 @@ class BodyGameRuntime(object):
         self._bodies = None
         # self.scene_type = 2
         
-        self.jorder = [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 20]  # upper body joints' order
         time.sleep(5)
 
         if self._kinect.has_new_color_frame():
@@ -250,6 +249,18 @@ class BodyGameRuntime(object):
             self.exeno = 4
             print('====  Doing exercise 4 ====')
             self.reset(change=True)
+        if press[pygame.K_5]:  # use '5' to change to execise 5
+            self.exeno = 5
+            print('====  Doing exercise 5 ====')
+            self.reset(change=True)
+        if press[pygame.K_6]:  # use '6' to change to execise 6
+            self.exeno = 6
+            print('====  Doing exercise 6 ====')
+            self.reset(change=True)
+        if press[pygame.K_7]:  # use '7' to change to execise 7
+            self.exeno = 7
+            print('====  Doing exercise 7 ====')
+            self.reset(change=True)
 
     def run(self):
         wait_key_cnt = 3
@@ -316,24 +327,32 @@ class BodyGameRuntime(object):
                         self.fextr.run(frame, bkimg, body, bddic, jps, SKELETON_COLORS[i], self._frame_surface)
 
                     # === joint reliability ===
-                    Rel, Relary = self.rel.run(jdic,self.jorder)
+                    Rel, Relary = self.rel.run(jdic)
                     # joint's reliability visulization
                     # self.skel.draw_Rel_joints(jps, Rel, self._frame_surface)
 
                     # === dtw analyze & denoising process ===
                     if not self.ana._done:
-                        modJary = self.h_mod.human_mod_pts(joints)  # modJary is 7*3 array
-                        modJary = modJary.flatten().reshape(-1, 21)  # change shape to 1*21 array
+                        if self.ana.exer[self.exeno].limbjoints:
+                            modJary = self.h_mod.human_mod_pts(joints)  # modJary is 7*3 array
+                            modJary = modJary.flatten().reshape(-1, 21)  # change shape to 1*21 array
+                        else:
+                            modJary = self.h_mod.human_mod_pts(joints, False)  # modJary is 11*3 array
+                            modJary = modJary.flatten().reshape(-1, 33)  # change shape to 1*33 array                            
                         if not self.denoise._done:
                             if not len(Relary) == 0:
                                 # === GPR denoising ===
                                 if all(ii > 0.6 for ii in Relary[limbidx]):  # all joints are reliable
                                     reconJ = modJary  # reconJ is 1*21 array
                                 else:  # contains unreliable joints
-                                    reconJ, unrelidx = self.denoise.run(modJary, Relary)
+                                    if self.ana.exer[self.exeno].limbjoints:
+                                        reconJ, unrelidx = self.denoise.run(modJary, Relary)
+                                    else:
+                                        reconJ, unrelidx = self.denoise.run(modJary[12:], Relary)
+                                        reconJ = np.hstack([modJary[:12], reconJ]) 
                                     #  === recon 2D joints in color domain ===
                                     JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
-                                    for ii in [4, 5, 6, 8, 9, 10]:
+                                    for ii in [4, 5, 6, 8, 9, 10, 20]:
                                         rec_joints[ii].Position.x = JJ[i][0]
                                         rec_joints[ii].Position.y = JJ[i][1]
                                         rec_joints[ii].Position.z = JJ[i][2]
@@ -360,7 +379,7 @@ class BodyGameRuntime(object):
                                             (255, 130, 45, 255))
 
                         if self.ana.evalstr != '':
-                            if (ana.evalstr).lower() = 'well done':
+                            if 'well' in (self.ana.evalstr).lower():
                                 self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, (0, 255, 0, 255))
                             else:
                                 self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, (255, 0, 0, 255))
@@ -375,8 +394,8 @@ class BodyGameRuntime(object):
                                             'Exercise '+str(self.exeno)+' is done', 1)
 
                         if not self.kp.finish:
-                            errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err, self.ana.shld.err]  # append err msg here
-                            dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.dtw.do, self.ana.shld.do]
+                            errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err, self.ana.shld.err, self.ana.clsp.err]  # append err msg here
+                            dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.dtw.do, self.ana.shld.do, self.ana.clsp.do]
                             self.eval.run(self.exeno, self.ana.brth, self.ana.hs)
                             self.eval.errmsg(errs, dolist) 
                             print self.ana.dtw.idxlist

@@ -59,10 +59,8 @@ class Exeinst(object):
         self.str['exe'][7] = 'Exercise 7 : Clasp and Spread'\
                              '\n  '\
                              '\n1. Raise and clasp your hands till the belly position.'\
-                             '\n2. Raise clasped hands toward to your forehead\
-                                   and keep elbows together.'\
-                             '\n3. Slide your heands to the back of your\
-                                   head and spread the elbows open wide.'\
+                             '\n2. Raise clasped hands toward to your forehead and keep elbows together.'\
+                             '\n3. Slide your heands to the back of your head and spread the elbows open wide.'\
                              '\n4. Back to the belly position.'\
                              '\n5. Repeat 4 times.'\
                              '\n6. Put down your hands.'
@@ -162,12 +160,12 @@ class Exeinst(object):
             y += word_height  # Start on new row.
 
         if y > max_height + y_ori:  # change font size if it is out of the boundary
-            print 'large'
+            # print 'large'
             if self.font_size > 12:
                 self.font_size = self.font_size - 1
                 self.font = pygame.font.SysFont('Calibri', self.font_size)
         elif y < max_height  - 40 :
-            print 'small'
+            # print 'small'
             if self.font_size < 40:
                 self.font_size = self.font_size + 1
                 self.font = pygame.font.SysFont('Calibri', self.font_size)    

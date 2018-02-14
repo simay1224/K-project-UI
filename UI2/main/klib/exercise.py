@@ -10,7 +10,8 @@ class Exer1(object):
 
     def __init__(self):
         self.no = 1
-        self.cntdown = 90     
+        self.cntdown = 90
+        self.limbjoints = True  # only need limb joints
         # order
         self.order = {}
         self.order[0] = [1]
@@ -26,6 +27,7 @@ class Exer2(object):
 
     def __init__(self):
         self.no = 2
+        self.limbjoints = True
         # reference subsequences
         self.gt_data = {}
         self.gt_data[1] = data2['GT_1'][:]
@@ -45,6 +47,7 @@ class Exer3(object):
 
     def __init__(self):
         self.no = 3
+        self.limbjoints = True
         # reference subsequences
         self.gt_data = {}
         self.gt_data[1] = data3['GT_1'][:]
@@ -69,6 +72,7 @@ class Exer4(object):
 
     def __init__(self):
         self.no = 4
+        self.limbjoints = True
         # reference subsequences
         self.gt_data = {}
         self.gt_data[1] = data4['GT_1'][:]
@@ -93,6 +97,7 @@ class Exer5(object):
 
     def __init__(self):
         self.no = 5
+        self.limbjoints = False  # need limb joints + torso joints
         # weight
         self.jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
                                  0., 0., 0., 3., 3., 3., 9., 9., 9.,
@@ -103,6 +108,7 @@ class Exer6(object):
 
     def __init__(self):
         self.no = 6
+        self.limbjoints = True
         self.cntdown = 90
         self.angle = []
         self.hraise = False  # hand raise
@@ -116,6 +122,8 @@ class Exer7(object):
 
     def __init__(self):
         self.no = 7
+        self.cntdown = 90
+        self.limbjoints = False  # need limb joints + torso joints
         self.angle = []
         self.hraise = False  # hand raise
         # weight
