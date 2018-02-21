@@ -16,11 +16,11 @@ import glob,os,win32com.client,pdb
 
 #src_path = 'I:/AllData_0327/raw data/20170306/pkl/'
 #dst_path = 'I:/Data_0702/unified data/Unified_KData/'
-src_path = 'D:/Project/K_project/data/Motion and Kinect raw data/20171004/pkl/'
-dst_path = 'D:/Project/K_project/data/'
+src_path = 'D:/AllData_0327(0220)/AllData_0327/Motion and Kinect raw data/20170306/pkl/'
+dst_path = 'D:/AllData_0327(0220)/AllData_0327/unified data/Unified_KData/'
 
 
-jidx = [0,1,2,3,4,5,6,8,9,10,20]
+jidx = [0, 1, 2, 3, 4, 5, 6, 8, 9 ,10, 20]
 
 def folder_retarget(src_path,shortcut):  
     shell = win32com.client.Dispatch("WScript.Shell")    
@@ -28,7 +28,7 @@ def folder_retarget(src_path,shortcut):
 
 
 for subfolder in os.listdir(src_path):  
-    for exeno in [4]:#[1,2,3,5,6,7]:
+    for exeno in [5, 6, 7]:
     
         if '.lnk' in subfolder:
             path = folder_retarget(src_path,subfolder)
@@ -56,16 +56,16 @@ for subfolder in os.listdir(src_path):
             
             
             
-# for single file:
-jidx = [0,1,2,3,4,5,6,8,9,10,20]
-infile = 'D:/Project/K_project/output/Yao_data201710131636.pkl'
+# ==========   for single file: ===========================
+# jidx = [0,1,2,3,4,5,6,8,9,10,20]
+# infile = 'D:/Project/K_project/output/Yao_data201710131636.pkl'
 
-data  = cPickle.load(file(infile,'rb'))
-Kbody = rawK2ary(data,jidx)
-J     = human_mod(Kbody)
-name  = infile.split('/')[-1].split('.pkl')
-fname = name[0]+'_unified_ex4.pkl'
-cPickle.dump(J,file(fname,'wb'))
+# data  = cPickle.load(file(infile,'rb'))
+# Kbody = rawK2ary(data,jidx)
+# J     = human_mod(Kbody)
+# name  = infile.split('/')[-1].split('.pkl')
+# fname = name[0]+'_unified_ex4.pkl'
+# cPickle.dump(J,file(fname,'wb'))
 
 
 

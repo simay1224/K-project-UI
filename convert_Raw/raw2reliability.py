@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Mar 27 13:57:34 2017
-
-@author: medialab
+original reliability
 """
 
 # create reliability file
@@ -10,16 +8,16 @@ Created on Mon Mar 27 13:57:34 2017
 import cPickle
 import os
 
-src_path = 'F:/AllData_0327/Motion and Kinect raw data/'
+src_path = 'D:/AllData_0327(0220)/AllData_0327/Motion and Kinect raw data/'
 
 #unified data
 #usrc_path = 'D:/Project/K_project/data/Motion and Kinect unified/Unified_KData/'
 
-dst_path = 'F:/AllData_0327/unified data/reliability/'
+dst_path = 'D:/AllData_0327(0220)/AllData_0327/unified data/reliability/'
 
 jidx = [0,1,2,3,4,5,6,8,9,10,20]
 
-for datefolder in os.listdir(src_path):
+for datefolder in ['20161216', '20170224', '20170306']:  #os.listdir(src_path):
     print datefolder
     for user in os.listdir(src_path+datefolder+'/pkl/'):
         print user

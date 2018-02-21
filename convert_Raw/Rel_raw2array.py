@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Nov 15 14:41:16 2016
-
-@author: medialab
+modified reliability
 """
 from pykinect2 import PyKinectV2
 from pykinect2.PyKinectV2 import *
@@ -125,11 +123,11 @@ def rel_rate(Rb,Rk,Rt,order,flen = 2):
         return rel
     return Rel
 
-src_path = 'F:/AllData_0327/Motion and Kinect raw data/'
-dst_path = 'F:/AllData_0327/unified data/reliability_mod/'
-exeno    = 'ex3'
+src_path = 'D:/AllData_0327(0220)/AllData_0327/Motion and Kinect raw data/'
+dst_path = 'D:/AllData_0327(0220)/AllData_0327/unified data array/reliability_mod/'
+exeno    = 'ex7'
 
-for datefolder in os.listdir(src_path):  
+for datefolder in ['20161216', '20170224', '20170306']:  #os.listdir(src_path):  
     for userfolder in os.listdir(src_path+'/'+datefolder+'/pkl/'):
         for infile in glob.glob(os.path.join(src_path+'/'+datefolder+'/pkl/'+userfolder+'/','*'+exeno+'.pkl')):
             print infile

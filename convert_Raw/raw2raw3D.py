@@ -12,16 +12,17 @@ import glob,os
 
     
 
-src_path = 'F:/AllData_0327/Motion and Kinect raw data/20161216/pkl/'
-dst_path = 'F:/AllData_0327/Motion and Kinect raw data/3D_kinect_joint/'
-jidx = [0,1,2,3,4,5,6,8,9,10,20]
+# src_path = 'F:/AllData_0327/Motion and Kinect raw data/20161216/pkl/'
+# dst_path = 'F:/AllData_0327/Motion and Kinect raw data/3D_kinect_joint/'
+src_path = 'D:/AllData_0327(0220)/AllData_0327/Motion and Kinect raw data/20170306/pkl/'
+dst_path = 'D:/AllData_0327(0220)/AllData_0327/Motion and Kinect raw data/3D_kinect_joint/'
+
+jidx = [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 20]
 
 
 
-for subfolder in os.listdir(src_path):  
-    for exeno in [1,2,3,4]:
-    
-
+for subfolder in os.listdir(src_path):
+    for exeno in [5, 6, 7]:
         filelist = glob.glob(os.path.join(src_path+subfolder, '*ex'+repr(exeno)+'.pkl') ) # find all pkl files
     #    pdb.set_trace()
         for infile in filelist:
@@ -42,8 +43,6 @@ for subfolder in os.listdir(src_path):
                 year = '2017'
                 
             fname = dst_path+'ex'+repr(exeno)+'/' + name[0].replace('data','data'+year)+'raw3D_ex'+name[1]
-    
-    
             cPickle.dump(J,file(fname,'wb'))
 
 

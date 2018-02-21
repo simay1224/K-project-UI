@@ -6,12 +6,14 @@ Created on Sun Jul 16 17:43:27 2017
 
 Mcam_raw2rawarray (kinect-like)
 """
+
 import cPickle,glob,os,pdb
 from Mocam2Kinect import *
 import numpy as np
 
-src_path = 'F:/AllData_0327/Motion and Kinect raw data/raw_MData/'
-dst_path = 'F:/AllData_0327/Motion and Kinect raw data/Not_unified_Mdata/'
+src_path = 'D:/AllData_0327(0220)/AllData_0327/Motion and Kinect raw data/raw_MData/'
+dst_path = 'D:/AllData_0327(0220)/AllData_0327/Motion and Kinect raw data/Not_unified_Mdata/'
+
 
 
 

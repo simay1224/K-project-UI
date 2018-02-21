@@ -180,7 +180,7 @@ class Analysis(object):
                 self.swing.run(reconJ)
                 if self.evalstr == '':
                     self.evalstr = self.swing.evalstr
-                    self.shld.evalstr = ''
+                    self.swing.evalstr = ''
             elif stus == 'down':
                 if self.swing.do:
                     if self.cnt > 90:
