@@ -5,7 +5,8 @@ from scipy.ndimage.filters import gaussian_filter1d as gf
 import pdb
 
 class Breath_status(object):
-
+    """ detect breathing status
+    """
     def __init__(self):
         self.ref_bdry      = np.array([])
         self.ref_dmap      = None
@@ -14,8 +15,22 @@ class Breath_status(object):
         self.ngframe       = []
         self.brthtype      = 'out'
         self.missingbreath = []
-        self.do            = False
-        self.err           = []
+        self.ana_ary       = []
+        self.max_ary       = np.array([[0, np.inf]])
+        self.min_ary       = np.array([[0, -np.inf]])
+        self.cnt_max_flag  = False
+        self.cnt_min_flag  = False
+        self.cnt_max       = 0 
+        self.cnt_min       = 0      
+        self.max_len       = 0
+        self.min_len       = 0
+        self.plot_flag     = False
+        self.brth_in_flag  = False
+        self.first_flag    = True
+        # default parameters
+        self.do      = False
+        self.err     = []
+        self.evalstr = ''
 
     def rm_pulse(self, ary, th=10):
         """ remove small pulse in the binary array
@@ -47,7 +62,7 @@ class Breath_status(object):
                               int(max(cur_bdry[1], self.ref_bdry[1])),
                               int(max(cur_bdry[2], self.ref_bdry[2])),
                               int(min(cur_bdry[3], self.ref_bdry[3]))])
-            blk_diff = gf_2D((dmap-self.ref_dmap)[ubdry[1]:ubdry[0], ubdry[2]:ubdry[3]], 5)
+            blk_diff = gf_2D((dmap.astype(float)-self.ref_dmap.astype(float))[ubdry[1]:ubdry[0], ubdry[2]:ubdry[3]], 5)
             self.breath_list.append(np.mean(blk_diff))
 
     def breath_analyze(self, offset=0, th=10):
@@ -166,5 +181,65 @@ class Breath_status(object):
 
         sync_rate = cnt*1./len(hand_trunc)*100
         print('hand and breath synchronize rate is '+str(np.round(sync_rate, 2))+'%')
+
+    def local_minmax(self, seq1, seq2, th, minmax_str, rng=15):
+        """ finding local min or max depending on the argument minmax
+        """
+        breath_list = gf(self.breath_list, 3)
+        if minmax_str == 'min':
+            minmax = np.less
+        elif minmax_str == 'max':
+            minmax = np.greater        
+        pts = argrelextrema(breath_list, minmax, order=rng)[0]
+        if len(pts) != 0:
+            if pts[-1] - seq1[-1][0] >= rng and minmax(breath_list[pts[-1]], th)\
+                and pts[-1] > seq2[-1, 0]:
+                seq1 = np.vstack((seq1, np.array([pts[-1], breath_list[pts[-1]]])))
+            elif 0 < pts[-1]-seq1[-1][0] < rng and minmax(breath_list[pts[-1]], seq1[-1][1]):
+                seq1[-1] = np.array([pts[-1], breath_list[pts[-1]]])
+        return np.atleast_2d(seq1)
+        
+    def detect_brth(self, rng=10):
+
+        if self.brth_in_flag:
+            self.max_ary = self.local_minmax(self.max_ary, self.min_ary, self.min_ary[-1, 1]+10, 'max')
+            if self.max_ary.shape[0] > self.max_len:
+                self.cnt_max_flag = True
+            if self.cnt_max_flag:
+                self.cnt_max += 1
+            if self.cnt_max == rng:
+                self.cnt_max = 0
+                self.cnt_max_flag = False
+                print ('find one max  ' +str(self.max_ary[-1,0]))
+                self.brth_in_flag = False
+                time = (np.atleast_2d(self.max_ary[-1, 0])-np.atleast_2d(self.min_ary[-1, 0]))/30
+                print('breath out takes time = '+str(time[0]))
+                self.ana_ary.append([self.max_ary[-1, 0], 1, self.max_ary[-1, 1]])
+        # detect brth in
+        else:
+            self.min_ary = self.local_minmax(self.min_ary, self.max_ary, self.max_ary[-1, 1]-10, 'min')
+            if self.min_ary.shape[0] > self.min_len:
+                self.cnt_min_flag = True
+            if self.cnt_min_flag:
+                self.cnt_min += 1
+            if self.cnt_min == rng:
+                self.cnt_min = 0
+                self.cnt_min_flag = False
+                print ('find one min ' + str(self.min_ary[-1, 0]))
+                self.brth_in_flag = True
+                if self.first_flag:
+                    self.first_flag = False
+                else:
+                    time = (np.atleast_2d(self.min_ary[-1, 0])-np.atleast_2d(self.max_ary[-1, 0]))/30
+                    print('breath in takes time = '+str(time[0]))
+                    self.ana_ary.append([self.min_ary[-1, 0], 0, self.min_ary[-1, 1]])        
+                    if np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1]) < 40 :
+                        print('breath in not deep enough '+str(np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1])))             
+        self.max_len = self.max_ary.shape[0]
+        self.min_len = self.min_ary.shape[0]
+
+    def run(self, bdry, dmap):
+        self.breathextract(bdry, dmap)
+        self.detect_brth()
 
         

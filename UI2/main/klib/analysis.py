@@ -89,7 +89,6 @@ class Analysis(object):
 
     def run(self, exeno, reconJ, surface, evalinst, kp, body, dmap=[], djps=[]):
         if exeno == 1:
-            
             if self.exer[1].cntdown <= 0:
                 if self.offset == 0:
                     self.offset = kp.framecnt
@@ -102,7 +101,7 @@ class Analysis(object):
                 if self.holdstate: 
                     evalinst.blit_text(surface, exeno, kp, 'Starting breath in/out', 1, (255, 0, 0, 255))
                     bdry = self.getcoord(djps)
-                    self.brth.breathextract(bdry, dmap)
+                    self.brth.run(bdry, dmap)
                 else:
                     if not self.do_once:
                         self.brth.breath_analyze(self.offset)
@@ -110,8 +109,8 @@ class Analysis(object):
                         self._done = True
                         print('================= exe END ======================')            
             else:
-                evalinst.blit_text(surface, self.exer[1].no, kp, 'Detection will starting after '\
-                                   +str(np.round(self.exer[1].cntdown/30., 2))+' second', 1)
+                evalinst.blit_text(surface, self.exer[1].no, kp,\
+                                   'Detection will starting after %.2f second' % (self.exer[1].cntdown/30.), 1)    
                 self.exer[1].cntdown -= 1       
         elif exeno == 2:
             if self.exer[2].order[self.dtw.oidx] == [2]:

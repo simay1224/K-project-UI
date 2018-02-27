@@ -6,13 +6,14 @@ from scipy.ndimage.filters import gaussian_filter1d as gf
 import inflect,pdb
 
 class Swing(object):
-    """
+    """ Dectect if body bend to left or right.
+        Also if hand is straight or not.
     """
     def __init__(self):
-        # self.up      = False
         self.angle_mean = []
         self.angel_le   = []
         self.angel_re   = []
+        self.angle_ini  = 90.0
         self.bend_max   = []
         self.bend_min   = []
         self.cnvt       = inflect.engine()  # converting numerals into ordinals
@@ -24,44 +25,51 @@ class Swing(object):
         self.min_ary = np.array([0, np.inf])
         self.max_len = 0
         self.min_len = 0
-        self.bend_th = 8
+        self.bend_th = 10
         self.kpm     = Kinect_para()
         self.cnt     = 0
-        self.evalstr = ''
-        self.err     = []
+        # default parameters
         self.do      = False
+        self.err     = []
+        self.evalstr = ''
 
     def vec_angle(self, vec1, vec2=np.array([1, 0, 0])):
+        """ find the angle btw vec1 and vec2
+            if vec2 is not given, set vec2 as [1, 0, 0] which represent horizontal vector
+        """
         costheta = vec1.dot(vec2)/sum(vec1**2)**0.5/sum(vec2**2)**0.5
         return acos(costheta)*180/np.pi
 
     def body_angle(self, joints):
-        angles = []
-        for i in range(3):
-            vec = joints[(i+1)*3:(i+2)*3] - joints[i*3:(i+1)*3]
-            angles.append(self.vec_angle(vec))
-        self.angle_mean.append(np.mean(angles))
+        """ calculate body bending angle
+        """
+        vec_SLEL = joints[self.kpm.LElbow_x:self.kpm.LElbow_z+1] - joints[self.kpm.LShld_x:self.kpm.LShld_z+1]
+        vec_SRER = joints[self.kpm.RElbow_x:self.kpm.RElbow_z+1] - joints[self.kpm.RShld_x:self.kpm.RShld_z+1]
+        vec_SE   = (vec_SRER + vec_SLEL)/2  # combine vec_SLEL and vec_SRER
+        self.angle_mean.append(self.vec_angle(vec_SE))  # angle btw vec_se and horizontal vector
+        # store left and right hand angles
         self.angel_le.append(self.vec_angle(joints[self.kpm.LElbow_x:self.kpm.LElbow_z+1] - joints[self.kpm.LShld_x:self.kpm.LShld_z+1],\
                                             joints[self.kpm.LElbow_x:self.kpm.LElbow_z+1] - joints[self.kpm.LWrist_x:self.kpm.LWrist_z+1]))
         self.angel_re.append(self.vec_angle(joints[self.kpm.RElbow_x:self.kpm.RElbow_z+1] - joints[self.kpm.RShld_x:self.kpm.RShld_z+1],\
                                             joints[self.kpm.RElbow_x:self.kpm.RElbow_z+1] - joints[self.kpm.RWrist_x:self.kpm.RWrist_z+1]))
 
-    def local_minmax(self, seq, th, minmax, rng=30):
+    def local_minmax(self, seq, th, minmax, rng=15):
+        """ finding local min or max depending on the argument minmax
+        """
         angle_bending = gf(self.angle_mean, 15)
         pts = argrelextrema(angle_bending, minmax, order=rng)[0]
         if len(pts) != 0:
-
             if pts[-1] - seq[-1][0] >= rng and minmax(angle_bending[pts[-1]], th):
                 seq = np.vstack((seq, np.array([pts[-1], angle_bending[pts[-1]]])))
             elif 0 < pts[-1]-seq[-1][0] < rng and minmax(angle_bending[pts[-1]], seq[-1][1]):
                 seq[-1] = np.array([pts[-1], angle_bending[pts[-1]]])
-
-
         return np.atleast_2d(seq)
 
-    def bending(self, joints, rng=30):   
-        self.max_ary = self.local_minmax(self.max_ary, 90+self.bend_th, np.greater, rng)
-        self.min_ary = self.local_minmax(self.min_ary, 90-self.bend_th, np.less, rng)
+    def bending(self, joints, rng=15):
+        """ check body bending
+        """ 
+        self.max_ary = self.local_minmax(self.max_ary, self.angle_ini+self.bend_th, np.greater, rng)
+        self.min_ary = self.local_minmax(self.min_ary, self.angle_ini-self.bend_th, np.less, rng)
         if self.max_ary.shape[0] > self.max_len:
             self.cnt_max_flag = True
         if self.cnt_max_flag:
@@ -70,10 +78,10 @@ class Swing(object):
             self.cnt_max = 0
             self.cnt_max_flag = False
             self.evalstr = 'well done\n Next : bend to right\n'
-            print ' ========  left  ========='
+            print '========  left  ========='
             self.cnt += 1
             # print ('bend to left  ' +str(self.max_ary[-1, 0])+'\n')
-        if self.min_ary.shape[0] > self.max_len:
+        if self.min_ary.shape[0] > self.min_len:
             self.cnt_min_flag = True
         if self.cnt_min_flag:
             self.cnt_min += 1
@@ -88,19 +96,27 @@ class Swing(object):
         self.min_len = self.min_ary.shape[0]
 
 
-    def detect_angle(self, angle, lr, rng=15, th=130):
-        if len(angle) < rng:
-            res = np.mean(angle)
+    def straight_detection(self, angle_lsit, lr, rng=15, th=130):
+        """ check if the hand (wrist-elbow-shoulder) is straight
+        """
+        if len(angle_lsit) < rng:
+            res = np.mean(angle_lsit)
         else:
-            res = np.mean(angle[-rng:])
-        # print res
+            res = np.mean(angle_lsit[-rng:])
         if res < th:
             if not 'Make your '+ lr +' arm straight.' in self.evalstr:
                 self.evalstr += 'Make your '+ lr +' arm straight.\n'
             self.err.append(lr+' arm is not straight in '+self.cnvt.ordinal(int(np.ceil(self.cnt/2)))+' time bending.')
 
+    def init_angle(self):
+        """ initialize torso angle
+        """
+        if len(self.angle_mean) <= 15:
+            self.angle_ini = np.mean(self.angle_mean)
+
     def run(self, joints):
+        self.init_angle()
         self.body_angle(joints)
         self.bending(joints)
-        self.detect_angle(self.angel_le, 'left')
-        self.detect_angle(self.angel_re, 'right')
+        self.straight_detection(self.angel_le, 'left')
+        self.straight_detection(self.angel_re, 'right')
