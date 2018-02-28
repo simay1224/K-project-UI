@@ -21,8 +21,12 @@ class Skeleton(Kinect_para):
         if (joint0State == self.TrackingState_Inferred) and (joint1State == self.TrackingState_Inferred):
             return
         # ok, at least one is good
-        start = (jointPoints[joint0].x, jointPoints[joint0].y)
-        end = (jointPoints[joint1].x, jointPoints[joint1].y)
+        if len(jointPoints) == 25:
+            start = (jointPoints[joint0].x, jointPoints[joint0].y)
+            end = (jointPoints[joint1].x, jointPoints[joint1].y)
+        else:  # reconstruct joints
+            start = (jointPoints[joint0, 0], jointPoints[joint0, 1])
+            end = (jointPoints[joint1, 0], jointPoints[joint1, 1])            
 
         try:
             pygame.draw.line(surface, color, start, end ,linewidth)

@@ -3,7 +3,7 @@ from .pykinect2 import PyKinectV2
 from .pykinect2.PyKinectV2 import *
 from .pykinect2 import PyKinectRuntime
 import ctypes, os, datetime
-import pygame, h5py, sys
+import pygame, h5py, sys, copy
 import pdb, time, cv2, cPickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -87,7 +87,7 @@ class BodyGameRuntime(object):
         else:
             print 'Failed to extract .....'
 
-        self.exeno = 5  # exercise number
+        self.exeno = 1  # exercise number
         self.__param_init__()
 
     def __param_init__(self, clean=False):
@@ -115,9 +115,7 @@ class BodyGameRuntime(object):
         self.h_mod = Human_model()
         self.skel = Skeleton()
         self.fextr = Finger_extract()
-        # self.hstus = Hand_status()
         self.exeinst = Exeinst()
-        # self.evalinst = Evalinst()
 
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
@@ -130,15 +128,6 @@ class BodyGameRuntime(object):
         self.movie.stop(True)
         del self.movie
         self.__param_init__(clean)
-
-    # def getcoord(self, data, order=[1, 4, 8, 20]):
-    #     foo = []
-    #     for i in order:
-    #         if i == 1:
-    #             foo = np.array([data[i].x, data[i].y])
-    #         else:
-    #             foo = np.vstack([foo, np.array([data[i].x, data[i].y])])
-    #     return foo
 
     def press_event(self, press):
         """ According to the button which is pressed by the user
@@ -223,8 +212,6 @@ class BodyGameRuntime(object):
                 if self.kp.ratio > 0.2:
                     self.kp.ratio -= 0.05
                     self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
-        
-
 
         if press[pygame.K_0]:  # use '0' to change the scene type
             print('scene change')
@@ -261,6 +248,9 @@ class BodyGameRuntime(object):
             self.exeno = 7
             print('====  Doing exercise 7 ====')
             self.reset(change=True)
+
+        if press[pygame.K_p]:
+            pdb.set_trace()
 
     def run(self):
         wait_key_cnt = 3
@@ -347,36 +337,39 @@ class BodyGameRuntime(object):
                                 else:  # contains unreliable joints
                                     if self.ana.exer[self.exeno].limbjoints:
                                         reconJ, unrelidx = self.denoise.run(modJary, Relary)
+                                        JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
                                     else:
-                                        reconJ, unrelidx = self.denoise.run(modJary[12:], Relary)
-                                        reconJ = np.hstack([modJary[:12], reconJ]) 
+                                        reconJ, unrelidx = self.denoise.run(modJary[:, 12:], Relary)
+                                        JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
+                                        reconJ = np.hstack([modJary[:, :12], reconJ]) 
                                     #  === recon 2D joints in color domain ===
-                                    JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
                                     for ii in [4, 5, 6, 8, 9, 10, 20]:
-                                        rec_joints[ii].Position.x = JJ[i][0]
-                                        rec_joints[ii].Position.y = JJ[i][1]
-                                        rec_joints[ii].Position.z = JJ[i][2]
+                                        rec_joints[ii].Position.x = JJ[ii][0]
+                                        rec_joints[ii].Position.y = JJ[ii][1]
+                                        rec_joints[ii].Position.z = JJ[ii][2]
                                     tmp_jps = self._kinect.body_joints_to_color_space(rec_joints)  # joints in color domain
-                                    rec_jps = jps
-                                    for ii in unrelidx:
-                                        rec_jps[ii].x = tmp_jps[ii].x
-                                        rec_jps[ii].y = tmp_jps[ii].y
-                                    self.skel.draw_body(rec_joints, rec_jps, SKELETON_COLORS[-1], self._frame_surface, 15)
+                                    rec_jps = np.zeros([21,2])
+                                    for ii in xrange(21):
+                                        if ii in unrelidx:
+                                            rec_jps[ii, 0] = tmp_jps[ii].x
+                                            rec_jps[ii, 1] = tmp_jps[ii].y
+                                        else:
+                                            rec_jps[ii, 0] = jps[ii].x
+                                            rec_jps[ii, 1] = jps[ii].y                                            
+                                    self.skel.draw_body(rec_joints, rec_jps, SKELETON_COLORS[3], self._frame_surface, 30)
                             else:
                                 reconJ = modJary
                         else:
                             reconJ = modJary
 
-                        # === DTW matching ===
-                        # bdry = self.getcoord(djps)
-     
+                        # === analyze ===  
                         self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
                                      self.eval, self.kp, body, dframe, djps)                        
 
                         # hand status 
-                        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                            self.ana.hs.htext(body.hand_left_state, body.hand_right_state), 4 ,\
-                                            (255, 130, 45, 255))
+                        # self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                        #                     self.ana.hs.htext(body.hand_left_state, body.hand_right_state), 4 ,\
+                        #                     (255, 130, 45, 255))
 
                         if self.ana.evalstr != '':
                             if 'well' in (self.ana.evalstr).lower():

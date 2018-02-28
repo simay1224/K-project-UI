@@ -13,21 +13,20 @@ class Breath_status(object):
         self.breath_list   = []
         self.breath        = None
         self.ngframe       = []
-        self.brthtype      = 'out'
+        # self.brthtype      = 'in'
         self.missingbreath = []
         self.ana_ary       = []
-        self.max_ary       = np.array([[0, np.inf]])
-        self.min_ary       = np.array([[0, -np.inf]])
-        self.cnt_max_flag  = False
-        self.cnt_min_flag  = False
-        self.cnt_max       = 0 
-        self.cnt_min       = 0      
-        self.max_len       = 0
-        self.min_len       = 0
+        self.breath_in     = []
+        self.breath_out    = []
+        self.max_ary       = np.array([[0, 0]])
+        self.min_ary       = np.array([[0, 0]])   
+        self.max_len       = 1
+        self.min_len       = 1
         self.plot_flag     = False
-        self.brth_in_flag  = False
-        self.first_flag    = True
+        self.brth_out_flag = False
+        # self.first_flag    = True
         # default parameters
+        self.cnt     = 0
         self.do      = False
         self.err     = []
         self.evalstr = ''
@@ -65,45 +64,41 @@ class Breath_status(object):
             blk_diff = gf_2D((dmap.astype(float)-self.ref_dmap.astype(float))[ubdry[1]:ubdry[0], ubdry[2]:ubdry[3]], 5)
             self.breath_list.append(np.mean(blk_diff))
 
+            if len(self.breath_list) == 1:
+                self.max_ary = np.array([[0, self.breath_list[0]]])
+                self.min_ary = np.array([[0, self.breath_list[0]]])
+                self.ana_ary = [[0, 1, self.breath_list[0]]]
+
     def breath_analyze(self, offset=0, th=10):
         """ Analyze the human and breath in/out behavior  
         """
         self.do = True
-        # breath part
-        breath_gd = np.gradient(gf(self.breath_list, 10))
-        breath_gd[breath_gd > 0] = 1
-        breath_gd[breath_gd < 0] = 0
-        breath_gd = self.rm_pulse(breath_gd)
-        breath_pulse = breath_gd[:-1]-np.roll(breath_gd, -1)[:-1]
-        breath_out = argrelextrema(breath_pulse, np.less, order=10)[0]#+offset  # endpoint of each b out
-        breath_in = argrelextrema(breath_pulse, np.greater, order=10)[0]#+offset # endpoint of each b in
-        self.breath = np.sort(np.hstack([breath_in, breath_out, len(self.breath_list)-1]))
-
-        if self.breath[0] == breath_in[0]:
-            self.brthtype = 'in'
-        else:
-            self.brthtype = 'out'
-        print('breath '+self.brthtype+' from frame '+str(0)+' to frame '+str(self.breath[0]))
+        for i in xrange(len(self.ana_ary)):
+            if self.ana_ary[i][1] == 0:
+                self.breath_in.append(self.ana_ary[i][0])
+            else:
+                self.breath_out.append(self.ana_ary[i][0])
+        self.breath = np.sort(np.hstack([self.breath_in, self.breath_out])).astype(int)
 
         b_in = []
         b_out = []
         delidx = []
 
-        if len(self.breath) != 0:       
+        if len(self.breath) != 0:
             for i, j in zip(self.breath[:-1], self.breath[1:]):
                 breath_diff = self.breath_list[j]-self.breath_list[i]
-                if abs(breath_diff) > 3000:  # really breath in/out
-                    if abs(breath_diff) < 30000:  # not deep breath
-                        if breath_diff < 0:  # breath out
+                if abs(breath_diff) > 10:  # really breath in/out
+                    if abs(breath_diff) < 40:  # not deep breath
+                        if breath_diff > 0:  # breath out
                             print('breath out from frame '+str(i)+' to frame '+str(j)
                                 +' <== breath not deep enough')
                             b_out.append(j-i)
-                            self.ngframe.append(i)
+                            self.ngframe.append((i+j)/2)
                         else:  # breath in
                             print('breath in from frame '+str(i)+' to frame '+str(j)
                             +' <== breath not deep enough')
                             b_in.append(j-i)
-                            self.ngframe.append(i)
+                            self.ngframe.append((i+j)/2)
                     else: 
                         if breath_diff > 0:  # breath out
                             print('breath out from frame '+str(i)+' to frame '+str(j))
@@ -124,10 +119,10 @@ class Breath_status(object):
         """calculate breath and hand open/close relation
         """
         hand = np.sort(np.hstack([lhopen, lhclose]))
-        if self.breath[0] == 0:
-            breath_data = self.breath[1:]
-        else:
-            breath_data = self.breath
+        # if self.breath[0] == 0:
+        #     breath_data = self.breath[1:]
+        # else:
+        #     breath_data = self.breath
         if hand[0] == lhopen[0]:  # first term is open
             mode = 'open'
         else:
@@ -140,24 +135,24 @@ class Breath_status(object):
             hand_trunc_close = hand_trunc[::2,:]
             hand_trunc_open = hand_trunc[1::2,:]
         else:
-            hand_trunc_close = hand_trunc[1::2,:]
-            hand_trunc_open = hand_trunc[::2,:]            
+            hand_trunc_close = hand_trunc[1::2, :]
+            hand_trunc_open = hand_trunc[::2, :]
 
-        if self.brthtype == 'out':
-            breath_in = breath_data[1::2]
-            breath_out = breath_data[::2]
-            if abs(breath_out[0]-hand_trunc_open[0, 0]) < 10:
-                breath_out[0] =  hand_trunc_open[0, 0]            
-        else:
-            breath_in = breath_data[::2]
-            breath_out = breath_data[1::2]
-            if abs(breath_in[0]-hand_trunc_close[0, 0]) < 10:
-                breath_in[0] =  hand_trunc_close[0, 0]
+        # if self.brthtype == 'out':
+        #     breath_in = breath_data[1::2]
+        #     breath_out = breath_data[::2]
+        #     if abs(breath_out[0]-hand_trunc_open[0, 0]) < 10:
+        #         breath_out[0] =  hand_trunc_open[0, 0]            
+        # else:
+        #     breath_in = breath_data[::2]
+        #     breath_out = breath_data[1::2]
+        #     if abs(breath_in[0]-hand_trunc_close[0, 0]) < 10:
+        #         breath_in[0] =  hand_trunc_close[0, 0]
                    
         hand_chk = np.ones(len(hand_trunc))
         # print hand_trunc
         cnt = 0
-        for idx, i in enumerate(breath_in):
+        for idx, i in enumerate(self.breath_in):
             loc = np.where(((i >= hand_trunc_close[:, 0]) & (i <= hand_trunc_close[:, 1])) == True)[0]
             if len(loc) == 1:
                 cnt += 1
@@ -167,7 +162,7 @@ class Breath_status(object):
                 pass
             else:
                 print hand_trunc
-        for idx, i in enumerate(breath_out):
+        for idx, i in enumerate(self.breath_out):
             loc = np.where(((i >= hand_trunc_open[:, 0]) & (i <= hand_trunc_open[:, 1])) == True)[0]
             if len(loc) == 1:
                 cnt += 1
@@ -195,46 +190,51 @@ class Breath_status(object):
             if pts[-1] - seq1[-1][0] >= rng and minmax(breath_list[pts[-1]], th)\
                 and pts[-1] > seq2[-1, 0]:
                 seq1 = np.vstack((seq1, np.array([pts[-1], breath_list[pts[-1]]])))
-            elif 0 < pts[-1]-seq1[-1][0] < rng and minmax(breath_list[pts[-1]], seq1[-1][1]):
-                seq1[-1] = np.array([pts[-1], breath_list[pts[-1]]])
         return np.atleast_2d(seq1)
+
+    def updata_minmax(self, seq, minmax_str):
+        if minmax_str == 'min':
+            minmax = np.less
+            flag = 0
+        elif minmax_str == 'max':
+            minmax = np.greater
+            flag = 1
+        if len(self.breath_list) != 0:
+            if minmax(self.breath_list[-1], seq[-1, 1]):
+                # print('updata '+minmax_str+'fame ' +str(len(self.breath_list)))
+                seq[-1] = [len(self.breath_list), self.breath_list[-1]]
+                self.ana_ary[-1] = [len(self.breath_list), flag, self.breath_list[-1]]
+        return seq        
         
     def detect_brth(self, rng=10):
 
-        if self.brth_in_flag:
+        if self.brth_out_flag:
+            self.min_ary = self.updata_minmax(self.min_ary, 'min')
             self.max_ary = self.local_minmax(self.max_ary, self.min_ary, self.min_ary[-1, 1]+10, 'max')
             if self.max_ary.shape[0] > self.max_len:
-                self.cnt_max_flag = True
-            if self.cnt_max_flag:
-                self.cnt_max += 1
-            if self.cnt_max == rng:
-                self.cnt_max = 0
-                self.cnt_max_flag = False
-                print ('find one max  ' +str(self.max_ary[-1,0]))
-                self.brth_in_flag = False
-                time = (np.atleast_2d(self.max_ary[-1, 0])-np.atleast_2d(self.min_ary[-1, 0]))/30
-                print('breath out takes time = '+str(time[0]))
-                self.ana_ary.append([self.max_ary[-1, 0], 1, self.max_ary[-1, 1]])
+                # print ('find one max  ' +str(self.max_ary[-1, 0]))
+                self.brth_out_flag = False
+                # time = (np.atleast_2d(self.max_ary[-1, 0])-np.atleast_2d(self.min_ary[-1, 0]))/30
+                # print('breath out takes time = '+str(time[0]))
+                self.cnt += 1
+                self.evalstr = 'well done'
+                self.ana_ary.append([self.max_ary[-1, 0], 1, self.max_ary[-1, 1]])  
         # detect brth in
         else:
+            self.max_ary = self.updata_minmax(self.max_ary, 'max')
             self.min_ary = self.local_minmax(self.min_ary, self.max_ary, self.max_ary[-1, 1]-10, 'min')
             if self.min_ary.shape[0] > self.min_len:
-                self.cnt_min_flag = True
-            if self.cnt_min_flag:
-                self.cnt_min += 1
-            if self.cnt_min == rng:
-                self.cnt_min = 0
-                self.cnt_min_flag = False
-                print ('find one min ' + str(self.min_ary[-1, 0]))
-                self.brth_in_flag = True
-                if self.first_flag:
-                    self.first_flag = False
-                else:
-                    time = (np.atleast_2d(self.min_ary[-1, 0])-np.atleast_2d(self.max_ary[-1, 0]))/30
-                    print('breath in takes time = '+str(time[0]))
-                    self.ana_ary.append([self.min_ary[-1, 0], 0, self.min_ary[-1, 1]])        
-                    if np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1]) < 40 :
-                        print('breath in not deep enough '+str(np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1])))             
+                # print ('find one min ' +str(self.min_ary[-1, 0]))
+                self.brth_out_flag = True
+                # if self.first_flag:
+                #     self.first_flag = False
+                # else:
+                    # time = (np.atleast_2d(self.min_ary[-1, 0])-np.atleast_2d(self.max_ary[-1, 0]))/30
+                    # print('breath in takes time = '+str(time[0]))
+                self.ana_ary.append([self.min_ary[-1, 0], 0, self.min_ary[-1, 1]])        
+                if np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1]) < 40 :
+                    # print('breath in not deep enough    '+str(np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1])))
+                    self.evalstr = 'please breathe deeper'
         self.max_len = self.max_ary.shape[0]
         self.min_len = self.min_ary.shape[0]
 

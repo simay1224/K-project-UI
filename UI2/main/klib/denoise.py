@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.spatial.distance import cdist
 from sklearn.externals import joblib
-import h5py
+import h5py, pdb
 
 class Denoise(object):
     """ Use Gaussian process regression to denoise
@@ -59,6 +59,6 @@ class Denoise(object):
             mask[unrelidx, :] = np.array([1, 1, 1])
             # use unrelidx and reconJ to replace unreliable joints in modJary
             modjary[:, mask.flatten() == 1] = reconj[:, mask.flatten() == 1]
-            return modjary, unrelidx
+            return modjary, self.limbidx[unrelidx]
         else:
-            return reconj, unrelidx
+            return reconj, self.limbidx

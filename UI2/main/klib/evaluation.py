@@ -24,34 +24,35 @@ class Evaluation(object):
                 pass
         else:  # did breath test
             if len(hs.hstate) == 0:  # only did breathe test (i.e. exer 1)
-                ax.plot(gf(brth.breath_list, 10), color='g')
+                ax.plot(gf(brth.breath_list, 5), color='g')
                 if len(brth.ngframe) != 0:
                     for i in brth.ngframe:
                         y1 = brth.breath_list[i]
-                        if y1 < 15000:
-                            y2 = y1+10000
-                        else:
-                            y2 = y1-10000    
-                        ax.annotate('Not deep breath', xy=(i, y1+10), xytext=(i, y2),\
+                        y2 = y1 - 20
+                        # if y1 < 0:
+                        #     y2 = y1+10
+                        # else:
+                        #     y2 = y1-10    
+                        ax.annotate('Not deep breath', xy=(i, y1-2), xytext=(i, y2),\
                                     arrowprops=dict(facecolor='red', shrink=0.05),)
                 plt.title('Breath in and out')
                 fig.savefig('output/Exer'+str(exeno)+'_bio_1.jpg')                
             else:  # did both hand and breath test (i.e. exer 2)
-                ax.plot(hs.hstate[:, 0]*20000, color='b')
-                ax.plot(hs.hstate[:, 1]*20000-20000, color='r')
+                ax.plot(hs.hstate[:, 0]*15, color='b')
+                ax.plot(hs.hstate[:, 1]*15-20, color='r')
                 # ax.plot(gf(self.breath_list, 10)/self.breath_list[0]*2, color='g')
-                ax.plot(gf(brth.breath_list, 10), color='g')
+                ax.plot(gf(brth.breath_list, 5), color='g')
                 if len(brth.ngframe) != 0:
                     for i in brth.ngframe:
                         y1 = brth.breath_list[i]#/self.breath_list[0]*2
-                        y2 = 1.5*10000
+                        y2 = 1.5*10
                         ax.annotate('breath not deep enough', xy=(i, y1), xytext=(i, y2),\
                                     arrowprops=dict(facecolor='red', shrink=0.05),)
                 if len(brth.missingbreath) != 0:
                     for i in brth.missingbreath:
                         x = sum(i)/2
                         y1 = brth.breath_list[x]#/self.breath_list[0]*2 
-                        y2 = 1*10000
+                        y2 = 1*10
                         ax.annotate('missing breath', xy=(x, y1), xytext=(x, y2),\
                                     arrowprops=dict(facecolor='green', shrink=0.05),)
                 plt.title('Breath in and out & hands open and close')
@@ -66,7 +67,7 @@ class Evaluation(object):
                     print (('%18s' % contents[idx])+' : '+text)
                     print('\n')
             elif dolist[idx]:  # done without err
-                print(('%18s' % contents[idx])+' : perfect !!')
+                print(('%18s' % contents[idx])+' : Perfect !!')
             else:
                 print(('%18s' % contents[idx])+' : Did not test this part.')
 

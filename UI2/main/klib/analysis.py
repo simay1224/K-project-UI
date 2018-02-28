@@ -98,8 +98,11 @@ class Analysis(object):
                     self.holdlist = np.vstack([self.holdlist, reconJ]) 
                     if np.sum(np.abs(self.holdlist[0]-self.holdlist[-1])[self.exer[1].jweight != 0]) > 400:
                         self.holdstate = False
-                if self.holdstate: 
-                    evalinst.blit_text(surface, exeno, kp, 'Starting breath in/out', 1, (255, 0, 0, 255))
+                if self.holdstate:
+                    if self.brth.brth_out_flag:
+                        evalinst.blit_text(surface, exeno, kp, 'Breathe out', 1, (255, 128, 0, 255))
+                    else:
+                        evalinst.blit_text(surface, exeno, kp, 'Breathe in', 1, (255, 128, 0, 255))
                     bdry = self.getcoord(djps)
                     self.brth.run(bdry, dmap)
                 else:
@@ -107,7 +110,16 @@ class Analysis(object):
                         self.brth.breath_analyze(self.offset)
                         self.do_once = True
                         self._done = True
-                        print('================= exe END ======================')            
+                        print('================= exe END ======================')
+                if self.evalstr == '':
+                    self.evalstr = self.brth.evalstr
+                    self.brth.evalstr = ''
+                if self.brth.cnt > 4:
+                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
+                    self.brth.err.append('Only need to do 4 times')
+                else:
+                    evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.brth.cnt)),\
+                                       3, (55,173,245,255))            
             else:
                 evalinst.blit_text(surface, self.exer[1].no, kp,\
                                    'Detection will starting after %.2f second' % (self.exer[1].cntdown/30.), 1)    
@@ -124,7 +136,7 @@ class Analysis(object):
                     evalinst.blit_text(surface, exeno, kp, 'Starting breath in (hand close) and breath out (hand open)', 1)
                     self.hs.hstus_proc(body.hand_left_state, body.hand_right_state)
                     bdry = self.getcoord(djps)
-                    self.brth.breathextract(bdry, dmap)
+                    self.brth.run(bdry, dmap)
                 else:
                     if not self.do_once:
                         self.brth.breath_analyze()
@@ -175,7 +187,13 @@ class Analysis(object):
             stus = self.handpos(self.exer[5], reconJ)
             if stus == 'up':
                 self.swing.do = True
-                evalinst.blit_text(surface, exeno, kp, 'Start bending to left and right', 1)
+                if self.swing.cnt/2 < 4:
+                    if self.swing.bend_left:
+                        evalinst.blit_text(surface, exeno, kp, 'Bending to your left', 1, color=(255, 128, 0, 255))
+                    else:
+                        evalinst.blit_text(surface, exeno, kp, 'Bending to your right', 1, color=(255, 128, 0, 255))
+                else:
+                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, color=(255, 128, 0, 255))
                 self.swing.run(reconJ)
                 if self.evalstr == '':
                     self.evalstr = self.swing.evalstr

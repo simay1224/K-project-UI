@@ -10,7 +10,7 @@ class Exer1(object):
 
     def __init__(self):
         self.no = 1
-        self.cntdown = 90
+        self.cntdown = 60
         self.limbjoints = True  # only need limb joints
         # order
         self.order = {}
@@ -100,9 +100,9 @@ class Exer5(object):
         self.angle = []
         self.limbjoints = False  # need limb joints + torso joints
         # weight
-        self.jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
-                                 0., 0., 0., 3., 3., 3., 9., 9., 9.,
-                                 0., 0., 0.])
+        self.jweight = np.array([3., 3., 3., 3., 3., 3., 3., 3., 3.,
+                                 3., 3., 3., 3., 3., 3., 3., 3., 3.,
+                                 3., 3., 3.])
         self.jweight = self.jweight/sum(self.jweight)*1.5
 
 class Exer6(object):
@@ -114,8 +114,8 @@ class Exer6(object):
         self.angle = []
         self.hraise = False  # hand raise
         # weight
-        self.jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
-                                 0., 0., 0., 3., 3., 3., 9., 9., 9.,
+        self.jweight = np.array([3., 3., 3., 3., 3., 3., 3., 3., 3.,
+                                 3., 3., 3., 3., 3., 3., 3., 3., 3.,
                                  0., 0., 0.])
         self.jweight = self.jweight/sum(self.jweight)*1.5
 
@@ -128,7 +128,7 @@ class Exer7(object):
         self.angle = []
         self.hraise = False  # hand raise
         # weight
-        self.jweight = np.array([0., 0., 0., 3., 3., 3., 9., 9., 9.,
-                                 0., 0., 0., 3., 3., 3., 9., 9., 9.,
+        self.jweight = np.array([3., 3., 3., 9., 9., 9., 3., 3., 3.,
+                                 3., 3., 3., 9., 9., 9., 3., 3., 3.,
                                  0., 0., 0.])
         self.jweight = self.jweight/sum(self.jweight)*1.5

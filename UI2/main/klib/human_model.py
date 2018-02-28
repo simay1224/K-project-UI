@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from initial_param.kinect_para import Kinect_para
+import pdb
 
 
 class Human_model(Kinect_para):
@@ -203,9 +204,10 @@ class Human_model(Kinect_para):
         Len90 = np.mean(np.sum((ori_body[10]- ori_body[9])**2, axis=0)**0.5)
         # reconstruct the joint
         J = {}
-        J[self.JointType_ShoulderLeft] = ori_body[4]  # use real Lshoulder position as reference
-        J[self.JointType_ElbowLeft]    = Vec45*Len45+ori_body[4]
-        J[self.JointType_WristLeft]    = Vec56*Len56+J[self.JointType_ElbowLeft]
+        J[self.JointType_SpineShoulder] = ori_body[20]
+        J[self.JointType_ShoulderLeft]  = ori_body[4]  # use real Lshoulder position as reference
+        J[self.JointType_ElbowLeft]     = Vec45*Len45+ori_body[4]
+        J[self.JointType_WristLeft]     = Vec56*Len56+J[self.JointType_ElbowLeft]
 
         J[self.JointType_ShoulderRight] = ori_body[8]  # use real Rshoulder position as reference
         J[self.JointType_ElbowRight]    = Vec89*Len89+ori_body[8]
