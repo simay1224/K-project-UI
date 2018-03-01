@@ -21,7 +21,7 @@ class Swing(object):
         self.min_ary = np.array([[0, np.inf]])
         self.max_len = 1
         self.min_len = 1
-        self.bend_th = 10
+        self.bend_th = 20
         self.kpm     = Kinect_para()
         self.bend_left = True
         # default parameters
@@ -29,6 +29,7 @@ class Swing(object):
         self.do      = False
         self.err     = []
         self.evalstr = ''
+        self.eval    = ''
 
     def vec_angle(self, vec1, vec2=np.array([1, 0, 0])):
         """ find the angle btw vec1 and vec2
@@ -84,7 +85,11 @@ class Swing(object):
             self.max_ary = self.local_minmax(self.max_ary, self.angle_ini+self.bend_th, np.greater, rng)  
             if self.max_ary.shape[0] > self.max_len:
                 self.bend_left = False
-                self.evalstr = 'well done\n'
+                if self.eval == '':
+                    self.evalstr = 'Repitition done: Well done.'
+                else:
+                    self.evalstr = 'Repitition done.\n'+self.eval
+                    self.eval = ''
                 print '========  left  ========='
                 self.cnt += 1
                 # print ('bend to left  ' +str(self.max_ary[-1, 0])+'\n')
@@ -93,7 +98,11 @@ class Swing(object):
             self.min_ary = self.local_minmax(self.min_ary, self.angle_ini-self.bend_th, np.less, rng)
             if self.min_ary.shape[0] > self.min_len:
                 self.bend_left = True
-                self.evalstr = 'well done\n'
+                if self.eval == '':
+                    self.evalstr = 'Repitition done: Well done.'
+                else:
+                    self.evalstr = 'Repitition done.\n'+self.eval
+                    self.eval = ''
                 print ' ========  right  ========='
                 self.cnt += 1
                 # print 'bend to right ' +str(self.min_ary[-1, 0])+'\n'
@@ -110,6 +119,8 @@ class Swing(object):
         if res < th:
             if not 'Make your '+ lr +' arm straight.' in self.evalstr:
                 self.evalstr += 'Make your '+ lr +' arm straight.\n'
+                if lr not in self.eval:
+                    self.eval += 'Make your '+ lr +' arm straight.\n'
             self.err.append(lr+' arm is not straight in '+self.cnvt.ordinal(int(self.cnt/2)+1)+' time bending.')
 
     def init_angle(self):

@@ -10,6 +10,7 @@ class Exer1(object):
 
     def __init__(self):
         self.no = 1
+        self.angle = []
         self.cntdown = 60
         self.limbjoints = True  # only need limb joints
         # order
@@ -27,6 +28,7 @@ class Exer2(object):
 
     def __init__(self):
         self.no = 2
+        self.angle = []
         self.limbjoints = True
         # reference subsequences
         self.gt_data = {}
@@ -109,7 +111,7 @@ class Exer6(object):
 
     def __init__(self):
         self.no = 6
-        self.limbjoints = True
+        self.limbjoints = False
         self.cntdown = 90
         self.angle = []
         self.hraise = False  # hand raise

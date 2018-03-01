@@ -33,9 +33,7 @@ class Dynamic_time_warping(object):
         self.srchfw        = 10  # forward search range
         self.srchbw        = 20  # backward search range
         self.seqlist_gf    = np.array([])
-        self.err           = []
-        self.evalstr       = ''
-        self.do            = False
+
         # updatable parameters
         self.dpfirst       = {}
         self.dist_p        = {}
@@ -43,11 +41,16 @@ class Dynamic_time_warping(object):
         self.seqlist       = np.array([])
         self.seqlist_reg   = np.array([])
         self.presv_size    = 0
-        self.oidx          = 0  # initail
-        self.cnt           = 0        
+        self.oidx          = 0  # initail       
         self.chk_flag      = False
         self.deflag        = False  # decreasing flag
         self.segini        = True
+        # default parameters
+        self.cnt     = 0
+        self.do      = False
+        self.err     = []
+        self.evalstr = ''
+        self.eval    = ''
 
     def wt_euclidean(self, u, v, w):
         """ normal euclidean dist with the weighting
@@ -125,7 +128,11 @@ class Dynamic_time_warping(object):
                                 minidx = 3
                             self.gt_idx = minidx
                             self.idxlist.append(self.gt_idx)
-                            self.evalstr = 'well done'
+                            if self.eval == '':
+                                self.evalstr = 'Repitition done: Well done.'
+                            else:
+                                self.evalstr = 'Repitition done. '+self.eval
+                                self.eval = ''
                             self.seg_update(endidx)
                 else:
                     test_data_p = self.seqlist + np.atleast_2d((exer.gt_data[self.gt_idx][0, :]-self.seqlist[0, :]))
@@ -152,7 +159,11 @@ class Dynamic_time_warping(object):
                     self.idx_cmp = self.seqlist.shape[0]
                     print(' ==== reset ====')
                 elif self.cnt == self.srchfw:
-                    self.evalstr = 'Well done'
+                    if self.eval == '':
+                        self.evalstr = 'Repitition done: Well done.'
+                    else:
+                        self.evalstr = 'Repitition done. '+self.eval
+                        self.eval = ''
                     tgrad = 0
                     for ii in xrange(self.seqlist.shape[1]):  # maybe can include jweight
                         tgrad += (np.gradient(gf(self.seqlist[:, ii], 1))**2)*exer.jweight[ii]

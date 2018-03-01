@@ -9,7 +9,6 @@ class Shld_state(object):
     """
 
     def __init__(self):
-        self.cnt     = 0
         self.ngcnt   = 0
         self.fcnt    = 0
         self.ign     = 30  # ignore first XX frames
@@ -22,9 +21,12 @@ class Shld_state(object):
         self.ldlist  = []
         self.rylist  = []
         self.rdlist  = []
-        self.evalstr = ''
+        # default parameters
+        self.cnt     = 0
         self.do      = False
-        self.err     = []       
+        self.err     = []
+        self.evalstr = ''
+        self.eval    = ''      
 
     def findtops(self, bdimg, shld, bdidx):
         """ find the shoulder top. 
@@ -94,17 +96,24 @@ class Shld_state(object):
 
         if self.type == 1:
             self.cnt += self.type  # cycle number
-            self.evalstr = 'well done'
+            if self.eval == '':
+                self.evalstr = 'Repitition done: Well done.'
+            else:
+                self.evalstr = 'Repitition done. '+self.eval
+                self.eval = ''
             self.type = 0
         elif self.type == 2:
-            print('simple up and down')
+            # print('simple up and down')
+            self.evalstr = 'Rotate deeper !!'
+            self.eval = 'Rotate deeper !!'
             self.ngcnt += 1
-            self.err.append('The '+self.cnvt.ordinal(self.ngcnt+self.cnt)+ 'time try, is not good.')
+            self.err.append('The '+self.cnvt.ordinal(self.ngcnt+self.cnt)+ 'time try, is not deep enough.')
             self.type = 0
         else:
             self.evalstr = ''
 
     def run(self, depth, joints):
+        self.do = True
         self.fcnt += 1
         lshld = [int(joints[4].x), int(joints[4].y)]
         # rshld = [int(joints[8].x), int(joints[8].y)]  

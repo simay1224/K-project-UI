@@ -87,7 +87,7 @@ class BodyGameRuntime(object):
         else:
             print 'Failed to extract .....'
 
-        self.exeno = 1  # exercise number
+        self.exeno = 6  # exercise number
         self.__param_init__()
 
     def __param_init__(self, clean=False):
@@ -362,7 +362,7 @@ class BodyGameRuntime(object):
                         else:
                             reconJ = modJary
 
-                        # === analyze ===  
+                        # === analyze ===
                         self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
                                      self.eval, self.kp, body, dframe, djps)                        
 

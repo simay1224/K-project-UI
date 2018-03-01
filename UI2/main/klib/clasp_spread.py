@@ -12,16 +12,19 @@ class Clasp_spread(object):
         self.clasp_cnt   = 0
         self.spread_cnt  = 0
         self.spread_time = 0
-        self.hold        = 18
-        self.elbowstus   = {}
+        self.hold        = 5
         self.first       = True
         self.cnvt        = inflect.engine()  # converting numerals into ordinals
         self.kpm         = Kinect_para()
+        self.elbowstus   = {}
         self.elbowstus['clasp'] = False
         self.elbowstus['spread'] = False
+        # default parameters
+        self.cnt     = 0
+        self.do      = False
         self.err     = []
         self.evalstr = ''
-        self.do      = False
+        self.eval    = ''
 
     def state_update(self, joints, kpm):
         """ update accoding to each frame data
@@ -40,7 +43,7 @@ class Clasp_spread(object):
             self.first = False
             self.do    = True    
             self.spread_time = 0
-            self.elbowstus['spread'] == False  
+            # self.elbowstus['spread'] == False  
 
     def bodystraight(self, joints, kpm, th=12):
         """ check whether body is straight or not
@@ -60,12 +63,14 @@ class Clasp_spread(object):
                 self.cnt += 1
                 if not self.elbowstus['spread']:
                     if self.spread_time < spread_th:
-                        self.evalstr = 'Elbows should put behind your head long enough!!'
+                        self.evalstr = 'Repitition done : Elbows should put behind your head long enough!!'
                         self.err.append('The '+self.cnvt.ordinal(self.cnt)+ \
                                         ' time spread is not good. elbows should behind your head long enough!!')
                     self.elbowstus['spread'] = True
                 else:
-                    self.evalstr = 'Spread well done'
+                    self.evalstr = 'Repitition done: Spread well done'
+                   
+
         if np.abs(joints[kpm.LElbow_x]-joints[kpm.RElbow_x]) < 75:
             self.elbowstus['clasp'] = True
 
@@ -75,11 +80,12 @@ class Clasp_spread(object):
         if self.spread_cnt == self.hold:
             self.elbowstus['spread'] = False
             if not self.elbowstus['clasp']:
-                self.evalstr = 'When raising the hands, elbows should close to each other.'
+                self.evalstr = 'Subsequence done: When raising the hands, elbows should close to each other.'
                 self.err.append('The '+self.cnvt.ordinal(self.cnt)+ ' time clasp is not good. Not clasp !!')
                 self.elbowstus['clasp'] = True
-            else:
-                self.evalstr = 'Clasp well done'
+            else:                    
+                self.evalstr = 'Subsequence done: Clasp well done'
+
         if (joints[kpm.LElbow_z]+joints[kpm.RElbow_z])/2 > joints[kpm.Head_z]:
             self.spread_time += 1
         if self.spread_time >= spread_th:

@@ -30,6 +30,7 @@ class Breath_status(object):
         self.do      = False
         self.err     = []
         self.evalstr = ''
+        self.eval    = ''
 
     def rm_pulse(self, ary, th=10):
         """ remove small pulse in the binary array
@@ -69,10 +70,10 @@ class Breath_status(object):
                 self.min_ary = np.array([[0, self.breath_list[0]]])
                 self.ana_ary = [[0, 1, self.breath_list[0]]]
 
-    def breath_analyze(self, offset=0, th=10):
+    def breath_analyze(self, th=10):
         """ Analyze the human and breath in/out behavior  
         """
-        self.do = True
+        
         for i in xrange(len(self.ana_ary)):
             if self.ana_ary[i][1] == 0:
                 self.breath_in.append(self.ana_ary[i][0])
@@ -88,7 +89,7 @@ class Breath_status(object):
             for i, j in zip(self.breath[:-1], self.breath[1:]):
                 breath_diff = self.breath_list[j]-self.breath_list[i]
                 if abs(breath_diff) > 10:  # really breath in/out
-                    if abs(breath_diff) < 40:  # not deep breath
+                    if abs(breath_diff) < 30:  # not deep breath
                         if breath_diff > 0:  # breath out
                             print('breath out from frame '+str(i)+' to frame '+str(j)
                                 +' <== breath not deep enough')
@@ -214,10 +215,12 @@ class Breath_status(object):
             if self.max_ary.shape[0] > self.max_len:
                 # print ('find one max  ' +str(self.max_ary[-1, 0]))
                 self.brth_out_flag = False
-                # time = (np.atleast_2d(self.max_ary[-1, 0])-np.atleast_2d(self.min_ary[-1, 0]))/30
-                # print('breath out takes time = '+str(time[0]))
                 self.cnt += 1
-                self.evalstr = 'well done'
+                if self.eval == '':
+                    self.evalstr = 'Repitition done: Well done.'
+                else:
+                    self.evalstr = 'Repitition done. '+self.eval
+                    self.eval = ''
                 self.ana_ary.append([self.max_ary[-1, 0], 1, self.max_ary[-1, 1]])  
         # detect brth in
         else:
@@ -226,19 +229,15 @@ class Breath_status(object):
             if self.min_ary.shape[0] > self.min_len:
                 # print ('find one min ' +str(self.min_ary[-1, 0]))
                 self.brth_out_flag = True
-                # if self.first_flag:
-                #     self.first_flag = False
-                # else:
-                    # time = (np.atleast_2d(self.min_ary[-1, 0])-np.atleast_2d(self.max_ary[-1, 0]))/30
-                    # print('breath in takes time = '+str(time[0]))
                 self.ana_ary.append([self.min_ary[-1, 0], 0, self.min_ary[-1, 1]])        
-                if np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1]) < 40 :
-                    # print('breath in not deep enough    '+str(np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1])))
-                    self.evalstr = 'please breathe deeper'
+                if np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1]) < 30:
+                    self.evalstr = 'Please breathe deeper.'
+                    self.eval = 'Please breathe deeper.'
         self.max_len = self.max_ary.shape[0]
         self.min_len = self.min_ary.shape[0]
 
     def run(self, bdry, dmap):
+        self.do = True
         self.breathextract(bdry, dmap)
         self.detect_brth()
 
