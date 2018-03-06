@@ -35,6 +35,7 @@ class Dynamic_time_warping(object):
         self.seqlist_gf    = np.array([])
 
         # updatable parameters
+        self.fcnt          = 0
         self.dpfirst       = {}
         self.dist_p        = {}
         #self.deflag_mul    = defaultdict(lambda: (bool(False)))
@@ -86,7 +87,7 @@ class Dynamic_time_warping(object):
         self.presv_size  = self.seqlist_reg.shape[0]
         self.oidx        = self.gt_idx
         #self.deflag_mul  = defaultdict(lambda: (bool(False)))
-        self.cnt         = 0
+        self.fcnt         = 0
         self.dpfirst     = {}
         self.dist_p      = {}
         self.deflag      = False
@@ -129,9 +130,9 @@ class Dynamic_time_warping(object):
                             self.gt_idx = minidx
                             self.idxlist.append(self.gt_idx)
                             if self.eval == '':
-                                self.evalstr = 'Repitition done: Well done.'
+                                self.evalstr = 'Subsequence done: Well done.'
                             else:
-                                self.evalstr = 'Repitition done. '+self.eval
+                                self.evalstr = 'Subsequence done. '+self.eval
                                 self.eval = ''
                             self.seg_update(endidx)
                 else:
@@ -152,17 +153,17 @@ class Dynamic_time_warping(object):
             test_data_p = self.seqlist + np.atleast_2d((exer.gt_data[self.gt_idx][0, :] - self.seqlist[0, :]))
             self.dist_p, path_p = fastdtw(exer.gt_data[self.gt_idx], test_data_p, exer.jweight, dist=self.wt_euclidean)
             if self.chk_flag:  # in check global min status
-                self.cnt += 1
+                self.fcnt += 1
                 if self.dist_p < self.distp_cmp:  # find smaller value
-                    self.cnt = 1
+                    self.fcnt = 1
                     self.distp_cmp = self.dist_p
                     self.idx_cmp = self.seqlist.shape[0]
                     print(' ==== reset ====')
-                elif self.cnt == self.srchfw:
+                elif self.fcnt == self.srchfw:
                     if self.eval == '':
-                        self.evalstr = 'Repitition done: Well done.'
+                        self.evalstr = 'Subsequence done: Well done.'
                     else:
-                        self.evalstr = 'Repitition done. '+self.eval
+                        self.evalstr = 'Subsequence done. '+self.eval
                         self.eval = ''
                     tgrad = 0
                     for ii in xrange(self.seqlist.shape[1]):  # maybe can include jweight

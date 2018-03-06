@@ -87,7 +87,7 @@ class BodyGameRuntime(object):
         else:
             print 'Failed to extract .....'
 
-        self.exeno = 6  # exercise number
+        self.exeno = 1  # exercise number
         self.__param_init__()
 
     def __param_init__(self, clean=False):
@@ -323,25 +323,25 @@ class BodyGameRuntime(object):
 
                     # === dtw analyze & denoising process ===
                     if not self.ana._done:
-                        if self.ana.exer[self.exeno].limbjoints:
-                            modJary = self.h_mod.human_mod_pts(joints)  # modJary is 7*3 array
-                            modJary = modJary.flatten().reshape(-1, 21)  # change shape to 1*21 array
-                        else:
-                            modJary = self.h_mod.human_mod_pts(joints, False)  # modJary is 11*3 array
-                            modJary = modJary.flatten().reshape(-1, 33)  # change shape to 1*33 array                            
+                        # if self.ana.exer[self.exeno].limbjoints:
+                        #     modJary = self.h_mod.human_mod_pts(joints)  # modJary is 7*3 array
+                        #     modJary = modJary.flatten().reshape(-1, 21)  # change shape to 1*21 array
+                        # else:
+                        modJary = self.h_mod.human_mod_pts(joints, False)  # modJary is 11*3 array
+                        modJary = modJary.flatten().reshape(-1, 33)  # change shape to 1*33 array                            
                         if not self.denoise._done:
                             if not len(Relary) == 0:
                                 # === GPR denoising ===
                                 if all(ii > 0.6 for ii in Relary[limbidx]):  # all joints are reliable
                                     reconJ = modJary  # reconJ is 1*21 array
                                 else:  # contains unreliable joints
-                                    if self.ana.exer[self.exeno].limbjoints:
-                                        reconJ, unrelidx = self.denoise.run(modJary, Relary)
-                                        JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
-                                    else:
-                                        reconJ, unrelidx = self.denoise.run(modJary[:, 12:], Relary)
-                                        JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
-                                        reconJ = np.hstack([modJary[:, :12], reconJ]) 
+                                    # if self.ana.exer[self.exeno].limbjoints:
+                                    #     reconJ, unrelidx = self.denoise.run(modJary, Relary)
+                                    #     JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
+                                    # else:
+                                    reconJ, unrelidx = self.denoise.run(modJary[:, 12:], Relary)
+                                    JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
+                                    reconJ = np.hstack([modJary[:, :12], reconJ]) 
                                     #  === recon 2D joints in color domain ===
                                     for ii in [4, 5, 6, 8, 9, 10, 20]:
                                         rec_joints[ii].Position.x = JJ[ii][0]
@@ -366,7 +366,7 @@ class BodyGameRuntime(object):
                         self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
                                      self.eval, self.kp, body, dframe, djps)                        
 
-                        # hand status 
+                        # === show hand status === 
                         # self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                         #                     self.ana.hs.htext(body.hand_left_state, body.hand_right_state), 4 ,\
                         #                     (255, 130, 45, 255))
@@ -381,11 +381,9 @@ class BodyGameRuntime(object):
                             if self.fcnt > 30 :
                                 self.ana.evalstr = ''
                                 self.fcnt  = 0
-
                     else:
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                                             'Exercise '+str(self.exeno)+' is done', 1)
-
                         if not self.kp.finish:
                             errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err,\
                                     self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here

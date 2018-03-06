@@ -6,13 +6,25 @@ data2 = h5py.File('data/GT_V_data_mod_EX2.h5', 'r')
 data3 = h5py.File('data/GT_V_data_mod_EX3.h5', 'r')
 data4 = h5py.File('data/GT_V_data_mod_EX4.h5', 'r')
 
-class Exer1(object):
 
+class Exercise(object):
     def __init__(self):
-        self.no = 1
+        # default parameters
+        self.no = 0
         self.angle = []
         self.cntdown = 60
         self.limbjoints = True  # only need limb joints
+
+
+class Exer1(Exercise):
+    """ muscle tightening deep breating
+    """
+    def __init__(self):
+        # default parameters
+        self.no = 1
+        self.angle = []
+        self.cntdown = 60
+        self.limbjoints = True
         # order
         self.order = {}
         self.order[0] = [1]
@@ -24,11 +36,14 @@ class Exer1(object):
                                  0., 0., 0.])
         self.jweight = self.jweight/sum(self.jweight)*1.5
 
-class Exer2(object):
-
+class Exer2(Exercise):
+    """ over the head pumping
+    """
     def __init__(self):
+        # default parameters
         self.no = 2
         self.angle = []
+        self.cntdown = 60
         self.limbjoints = True
         # reference subsequences
         self.gt_data = {}
@@ -45,10 +60,14 @@ class Exer2(object):
                                  0., 0., 0.])
         self.jweight = self.jweight/sum(self.jweight)*1.5
 
-class Exer3(object):
-
+class Exer3(Exercise):
+    """push-up pumping
+    """
     def __init__(self):
+        # default parameters
         self.no = 3
+        self.angle = []
+        self.cntdown = 60
         self.limbjoints = True
         # reference subsequences
         self.gt_data = {}
@@ -71,9 +90,13 @@ class Exer3(object):
         self.jweight = self.jweight/sum(self.jweight)*1.5
 
 class Exer4(object):
-
+    """ horizontal pumping
+    """
     def __init__(self):
+        # default parameters
         self.no = 4
+        self.angle = []
+        self.cntdown = 60
         self.limbjoints = True
         # reference subsequences
         self.gt_data = {}
@@ -95,11 +118,14 @@ class Exer4(object):
                                  0., 0., 0.])
         self.jweight = self.jweight/sum(self.jweight)*1.5
 
-class Exer5(object):
-
+class Exer5(Exercise):
+    """ reach to the sky
+    """
     def __init__(self):
+        # default parameters
         self.no = 5
         self.angle = []
+        self.cntdown = 60
         self.limbjoints = False  # need limb joints + torso joints
         # weight
         self.jweight = np.array([3., 3., 3., 3., 3., 3., 3., 3., 3.,
@@ -107,13 +133,15 @@ class Exer5(object):
                                  3., 3., 3.])
         self.jweight = self.jweight/sum(self.jweight)*1.5
 
-class Exer6(object):
-
+class Exer6(Exercise):
+    """ shoulder roll
+    """
     def __init__(self):
+        # default parameters
         self.no = 6
-        self.limbjoints = False
-        self.cntdown = 90
         self.angle = []
+        self.cntdown = 60
+        self.limbjoints = False # need limb joints + torso joints
         self.hraise = False  # hand raise
         # weight
         self.jweight = np.array([3., 3., 3., 3., 3., 3., 3., 3., 3.,
@@ -121,14 +149,16 @@ class Exer6(object):
                                  0., 0., 0.])
         self.jweight = self.jweight/sum(self.jweight)*1.5
 
-class Exer7(object):
 
+class Exer7(Exercise):
+    """ clasp and spread
+    """
     def __init__(self):
+        # default parameters
         self.no = 7
-        self.cntdown = 90
-        self.limbjoints = False  # need limb joints + torso joints
         self.angle = []
-        self.hraise = False  # hand raise
+        self.cntdown = 60
+        self.limbjoints = False  # need limb joints + torso joints
         # weight
         self.jweight = np.array([3., 3., 3., 9., 9., 9., 3., 3., 3.,
                                  3., 3., 3., 9., 9., 9., 3., 3., 3.,
