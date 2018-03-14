@@ -113,8 +113,8 @@ class Breath_status(object):
             print('\naverage breath out freq is: '+str(np.round(30./np.mean(b_out), 2))+' Hz')
             print('\naverage breath in freq is: '+str(np.round(30./np.mean(b_in), 2))+' Hz')
         else:
-            raise ImportError('Doing too fast !! please redo again !!')
-
+            # raise ImportError('Doing too fast !! please redo again !!')
+            self.evalstr = 'Doing too fast !! please redo again !!'
     def brth_hand_sync(self, lhopen, lhclose):
         """calculate breath and hand open/close relation
         """

@@ -36,7 +36,7 @@ class Evaluation(object):
                         ax.annotate('Not deep breath', xy=(i, y1-2), xytext=(i, y2),\
                                     arrowprops=dict(facecolor='red', shrink=0.05),)
                 plt.title('Breath in and out')
-                fig.savefig('output/Exer'+str(exeno)+'_bio_1.jpg')                
+                fig.savefig('output/Exer%s_bio_1.jpg' % str(exeno))                
             else:  # did both hand and breath test (i.e. exer 2)
                 ax.plot(hs.hstate[:, 0]*15, color='b')
                 ax.plot(hs.hstate[:, 1]*15-20, color='r')
@@ -56,7 +56,7 @@ class Evaluation(object):
                         ax.annotate('missing breath', xy=(x, y1), xytext=(x, y2),\
                                     arrowprops=dict(facecolor='green', shrink=0.05),)
                 plt.title('Breath in and out & hands open and close')
-                fig.savefig('output/Exer'+str(exeno)+'_biohoc_1.jpg')        
+                fig.savefig('output/Exer%s_biohoc_1.jpg' %str(exeno))        
         plt.close(fig)
 
     def errmsg(self, errs=[], dolist=None, contents=['Breath eval', 'Hand eval', 'Exercise motion',\

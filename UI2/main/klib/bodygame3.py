@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import h5py
 from .pykinect2 import PyKinectV2
 from .pykinect2.PyKinectV2 import *
 from .pykinect2 import PyKinectRuntime
@@ -7,10 +8,8 @@ import pygame, h5py, sys, copy
 import pdb, time, cv2, cPickle
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from sklearn.externals import joblib
 from collections import defaultdict
-
 # import class
 import movie
 # from dtw         import Dtw
@@ -28,7 +27,7 @@ from handstatus import Hand_status
 
 fps = 30
 bkimg = np.zeros([1080, 1920])
-username = 'Andy_'  # user name
+# username = 'Andy_'  # user name
 
 # colors for drawing different bodies
 SKELETON_COLORS = [pygame.color.THECOLORS["red"],
@@ -43,7 +42,7 @@ limbidx = np.array([4, 5, 6, 8, 9, 10, 20])
 
 class BodyGameRuntime(object):
 
-    def __init__(self):
+    def __init__(self, info):
         global bkimg
         pygame.init()
         # Used to manage how fast the screen updates
@@ -75,6 +74,7 @@ class BodyGameRuntime(object):
         self.h_to_w = float(self.default_h) / self.default_w
         # here we will store skeleton data
         self._bodies = None
+        self.info = info
         # self.scene_type = 2
         
         time.sleep(5)
@@ -100,7 +100,7 @@ class BodyGameRuntime(object):
         except:
             pass
         self.fig = None
-        self.kp = Kparam(self.exeno, username)
+        self.kp = Kparam(self.exeno, self.info.name)
         self.movie = movie.Movie(self.exeno)
         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         self.kp.ini_scale = self.kp.scale

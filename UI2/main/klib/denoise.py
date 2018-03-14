@@ -10,7 +10,11 @@ class Denoise(object):
     """
     def __init__(self):
         self._done = True
-        self.gp = joblib.load('data/GPR_cluster_800_meter_fix_ex4.pkl')
+        exeno = 4
+        try:
+            self.gp = joblib.load('./data/GPR_cluster_800_meter_fix_ex%s.pkl' % exeno)
+        except:
+            self.gp = joblib.load('./data/GPR_cluster_800_meter_fix_ex4.pkl')
         self.parameter = self.gp.kernel_.get_params(deep=True)
         self.limbidx = np.array([4, 5, 6, 8, 9, 10, 20])
         [self.min, self.max] = h5py.File('data/model_CNN_0521_K2M_rel.h5', 'r')['minmax'][:]
