@@ -147,8 +147,12 @@ $RECYCLE.BIN/
 *.jpg
 *.png
 *.mpg
+*.exe
 
 *.txt
+*.xlsx
+*.csv
+*.dll
 *.jpg
 DTW/*.jpg
 
