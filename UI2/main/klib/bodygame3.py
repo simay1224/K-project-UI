@@ -24,6 +24,7 @@ from skeleton    import Skeleton
 from fextract    import Finger_extract
 from instruction import Exeinst
 from handstatus import Hand_status
+from historylog import Historylog
 
 fps = 30
 bkimg = np.zeros([1080, 1920])
@@ -116,6 +117,7 @@ class BodyGameRuntime(object):
         self.skel = Skeleton()
         self.fextr = Finger_extract()
         self.exeinst = Exeinst()
+        self.log = Historylog()
 
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
@@ -390,7 +392,9 @@ class BodyGameRuntime(object):
                             dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.dtw.do,\
                                       self.ana.shld.do, self.ana.clsp.do, self.ana.swing.do]
                             self.eval.run(self.exeno, self.ana.brth, self.ana.hs)
-                            self.eval.errmsg(errs, dolist) 
+                            self.eval.errmsg(errs, dolist)
+                            #  need add another compare with history record command
+                            self.log.writein(self.info, self.exeno, self.kp.now, [], errs)
                             print self.ana.dtw.idxlist
                             self.kp.finish = True
                     # draw skel
