@@ -129,6 +129,8 @@ class Swing(object):
         if len(self.angle_mean) <= 15:
             self.angle_ini = np.mean(self.angle_mean)
 
+
+
     def run(self, joints):
         self.init_angle()
         self.body_angle(joints)

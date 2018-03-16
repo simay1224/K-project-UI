@@ -2,6 +2,7 @@ import numpy as np
 from scipy.signal import argrelextrema
 from scipy.ndimage.filters import gaussian_filter as gf_2D
 from scipy.ndimage.filters import gaussian_filter1d as gf
+import inflect
 import pdb
 
 class Breath_status(object):
@@ -13,7 +14,6 @@ class Breath_status(object):
         self.breath_list   = []
         self.breath        = None
         self.ngframe       = []
-        # self.brthtype      = 'in'
         self.missingbreath = []
         self.ana_ary       = []
         self.breath_in     = []
@@ -24,7 +24,10 @@ class Breath_status(object):
         self.min_len       = 1
         self.plot_flag     = False
         self.brth_out_flag = False
-        # self.first_flag    = True
+        self.cnvt          = inflect.engine()  # converting numerals into ordinals
+        #save in log
+        self.sync_rate = 0
+        self.brth_diff = []
         # default parameters
         self.cnt     = 0
         self.do      = False
@@ -87,6 +90,7 @@ class Breath_status(object):
         if len(self.breath) != 0:
             for i, j in zip(self.breath[:-1], self.breath[1:]):
                 breath_diff = self.breath_list[j]-self.breath_list[i]
+                self.brth_diff.append(abs(breath_diff))
                 if abs(breath_diff) > 10:  # really breath in/out
                     if abs(breath_diff) < 30:  # not deep breath
                         if breath_diff > 0:  # breath out
@@ -156,8 +160,8 @@ class Breath_status(object):
                 print hand_trunc
         self.missingbreath = hand_trunc[hand_chk == 1]
 
-        sync_rate = cnt*1./len(hand_trunc)*100
-        print('hand and breath synchronize rate is '+str(np.round(sync_rate, 2))+'%')
+        self.sync_rate = cnt*1./len(hand_trunc)*100
+        print('hand and breath synchronize rate is '+str(np.round(self.sync_rate, 2))+'%')
 
     def local_minmax(self, seq1, seq2, th, minmax_str, rng=15):
         """ finding local min or max depending on the argument minmax
@@ -200,7 +204,7 @@ class Breath_status(object):
                 if self.eval == '':
                     self.evalstr = 'Repitition done: Well done.'
                 else:
-                    self.evalstr = 'Repitition done. '+self.eval
+                    self.evalstr = 'Repitition done. '+ self.eval
                     self.eval = ''
                 self.ana_ary.append([self.max_ary[-1, 0], 1, self.max_ary[-1, 1]])
         # detect brth in
@@ -214,6 +218,7 @@ class Breath_status(object):
                 if np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1]) < 30:
                     self.evalstr = 'Please breathe deeper.'
                     self.eval = 'Please breathe deeper.'
+                    self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, is not deep enough.')
         self.max_len = self.max_ary.shape[0]
         self.min_len = self.min_ary.shape[0]
 

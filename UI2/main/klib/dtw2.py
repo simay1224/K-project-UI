@@ -46,6 +46,8 @@ class Dynamic_time_warping(object):
         self.chk_flag      = False
         self.deflag        = False  # decreasing flag
         self.segini        = True
+        #save in log
+        self.jspos = []  # record the joints position when finish one subsequence 
         # default parameters
         self.cnt     = 0
         self.do      = False
@@ -134,6 +136,7 @@ class Dynamic_time_warping(object):
                             else:
                                 self.evalstr = 'Subsequence done. '+self.eval
                                 self.eval = ''
+                            self.jspos.append(reconJ)
                             self.seg_update(endidx)
                 else:
                     test_data_p = self.seqlist + np.atleast_2d((exer.gt_data[self.gt_idx][0, :]-self.seqlist[0, :]))
@@ -165,6 +168,7 @@ class Dynamic_time_warping(object):
                     else:
                         self.evalstr = 'Subsequence done. '+self.eval
                         self.eval = ''
+                    self.jspos.append(reconJ)
                     tgrad = 0
                     for ii in xrange(self.seqlist.shape[1]):  # maybe can include jweight
                         tgrad += (np.gradient(gf(self.seqlist[:, ii], 1))**2)*exer.jweight[ii]

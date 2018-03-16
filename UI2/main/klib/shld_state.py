@@ -21,6 +21,8 @@ class Shld_state(object):
         self.ldlist  = []
         self.rylist  = []
         self.rdlist  = []
+        #save in log
+        self.dep_diff = []
         # default parameters
         self.cnt     = 0
         self.do      = False
@@ -67,9 +69,7 @@ class Shld_state(object):
         if (max(len(y[0]), len(y[1]), len(z[0]), len(z[1])) \
             - min(len(y[0]), len(y[1]), len(z[0]), len(z[1]))) > 1:
             return 0 
-
         num = (len(y[0])+len(y[1])+len(z[0])+len(z[1])-1)/4
-
         if num > 0:
             chk = self.chkdepth(z[2], z[3])
             if chk:
@@ -95,6 +95,7 @@ class Shld_state(object):
         self.type = self.findcycle(y, z)
 
         if self.type == 1:
+            self.dep_diff.append(z[2][0]-z[3][0])
             self.cnt += self.type  # cycle number
             if self.eval == '':
                 self.evalstr = 'Repitition done: Well done.'
@@ -103,6 +104,7 @@ class Shld_state(object):
                 self.eval = ''
             self.type = 0
         elif self.type == 2:
+            self.dep_diff.append(z[2][0]-z[3][0])
             # print('simple up and down')
             self.evalstr = 'Rotate deeper !!'
             self.eval = 'Rotate deeper !!'

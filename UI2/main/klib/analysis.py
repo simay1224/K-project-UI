@@ -109,13 +109,14 @@ class Analysis(object):
         if exeno == 1:
             if self.exer[1].cntdown <= 0:
                 stus = self.handpos(self.exer[1], reconJ)
-                if len(self.jointslist) == 0:  # store joints information
-                    self.jointslist = reconJ
-                else:
-                    self.jointslist = np.vstack([self.jointslist, reconJ])
-                bdry = self.getcoord(djps)
-                self.brth.run(bdry, dmap)
-                if stus == 'down':
+                if stus != 'down':
+                    if len(self.jointslist) == 0:  # store joints information
+                        self.jointslist = reconJ
+                    else:
+                        self.jointslist = np.vstack([self.jointslist, reconJ])
+                    bdry = self.getcoord(djps)
+                    self.brth.run(bdry, dmap)
+                elif stus == 'down':
                     if self.brth.do:
                         if not self.do_once:
                             self.brth.breath_analyze()
@@ -251,7 +252,7 @@ class Analysis(object):
                 if self.swing.do:
                     if self.cnt > 90:
                         self._done = True
-                        if self.swing.cnt < 4:
+                        if self.swing.cnt/2 < 4:
                             self.swing.err.append('Did not do enough repetition.')
                         print('================= exer END ======================')
                     self.cnt += 1
@@ -277,14 +278,17 @@ class Analysis(object):
             if self.exer[6].cntdown <= 0:
                 stus = self.handpos(self.exer[6], reconJ)
                 if stus == 'belly':
+                    self.cnt = 0
                     self.shld.run(dmap, djps)
                     # self.exer[6].hraise = True
                 elif stus == 'down':
                     if self.shld.do:
-                        self._done = True
-                        if self.shld.cnt < 4:
-                            self.shld.err.append('Did not do enough repetition.')
-                        print('================= exer END ======================')
+                        if self.cnt > 60:
+                            self._done = True
+                            if self.shld.cnt < 4:
+                                self.shld.err.append('Did not do enough repetition.')
+                            print('================= exer END ======================')
+                        self.cnt += 1
                 # === eval string update ===
                 if self.evalstr == '':
                     self.evalstr = self.shld.evalstr

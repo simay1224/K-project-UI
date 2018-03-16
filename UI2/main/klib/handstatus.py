@@ -5,10 +5,13 @@ class Hand_status(object):
 
     def __init__(self):
         self.hstate    = np.array([])
-        self.rawhstate = np.array([0,0])
-        self.do        = False       
-        self.err       = []
-
+        self.rawhstate = np.array([0,0]) 
+        # default parameters
+        self.cnt     = 0
+        self.do      = False
+        self.err     = []
+        self.evalstr = ''
+        self.eval    = ''
 
     def hstus(self, hstus):
         if (hstus == 2): #Lhand open

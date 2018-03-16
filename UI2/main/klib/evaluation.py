@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 from scipy.ndimage.filters import gaussian_filter1d as gf
 from collections import defaultdict
+import numpy as np
+from math import acos
 import pygame
 
 
@@ -12,55 +14,134 @@ class Evaluation(object):
         self.font = pygame.font.SysFont('Calibri', self.font_size)
         self.space = self.font.size(' ')[0]
 
-    def run(self, exeno, brth, hs, errs=[]):
+    def joint_angle(self, joints, idx=[0, 1, 2], offset=0):
+        """ finding the angle between 3 joints.
+            default joints are left shld, elbow, wrist.
+        """
+        if joints.shape[0] == 33:
+            offset = 4
+        # Elbow - sholder
+        vec1 = np.array([joints[(offset+idx[1])*3+0]-joints[(offset+idx[0])*3+0],
+                         joints[(offset+idx[1])*3+1]-joints[(offset+idx[0])*3+1],
+                         joints[(offset+idx[1])*3+2]-joints[(offset+idx[0])*3+2]])
+        # Elbow - Wrist
+        vec2 = np.array([joints[(offset+idx[1])*3+0]-joints[(offset+idx[2])*3+0],
+                         joints[(offset+idx[1])*3+1]-joints[(offset+idx[2])*3+1],
+                         joints[(offset+idx[1])*3+2]-joints[(offset+idx[2])*3+2]])
+
+        costheta = vec1.dot(vec2)/sum(vec1**2)**.5/sum(vec2**2)**.5
+        return acos(costheta)*180/np.pi
+
+    def cutdata(self, data, length=4):
+        """ if data too long (user do more than default repitition), cut it
+            if data too short (user do less than default repitition), add ''
+        """
+        if len(data) == length:
+            return data
+        elif len(data) > length:
+            data = data[:length]
+        else:
+            data = data + ['']*length-len(data)
+        return data
+
+    def run(self, exeno, ana):
         """ exercise performance evaluation
         """
-        fig = plt.figure(1)
-        ax = fig.add_subplot(111)
-        if len(brth.breath_list) == 0:
-            if len(hs.hstate) == 0:
-                pass  # did not do hand and breathe test
-            else:  # only did hand test
-                pass
-        else:  # did breath test
-            if len(hs.hstate) == 0:  # only did breathe test (i.e. exer 1)
-                ax.plot(gf(brth.breath_list, 5), color='g')
-                if len(brth.ngframe) != 0:
-                    for i in brth.ngframe:
-                        y1 = brth.breath_list[i]
-                        y2 = y1 - 20
-                        # if y1 < 0:
-                        #     y2 = y1+10
-                        # else:
-                        #     y2 = y1-10    
+        if exeno == 1 :
+            fig = plt.figure(1)
+            ax = fig.add_subplot(111)
+            if len(ana.hs.hstate) == 0:  # only did breathe test (i.e. exer 1)
+                ax.plot(gf(ana.brth.breath_list, 5), color='g')
+                if len(ana.brth.ngframe) != 0:
+                    for i in ana.brth.ngframe:
+                        y1 = ana.brth.breath_list[i]
+                        y2 = y1 - 20  
                         ax.annotate('Not deep breath', xy=(i, y1-2), xytext=(i, y2),\
                                     arrowprops=dict(facecolor='red', shrink=0.05),)
                 plt.title('Breath in and out')
-                fig.savefig('output/Exer%s_bio_1.jpg' % str(exeno))                
-            else:  # did both hand and breath test (i.e. exer 2)
-                ax.plot(hs.hstate[:, 0]*15, color='b')
-                ax.plot(hs.hstate[:, 1]*15-20, color='r')
-                # ax.plot(gf(self.breath_list, 10)/self.breath_list[0]*2, color='g')
-                ax.plot(gf(brth.breath_list, 5), color='g')
-                if len(brth.ngframe) != 0:
-                    for i in brth.ngframe:
-                        y1 = brth.breath_list[i]#/self.breath_list[0]*2
-                        y2 = 1.5*10
-                        ax.annotate('breath not deep enough', xy=(i, y1), xytext=(i, y2),\
-                                    arrowprops=dict(facecolor='red', shrink=0.05),)
-                if len(brth.missingbreath) != 0:
-                    for i in brth.missingbreath:
-                        x = sum(i)/2
-                        y1 = brth.breath_list[x]#/self.breath_list[0]*2 
-                        y2 = 1*10
-                        ax.annotate('missing breath', xy=(x, y1), xytext=(x, y2),\
-                                    arrowprops=dict(facecolor='green', shrink=0.05),)
-                plt.title('Breath in and out & hands open and close')
-                fig.savefig('output/Exer%s_biohoc_1.jpg' %str(exeno))        
-        plt.close(fig)
+                fig.savefig('output/Exer%s_bio_1.jpg' % str(exeno))
+                plt.close(fig)
+                if len(ana.brth.brth_diff) == 0:
+                    return ['','','']
+                return [min(ana.brth.brth_diff), max(ana.brth.brth_diff),
+                        np.mean(ana.brth.brth_diff)]         
+        elif exeno == 2:
+            fig = plt.figure(1)
+            ax = fig.add_subplot(111)
+            ax.plot(ana.hs.hstate[:, 0]*15, color='b')
+            ax.plot(ana.hs.hstate[:, 1]*15-20, color='r')
+            ax.plot(gf(ana.brth.breath_list, 5), color='g')
+            if len(ana.brth.ngframe) != 0:
+                for i in ana.brth.ngframe:
+                    y1 = ana.brth.breath_list[i]#/self.breath_list[0]*2
+                    y2 = 1.5*10
+                    ax.annotate('breath not deep enough', xy=(i, y1), xytext=(i, y2),\
+                                arrowprops=dict(facecolor='red', shrink=0.05),)
+            if len(ana.brth.missingbreath) != 0:
+                for i in ana.brth.missingbreath:
+                    x = sum(i)/2
+                    y1 = ana.brth.breath_list[x]#/self.breath_list[0]*2 
+                    y2 = 1*10
+                    ax.annotate('missing breath', xy=(x, y1), xytext=(x, y2),\
+                                arrowprops=dict(facecolor='green', shrink=0.05),)
+            plt.title('Breath in and out & hands open and close')
+            fig.savefig('output/Exer%s_biohoc_1.jpg' %str(exeno)) 
+            plt.close(fig)
+            return [min(ana.brth.brth_diff), max(ana.brth.brth_diff), 
+                    np.mean(ana.brth.brth_diff), ana.brth.sync_rate]
+        elif exeno == 3:
+            lres = []
+            rres = []
+            for joints, order in zip(ana.dtw.jspos, ana.dtw.idxlist):
+                lang = self.joint_angle(joints, idx=[0, 1, 2])
+                rang = self.joint_angle(joints, idx=[3, 4, 5])
+                if order == 3:
+                    if lang < 60:
+                        lres.append('Y')
+                    else:
+                        lres.append('N')
+                    lres.append(lang)
+                    if rang < 60:
+                        rres.append('Y')
+                    else:
+                        rres.append('N')
+                    rres.append(rang)
+                elif order == 4:
+                    if lang > 160:
+                        lres.append('Y')
+                    else:
+                        lres.append('N')
+                    lres.append(lang)
+                    if rang > 160:
+                        rres.append('Y')
+                    else:
+                        rres.append('N')
+                    rres.append(rang)
+            lres = self.cutdata(lres, 16)
+            rres = self.cutdata(rres, 16)
+            return rres + [np.mean(rres[3::4]), np.mean(rres[1::4])] + lres + [np.mean(lres[3::4]), np.mean(lres[1::4])]
+        elif exeno == 4:
+            #ana.dtw.jspos
+            return []
+        elif exeno == 5:
+            max_right = np.abs(ana.swing.angle_ini - np.min(ana.swing.min_ary[1:, 1]))
+            min_right = np.abs(ana.swing.angle_ini - np.max(ana.swing.min_ary[1:, 1]))
+            max_left  = np.abs(ana.swing.angle_ini - np.max(ana.swing.max_ary[1:, 1]))
+            min_left  = np.abs(ana.swing.angle_ini - np.min(ana.swing.max_ary[1:, 1]))
+            return [max_right, min_right, max_left, min_left]
+        elif exeno == 6:
+            return [max(ana.shld.dep_diff).astype(np.uint8), min(ana.shld.dep_diff).astype(np.uint8)]
+        elif exeno == 7:
+            max_hold  = np.max(ana.clsp.holdtime)
+            min_hold  = np.min(ana.clsp.holdtime)
+            mean_hold = np.mean(ana.clsp.holdtime)
+            clasp_rate = 1.*ana.clsp.claspsuc/ana.clsp.cnt
+            return [max_hold, min_hold, mean_hold, clasp_rate]
+        else:
+            raise ImportError('Did not define this ecercise yet.')
 
     def errmsg(self, errs=[], dolist=None, contents=['Breath eval', 'Hand eval', 'Exercise motion',\
-                                                           'Shoulder State', 'Clasp & Spread', 'Swing']):
+                                                     'Shoulder State', 'Clasp & Spread', 'Swing']):
         """ According to the test results, showing evaluation results.
         """
         print('\nevaluation:\n')

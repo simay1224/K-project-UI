@@ -391,10 +391,11 @@ class BodyGameRuntime(object):
                                     self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
                             dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.dtw.do,\
                                       self.ana.shld.do, self.ana.clsp.do, self.ana.swing.do]
-                            self.eval.run(self.exeno, self.ana.brth, self.ana.hs)
+                            # self.eval.run(self.exeno, self.ana.brth, self.ana.hs)
+                            exelog = self.eval.run(self.exeno, self.ana)
                             self.eval.errmsg(errs, dolist)
                             #  need add another compare with history record command
-                            self.log.writein(self.info, self.exeno, self.kp.now, [], errs)
+                            self.log.writein(self.info, self.exeno, self.kp.now, exelog, errs)
                             print self.ana.dtw.idxlist
                             self.kp.finish = True
                     # draw skel
