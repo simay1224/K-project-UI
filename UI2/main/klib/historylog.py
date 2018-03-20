@@ -1,5 +1,5 @@
 import pandas as pd
-import os.path,pdb
+import os.path
 from openpyxl import load_workbook
 
 
@@ -95,7 +95,6 @@ class Historylog(object):
             data : list-like object, which contains vary results depend on the exercise type
             time :  
         """
-        pdb.set_trace()
         if not os.path.isfile(self.excelPath):
             self.newlog()
         errmsg = errmsgs[self.order[exeno-1]]

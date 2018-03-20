@@ -4,7 +4,9 @@ from collections import defaultdict
 import numpy as np
 from math import acos
 import pygame
-
+import pandas as pd
+import os.path
+from openpyxl import load_workbook
 
 class Evaluation(object):
     def __init__(self):
@@ -139,7 +141,48 @@ class Evaluation(object):
             return [max_hold, min_hold, mean_hold, clasp_rate]
         else:
             raise ImportError('Did not define this ecercise yet.')
+    def cmphist(self, log, userinfo, exeno, time, data=[]):
+        """  compare user's latest data with its historical data
+        """
+        if not os.path.isfile('./output/compare.txt'):
+            text_file = open("./output/compare.txt", "w") 
+        else:
+            text_file = open("./output/compare.txt", "a")
+        date = '-'.join(map(str,[time.year,time.month,time.day,time.hour,time.minute]))
+        str0 = '%10s: %s\n %10s: %s\n %10s: %s\n'% ('Exercise', exeno, 'Username', userinfo.name, 'Date', date)
 
+        text_file.write(str0)
+        print(str0)
+        if os.path.isfile(log.excelPath):
+            name = userinfo.name
+            df = pd.read_excel(log.excelPath, sheet_name='exercise %s' %exeno)
+            cols = log.colname[exeno][4:-1]  # donot neet common & errmsg info
+            roi = df[df['name'] == name]  # rows of interest
+            hisres = []
+            terms = []
+            for col in cols:
+                try:
+                    hisres.append(round(np.mean(roi[col]),2))
+                    terms.append(col)
+                except:
+                    pass
+            str1 = '%10s | %18s | %18s | %18s\n'%('Terms', 'In history record', 'This time', 'Results')
+            print(str1)
+            text_file.write(str1)
+            for i in xrange(len(cols)):
+                if hisres[i] > data[i]:
+                    updown = 'decrease'
+                else:
+                    updown = 'increase'
+                num = round(np.abs(data[i]-hisres[i])/hisres[i]*100, 2)
+                str2 = '%10s | %18s | %18s | %6s%s %8s\n' %(terms[i], hisres[i], round(data[i], 2), num, '%', updown) 
+                print(str2)
+                text_file.write(str2)
+        else:
+            str1 = 'No historical data for this user.\n'
+            print(str1)
+            text_file.write(str1)
+        text_file.close()
     def errmsg(self, errs=[], dolist=None, contents=['Breath eval', 'Hand eval', 'Exercise motion',\
                                                      'Shoulder State', 'Clasp & Spread', 'Swing']):
         """ According to the test results, showing evaluation results.

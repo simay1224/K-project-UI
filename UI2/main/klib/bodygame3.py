@@ -394,7 +394,7 @@ class BodyGameRuntime(object):
                             # self.eval.run(self.exeno, self.ana.brth, self.ana.hs)
                             exelog = self.eval.run(self.exeno, self.ana)
                             self.eval.errmsg(errs, dolist)
-                            #  need add another compare with history record command
+                            self.eval.cmphist(self.log, self.info, self.exeno, self.kp.now, exelog)
                             self.log.writein(self.info, self.exeno, self.kp.now, exelog, errs)
                             print self.ana.dtw.idxlist
                             self.kp.finish = True
