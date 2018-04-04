@@ -26,8 +26,7 @@ class Historylog(object):
         brth  = ["mindepth", "maxdepth", "avgdepth"]  # breathing exercise feature
         hs    = ["sync_rate"]                         # hand exercise feature => hand breath sync rate
         shld  = ["Max rotation depth", "Min rotation depth"]
-        clsp  = ["Max hold time", "Min hold time", "average hold time",
-                 "clasp rate"]
+        clsp  = ["Max hold time", "Min hold time", "average hold time"]
         swing = ["Max right bending angle", "Min right bending angle",
                  "Max left bending angle", "Min left bending angle"]
         exer3 = ['1st right push down lower enough?', '1st lower right elbow angle',
@@ -47,14 +46,24 @@ class Historylog(object):
                  '3rd left hand up straight?', '3rd straight left elbow angle',
                  '4th left push down lower enough?','4th lower left elbow angle',
                  '4th left hand up straight?', '4th straight left elbow angle',
-                 'average left hand straight angle', 'average left hand push down angle',]
+                 'average left hand straight angle', 'average left hand push down angle']
+        exer4 = ['1st right hand angle (H-close)', '1st right hand angle (T-pose)',
+                 '2nd right hand angle (H-close)', '2nd right hand angle (T-pose)',
+                 '3rd right hand angle (H-close)', '3rd right hand angle (T-pose)',
+                 '4th right hand angle (H-close)', '4th right hand angle (T-pose)',
+                 'average right hand angle (H-close)', 'average right hand angle (T-pose)',
+                 '1st left hand angle (H-close)', '1st left hand angle (T-pose)',
+                 '2nd left hand angle (H-close)', '2nd left hand angle (T-pose)',
+                 '3rd left hand angle (H-close)', '3rd left hand angle (T-pose)',
+                 '4th left hand angle (H-close)', '4th left hand angle (T-pose)',
+                 'average left hand angle (H-close)', 'average left hand angle (T-pose)']
 
         # cols title for different exercise sheets
         self.colname = {}
         self.colname[1] = common + brth + backup
         self.colname[2] = common + brth + hs + backup
         self.colname[3] = common + exer3 + backup
-        self.colname[4] = common + backup
+        self.colname[4] = common + exer4 + backup
         self.colname[5] = common + swing + backup
         self.colname[6] = common + shld + backup
         self.colname[7] = common + clsp + backup

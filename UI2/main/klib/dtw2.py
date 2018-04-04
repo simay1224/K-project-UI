@@ -7,6 +7,7 @@ from w_fastdtw import fastdtw
 import numpy as np
 from scipy.signal import argrelextrema
 from dataoutput import Dataoutput
+from math import acos
 import pdb
 
 class Dynamic_time_warping(object):
@@ -54,6 +55,10 @@ class Dynamic_time_warping(object):
         self.err     = []
         self.evalstr = ''
         self.eval    = ''
+        self.Ltangle      = []  # Armpit angle in T-pose
+        self.Lcangle      = []  # Armpit angle in hand close
+        self.Rtangle      = []  # Armpit angle in T-pose
+        self.Rcangle      = []  # Armpit angle in hand close        
 
     def wt_euclidean(self, u, v, w):
         """ normal euclidean dist with the weighting
@@ -96,6 +101,29 @@ class Dynamic_time_warping(object):
         self.segini      = True
         self.chk_flag    = False
 
+
+    def joint_angle(self, reconJ, idx=[4, 5, 6], offset=0):
+        """ finding the angle between 3 joints.
+            default joints are left shld, elbow, wrist.
+        """
+        y_vec = np.array([0, 1, 0])
+        if reconJ.shape[0] == 33:
+            offset = 4
+        if idx[0] == 8:  # right hand
+            offset += 3
+        # Elbow - sholder
+        vec1 = np.array([reconJ[(offset+1)*3]-reconJ[(offset*3)],
+                        reconJ[(offset+1)*3+1]-reconJ[(offset*3)+1],
+                        reconJ[(offset+1)*3+2]-reconJ[(offset*3)+2]])
+        # Elbow - Wrist
+        vec2 = np.array([reconJ[(offset+1)*3]-reconJ[(offset+2)*3],
+                        reconJ[(offset+1)*3+1]-reconJ[(offset+2)*3+1],
+                        reconJ[(offset+1)*3+2]-reconJ[(offset+2)*3+2]])
+
+        costheta_e = vec1.dot(-1*y_vec)/sum(vec1**2)**.5/sum(y_vec**2)**.5
+        costheta_w = vec2.dot(y_vec)/sum(vec2**2)**.5/sum(y_vec**2)**.5
+        return acos(np.mean([costheta_e,costheta_w]))*180/np.pi
+
     def matching(self, reconJ, exer, lowpass=True):
         """the main part of dtw matching algorithm
         """
@@ -130,6 +158,9 @@ class Dynamic_time_warping(object):
                             else:
                                 minidx = 3
                             self.gt_idx = minidx
+                            if self.gt_idx == 3:  # hand close
+                                self.Lcangle.append(self.joint_angle(reconJ))
+                                self.Rcangle.append(self.joint_angle(reconJ, idx=[8, 9, 10]))
                             self.idxlist.append(self.gt_idx)
                             if self.eval == '':
                                 self.evalstr = 'Subsequence done: Well done.'
@@ -168,6 +199,13 @@ class Dynamic_time_warping(object):
                     else:
                         self.evalstr = 'Subsequence done. '+self.eval
                         self.eval = ''
+                    if self.gt_idx == 3:  # hand close
+                        self.Lcangle.append(self.joint_angle(reconJ))
+                        self.Rcangle.append(self.joint_angle(reconJ, [8, 9, 10]))
+                    elif self.gt_idx == 4:  # T-pose
+                        self.Ltangle.append(self.joint_angle(reconJ))
+                        self.Rtangle.append(self.joint_angle(reconJ, [8, 9, 10]))
+
                     self.jspos.append(reconJ)
                     tgrad = 0
                     for ii in xrange(self.seqlist.shape[1]):  # maybe can include jweight

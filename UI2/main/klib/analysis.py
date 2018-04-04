@@ -39,6 +39,10 @@ class Analysis(object):
         self._done = False
         self.jointslist = np.array([])
         self.evalstr = ''
+        # default color
+        self.c_togo = (26, 26, 255, 255)
+        self.c_handdown = (213, 23, 216, 255)
+        self.c_normal = (255, 128, 0, 255)
 
     def getcoord(self, data, order=[1, 4, 8, 20]):
         """ get the coordinate of the chest region
@@ -131,18 +135,18 @@ class Analysis(object):
                     self.brth.evalstr = ''
                 # === eval information ===
                 if self.brth.cnt > 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your hands', 1, (213, 23, 216, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, True)
+                    evalinst.blit_text(surface, exeno, kp, 'Put down your hands', 1, True, color=self.c_handdown)
                     self.brth.err.append('Only need to do 4 times')
                 elif self.brth.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your hands', 1, (213, 23, 216, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Put down your hands', 1, True, color=self.c_handdown)
                 else:
                     if self.brth.brth_out_flag:
-                        evalinst.blit_text(surface, exeno, kp, 'Breathe out', 1, (255, 128, 0, 255))
+                        evalinst.blit_text(surface, exeno, kp, 'Breathe out', 1, color=self.c_normal)
                     else:
-                        evalinst.blit_text(surface, exeno, kp, 'Breathe in', 1, (255, 128, 0, 255))
+                        evalinst.blit_text(surface, exeno, kp, 'Breathe in', 1, color=self.c_normal)
                     evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.brth.cnt)),
-                                       3, (55, 173, 245, 255))
+                                       3, color=self.c_togo)
             else:
                 evalinst.blit_text(surface, self.exer[1].no, kp,
                                    'Detection will starting after %.2f second' % (self.exer[1].cntdown/30.), 1)
@@ -164,22 +168,22 @@ class Analysis(object):
                     self.brth.evalstr = ''
                 # === eval information ===
                 if self.brth.cnt > 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your hands', 1, (213, 23, 216, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, True)
+                    evalinst.blit_text(surface, exeno, kp, 'Put down your hands', 1, True, color=self.c_handdown)
                     self.brth.err.append('Only need to do 4 times')
                 elif self.brth.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your hands', 1, (213, 23, 216, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Put down your hands', 1, True, color=self.c_handdown)
                 else:
                     if stus == 'upnotstraight':
-                        evalinst.blit_text(surface, exeno, kp, 'Staight your hands.', 1, (255, 0, 0, 255))
+                        evalinst.blit_text(surface, exeno, kp, 'Staight your hands.', 1, True)
                         self.brth.err.append('Hands not straight at %s repetition.'
                                               % self.cnvt.ordinal(self.brth.cnt+1))
                     else:
                         if not self.brth.brth_out_flag:
-                            evalinst.blit_text(surface, exeno, kp, 'Breathe in and close hand.', 1, (255, 128, 0, 255))
+                            evalinst.blit_text(surface, exeno, kp, 'Breathe in and close hand.', 1, color=self.c_normal)
                         else:
-                            evalinst.blit_text(surface, exeno, kp, 'Breathe out and open hand.', 1, (255, 128, 0, 255))
-                    evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.brth.cnt)), 3, (55, 173, 245, 255))
+                            evalinst.blit_text(surface, exeno, kp, 'Breathe out and open hand.', 1, color=self.c_normal)
+                    evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.brth.cnt)), 3, color=self.c_togo)
             elif stus == 'down':
                 if self.brth.do:
                     if not self.do_once:
@@ -192,7 +196,7 @@ class Analysis(object):
                             self.brth.err.append('Did not do enough repetition.')
                         print('================= exer END ======================')
                 else:
-                    evalinst.blit_text(surface, exeno, kp, 'Please raise yours hands.', 1, (255, 128, 0, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Please raise yours hands.', 1, color=self.c_normal)
 
         elif exeno == 3:
             if not self.exer[3].order[self.dtw.oidx] == 'end':
@@ -204,15 +208,15 @@ class Analysis(object):
                 # === eval information ===
                 if self.dtw.idxlist.count(3) > 4:
                     evalinst.blit_text(surface, exeno, kp,
-                                      'Only need to do 4 times', 3)
+                                      'Only need to do 4 times', 3, True, True)
                     self.dtw.err.append('Only need to do 4 times')
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your hands.', 1, (213, 23, 216, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Put down your hands.', 1, True, color=self.c_handdown)
                 elif self.dtw.idxlist.count(3) == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, color=(213, 23, 216, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, True, color=self.c_handdown)
                 else:
                     evalinst.blit_text(surface, exeno, kp,
                                       str(4-min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4)))
-                                      + ' to go !!', 3, (55, 173, 245, 255))
+                                      + ' to go !!', 3, color=self.c_togo)
             else:
                 self._done = True
                 if self.dtw.idxlist.count(3) < 4:
@@ -228,15 +232,15 @@ class Analysis(object):
                     self.dtw.evalstr = ''
                 # === eval information ===
                 if self.dtw.idxlist.count(3) > 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
-                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, color=(213, 23, 216, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, True)
+                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, True, color=self.c_handdown)
                     self.dtw.err.append('Only need to do 4 times')
                 elif self.dtw.idxlist.count(3) == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, color=(213, 23, 216, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, True, color=self.c_handdown)
                 else:
                     evalinst.blit_text(surface, exeno, kp,
                                         str(4-min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4)))
-                                        + ' to go !!', 3, (55, 173, 245, 255))
+                                        + ' to go !!', 3, color=self.c_togo)
             else:
                 self._done = True
                 if self.dtw.idxlist.count(3) < 4:
@@ -262,17 +266,17 @@ class Analysis(object):
                 self.swing.evalstr = ''
             # === eval information ===
             if self.swing.cnt/2 > 4:
-                evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
-                evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, color=(213, 23, 216, 255))
+                evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, True)
+                evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, True, color=self.c_handdown)
                 self.swing.err.append('Only need to do 4 times')
             elif self.swing.cnt/2 == 4:
-                evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, color=(213, 23, 216, 255))
+                evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, True, color=self.c_handdown)
             else:
                 if self.swing.bend_left:
-                    evalinst.blit_text(surface, exeno, kp, 'Bending to your left', 1, color=(255, 128, 0, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Bending to your left', 1, color=self.c_normal)
                 else:
-                    evalinst.blit_text(surface, exeno, kp, 'Bending to your right', 1, color=(255, 128, 0, 255))
-                evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.swing.cnt/2)), 3, (55, 173, 245, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Bending to your right', 1, color=self.c_normal)
+                evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.swing.cnt/2)), 3, color=self.c_togo)
 
         elif exeno == 6:
             if self.exer[6].cntdown <= 0:
@@ -295,14 +299,14 @@ class Analysis(object):
                     self.shld.evalstr = ''
                 # === eval information ===
                 if self.shld.cnt > 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
-                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, color=(213, 23, 216, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, True)
+                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, True, color=self.c_handdown)
                     self.shld.err.append('Only need to do 4 times')
                 elif self.shld.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, color=(213, 23, 216, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, True, color=self.c_handdown)
                 else:
                     evalinst.blit_text(surface, exeno, kp, 'Start rotating your shoulders', 1)
-                    evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.shld.cnt)), 3, (55, 173, 245, 255))
+                    evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.shld.cnt)), 3, color=self.c_togo)
             else:
                 evalinst.blit_text(surface, self.exer[6].no, kp,
                                   ('Detection will starting after %.2f second' % (self.exer[6].cntdown/30.)), 1)
@@ -328,14 +332,14 @@ class Analysis(object):
                     self.clsp.evalstr = ''
                 # === eval information ===
                 if self.clsp.cnt > 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3)
-                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, color=(213, 23, 216, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, True)
+                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, True, color=self.c_handdown)
                     self.clsp.err.append('Only need to do 4 times')
                 elif self.shld.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, color=(213, 23, 216, 255))
+                    evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, True, color=self.c_handdown)
                 else:
                     evalinst.blit_text(surface, exeno, kp, 'Start to clasp and spread', 1)
-                    evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.clsp.cnt)), 3, (55, 173, 245, 255))
+                    evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.clsp.cnt)), 3, color=self.c_togo)
             else:
                 evalinst.blit_text(surface, self.exer[7].no, kp,
                                   ('Detection will starting after %.2f second' % (self.exer[7].cntdown/30.)), 1)

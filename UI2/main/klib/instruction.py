@@ -66,29 +66,29 @@ class Exeinst(object):
                              '\n6. Put down your hands.'
 
         
-        self.str['note'][1] = 'Notice :'\
+        self.str['note'][1] = 'Tips :'\
                                 '\n1. Tight your muscle as much as you can.'\
                                 '\n2. Breath as deep as you can.'
-        self.str['note'][2] = 'Notice :'\
+        self.str['note'][2] = 'Tips :'\
                                 '\n1. When breathing in, you need to close your hands.'\
                                 '\n2. When breathing out, you need to open your hands.'\
                                 '\n3. Breath as deep as you can.'
-        self.str['note'][3] = 'Notice :'\
+        self.str['note'][3] = 'Tips :'\
                                 '\n1. When you raise up your hands, make sure that your hand, elbow and shoulder are straight.'\
                                 '\n2. When bending the elbow, hand-elbow-shoulder should be "V-shape" not "L-shape"'\
  
-        self.str['note'][4] = 'Notice :'\
+        self.str['note'][4] = 'Tips :'\
                                 '\n1. When doing "T-pose", make sure that your hand, elbow and shoulder are straight'\
                                 '\n2. When closing hands, make sure that your hand, and shoulder are in the same height.'\
 
-        self.str['note'][5] = 'Notice :'\
+        self.str['note'][5] = 'Tips :'\
                                 '\n1. When bending the body, make sure that your hand, elbow and shoulder are straight.'\
                                 '\n2. Keep your body staight'
 
-        self.str['note'][6] = 'Notice :'\
+        self.str['note'][6] = 'Tips :'\
                                 '\n1. Let your shoulders rotation movement as large as possible.'
 
-        self.str['note'][7] = 'Notice :'\
+        self.str['note'][7] = 'Tips :'\
                                 '\n1. When raising the hands to the forehead, keeping two elbows as close as possible.'\
                                 '\n2. When the hands is in the back of your head, spread the elnows open as wide as possible.'\
                                 '\n3. Keep your body staight.'
@@ -112,8 +112,8 @@ class Exeinst(object):
         self.words['note'][7] = [word.split(' ') for word in self.str['note'][7].splitlines()]
 
         self.font_size = 40
-        self.font = pygame.font.SysFont('Calibri', self.font_size)
-        self.space = self.font.size(' ')[0]  # The width of a space.
+        # self.font = pygame.font.SysFont('Arial', self.font_size)
+        #self.space = self.font.size(' ')[0]  # The width of a space.
 
     def position(self, surface, ratio, stype, region=1, height=0):
         """According to the scene type, ratio and the region number
@@ -126,11 +126,15 @@ class Exeinst(object):
             self.upperbnd = height*self.part[region-1]
         return (self.leftbnd, self.upperbnd + 20)
 
-    def blit_text(self, surface, exeno, kp, strtype='exe', text=None, region=1, color=(0, 255, 0, 255)):
+    def blit_text(self, surface, exeno, kp, strtype='exe', text=None, region=1, emph=False, color=(0, 255, 0, 255)):
         """Creat a text surface, this surface will change according to the scene type,
            ratio and the region number. According to the size of the surface, the text 
            will auto change line also auto change the font size"""
-
+        if emph:
+            self.font = pygame.font.SysFont('Arial', self.font_size, bold=True, italic=True)
+        else:
+            self.font = pygame.font.SysFont('Arial', self.font_size)
+        self.space = self.font.size(' ')[0]  # The width of a space.
         if text == None:  # if there is no assign text, use the text in data base 
             words = self.words[strtype][exeno]
         else:
@@ -163,66 +167,15 @@ class Exeinst(object):
             # print 'large'
             if self.font_size > 12:
                 self.font_size = self.font_size - 1
-                self.font = pygame.font.SysFont('Calibri', self.font_size)
+                if emph:
+                    self.font = pygame.font.SysFont('Arial', self.font_size, bold=True, italic=True)
+                else:
+                    self.font = pygame.font.SysFont('Arial', self.font_size)
         elif y < max_height  - 40 :
             # print 'small'
             if self.font_size < 40:
                 self.font_size = self.font_size + 1
-                self.font = pygame.font.SysFont('Calibri', self.font_size)    
-
-# class Evalinst(object):
-#     "Evaluation instruction"
-#     def __init__(self):
-#         self.upperbnd = 0
-#         self.words = defaultdict(list)
-#         self.font_size = 60
-#         self.font = pygame.font.SysFont('Calibri', self.font_size)
-#         self.space = self.font.size(' ')[0]
-
-#     def position(self, surface, ratio, stype=2, region=1, height=0):
-#         """According to the scene type, ratio and the region number
-#            set up different upper bound and lower bound to the text"""
-
-#         if stype == 2:
-#             self.upperbnd = int(surface.get_height()*ratio + (region-1)*height/4.)
-#         else:
-#             self.upperbnd = int(surface.get_height()*(1-ratio) + (region-1)*height/4.)
-#         return (20, self.upperbnd+20)
-
-#     def blit_text(self, surface, exeno, kp, text=None, region=1, color=(255, 0, 0, 255)):
-#         """Creat a text surface, this surface will change according to the scene type,
-#            ratio and the region number. According to the size of the surface, the text 
-#            will auto change line also auto change size"""
-
-#         if text == None:
-#             words = self.words[exeno]
-#         else:
-#             words = [word.split(' ') for word in text.splitlines()]
-
-#         if kp.scene_type == 2:
-#             max_width = surface.get_width()*kp.ratio
-#             height = surface.get_height()*(1-kp.ratio)
-#         else:
-#             max_width = surface.get_width()*(1-kp.ratio)
-#             height = surface.get_height()*kp.ratio
-#         max_height = height/4
-
-#         (x, y) = self.position(surface, kp.ratio, kp.scene_type, region, height)
-#         x_ori, y_ori = x, y
-
-#         for line in words:
-#             for word in line:
-#                 word_surface = self.font.render(word, 0, color)
-#                 word_width, word_height = word_surface.get_size()
-#                 if x + word_width >= max_width+x_ori:  # change line(row)
-#                     x = x_ori  # Reset the x.
-#                     y += word_height  # Start on new row.
-#                 surface.blit(word_surface, (x, y))
-#                 x += word_width + self.space
-#             x = x_ori  # Reset the x.
-#             y += word_height  # Start on new row.
-#         if y > max_height + y_ori:
-#             if self.font_size > 12:
-#                 self.font_size = self.font_size - 2
-#                 self.font = pygame.font.SysFont('Calibri', self.font_size)
-            
+                if emph:
+                    self.font = pygame.font.SysFont('Arial', self.font_size, bold=True, italic=True)
+                else:
+                    self.font = pygame.font.SysFont('Arial', self.font_size)   

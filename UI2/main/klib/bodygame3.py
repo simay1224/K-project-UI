@@ -3,7 +3,7 @@ import h5py
 from .pykinect2 import PyKinectV2
 from .pykinect2.PyKinectV2 import *
 from .pykinect2 import PyKinectRuntime
-import ctypes, os, datetime
+import ctypes, os, datetime, glob
 import pygame, h5py, sys, copy
 import pdb, time, cv2, cPickle
 import numpy as np
@@ -72,6 +72,9 @@ class BodyGameRuntime(object):
 
         self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
+        self.bkidx = 3
+        self.bklist = glob.glob(os.path.join('./data/bkimgs', '*.jpg'))
+        self.readbackground()
         self.h_to_w = float(self.default_h) / self.default_w
         # here we will store skeleton data
         self._bodies = None
@@ -90,6 +93,10 @@ class BodyGameRuntime(object):
 
         self.exeno = 1  # exercise number
         self.__param_init__()
+
+    def readbackground(self):
+        self.bkimg = cv2.imread(self.bklist[self.bkidx])
+        self.bkimg = np.dstack([cv2.resize(self.bkimg, (1920, 1080)), np.zeros([1080, 1920])]).astype(np.uint8)
 
     def __param_init__(self, clean=False):
         try:
@@ -203,6 +210,11 @@ class BodyGameRuntime(object):
         #     self.kp.scale = min(self.kp.scale*1.1, self.kp.ini_scale*1.8)
         # if press[pygame.K_s]:  # use 's' to smaller the scale
         #     self.kp.scale = max(self.kp.scale/1.1, 1)
+        if press[pygame.K_w]: # use 'w' to change background image
+            self.bkidx += 1
+            if self.bkidx >= len(self.bklist):      
+                self.bkidx -= len(self.bklist) 
+            self.readbackground()
 
         if press[pygame.K_z]:  # use 'z' to lower the ratio of avatar to color frame
                                # 'ctrl+z' to larger the ratio of avatar to color frame
@@ -278,7 +290,10 @@ class BodyGameRuntime(object):
                                    pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
             # initail background frame 
-            self.draw_color_frame(np.zeros(1920*1080*4).astype(np.uint8), self.bk_frame_surface)
+            # self.draw_color_frame(np.zeros(1920*1080*4).astype(np.uint8), self.bk_frame_surface)
+            # self.draw_color_frame(self.bkcolor.astype(np.uint8), self.bk_frame_surface)
+            self.draw_color_frame(self.bkimg, self.bk_frame_surface)
+            # self.bk_frame_surface.fill(255,50,50)
             # === extract data from kinect ===
             if self._kinect.has_new_color_frame():
                 frame = self._kinect.get_last_color_frame()
@@ -375,9 +390,9 @@ class BodyGameRuntime(object):
 
                         if self.ana.evalstr != '':
                             if 'well' in (self.ana.evalstr).lower():
-                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, (0, 255, 0, 255))
+                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, color=(0, 255, 0, 255))
                             else:
-                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, (255, 0, 0, 255))
+                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, True)
 
                             self.fcnt += 1
                             if self.fcnt > 30 :
@@ -385,7 +400,7 @@ class BodyGameRuntime(object):
                                 self.fcnt  = 0
                     else:
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                            'Exercise '+str(self.exeno)+' is done', 1)
+                                            'Exercise '+str(self.exeno)+' is done', 1, emph=True)
                         if not self.kp.finish:
                             errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err,\
                                     self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
@@ -440,7 +455,7 @@ class BodyGameRuntime(object):
 
             
             self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='exe', region=1) 
-            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='note', region=2, color=(255, 0, 0, 0))
+            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='note', region=2, emph=True, color=(255, 0, 0, 0))
             # draw back ground
             bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
             self._screen.blit(bksurface_to_draw, (0, 0))

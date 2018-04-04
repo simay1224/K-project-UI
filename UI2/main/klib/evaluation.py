@@ -3,7 +3,7 @@ from scipy.ndimage.filters import gaussian_filter1d as gf
 from collections import defaultdict
 import numpy as np
 from math import acos
-import pygame
+import pygame, pdb
 import pandas as pd
 import os.path
 from openpyxl import load_workbook
@@ -13,8 +13,8 @@ class Evaluation(object):
         self.upperbnd = 0
         self.words = defaultdict(list)
         self.font_size = 60
-        self.font = pygame.font.SysFont('Calibri', self.font_size)
-        self.space = self.font.size(' ')[0]
+        # self.font = pygame.font.SysFont('Arial', self.font_size)
+        # self.space = self.font.size(' ')[0]
 
     def joint_angle(self, joints, idx=[0, 1, 2], offset=0):
         """ finding the angle between 3 joints.
@@ -123,8 +123,9 @@ class Evaluation(object):
             rres = self.cutdata(rres, 16)
             return rres + [np.mean(rres[3::4]), np.mean(rres[1::4])] + lres + [np.mean(lres[3::4]), np.mean(lres[1::4])]
         elif exeno == 4:
-            #ana.dtw.jspos
-            return []
+            langle = list(np.vstack([ana.dtw.Lcangle, ana.dtw.Ltangle]).T.flatten())
+            rangle = list(np.vstack([ana.dtw.Rcangle, ana.dtw.Rtangle]).T.flatten())
+            return rangle + [np.mean(rangle[::2]), np.mean(rangle[1::2])]+ langle + [np.mean(langle[::2]), np.mean(langle[1::2])]
         elif exeno == 5:
             max_right = np.abs(ana.swing.angle_ini - np.min(ana.swing.min_ary[1:, 1]))
             min_right = np.abs(ana.swing.angle_ini - np.max(ana.swing.min_ary[1:, 1]))
@@ -137,8 +138,8 @@ class Evaluation(object):
             max_hold  = np.max(ana.clsp.holdtime)
             min_hold  = np.min(ana.clsp.holdtime)
             mean_hold = np.mean(ana.clsp.holdtime)
-            clasp_rate = 1.*ana.clsp.claspsuc/ana.clsp.cnt
-            return [max_hold, min_hold, mean_hold, clasp_rate]
+            #clasp_rate = 1.*ana.clsp.claspsuc/ana.clsp.cnt
+            return [max_hold, min_hold, mean_hold]
         else:
             raise ImportError('Did not define this ecercise yet.')
     def cmphist(self, log, userinfo, exeno, time, data=[]):
@@ -208,11 +209,16 @@ class Evaluation(object):
             self.upperbnd = int(surface.get_height()*(1-ratio) + (region-1)*height/4.)
         return (20, self.upperbnd+20)
 
-    def blit_text(self, surface, exeno, kp, text=None, region=1, color=(255, 0, 0, 255)):
+    def blit_text(self, surface, exeno, kp, text=None, region=1, emph=False, color=(255, 0, 0, 255)):
         """Creat a text surface, this surface will change according to the scene type,
            ratio and the region number. According to the size of the surface, the text 
-           will auto change line also auto change size"""
-
+           will auto change line also auto change size
+        """
+        if emph:
+            self.font = pygame.font.SysFont('Bahnschrift', self.font_size, bold=True, italic=True)
+        else:
+            self.font = pygame.font.SysFont('Arial', self.font_size)
+        self.space = self.font.size(' ')[0]
         if text == None:
             words = self.words[exeno]
         else:
@@ -243,7 +249,10 @@ class Evaluation(object):
         if y > max_height + y_ori:
             if self.font_size > 12:
                 self.font_size = self.font_size - 2
-                self.font = pygame.font.SysFont('Calibri', self.font_size)           
+                if emph:
+                    self.font = pygame.font.SysFont('Arial', self.font_size, bold=True, italic=True)
+                else:
+                    self.font = pygame.font.SysFont('Arial', self.font_size)           
                 
 
 

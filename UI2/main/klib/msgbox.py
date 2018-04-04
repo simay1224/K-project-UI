@@ -5,7 +5,10 @@ class Msgbox(wx.Frame):
     def __init__(self, parent, title):    
         super(Msgbox, self).__init__(parent, title=title, 
             size=(400, 260), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
-
+        self.fname  = 'Jane'
+        self.lname  = 'Doe'
+        self.age    = 'unknown'
+        self.gender = 'unknown' 
         self.InitUI()
         self.Centre()
         self.Show()     
@@ -66,7 +69,7 @@ class Msgbox(wx.Frame):
     def ok(self, event):
         self.fname = self.tc1.GetValue()
         self.lname = self.tc2.GetValue()
-        self.name = '%s %s' %(self.tc1.GetValue(), self.tc2.GetValue())
+        self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
         try:
             self.age = int(self.tc3.GetValue())
         except:
@@ -88,8 +91,11 @@ class Msgbox(wx.Frame):
                     error = 'age out of range\n'
                     error_flag = True
             else:
-                error = 'age should be an integer\n'
-                error_flag = True
+                if self.age != 'unknown':
+                    error = 'age should be an integer\n'
+                    error_flag = True
+                else:
+                    self.age = 0
         else:
             error = 'please enter your age\n'
             error_flag = True
@@ -105,13 +111,31 @@ class Msgbox(wx.Frame):
             message = 'Is the following infomation correct?\nName: %s\nAge: %s\nGender: %s' %(self.fname+' '+self.lname, self.age, self.gender)
             dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
             result = dlg.ShowModal() == wx.ID_YES
-            dlg.Destroy()
-            self.Destroy()
+            if result:
+                dlg.Destroy()
+                self.Destroy()
+            else:
+                dlg.Destroy()
 
     def cancel(self, event):
-        self.fname = self.tc1.SetValue('')
-        self.lname = self.tc2.SetValue('')
-        self.age = self.tc3.SetValue('')
+        self.fname = 'Jane'
+        self.lname = 'Doe'
+        self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
+        self.age = 'unknown'
+        self.gender = 'unknown'
+        message = 'Do you want to use following information?\nName: %s\nAge: %s\nGender: %s' %(self.fname+' '+self.lname, self.age, self.gender)
+        dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
+        result = dlg.ShowModal() == wx.ID_YES
+        if result:
+            dlg.Destroy()
+            self.Destroy()
+        else:
+            dlg.Destroy()
+        self.fname = ''
+        self.lname = ''
+        self.tc1.SetValue('')
+        self.tc2.SetValue('')
+        self.tc3.SetValue('')
         self.rb_female.SetValue(False)
         self.rb_male.SetValue(False)
 
