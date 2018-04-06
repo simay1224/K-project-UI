@@ -92,36 +92,15 @@ class Evaluation(object):
             return [min(ana.brth.brth_diff), max(ana.brth.brth_diff), 
                     np.mean(ana.brth.brth_diff), ana.brth.sync_rate]
         elif exeno == 3:
-            lres = []
-            rres = []
-            for joints, order in zip(ana.dtw.jspos, ana.dtw.idxlist):
-                lang = self.joint_angle(joints, idx=[0, 1, 2])
-                rang = self.joint_angle(joints, idx=[3, 4, 5])
-                if order == 3:
-                    if lang < 60:
-                        lres.append('Y')
-                    else:
-                        lres.append('N')
-                    lres.append(lang)
-                    if rang < 60:
-                        rres.append('Y')
-                    else:
-                        rres.append('N')
-                    rres.append(rang)
-                elif order == 4:
-                    if lang > 160:
-                        lres.append('Y')
-                    else:
-                        lres.append('N')
-                    lres.append(lang)
-                    if rang > 160:
-                        rres.append('Y')
-                    else:
-                        rres.append('N')
-                    rres.append(rang)
-            lres = self.cutdata(lres, 16)
-            rres = self.cutdata(rres, 16)
-            return rres + [np.mean(rres[3::4]), np.mean(rres[1::4])] + lres + [np.mean(lres[3::4]), np.mean(lres[1::4])]
+            langle = list(np.vstack([ana.dtw.Lcangle, ana.dtw.Ltangle]).T.flatten())
+            rangle = list(np.vstack([ana.dtw.Rcangle, ana.dtw.Rtangle]).T.flatten())
+            if ana.dtw.idxlist.count(4) != 4:
+                ana.dtw.Lcangle = np.array((ana.dtw.Lcangle + ['-NaN']*4)[:4])
+                ana.dtw.Ltangle = np.array((ana.dtw.Ltangle + ['-NaN']*4)[:4])
+                ana.dtw.Rcangle = np.array((ana.dtw.Rcangle + ['-NaN']*4)[:4])
+                ana.dtw.Rtangle = np.array((ana.dtw.Rtangle + ['-NaN']*4)[:4])           
+            result = rangle + [np.mean(rangle[::2]), np.mean(rangle[1::2])]+ langle + [np.mean(langle[::2]), np.mean(langle[1::2])]
+            return result            
         elif exeno == 4:
             langle = list(np.vstack([ana.dtw.Lcangle, ana.dtw.Ltangle]).T.flatten())
             rangle = list(np.vstack([ana.dtw.Rcangle, ana.dtw.Rtangle]).T.flatten())
@@ -156,6 +135,7 @@ class Evaluation(object):
         print(str0)
         if os.path.isfile(log.excelPath):
             name = userinfo.name
+            pdb.set_trace()
             df = pd.read_excel(log.excelPath, sheet_name='exercise %s' %exeno)
             cols = log.colname[exeno][4:-1]  # donot neet common & errmsg info
             roi = df[df['name'] == name]  # rows of interest
@@ -163,11 +143,12 @@ class Evaluation(object):
             terms = []
             for col in cols:
                 try:
-                    hisres.append(round(np.mean(roi[col]),2))
+                    hisres.append(round(roi[col].mean(),2))
                     terms.append(col)
                 except:
+                    pdb.set_trace()
                     pass
-            str1 = '%10s | %18s | %18s | %18s\n'%('Terms', 'In history record', 'This time', 'Results')
+            str1 = '%40s | %18s | %15s | %16s\n'%('Terms', 'In history record', 'This time', 'Results')
             print(str1)
             text_file.write(str1)
             for i in xrange(len(cols)):
@@ -176,7 +157,7 @@ class Evaluation(object):
                 else:
                     updown = 'increase'
                 num = round(np.abs(data[i]-hisres[i])/hisres[i]*100, 2)
-                str2 = '%10s | %18s | %18s | %6s%s %8s\n' %(terms[i], hisres[i], round(data[i], 2), num, '%', updown) 
+                str2 = '%40s | %18s | %15s | %6s%s %8s\n' %(terms[i], hisres[i], round(data[i], 2), num, '%', updown) 
                 print(str2)
                 text_file.write(str2)
         else:
@@ -197,7 +178,8 @@ class Evaluation(object):
             elif dolist[idx]:  # done without err
                 print(('%18s' % contents[idx])+' : Perfect !!')
             else:
-                print(('%18s' % contents[idx])+' : Did not test this part.')
+                pass
+                #print(('%18s' % contents[idx])+' : Did not test this part.')
 
     def position(self, surface, ratio, stype=2, region=1, height=0):
         """According to the scene type, ratio and the region number

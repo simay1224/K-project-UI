@@ -8,6 +8,7 @@ import numpy as np
 from scipy.signal import argrelextrema
 from dataoutput import Dataoutput
 from math import acos
+import inflect
 import pdb
 
 class Dynamic_time_warping(object):
@@ -34,7 +35,7 @@ class Dynamic_time_warping(object):
         self.srchfw        = 10  # forward search range
         self.srchbw        = 20  # backward search range
         self.seqlist_gf    = np.array([])
-
+        self.cnvt          = inflect.engine() 
         # updatable parameters
         self.fcnt          = 0
         self.dpfirst       = {}
@@ -47,18 +48,18 @@ class Dynamic_time_warping(object):
         self.chk_flag      = False
         self.deflag        = False  # decreasing flag
         self.segini        = True
+        self.Ltangle      = []  # Armpit angle in T-pose
+        self.Lcangle      = []  # Armpit angle in hand close
+        self.Rtangle      = []  # Armpit angle in T-pose
+        self.Rcangle      = []  # Armpit angle in hand close 
         #save in log
-        self.jspos = []  # record the joints position when finish one subsequence 
+        # self.jspos = []  # record the joints position when finish one subsequence 
         # default parameters
         self.cnt     = 0
         self.do      = False
         self.err     = []
         self.evalstr = ''
-        self.eval    = ''
-        self.Ltangle      = []  # Armpit angle in T-pose
-        self.Lcangle      = []  # Armpit angle in hand close
-        self.Rtangle      = []  # Armpit angle in T-pose
-        self.Rcangle      = []  # Armpit angle in hand close        
+        self.eval    = ''       
 
     def wt_euclidean(self, u, v, w):
         """ normal euclidean dist with the weighting
@@ -93,7 +94,6 @@ class Dynamic_time_warping(object):
         self.seqlist_reg = self.seqlist_reg[endidx+1:, :]  # update the seqlist
         self.presv_size  = self.seqlist_reg.shape[0]
         self.oidx        = self.gt_idx
-        #self.deflag_mul  = defaultdict(lambda: (bool(False)))
         self.fcnt         = 0
         self.dpfirst     = {}
         self.dist_p      = {}
@@ -101,30 +101,29 @@ class Dynamic_time_warping(object):
         self.segini      = True
         self.chk_flag    = False
 
-
-    def joint_angle(self, reconJ, idx=[4, 5, 6], offset=0):
+    def joint_angle(self, reconJ, idx=[4, 5, 6], y_vec=np.array([0, 1, 0]) ,offset=0):
         """ finding the angle between 3 joints.
             default joints are left shld, elbow, wrist.
         """
-        y_vec = np.array([0, 1, 0])
         if reconJ.shape[0] == 33:
             offset = 4
         if idx[0] == 8:  # right hand
             offset += 3
-        # Elbow - sholder
+        #  sholder -> Elbow 
         vec1 = np.array([reconJ[(offset+1)*3]-reconJ[(offset*3)],
                         reconJ[(offset+1)*3+1]-reconJ[(offset*3)+1],
                         reconJ[(offset+1)*3+2]-reconJ[(offset*3)+2]])
-        # Elbow - Wrist
+        # Wrist -> Elbow 
         vec2 = np.array([reconJ[(offset+1)*3]-reconJ[(offset+2)*3],
                         reconJ[(offset+1)*3+1]-reconJ[(offset+2)*3+1],
                         reconJ[(offset+1)*3+2]-reconJ[(offset+2)*3+2]])
 
-        costheta_e = vec1.dot(-1*y_vec)/sum(vec1**2)**.5/sum(y_vec**2)**.5
-        costheta_w = vec2.dot(y_vec)/sum(vec2**2)**.5/sum(y_vec**2)**.5
-        return acos(np.mean([costheta_e,costheta_w]))*180/np.pi
+        costheta_ampit = vec1.dot(-1*y_vec)/sum(vec1**2)**.5/sum(y_vec**2)**.5
+        costheta_elbow = vec2.dot(-1*y_vec)/sum(vec2**2)**.5/sum(y_vec**2)**.5
+        costheta_sew = vec1.dot(vec2)/sum(vec1**2)**.5/sum(vec2**2)**.5
+        return np.array([acos(costheta_ampit), acos(costheta_elbow), acos(costheta_sew)])*180/np.pi
 
-    def matching(self, reconJ, exer, lowpass=True):
+    def matching(self, reconJ, exer, exeno, lowpass=True):
         """the main part of dtw matching algorithm
         """
         self.do = True
@@ -158,16 +157,29 @@ class Dynamic_time_warping(object):
                             else:
                                 minidx = 3
                             self.gt_idx = minidx
-                            if self.gt_idx == 3:  # hand close
-                                self.Lcangle.append(self.joint_angle(reconJ))
-                                self.Rcangle.append(self.joint_angle(reconJ, idx=[8, 9, 10]))
+                            if self.gt_idx == 3:  # hand close in exer4, hands push down in exer3
+                                if exeno == 4:
+                                    self.Lcangle.append(min(self.joint_angle(reconJ)[:2]))
+                                    self.Rcangle.append(min(self.joint_angle(reconJ, idx=[8, 9, 10])[:2]))
+                                    if self.Lcangle[-1] < 80 or self.Rcangle[-1] < 80:
+                                        self.evalstr = 'Please keep your hand horizontally.'
+                                        self.eval = 'Please keep your hand horizontally.'
+                                        self.err.append('The '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, hands is not horizontal.')
+                                elif exeno == 3:
+                                    self.Lcangle.append(self.joint_angle(reconJ)[2])
+                                    self.Rcangle.append(self.joint_angle(reconJ, idx=[8, 9, 10])[2])                                 
+                                    if self.Lcangle[-1] > 50 or self.Rcangle[-1] > 50:
+                                        self.evalstr = 'Please push your hand lower.'
+                                        self.eval = 'Please push your hand lower.'
+                                        self.err.append('The '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, hands is not lower enough.')
+
                             self.idxlist.append(self.gt_idx)
                             if self.eval == '':
                                 self.evalstr = 'Subsequence done: Well done.'
                             else:
                                 self.evalstr = 'Subsequence done. '+self.eval
                                 self.eval = ''
-                            self.jspos.append(reconJ)
+                            # self.jspos.append(reconJ)
                             self.seg_update(endidx)
                 else:
                     test_data_p = self.seqlist + np.atleast_2d((exer.gt_data[self.gt_idx][0, :]-self.seqlist[0, :]))
@@ -194,19 +206,43 @@ class Dynamic_time_warping(object):
                     self.idx_cmp = self.seqlist.shape[0]
                     print(' ==== reset ====')
                 elif self.fcnt == self.srchfw:
+                    if exeno == 4:  # exercise 4
+                        if self.gt_idx == 3:  # hand close 
+                            self.Lcangle.append(min(self.joint_angle(reconJ)[:2]))
+                            self.Rcangle.append(min(self.joint_angle(reconJ, idx=[8, 9, 10])[:2]))
+                            if self.Lcangle[-1] < 80 or self.Rcangle[-1] < 80:
+                                self.evalstr = 'Please keep your hand horizontally.'
+                                self.eval = 'Please keep your hand horizontally.'
+                                self.err.append('The '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, hands is not horizontal.')
+                        elif self.gt_idx == 4:  # T-pose
+                            self.Ltangle.append(min(self.joint_angle(reconJ)[:2]))
+                            self.Rtangle.append(min(self.joint_angle(reconJ, idx=[8, 9, 10])[:2]))
+                            if self.Ltangle[-1] < 80 or self.Rtangle[-1] < 80:
+                                self.evalstr = 'Please keep your hand horizontally.'
+                                self.eval = 'Please keep your hand horizontally.'
+                                self.err.append('The '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, hands is not horizontal.')                                    
+                    elif exeno == 3:  # exercise 3
+                        if self.gt_idx == 3:  # hand push down
+                            self.Lcangle.append(self.joint_angle(reconJ)[2])
+                            self.Rcangle.append(self.joint_angle(reconJ, idx=[8, 9, 10])[2])
+                            if self.Lcangle[-1] > 50 or self.Rcangle[-1] > 50:
+                                self.evalstr = 'Please push your hand lower.'
+                                self.eval = 'Please push your hand lower.'
+                                self.err.append('The '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, hands is not lower enough.')
+                        elif self.gt_idx == 4:  # hand raise up
+                            self.Ltangle.append(np.mean(self.joint_angle(reconJ)[::2]))
+                            self.Rtangle.append(np.mean(self.joint_angle(reconJ, idx=[8, 9, 10])[::2]))
+                            if self.Ltangle[-1] < 160 or self.Rtangle[-1] < 160:
+                                self.evalstr = 'Please straight your hand.'
+                                self.eval = 'Please straight your hand.'
+                                self.err.append('The '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, hands is not horizontal.')
+
                     if self.eval == '':
                         self.evalstr = 'Subsequence done: Well done.'
                     else:
                         self.evalstr = 'Subsequence done. '+self.eval
-                        self.eval = ''
-                    if self.gt_idx == 3:  # hand close
-                        self.Lcangle.append(self.joint_angle(reconJ))
-                        self.Rcangle.append(self.joint_angle(reconJ, [8, 9, 10]))
-                    elif self.gt_idx == 4:  # T-pose
-                        self.Ltangle.append(self.joint_angle(reconJ))
-                        self.Rtangle.append(self.joint_angle(reconJ, [8, 9, 10]))
-
-                    self.jspos.append(reconJ)
+                        self.eval = ''        
+                    # self.jspos.append(reconJ)
                     tgrad = 0
                     for ii in xrange(self.seqlist.shape[1]):  # maybe can include jweight
                         tgrad += (np.gradient(gf(self.seqlist[:, ii], 1))**2)*exer.jweight[ii]

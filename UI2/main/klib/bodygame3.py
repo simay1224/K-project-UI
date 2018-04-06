@@ -72,7 +72,7 @@ class BodyGameRuntime(object):
 
         self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
-        self.bkidx = 3
+        self.bkidx = 7
         self.bklist = glob.glob(os.path.join('./data/bkimgs', '*.jpg'))
         self.readbackground()
         self.h_to_w = float(self.default_h) / self.default_w
@@ -382,7 +382,7 @@ class BodyGameRuntime(object):
                         # === analyze ===
                         self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
                                      self.eval, self.kp, body, dframe, djps)                        
-
+                        
                         # === show hand status === 
                         # self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                         #                     self.ana.hs.htext(body.hand_left_state, body.hand_right_state), 4 ,\
@@ -395,7 +395,7 @@ class BodyGameRuntime(object):
                                 self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, True)
 
                             self.fcnt += 1
-                            if self.fcnt > 30 :
+                            if self.fcnt > 60 :
                                 self.ana.evalstr = ''
                                 self.fcnt  = 0
                     else:
@@ -440,7 +440,6 @@ class BodyGameRuntime(object):
             else:
                 self.io.typetext(self._frame_surface, 'Kinect does not connect!!', (20, 100))
 
-
             # === text infomation on the surface ===
             if self.kp.vid_rcd:  # video recoding text
                 self.io.typetext(self._frame_surface, 'Video Recording', (1580, 20), (255, 0, 0))
@@ -455,7 +454,7 @@ class BodyGameRuntime(object):
 
             
             self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='exe', region=1) 
-            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='note', region=2, emph=True, color=(255, 0, 0, 0))
+            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='note', region=2, color=(255, 255, 51, 0))#color=(255, 0, 0, 0))
             # draw back ground
             bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
             self._screen.blit(bksurface_to_draw, (0, 0))

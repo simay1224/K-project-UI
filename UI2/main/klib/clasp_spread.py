@@ -48,13 +48,13 @@ class Clasp_spread(object):
             self.spread_time = 0
             # self.elbowstus['spread'] == False  
 
-    def bodystraight(self, joints, kpm, th=12):
+    def bodystraight(self, joints, kpm, th=20):
         """ check whether body is straight or not
         """
         torso_z = np.mean([joints[kpm.SpineBase_z], joints[kpm.SpineMid_z]])
         if torso_z-joints[kpm.Neck_z] > th and torso_z-joints[kpm.Head_z] > th:
-        #    self.evalstr = 'please stand straight.'
-           return False
+            self.evalstr = 'please stand straight.'
+            return False
         return True 
 
     def clasp(self, joints, kpm, spread_th=60, elbow_th=75):
@@ -104,5 +104,5 @@ class Clasp_spread(object):
         else:
             # print 'hands up'
             self.spread(joints, self.kpm)
-            # self.bodystraight(joints, self.kpm)
+            self.bodystraight(joints, self.kpm)
         self.state_update(joints, self.kpm)

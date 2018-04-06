@@ -126,7 +126,7 @@ class Exeinst(object):
             self.upperbnd = height*self.part[region-1]
         return (self.leftbnd, self.upperbnd + 20)
 
-    def blit_text(self, surface, exeno, kp, strtype='exe', text=None, region=1, emph=False, color=(0, 255, 0, 255)):
+    def blit_text(self, surface, exeno, kp, strtype='exe', text=None, region=1, emph=False, color=(255, 204, 153, 255)):#color=(0, 153, 51, 255)):
         """Creat a text surface, this surface will change according to the scene type,
            ratio and the region number. According to the size of the surface, the text 
            will auto change line also auto change the font size"""

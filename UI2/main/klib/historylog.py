@@ -1,7 +1,7 @@
 import pandas as pd
 import os.path
 from openpyxl import load_workbook
-
+import pdb
 
 class Historylog(object):
     """ save the user's data from furture analysis and comparision.
@@ -29,23 +29,15 @@ class Historylog(object):
         clsp  = ["Max hold time", "Min hold time", "average hold time"]
         swing = ["Max right bending angle", "Min right bending angle",
                  "Max left bending angle", "Min left bending angle"]
-        exer3 = ['1st right push down lower enough?', '1st lower right elbow angle',
-                 '1st right hand up straight?', '1st straight right elbow angle',
-                 '2nd right push down lower enough?', '2nd lower right elbow angle',
-                 '2nd right hand up straight?', '2nd straight right elbow angle',
-                 '3rd right push down lower enough?', '3rd lower right elbow angle',
-                 '3rd right hand up straight?', '3rd straight right elbow angle',
-                 '4th right push down lower enough?','4th lower right elbow angle',
-                 '4th right hand up straight?', '4th straight right elbow angle',
+        exer3 = ['1st lower right elbow angle', '1st straight right elbow angle',
+                 '2nd lower right elbow angle', '2nd straight right elbow angle',
+                 '3rd lower right elbow angle', '3rd straight right elbow angle',
+                 '4th lower right elbow angle', '4th straight right elbow angle',
                  'average right hand straight angle', 'average right hand push down angle',
-                 '1st left push down lower enough?', '1st lower left elbow angle',
-                 '1st left hand up straight?', '1st straight left elbow angle',
-                 '2nd left push down lower enough?', '2nd lower left elbow angle',
-                 '2nd left hand up straight?', '2nd straight left elbow angle',
-                 '3rd left push down lower enough?', '3rd lower left elbow angle',
-                 '3rd left hand up straight?', '3rd straight left elbow angle',
-                 '4th left push down lower enough?','4th lower left elbow angle',
-                 '4th left hand up straight?', '4th straight left elbow angle',
+                 '1st lower left elbow angle', '1st straight left elbow angle',
+                 '2nd lower left elbow angle', '2nd straight left elbow angle',
+                 '3rd lower left elbow angle', '3rd straight left elbow angle',
+                 '4th lower left elbow angle', '4th straight left elbow angle',
                  'average left hand straight angle', 'average left hand push down angle']
         exer4 = ['1st right hand angle (H-close)', '1st right hand angle (T-pose)',
                  '2nd right hand angle (H-close)', '2nd right hand angle (T-pose)',

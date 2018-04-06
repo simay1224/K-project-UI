@@ -2,6 +2,7 @@ import numpy as np
 from scipy.signal import argrelextrema
 from scipy.ndimage.filters import gaussian_filter as gf_2D
 from scipy.ndimage.filters import gaussian_filter1d as gf
+from initial_param.kinect_para import Kinect_para
 import inflect
 import pdb
 
@@ -25,6 +26,7 @@ class Breath_status(object):
         self.plot_flag     = False
         self.brth_out_flag = False
         self.cnvt          = inflect.engine()  # converting numerals into ordinals
+        self.kpm         = Kinect_para()        
         #save in log
         self.sync_rate = 0
         self.brth_diff = []
@@ -34,6 +36,20 @@ class Breath_status(object):
         self.err     = []
         self.evalstr = ''
         self.eval    = ''
+
+    # def bodystraight(self, joints, th=20):
+    #     """ check whether body is straight or not
+    #     """
+    #     print joints.shape[0]
+    #     if joints.shape[0] == 21:  # only use limb joint
+    #         offset = 12
+    #     else:
+    #         offset = 0
+    #     torso_z = np.mean([joints[self.kpm.SpineBase_z-offset], joints[self.kpm.SpineMid_z-offset]])
+    #     if torso_z-joints[self.kpm.Neck_z-offset] > th and torso_z-joints[self.kpm.Head_z-offset] > th:
+    #         self.evalstr += 'Please stand straight.\n'
+    #         return False
+    #     return True
 
     def rm_pulse(self, ary, th=10):
         """ remove small pulse in the binary array
@@ -118,7 +134,7 @@ class Breath_status(object):
             print('\naverage breath in freq is: '+str(np.round(30./np.mean(b_in), 2))+' Hz')
         else:
             # raise ImportError('Doing too fast !! please redo again !!')
-            self.evalstr = 'Doing too fast !! please redo again !!'
+            self.evalstr = 'Doing too fast !! please redo again !!\n'
     def brth_hand_sync(self, lhopen, lhclose):
         """calculate breath and hand open/close relation
         """
@@ -216,7 +232,7 @@ class Breath_status(object):
                 self.brth_out_flag = True
                 self.ana_ary.append([self.min_ary[-1, 0], 0, self.min_ary[-1, 1]])
                 if np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1]) < 30:
-                    self.evalstr = 'Please breathe deeper.'
+                    self.evalstr = 'Please breathe deeper.\n'
                     self.eval = 'Please breathe deeper.'
                     self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, is not deep enough.')
         self.max_len = self.max_ary.shape[0]
