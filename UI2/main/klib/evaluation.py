@@ -94,12 +94,9 @@ class Evaluation(object):
         elif exeno == 3:
             langle = list(np.vstack([ana.dtw.Lcangle, ana.dtw.Ltangle]).T.flatten())
             rangle = list(np.vstack([ana.dtw.Rcangle, ana.dtw.Rtangle]).T.flatten())
-            if ana.dtw.idxlist.count(4) != 4:
-                ana.dtw.Lcangle = np.array((ana.dtw.Lcangle + ['-NaN']*4)[:4])
-                ana.dtw.Ltangle = np.array((ana.dtw.Ltangle + ['-NaN']*4)[:4])
-                ana.dtw.Rcangle = np.array((ana.dtw.Rcangle + ['-NaN']*4)[:4])
-                ana.dtw.Rtangle = np.array((ana.dtw.Rtangle + ['-NaN']*4)[:4])           
-            result = rangle + [np.mean(rangle[::2]), np.mean(rangle[1::2])]+ langle + [np.mean(langle[::2]), np.mean(langle[1::2])]
+            rangle = (rangle+['-NaN']*8)[:8]
+            langle = (langle+['-NaN']*8)[:8]         
+            result = rangle + [np.mean(ana.dtw.Rcangle), np.mean(ana.dtw.Rtangle)]+ langle + [np.mean(ana.dtw.Lcangle), np.mean(ana.dtw.Ltangle)]
             return result            
         elif exeno == 4:
             langle = list(np.vstack([ana.dtw.Lcangle, ana.dtw.Ltangle]).T.flatten())

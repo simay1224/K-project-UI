@@ -214,7 +214,10 @@ class Analysis(object):
         elif exeno == 3:
             if not self.exer[3].order[self.dtw.oidx] == 'end':
                 self.dtw.matching(reconJ21, self.exer[3], exeno)
-
+                if self.dtw.gidx not in [1, 2]:
+                    self.hs.hstus_proc(body.hand_left_state, body.hand_right_state)
+                    bdry = self.getcoord(djps)
+                    self.brth.run(bdry, dmap)
                 if 'stand' not in self.evalstr:
                     self.bodystraight(reconJ)
                 # === eval string update ===
@@ -239,6 +242,9 @@ class Analysis(object):
                                       + ' to go !!', 3, color=self.c_togo)
             else:
                 self._done = True
+                self.brth.breath_analyze()
+                hopen, hclose = self.hs.hstus_ana()
+                self.brth.brth_hand_sync(hopen, hclose)                
                 if self.dtw.idxlist.count(3) < 4:
                     self.dtw.err.append('Did not do enough repetition.')
                 print('================= exer END ======================')
