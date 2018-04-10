@@ -112,7 +112,8 @@ class BodyGameRuntime(object):
         self.movie = movie.Movie(self.exeno)
         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
-        self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
+        # self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
+        self.ori = (int(self._screen.get_width()/12.), int(self._screen.get_height()*0.5))  # origin of the color frame
         self.fcnt = 0
         # import class
         self.ana = Analysis()
@@ -476,12 +477,17 @@ class BodyGameRuntime(object):
  
 
             self.kp.scale = self.kp.scale * scale
-            self.movie.draw(self._screen, self.w, self.h, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
+            self.movie.draw(self._screen, self._screen.get_width(), self._screen.get_height(), self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
             self.kp.pre_scale = self.kp.scale
 
             
-            surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*(1-self.kp.ratio)), int(self.h*(1-self.kp.ratio))))     
+            # surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*(1-self.kp.ratio)), int(self.h*(1-self.kp.ratio))))
+            # self._screen.blit(surface_to_draw, self.ori)
+            surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*(1-self.kp.ratio)), int(self.h*(1-self.kp.ratio))))
+            self.ori = (int(self._screen.get_width()/8.), int(self._screen.get_height()*0.5))
+            print 'k:'+ str(self._screen.get_width())
             self._screen.blit(surface_to_draw, self.ori)
+
 
 
             # update
