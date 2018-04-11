@@ -1,4 +1,5 @@
 from collections import defaultdict
+from initial_param.kparam import Kparam
 import pygame, pdb
 
 pygame.init()
@@ -10,6 +11,7 @@ class Exeinst(object):
         self.upperbnd = 0
         self.str = defaultdict(dict)
         self.words = defaultdict(dict)
+        self.kp = Kparam()
         self.part = [0, 0.5, 5./6, 1]
         self.str['exe'][1] = 'Exercise 1 : Muscle Tighting Deep Breathing'\
                              '\n  '\
@@ -93,8 +95,6 @@ class Exeinst(object):
                                 '\n2. When the hands is in the back of your head, spread the elnows open as wide as possible.'\
                                 '\n3. Keep your body staight.'
 
-
-
         self.words['exe'][1] = [word.split(' ') for word in self.str['exe'][1].splitlines()]
         self.words['exe'][2] = [word.split(' ') for word in self.str['exe'][2].splitlines()]
         self.words['exe'][3] = [word.split(' ') for word in self.str['exe'][3].splitlines()]
@@ -111,7 +111,7 @@ class Exeinst(object):
         self.words['note'][6] = [word.split(' ') for word in self.str['note'][6].splitlines()]
         self.words['note'][7] = [word.split(' ') for word in self.str['note'][7].splitlines()]
 
-        self.font_size = 40
+        self.font_size = self.kp.inst_size
         # self.font = pygame.font.SysFont('Arial', self.font_size)
         #self.space = self.font.size(' ')[0]  # The width of a space.
 
@@ -126,14 +126,15 @@ class Exeinst(object):
             self.upperbnd = height*self.part[region-1]
         return (self.leftbnd, self.upperbnd + 20)
 
-    def blit_text(self, surface, exeno, kp, strtype='exe', text=None, region=1, emph=False, color=(107, 71, 107, 255)):#color=(0, 153, 51, 255)):
+    def blit_text(self, surface, exeno, kp, strtype='exe', text=None, region=1, emph=False, color=None):
         """Creat a text surface, this surface will change according to the scene type,
            ratio and the region number. According to the size of the surface, the text 
            will auto change line also auto change the font size"""
+        color = self.kp.c_inst if color is None else color
         if emph:
-            self.font = pygame.font.SysFont('Arial', self.font_size, bold=True, italic=True)
+            self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True, italic=True)
         else:
-            self.font = pygame.font.SysFont('Arial', self.font_size)
+            self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)
         self.space = self.font.size(' ')[0]  # The width of a space.
         if text == None:  # if there is no assign text, use the text in data base 
             words = self.words[strtype][exeno]
@@ -168,14 +169,14 @@ class Exeinst(object):
             if self.font_size > 12:
                 self.font_size = self.font_size - 1
                 if emph:
-                    self.font = pygame.font.SysFont('Arial', self.font_size, bold=True, italic=True)
+                    self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True, italic=True)
                 else:
-                    self.font = pygame.font.SysFont('Arial', self.font_size)
+                    self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)
         elif y < max_height  - 40 :
             # print 'small'
             if self.font_size < 40:
                 self.font_size = self.font_size + 1
                 if emph:
-                    self.font = pygame.font.SysFont('Arial', self.font_size, bold=True, italic=True)
+                    self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True, italic=True)
                 else:
-                    self.font = pygame.font.SysFont('Arial', self.font_size)   
+                    self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)   

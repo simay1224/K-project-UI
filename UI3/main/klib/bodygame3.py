@@ -15,7 +15,7 @@ import movie
 # from dtw         import Dtw
 from analysis import Analysis
 from evaluation import Evaluation
-from denoise     import Denoise
+# from denoise     import Denoise
 from initial_param.kparam      import Kparam
 from rel         import Rel
 from dataoutput  import Dataoutput
@@ -72,6 +72,7 @@ class BodyGameRuntime(object):
 
         self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
+
         self.bkidx = 4
         self.bklist = glob.glob(os.path.join('./data/bkimgs', '*.jpg'))
         self.readbackground()
@@ -80,7 +81,10 @@ class BodyGameRuntime(object):
         self._bodies = None
         self.info = info
         # self.scene_type = 2
-        
+        self.emoji = None
+        self.errimg = pygame.image.load("./data/err.png").convert_alpha()
+        self.corimg = pygame.image.load("./data/right.png").convert_alpha()
+
         time.sleep(5)
 
         if self._kinect.has_new_color_frame():
@@ -118,7 +122,7 @@ class BodyGameRuntime(object):
         # import class
         self.ana = Analysis()
         self.eval = Evaluation()
-        self.denoise = Denoise()
+        # self.denoise = Denoise()
         self.rel = Rel()
         self.io  = Dataoutput()
         self.h_mod = Human_model()
@@ -182,13 +186,13 @@ class BodyGameRuntime(object):
                 self.kp.vid_rcd = True
                 self.kp.clipNo += 1
 
-        if press[pygame.K_g]:  # use 'g' to to open, 'ctrl+g' to close gpr denoise
-            if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
-                print('Close denoising process .....')
-                self.denoise._done = True
-            else:
-                print('Start denoising process .....')
-                self.denoise._done = False
+        # if press[pygame.K_g]:  # use 'g' to to open, 'ctrl+g' to close gpr denoise
+        #     if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
+        #         print('Close denoising process .....')
+        #         self.denoise._done = True
+        #     else:
+        #         print('Start denoising process .....')
+        #         self.denoise._done = False
 
         if press[pygame.K_d]:  # use 'd' to to open, 'ctrl+d' to close dtw
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
@@ -220,13 +224,14 @@ class BodyGameRuntime(object):
         if press[pygame.K_z]:  # use 'z' to lower the ratio of avatar to color frame
                                # 'ctrl+z' to larger the ratio of avatar to color frame
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
-                if self.kp.ratio < 0.8:
+                if self.kp.ratio <= 0.6:
                     self.kp.ratio += 0.05  
                     self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)                  
             else:    
-                if self.kp.ratio > 0.2:
+                if self.kp.ratio > 0.4:
                     self.kp.ratio -= 0.05
                     self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
+            print self.kp.ratio
 
         if press[pygame.K_0]:  # use '0' to change the scene type
             print('scene change')
@@ -294,6 +299,8 @@ class BodyGameRuntime(object):
             # self.draw_color_frame(np.zeros(1920*1080*4).astype(np.uint8), self.bk_frame_surface)
             # self.draw_color_frame(self.bkcolor.astype(np.uint8), self.bk_frame_surface)
             self.draw_color_frame(self.bkimg, self.bk_frame_surface)
+
+
             # self.bk_frame_surface.fill(255,50,50)
             # === extract data from kinect ===
             if self._kinect.has_new_color_frame():
@@ -346,39 +353,37 @@ class BodyGameRuntime(object):
                         #     modJary = modJary.flatten().reshape(-1, 21)  # change shape to 1*21 array
                         # else:
                         modJary = self.h_mod.human_mod_pts(joints, False)  # modJary is 11*3 array
-                        modJary = modJary.flatten().reshape(-1, 33)  # change shape to 1*33 array                            
-                        if not self.denoise._done:
-                            if not len(Relary) == 0:
-                                # === GPR denoising ===
-                                if all(ii > 0.6 for ii in Relary[limbidx]):  # all joints are reliable
-                                    reconJ = modJary  # reconJ is 1*21 array
-                                else:  # contains unreliable joints
-                                    # if self.ana.exer[self.exeno].limbjoints:
-                                    #     reconJ, unrelidx = self.denoise.run(modJary, Relary)
-                                    #     JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
-                                    # else:
-                                    reconJ, unrelidx = self.denoise.run(modJary[:, 12:], Relary)
-                                    JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
-                                    reconJ = np.hstack([modJary[:, :12], reconJ]) 
-                                    #  === recon 2D joints in color domain ===
-                                    for ii in [4, 5, 6, 8, 9, 10, 20]:
-                                        rec_joints[ii].Position.x = JJ[ii][0]
-                                        rec_joints[ii].Position.y = JJ[ii][1]
-                                        rec_joints[ii].Position.z = JJ[ii][2]
-                                    tmp_jps = self._kinect.body_joints_to_color_space(rec_joints)  # joints in color domain
-                                    rec_jps = np.zeros([21,2])
-                                    for ii in xrange(21):
-                                        if ii in unrelidx:
-                                            rec_jps[ii, 0] = tmp_jps[ii].x
-                                            rec_jps[ii, 1] = tmp_jps[ii].y
-                                        else:
-                                            rec_jps[ii, 0] = jps[ii].x
-                                            rec_jps[ii, 1] = jps[ii].y                                            
-                                    self.skel.draw_body(rec_joints, rec_jps, SKELETON_COLORS[3], self._frame_surface, 30)
-                            else:
-                                reconJ = modJary
-                        else:
-                            reconJ = modJary
+                        modJary = modJary.flatten().reshape(-1, 33)  # change shape to 1*33 array
+
+                        reconJ = modJary                            
+                        # if not self.denoise._done:
+                        #     if not len(Relary) == 0:
+                        #         # === GPR denoising ===
+                        #         if all(ii > 0.6 for ii in Relary[limbidx]):  # all joints are reliable
+                        #             reconJ = modJary  # reconJ is 1*21 array
+                        #         else:  # contains unreliable joints
+                        #             reconJ, unrelidx = self.denoise.run(modJary[:, 12:], Relary)
+                        #             JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
+                        #             reconJ = np.hstack([modJary[:, :12], reconJ]) 
+                        #             #  === recon 2D joints in color domain ===
+                        #             for ii in [4, 5, 6, 8, 9, 10, 20]:
+                        #                 rec_joints[ii].Position.x = JJ[ii][0]
+                        #                 rec_joints[ii].Position.y = JJ[ii][1]
+                        #                 rec_joints[ii].Position.z = JJ[ii][2]
+                        #             tmp_jps = self._kinect.body_joints_to_color_space(rec_joints)  # joints in color domain
+                        #             rec_jps = np.zeros([21,2])
+                        #             for ii in xrange(21):
+                        #                 if ii in unrelidx:
+                        #                     rec_jps[ii, 0] = tmp_jps[ii].x
+                        #                     rec_jps[ii, 1] = tmp_jps[ii].y
+                        #                 else:
+                        #                     rec_jps[ii, 0] = jps[ii].x
+                        #                     rec_jps[ii, 1] = jps[ii].y                                            
+                        #             self.skel.draw_body(rec_joints, rec_jps, SKELETON_COLORS[3], self._frame_surface, 30)
+                        #     else:
+                        #         reconJ = modJary
+                        # else:
+                        #     reconJ = modJary
 
                         # === analyze ===
                         self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
@@ -391,23 +396,23 @@ class BodyGameRuntime(object):
 
                         if self.ana.evalstr != '':
                             if 'well' in (self.ana.evalstr).lower():
-                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, color=(45, 89, 134, 255))
+                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, color=self.kp.c_eval_well)
+                                self.emoji = self.corimg
                             else:
-                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, False, color=(230, 115, 0, 255))
-
+                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, False, color=self.kp.c_eval_err)
+                                self.emoji = self.errimg
                             self.fcnt += 1
                             if self.fcnt > 60 :
                                 self.ana.evalstr = ''
                                 self.fcnt  = 0
                     else:
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                            'Exercise '+str(self.exeno)+' is done', 1, emph=False, color=(107, 71, 107, 255))
+                                            'Exercise '+str(self.exeno)+' is done', 1, False)
                         if not self.kp.finish:
                             errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err,\
                                     self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
                             dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.dtw.do,\
                                       self.ana.shld.do, self.ana.clsp.do, self.ana.swing.do]
-                            # self.eval.run(self.exeno, self.ana.brth, self.ana.hs)
                             exelog = self.eval.run(self.exeno, self.ana)
                             self.eval.errmsg(errs, dolist)
                             self.eval.cmphist(self.log, self.info, self.exeno, self.kp.now, exelog)
@@ -454,16 +459,21 @@ class BodyGameRuntime(object):
                 self.io.typetext(self._frame_surface, 'Not Recording', (1580, 20), (0, 255, 0))  
 
             
-            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='exe', region=1) 
-            self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='note', region=2, color=(45, 89, 134, 0))#color=(255, 0, 0, 0))
+            # self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='exe', region=1) 
+            # self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='note', region=2, color=self.kp.c_tips)
             # draw back ground
             bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
             self._screen.blit(bksurface_to_draw, (0, 0))
+            # emoji
+            if self.ana.evalstr != '':
+                emoji_size = min(int(self._screen.get_width()*0.25), int(self._screen.get_height()*0.25))
+                emoji = pygame.transform.scale(self.emoji, (emoji_size, emoji_size)) 
+                self._screen.blit(emoji, (int(self._screen.get_width()/8.*6), int(self._screen.get_height()*0.6)))
 
-            if self.kp.scene_type == 1:
-                self.ori = (0, 0) 
+            if self.kp.scene_type == 2:
+                self.ori = (int(self._screen.get_width()/8.), int(self._screen.get_height()*self.kp.ratio))
             else:
-                self.ori = (int(self._screen.get_width()*self.kp.ratio), int(self._screen.get_height()*self.kp.ratio))
+                self.ori = (int(self._screen.get_width()/8.), 0)
 
             h_scale = 1.*self._screen.get_height()/self.h
             w_scale = 1.*self._screen.get_width()/self.w
@@ -475,20 +485,15 @@ class BodyGameRuntime(object):
             self.w = self.w *scale
             self.h = self.h *scale  
  
-
             self.kp.scale = self.kp.scale * scale
-            self.movie.draw(self._screen, self._screen.get_width(), self._screen.get_height(), self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
+            # draw avatar
+            self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
             self.kp.pre_scale = self.kp.scale
 
-            
             # surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*(1-self.kp.ratio)), int(self.h*(1-self.kp.ratio))))
             # self._screen.blit(surface_to_draw, self.ori)
             surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*(1-self.kp.ratio)), int(self.h*(1-self.kp.ratio))))
-            self.ori = (int(self._screen.get_width()/8.), int(self._screen.get_height()*0.5))
-            print 'k:'+ str(self._screen.get_width())
             self._screen.blit(surface_to_draw, self.ori)
-
-
 
             # update
             surface_to_draw = None

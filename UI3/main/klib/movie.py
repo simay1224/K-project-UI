@@ -37,20 +37,15 @@ class Movie(object):
             Type : 1 => upper-left corner, 2 => lower-right corner 
         """
         if Type == 1:
-            return [screen_w-int(self.w*scale), screen_h-int(self.h*scale)]
+            return [int(screen_w/8.), screen_h-int(self.h*scale)]
         elif Type == 2:
-            return [0,0]
-        elif Type == 3:
             return [int(screen_w/8.), 0]
 
-        # return [screen_w-20-int(self.w*scale), screen_h-20-int(self.h*scale)]
-
-    def draw(self, surface, screen_w, screen_h, scale=1, pre_scale=1, Type=1):
+    def draw(self, surface, scale=1, pre_scale=1, Type=1):
         "Draw current frame to the surface"
         if scale/pre_scale != 1:
             self.mscreen = pygame.Surface((int(self.w*scale), int(self.h*scale))).convert()
             self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.w*scale), int(self.h*scale)))
-        # surface.blit(self.mscreen, self.position(screen_w, screen_h, scale, Type))
-        surface.blit(self.mscreen, self.position(screen_w, screen_h, scale, 3))
-        print 'A:'+ str(screen_w)
+        surface.blit(self.mscreen, self.position(surface.get_width(), surface.get_height(), scale, Type))
+
 

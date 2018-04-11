@@ -7,12 +7,15 @@ import pygame, pdb
 import pandas as pd
 import os.path
 from openpyxl import load_workbook
+from initial_param.kparam import Kparam
 
 class Evaluation(object):
     def __init__(self):
         self.upperbnd = 0
         self.words = defaultdict(list)
-        self.font_size = 60
+        self.kp = Kparam()
+        self.font_size = self.kp.eval_size
+        self.part = [0, 1./6, 4./6, 1]
         # self.font = pygame.font.SysFont('Arial', self.font_size)
         # self.space = self.font.size(' ')[0]
 
@@ -34,7 +37,7 @@ class Evaluation(object):
         costheta = vec1.dot(vec2)/sum(vec1**2)**.5/sum(vec2**2)**.5
         return acos(costheta)*180/np.pi
 
-    def breath_plot(self, ana):
+    def breath_plot(self, ana, exeno):
         fig = plt.figure(1)
         ax = fig.add_subplot(111)
         if len(ana.hs.hstate) == 0:  # only did breathe test (i.e. exer 1)
@@ -89,7 +92,7 @@ class Evaluation(object):
         """ exercise performance evaluation
         """
         if exeno == 1 :
-            self.breath_plot(ana)
+            self.breath_plot(ana, exeno)
             if len(ana.brth.brth_diff) == 0:
                 return ['','','']
             return [min(ana.brth.brth_diff), max(ana.brth.brth_diff),
@@ -134,7 +137,7 @@ class Evaluation(object):
         else:
             text_file = open("./output/compare.txt", "a")
         date = '-'.join(map(str,[time.year,time.month,time.day,time.hour,time.minute]))
-        str0 = '\n%10s: %s\n %10s: %s\n %10s: %s\n'% ('Exercise', exeno, 'Username', userinfo.name, 'Date', date)
+        str0 = '\n%10s: %s\n%10s: %s\n%10s: %s\n'% ('Exercise', exeno, 'Username', userinfo.name, 'Date', date)
 
         text_file.write(str0)
         print(str0)
@@ -187,35 +190,40 @@ class Evaluation(object):
     def position(self, surface, ratio, stype=2, region=1, height=0):
         """According to the scene type, ratio and the region number
            set up different upper bound and lower bound to the text"""
+        self.upperbnd = int(height*self.part[region-1])+20
+        self.leftbnd = int(surface.get_width()/8.*5+abs(0.5-ratio)*surface.get_height()*8./9)+20
+        # if stype == 2:
+        #     self.upperbnd = int(surface.get_height()*ratio + (region-1)*height/4.)
+        # else:
+        #     self.upperbnd = int(surface.get_height()*(1-ratio) + (region-1)*height/4.)
+        # return (20, self.upperbnd+20)
+        return (self.leftbnd, self.upperbnd) 
 
-        if stype == 2:
-            self.upperbnd = int(surface.get_height()*ratio + (region-1)*height/4.)
-        else:
-            self.upperbnd = int(surface.get_height()*(1-ratio) + (region-1)*height/4.)
-        return (20, self.upperbnd+20)
-
-    def blit_text(self, surface, exeno, kp, text=None, region=1, emph=False, color=(107, 71, 107, 255)):
+    def blit_text(self, surface, exeno, kp, text=None, region=1, emph=False, color=None):
         """Creat a text surface, this surface will change according to the scene type,
            ratio and the region number. According to the size of the surface, the text 
            will auto change line also auto change size
         """
+        color = self.kp.c_guide if color is None else color
         if emph:
-            self.font = pygame.font.SysFont('Bahnschrift', self.font_size, bold=True, italic=True)
+            self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True, italic=True)
         else:
-            self.font = pygame.font.SysFont('Arial', self.font_size)
+            self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)
         self.space = self.font.size(' ')[0]
         if text == None:
             words = self.words[exeno]
         else:
             words = [word.split(' ') for word in text.splitlines()]
 
-        if kp.scene_type == 2:
-            max_width = surface.get_width()*kp.ratio
-            height = surface.get_height()*(1-kp.ratio)
-        else:
-            max_width = surface.get_width()*(1-kp.ratio)
-            height = surface.get_height()*kp.ratio
-        max_height = height/4
+        # if kp.scene_type == 2:
+        #     max_width = surface.get_width()*kp.ratio
+        #     height = surface.get_height()*(1-kp.ratio)
+        # else:
+        #     max_width = surface.get_width()*(1-kp.ratio)
+        #     height = surface.get_height()*kp.ratio
+        max_width = surface.get_width()*0.25
+        height = surface.get_height()*0.6
+        max_height = height/6
 
         (x, y) = self.position(surface, kp.ratio, kp.scene_type, region, height)
         x_ori, y_ori = x, y
@@ -235,9 +243,9 @@ class Evaluation(object):
             if self.font_size > 12:
                 self.font_size = self.font_size - 2
                 if emph:
-                    self.font = pygame.font.SysFont('Arial', self.font_size, bold=True, italic=True)
+                    self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True, italic=True)
                 else:
-                    self.font = pygame.font.SysFont('Arial', self.font_size)           
+                    self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)           
                 
 
 

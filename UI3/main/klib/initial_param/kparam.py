@@ -5,7 +5,7 @@ class Kparam(object):
     """ Kinect intervention project parameters' initialization 
     """
 
-    def __init__(self,exeno, username):
+    def __init__(self,exeno='', username=''):
 
         self.bdjoints   = []
         self.now  = datetime.datetime.now() 
@@ -26,6 +26,24 @@ class Kparam(object):
         self.clipNo      = 0
         self.fno         = 0 
         self.framecnt    = 0
+
+        # === Font setting ===
+        # color
+        # instruction part
+        self.c_inst = (107, 71, 107, 255)
+        self.c_tips = (45, 89, 134, 0)
+        # eval part
+        self.c_guide     = (107, 71, 107, 255)
+        self.c_eval_well = (45, 89, 134, 0)
+        self.c_eval_err  = (230, 115, 0, 255)
+        self.c_togo      = (107, 71, 107, 255)
+        # style
+        self.s_normal = 'Arial'
+        self.s_emp = 'Arial'
+        self.eval_size = 60
+        self.inst_size = 40
+
+
                   
 
 
