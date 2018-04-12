@@ -34,7 +34,7 @@ class Evaluation(object):
         costheta = vec1.dot(vec2)/sum(vec1**2)**.5/sum(vec2**2)**.5
         return acos(costheta)*180/np.pi
 
-    def breath_plot(self, ana):
+    def breath_plot(self, ana, exeno):
         fig = plt.figure(1)
         ax = fig.add_subplot(111)
         if len(ana.hs.hstate) == 0:  # only did breathe test (i.e. exer 1)
@@ -89,13 +89,13 @@ class Evaluation(object):
         """ exercise performance evaluation
         """
         if exeno == 1 :
-            self.breath_plot(ana)
+            self.breath_plot(ana, exeno)
             if len(ana.brth.brth_diff) == 0:
                 return ['','','']
             return [min(ana.brth.brth_diff), max(ana.brth.brth_diff),
                     np.mean(ana.brth.brth_diff)]        
         elif exeno == 2:
-            self.breath_hand_plot(ana)
+            self.breath_hand_plot(ana, exeno)
             return [min(ana.brth.brth_diff), max(ana.brth.brth_diff), 
                     np.mean(ana.brth.brth_diff), ana.brth.sync_rate]
         elif exeno == 3:
@@ -117,7 +117,7 @@ class Evaluation(object):
             min_left  = np.abs(ana.swing.angle_ini - np.min(ana.swing.max_ary[1:, 1]))
             return [max_right, min_right, max_left, min_left]
         elif exeno == 6:
-            return [max(ana.shld.dep_diff).astype(np.uint8), min(ana.shld.dep_diff).astype(np.uint8)]
+            return [max(ana.shld.dep_diff).astype(float), min(ana.shld.dep_diff).astype(float)]
         elif exeno == 7:
             max_hold  = np.max(ana.clsp.holdtime)
             min_hold  = np.min(ana.clsp.holdtime)

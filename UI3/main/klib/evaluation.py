@@ -120,7 +120,7 @@ class Evaluation(object):
             min_left  = np.abs(ana.swing.angle_ini - np.min(ana.swing.max_ary[1:, 1]))
             return [max_right, min_right, max_left, min_left]
         elif exeno == 6:
-            return [max(ana.shld.dep_diff).astype(np.uint8), min(ana.shld.dep_diff).astype(np.uint8)]
+            return [max(ana.shld.dep_diff).astype(float), min(ana.shld.dep_diff).astype(float)]
         elif exeno == 7:
             max_hold  = np.max(ana.clsp.holdtime)
             min_hold  = np.min(ana.clsp.holdtime)
@@ -221,7 +221,7 @@ class Evaluation(object):
         # else:
         #     max_width = surface.get_width()*(1-kp.ratio)
         #     height = surface.get_height()*kp.ratio
-        max_width = surface.get_width()*0.25
+        max_width = surface.get_width()*0.125*3
         height = surface.get_height()*0.6
         max_height = height/6
 
