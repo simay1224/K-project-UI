@@ -40,7 +40,7 @@ class Kparam(object):
         # style
         self.s_normal = 'Arial'
         self.s_emp = 'Arial'
-        self.eval_size = 60
+        self.eval_size = 80
         self.inst_size = 40
 
 

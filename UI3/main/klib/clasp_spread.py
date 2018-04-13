@@ -19,9 +19,10 @@ class Clasp_spread(object):
         self.elbowstus   = {}
         self.elbowstus['clasp'] = False
         self.elbowstus['spread'] = False
+        self.mode = 'clasp'
         # save in log
         self.holdtime = []
-        self.claspsuc = 0
+        # self.claspsuc = 0
         # default parameters
         self.cnt     = 0
         self.do      = False
@@ -89,7 +90,7 @@ class Clasp_spread(object):
                 self.elbowstus['clasp'] = True
             else:                    
                 self.evalstr = 'Subsequence done: Clasp well done'
-                self.claspsuc += 1
+                # self.claspsuc += 1
         if (joints[kpm.LElbow_z]+joints[kpm.RElbow_z])/2 > joints[kpm.Head_z]:
             self.spread_time += 1
         if self.spread_time >= spread_th:
@@ -100,9 +101,11 @@ class Clasp_spread(object):
         """
         if self.handsdown:
             # print 'hands down'
+            self.mode = 'clasp'
             self.clasp(joints, self.kpm)
         else:
             # print 'hands up'
+            self.mode = 'spread'
             self.spread(joints, self.kpm)
             self.bodystraight(joints, self.kpm)
         self.state_update(joints, self.kpm)

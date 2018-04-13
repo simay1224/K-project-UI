@@ -456,9 +456,8 @@ class BodyGameRuntime(object):
                 self.kp.bdjoints.append(bddic)
             else:
                 pass
-                self.io.typetext(self._frame_surface, 'Not Recording', (1580, 20), (0, 255, 0))  
+                self.io.typetext(self._frame_surface, 'Not Recording', (1580, 20), (0, 255, 0))
 
-            
             # self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='exe', region=1) 
             # self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='note', region=2, color=self.kp.c_tips)
             # draw back ground

@@ -49,7 +49,18 @@ class Historylog(object):
                  '3rd left hand angle (H-close)', '3rd left hand angle (T-pose)',
                  '4th left hand angle (H-close)', '4th left hand angle (T-pose)',
                  'average left hand angle (H-close)', 'average left hand angle (T-pose)']
-
+        # ideal value
+        icommon = ['$IDEAL VALUE$', 'NaN', 'NaN','NaN']
+        ibrth = ['bigger is better', 'bigger is better', 'bigger is better']
+        ihs   = [100]
+        ishld = ['bigger is better', 'bigger is better']
+        iclsp  = ['bigger is better', 'bigger is better', 'bigger is better']
+        iswing = [90, 'bigger is better', 90, 'bigger is better']
+        iexer3 = [10, 180, 10, 180, 10, 180, 10, 180, 180, 10,
+                    10, 180, 10, 180, 10, 180, 10, 180, 180, 10]
+        iexer4 = [90]*20  
+        ibackup = []   
+        ibackup = []     
         # cols title for different exercise sheets
         self.colname = {}
         self.colname[1] = common + brth + backup
@@ -59,6 +70,16 @@ class Historylog(object):
         self.colname[5] = common + swing + backup
         self.colname[6] = common + shld + backup
         self.colname[7] = common + clsp + backup
+
+        # ideal number
+        self.icol = {}
+        self.icol[1] = icommon + ibrth + ibackup
+        self.icol[2] = icommon + ibrth + ihs + ibackup
+        self.icol[3] = icommon + iexer3 + ibackup
+        self.icol[4] = icommon + iexer4 + ibackup
+        self.icol[5] = icommon + iswing + ibackup
+        self.icol[6] = icommon + ishld + ibackup
+        self.icol[7] = icommon + iclsp + ibackup        
     
     def newlog(self, sheetnum=7):
         """ if there is not log.xlsx exist, create one with sheetnum sheets
@@ -67,15 +88,24 @@ class Historylog(object):
         excelWriter = pd.ExcelWriter(self.excelPath, engine='openpyxl')  #create excel file
         for i in xrange(1, sheetnum+1):
             dataframe = pd.DataFrame(columns = self.colname[i])
+            ideal = pd.DataFrame(columns = self.icol[i])
             if i == 1:
                 dataframe.to_excel(excelWriter, 'exercise %s' %i, index=None)
+                ideal.to_excel(excelWriter, 'exercise %s' %i, index=None)
                 excelWriter.save()
             else:  # add sheet
                 book = load_workbook(excelWriter.path)
                 excelWriter.book = book
                 dataframe.to_excel(excelWriter, 'exercise %s' %i, index=None)
+                ideal.to_excel(excelWriter, 'exercise %s' %i, index=None)
                 excelWriter.save()
             excelWriter.close()
+        # append ideal value
+        for i in xrange(1, sheetnum+1):
+            book = load_workbook(self.excelPath)
+            sheet = book['exercise %s' %i]
+            sheet.append(icol[i])
+            book.save(self.excelPath)    
 
     def addsheet(self, num=1):
         """ adding num new sheet
@@ -105,8 +135,3 @@ class Historylog(object):
         userrecord = [userinfo.name, userinfo.age, userinfo.gender, date] + data + errmsg
         sheet.append(userrecord)
         book.save(self.excelPath)
-
-
-            
-
-

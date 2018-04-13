@@ -378,7 +378,10 @@ class Analysis(object):
                 elif self.shld.cnt == 4:
                     evalinst.blit_text(surface, exeno, kp, 'Put your hands down', 1, False, color=self.c_handdown)
                 else:
-                    evalinst.blit_text(surface, exeno, kp, 'Start to clasp and spread', 1, color=self.c_normal)
+                    if ana.clasp.mode == 'clasp':
+                        evalinst.blit_text(surface, exeno, kp, 'Start to clasp', 1, color=self.c_normal)
+                    else:   #ana.clasp.mode == 'spread' 
+                        evalinst.blit_text(surface, exeno, kp, 'Start to spread', 1, color=self.c_normal)
                     evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.clsp.cnt)), 3, color=self.c_togo)
             else:
                 evalinst.blit_text(surface, self.exer[7].no, kp,

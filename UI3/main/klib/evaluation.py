@@ -98,7 +98,7 @@ class Evaluation(object):
             return [min(ana.brth.brth_diff), max(ana.brth.brth_diff),
                     np.mean(ana.brth.brth_diff)]        
         elif exeno == 2:
-            self.breath_hand_plot(ana)
+            self.breath_hand_plot(ana, exeno)
             return [min(ana.brth.brth_diff), max(ana.brth.brth_diff), 
                     np.mean(ana.brth.brth_diff), ana.brth.sync_rate]
         elif exeno == 3:
@@ -146,25 +146,34 @@ class Evaluation(object):
             df = pd.read_excel(log.excelPath, sheet_name='exercise %s' %exeno)
             cols = log.colname[exeno][4:-1]  # donot neet common & errmsg info
             roi = df[df['name'] == name]  # rows of interest
-            hisres = []
+            def_val = df[df['name'] == '$IDEAL VALUE$']
+            def_val = def_val.values.tolist()[0][4:4+len(cols)]
+            history = []
             terms = []
             for col in cols:
                 try:
-                    hisres.append(round(roi[col].mean(),2))
+                    history.append(round(roi[col].mean(),2))
                     terms.append(col)
                 except:
-                    pdb.set_trace()
                     pass
             str1 = '%40s | %18s | %15s | %16s\n'%('Terms', 'In history record', 'This time', 'Results')
             print(str1)
             text_file.write(str1)
             for i in xrange(len(cols)):
-                if hisres[i] > data[i]:
-                    updown = 'decrease'
-                else:
-                    updown = 'increase'
-                num = round(np.abs(data[i]-hisres[i])/hisres[i]*100, 2)
-                str2 = '%40s | %18s | %15s | %6s%s %8s\n' %(terms[i], hisres[i], round(data[i], 2), num, '%', updown) 
+                if def_val[i] == 'bigger is better':  # lager value is preferred
+                    if history[i] >= data[i]:
+                        evaluation = 'worsen'
+                    else:
+                        evaluation = 'improve'
+                    num = round(abs(data[i]-history[i])/history[i]*100, 2)
+                else:  # should compare with default values
+                    if abs(history[i]-def_val[i]) >= abs(data[i]-def_val[i]):
+                       evaluation = 'improve'
+                    else:
+                       evaluation = 'worsen'
+                    num = round(abs(abs(data[i]-def_val[i])-abs(history[i]-def_val[i]))/def_val[i]*100, 2)
+                
+                str2 = '%40s | %18s | %15s | %6s%s %8s\n' %(terms[i], history[i], round(data[i], 2), num, '%', evaluation) 
                 print(str2)
                 text_file.write(str2)
         else:
@@ -245,7 +254,15 @@ class Evaluation(object):
                 if emph:
                     self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True, italic=True)
                 else:
-                    self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)           
+                    self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)
+        # elif y < max_height  - 40 :
+        #     # print 'small'
+        #     if self.font_size < 40:
+        #         self.font_size = self.font_size + 1
+        #         if emph:
+        #             self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True, italic=True)
+        #         else:
+        #             self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)            
                 
 
 
