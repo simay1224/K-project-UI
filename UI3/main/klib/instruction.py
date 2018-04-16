@@ -13,6 +13,15 @@ class Exeinst(object):
         self.words = defaultdict(dict)
         self.kp = Kparam()
         self.part = [0, 0.5, 5./6, 1]
+
+        self.str['name'][1] = 'Muscle Tighting Deep Breathing'
+        self.str['name'][2] = 'Over The Head Pumping'
+        self.str['name'][3] = 'Push Down Pumping'
+        self.str['name'][4] = 'Horizontal Pumping'
+        self.str['name'][5] = 'Reach to the Sky'
+        self.str['name'][6] = 'Shoulder Rolls'
+        self.str['name'][7] = 'Clasp and Spread'
+
         self.str['exe'][1] = 'Exercise 1 : Muscle Tighting Deep Breathing'\
                              '\n  '\
                              '\n1. Put your hands on the belly position.'\

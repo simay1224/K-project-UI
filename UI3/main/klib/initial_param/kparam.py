@@ -30,17 +30,20 @@ class Kparam(object):
         # === Font setting ===
         # color
         # instruction part
-        self.c_inst = (107, 71, 107, 255)
-        self.c_tips = (45, 89, 134, 0)
+        self.c_inst = (0, 90, 115, 255)
+        self.c_tips = (19, 144, 178, 0)
         # eval part
-        self.c_guide     = (107, 71, 107, 255)
-        self.c_eval_well = (45, 89, 134, 0)
+        self.c_guide     = (0, 90, 115, 255)
+        self.c_eval_well = (19, 144, 178, 0)
         self.c_eval_err  = (230, 115, 0, 255)
-        self.c_togo      = (107, 71, 107, 255)
+        self.c_togo      = (255, 20, 100, 255)
         # style
-        self.s_normal = 'Arial'
-        self.s_emp = 'Arial'
-        self.eval_size = 80
+        self.s_normal = 'montserrat'
+        self.s_emp = 'montserrat'
+        self.eval_fs_title = 100
+        self.eval_fs_guide = 80
+        self.eval_fs_msg = 70
+        self.eval_fs_cnt = 100
         self.inst_size = 40
 
 

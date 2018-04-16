@@ -14,10 +14,9 @@ class Evaluation(object):
         self.upperbnd = 0
         self.words = defaultdict(list)
         self.kp = Kparam()
-        self.font_size = self.kp.eval_size
-        self.part = [0, 1./6, 4./6, 1]
-        # self.font = pygame.font.SysFont('Arial', self.font_size)
-        # self.space = self.font.size(' ')[0]
+        self.font_size = 80
+        # self.part = [0, 1./6, 4./6, 1]
+        self.ub = [110, 330, 455, 835, 930, 1080]
 
     def joint_angle(self, joints, idx=[0, 1, 2], offset=0):
         """ finding the angle between 3 joints.
@@ -188,34 +187,53 @@ class Evaluation(object):
         print('\nevaluation:\n')
         for idx, err in enumerate(errs):
             if len(err) != 0:
-                for text in set(err):
-                    print (('%18s' % contents[idx])+' : '+text)
+                for i, text in enumerate(set(err)):
+                    if i == 0:
+                        print (('%18s' % contents[idx])+' : '+text)
+                    else:
+                        print (('%18s' % '')+' : '+text)
             elif dolist[idx]:  # done without err
                 print(('%18s' % contents[idx])+' : Perfect !!\n')
             else:
                 pass
                 #print(('%18s' % contents[idx])+' : Did not test this part.')
 
-    def position(self, surface, ratio, stype=2, region=1, height=0):
+    def position(self, surface, region=1):
         """According to the scene type, ratio and the region number
            set up different upper bound and lower bound to the text"""
-        self.upperbnd = int(height*self.part[region-1])+20
-        self.leftbnd = int(surface.get_width()/8.*5+abs(0.5-ratio)*surface.get_height()*8./9)+20
-        # if stype == 2:
-        #     self.upperbnd = int(surface.get_height()*ratio + (region-1)*height/4.)
-        # else:
-        #     self.upperbnd = int(surface.get_height()*(1-ratio) + (region-1)*height/4.)
-        # return (20, self.upperbnd+20)
+        self.upperbnd = self.ub[region-1]*surface.get_height()/1080.
+        self.leftbnd = 120*surface.get_width()/1920.
+
         return (self.leftbnd, self.upperbnd) 
 
-    def blit_text(self, surface, exeno, kp, text=None, region=1, emph=False, color=None):
+    def blit_text(self, surface, exeno, kp, text=None, region=1, emph=False, fsize=0, color=None):
         """Creat a text surface, this surface will change according to the scene type,
            ratio and the region number. According to the size of the surface, the text 
            will auto change line also auto change size
         """
         color = self.kp.c_guide if color is None else color
+
+        if fsize != 0:
+            self.font_size = fsize
+        else:
+            if region == 1:
+                self.font_size = self.kp.eval_fs_title
+                emph = True
+            elif region == 2:
+                self.font_size = self.kp.eval_fs_guide
+                emph = True
+            elif region == 3:
+                self.font_size = self.kp.eval_fs_msg
+            elif region == 4:
+                self.font_size = self.kp.eval_fs_cnt
+                emph = True
+            elif region == 5:
+                pass
+            else:
+                pass
+
         if emph:
-            self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True, italic=True)
+            self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True)
         else:
             self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)
         self.space = self.font.size(' ')[0]
@@ -224,18 +242,11 @@ class Evaluation(object):
         else:
             words = [word.split(' ') for word in text.splitlines()]
 
-        # if kp.scene_type == 2:
-        #     max_width = surface.get_width()*kp.ratio
-        #     height = surface.get_height()*(1-kp.ratio)
-        # else:
-        #     max_width = surface.get_width()*(1-kp.ratio)
-        #     height = surface.get_height()*kp.ratio
-        max_width = surface.get_width()*0.125*3
-        height = surface.get_height()*0.6
-        max_height = height/6
-
-        (x, y) = self.position(surface, kp.ratio, kp.scene_type, region, height)
+        (x, y) = self.position(surface, region)
         x_ori, y_ori = x, y
+
+        max_width = (980-120)*surface.get_width()/1920.
+        max_height = (self.ub[region]-self.ub[region-1])*surface.get_height()/1080.
 
         for line in words:
             for word in line:
@@ -248,19 +259,19 @@ class Evaluation(object):
                 x += word_width + self.space
             x = x_ori  # Reset the x
             y += word_height  # Start on new row.
-        if y > max_height + y_ori:
-            if self.font_size > 12:
-                self.font_size = self.font_size - 2
-                if emph:
-                    self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True, italic=True)
-                else:
-                    self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)
+        # if y > max_height + y_ori:
+        #     if self.font_size > 12:
+        #         self.font_size = self.font_size - 2
+        #         if emph:
+        #             self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True)
+        #         else:
+        #             self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)
         # elif y < max_height  - 40 :
         #     # print 'small'
-        #     if self.font_size < 40:
+        #     if self.font_size < 100:
         #         self.font_size = self.font_size + 1
         #         if emph:
-        #             self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True, italic=True)
+        #             self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True)
         #         else:
         #             self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)            
                 

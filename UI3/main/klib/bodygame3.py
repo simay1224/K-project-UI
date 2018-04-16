@@ -73,7 +73,7 @@ class BodyGameRuntime(object):
         self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
 
-        self.bkidx = 4
+        self.bkidx = 10
         self.bklist = glob.glob(os.path.join('./data/bkimgs', '*.jpg'))
         self.readbackground()
         self.h_to_w = float(self.default_h) / self.default_w
@@ -347,6 +347,8 @@ class BodyGameRuntime(object):
                     # self.skel.draw_Rel_joints(jps, Rel, self._frame_surface)
 
                     # === dtw analyze & denoising process ===
+                    self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                        self.exeinst.str['name'][self.exeno], 1)
                     if not self.ana._done:
                         # if self.ana.exer[self.exeno].limbjoints:
                         #     modJary = self.h_mod.human_mod_pts(joints)  # modJary is 7*3 array
@@ -396,10 +398,10 @@ class BodyGameRuntime(object):
 
                         if self.ana.evalstr != '':
                             if 'well' in (self.ana.evalstr).lower():
-                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, color=self.kp.c_eval_well)
+                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_well)
                                 self.emoji = self.corimg
                             else:
-                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 2, False, color=self.kp.c_eval_err)
+                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_err)
                                 self.emoji = self.errimg
                             self.fcnt += 1
                             if self.fcnt > 60 :
@@ -407,7 +409,7 @@ class BodyGameRuntime(object):
                                 self.fcnt  = 0
                     else:
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                            'Exercise '+str(self.exeno)+' is done', 1, False)
+                                            'Exercise '+str(self.exeno)+' is done', 2)
                         if not self.kp.finish:
                             errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err,\
                                     self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
@@ -467,12 +469,15 @@ class BodyGameRuntime(object):
             if self.ana.evalstr != '':
                 emoji_size = min(int(self._screen.get_width()*0.25), int(self._screen.get_height()*0.25))
                 emoji = pygame.transform.scale(self.emoji, (emoji_size, emoji_size)) 
-                self._screen.blit(emoji, (int(self._screen.get_width()/8.*6), int(self._screen.get_height()*0.6)))
+                # self._screen.blit(emoji, (int(self._screen.get_width()/8.*6), int(self._screen.get_height()*0.6)))
+                self._screen.blit(emoji, (int(self._screen.get_width()/8.*5), int(self._screen.get_height()*0.6)))
 
             if self.kp.scene_type == 2:
-                self.ori = (int(self._screen.get_width()/8.), int(self._screen.get_height()*self.kp.ratio))
+                # self.ori = (int(self._screen.get_width()/8.), int(self._screen.get_height()*self.kp.ratio))
+                self.ori = (int(self._screen.get_width()*1080./1920.), int(self._screen.get_height()*560./1080.))
             else:
-                self.ori = (int(self._screen.get_width()/8.), 0)
+                # self.ori = (int(self._screen.get_width()/8.), 0)
+                self.ori = (int(self._screen.get_width()*1080./1920.), int(self._screen.get_height()*110./1080.))
 
             h_scale = 1.*self._screen.get_height()/self.h
             w_scale = 1.*self._screen.get_width()/self.w
@@ -491,7 +496,7 @@ class BodyGameRuntime(object):
 
             # surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*(1-self.kp.ratio)), int(self.h*(1-self.kp.ratio))))
             # self._screen.blit(surface_to_draw, self.ori)
-            surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*(1-self.kp.ratio)), int(self.h*(1-self.kp.ratio))))
+            surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*750./1920.), int(self.h*420./1080.)))
             self._screen.blit(surface_to_draw, self.ori)
 
             # update
