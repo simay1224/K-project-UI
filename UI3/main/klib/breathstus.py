@@ -34,6 +34,7 @@ class Breath_status(object):
         self.cnt     = 0
         self.do      = False
         self.err     = []
+        self.errsum  = []
         self.evalstr = ''
         self.eval    = ''
 
@@ -108,7 +109,7 @@ class Breath_status(object):
                 try:
                     breath_diff = self.breath_list[j]-self.breath_list[i]
                 except:
-                    pdb.set_trace()
+                    break
                 self.brth_diff.append(abs(breath_diff))
                 if abs(breath_diff) > 10:  # really breath in/out
                     if abs(breath_diff) < 30:  # not deep breath
@@ -225,7 +226,7 @@ class Breath_status(object):
                 if self.eval == '':
                     self.evalstr = 'Repitition done: Well done.'
                 else:
-                    self.evalstr = 'Repitition done. '+ self.eval
+                    self.evalstr = 'Repitition done.\n'+ self.eval
                     self.eval = ''
                 self.ana_ary.append([self.max_ary[-1, 0], 1, self.max_ary[-1, 1]])
         # detect brth in
@@ -238,8 +239,9 @@ class Breath_status(object):
                 self.ana_ary.append([self.min_ary[-1, 0], 0, self.min_ary[-1, 1]])
                 if np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1]) < 30:
                     self.evalstr = 'Please breathe deeper.\n'
-                    self.eval = 'Please breathe deeper.'
+                    self.eval = 'Please breathe deeper.\n'
                     self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, is not deep enough.')
+                    self.errsum.append('Breathing is not deep enough.\n')
         self.max_len = self.max_ary.shape[0]
         self.min_len = self.min_ary.shape[0]
 

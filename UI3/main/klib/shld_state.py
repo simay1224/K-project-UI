@@ -27,6 +27,7 @@ class Shld_state(object):
         self.cnt     = 0
         self.do      = False
         self.err     = []
+        self.errsum  = []
         self.evalstr = ''
         self.eval    = ''      
 
@@ -100,7 +101,7 @@ class Shld_state(object):
             if self.eval == '':
                 self.evalstr = 'Repitition done: Well done.'
             else:
-                self.evalstr = 'Repitition done. '+self.eval
+                self.evalstr = 'Repitition done.\n'+self.eval
                 self.eval = ''
             self.type = 0
         elif self.type == 2:
@@ -110,6 +111,7 @@ class Shld_state(object):
             self.eval = 'Rotate deeper !!'
             self.ngcnt += 1
             self.err.append('The '+self.cnvt.ordinal(self.ngcnt+self.cnt)+ 'time try, is not deep enough.')
+            self.errsum.append('Rotation is not deep enough.')
             self.type = 0
         else:
             self.evalstr = ''

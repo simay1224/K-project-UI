@@ -27,6 +27,7 @@ class Clasp_spread(object):
         self.cnt     = 0
         self.do      = False
         self.err     = []
+        self.errsum  = []
         self.evalstr = ''
         self.eval    = ''
 
@@ -68,9 +69,10 @@ class Clasp_spread(object):
                 self.cnt += 1
                 if not self.elbowstus['spread']:
                     if self.spread_time < spread_th:
-                        self.evalstr = 'Repitition done : Elbows should put behind your head long enough!!'
+                        self.evalstr = 'Repitition done:\nElbows should put behind your head long enough!!'
                         self.err.append('The '+self.cnvt.ordinal(self.cnt)+ \
                                         ' time spread is not good. elbows should behind your head long enough!!')
+                        self.errsum.append('Elbows should behind your head long enough.')
                     self.elbowstus['spread'] = True
                 else:
                     self.evalstr = 'Repitition done: Spread well done'
@@ -85,8 +87,9 @@ class Clasp_spread(object):
         if self.spread_cnt == self.hold:
             self.elbowstus['spread'] = False
             if not self.elbowstus['clasp']:
-                self.evalstr = 'Subsequence done: When raising the hands, elbows should close to each other.'
+                self.evalstr = 'Subsequence done:\nWhen raising the hands, elbows should close to each other.'
                 self.err.append('The '+self.cnvt.ordinal(self.cnt)+ ' time clasp is not good. Not clasp !!')
+                self.errsum.append('Elbows should close to each other.')
                 self.elbowstus['clasp'] = True
             else:                    
                 self.evalstr = 'Subsequence done: Clasp well done'

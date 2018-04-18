@@ -16,7 +16,7 @@ class Evaluation(object):
         self.kp = Kparam()
         self.font_size = 80
         # self.part = [0, 1./6, 4./6, 1]
-        self.ub = [110, 330, 455, 835, 930, 1080]
+        self.ub = [110, 330, 455, 835, 900, 1080]
 
     def joint_angle(self, joints, idx=[0, 1, 2], offset=0):
         """ finding the angle between 3 joints.
@@ -150,21 +150,21 @@ class Evaluation(object):
             history = []
             terms = []
             for col in cols:
-                try:
-                    history.append(round(roi[col].mean(),2))
-                    terms.append(col)
-                except:
-                    pass
+                history.append(round(roi[col].mean(),2))
+                terms.append(col)
             str1 = '%40s | %18s | %15s | %16s\n'%('Terms', 'In history record', 'This time', 'Results')
             print(str1)
             text_file.write(str1)
             for i in xrange(len(cols)):
                 if def_val[i] == 'bigger is better':  # lager value is preferred
-                    if history[i] >= data[i]:
-                        evaluation = 'worsen'
-                    else:
-                        evaluation = 'improve'
-                    num = round(abs(data[i]-history[i])/history[i]*100, 2)
+                    try:
+                        if history[i] >= data[i]:
+                            evaluation = 'worsen'
+                        else:
+                            evaluation = 'improve'
+                        num = round(abs(data[i]-history[i])/history[i]*100, 2)
+                    except:
+                        pdb.set_trace()
                 else:  # should compare with default values
                     if abs(history[i]-def_val[i]) >= abs(data[i]-def_val[i]):
                        evaluation = 'improve'
@@ -206,7 +206,7 @@ class Evaluation(object):
 
         return (self.leftbnd, self.upperbnd) 
 
-    def blit_text(self, surface, exeno, kp, text=None, region=1, emph=False, fsize=0, color=None):
+    def blit_text(self, surface, exeno, kp, text=None, region=1, emph=False, ita=False, fsize=0, color=None):
         """Creat a text surface, this surface will change according to the scene type,
            ratio and the region number. According to the size of the surface, the text 
            will auto change line also auto change size
@@ -228,14 +228,11 @@ class Evaluation(object):
                 self.font_size = self.kp.eval_fs_cnt
                 emph = True
             elif region == 5:
-                pass
+                self.font_size = self.kp.eval_fs_msg
             else:
                 pass
+        self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size, bold=emph, italic=ita)
 
-        if emph:
-            self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True)
-        else:
-            self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)
         self.space = self.font.size(' ')[0]
         if text == None:
             words = self.words[exeno]
