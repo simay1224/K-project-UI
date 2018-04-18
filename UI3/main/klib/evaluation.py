@@ -15,8 +15,6 @@ class Evaluation(object):
         self.words = defaultdict(list)
         self.kp = Kparam()
         self.font_size = 80
-        # self.part = [0, 1./6, 4./6, 1]
-        self.ub = [110, 330, 455, 835, 900, 1080]
 
     def joint_angle(self, joints, idx=[0, 1, 2], offset=0):
         """ finding the angle between 3 joints.
@@ -157,14 +155,11 @@ class Evaluation(object):
             text_file.write(str1)
             for i in xrange(len(cols)):
                 if def_val[i] == 'bigger is better':  # lager value is preferred
-                    try:
-                        if history[i] >= data[i]:
-                            evaluation = 'worsen'
-                        else:
-                            evaluation = 'improve'
-                        num = round(abs(data[i]-history[i])/history[i]*100, 2)
-                    except:
-                        pdb.set_trace()
+                    if history[i] >= data[i]:
+                        evaluation = 'worsen'
+                    else:
+                        evaluation = 'improve'
+                    num = round(abs(data[i]-history[i])/history[i]*100, 2)
                 else:  # should compare with default values
                     if abs(history[i]-def_val[i]) >= abs(data[i]-def_val[i]):
                        evaluation = 'improve'
@@ -201,8 +196,8 @@ class Evaluation(object):
     def position(self, surface, region=1):
         """According to the scene type, ratio and the region number
            set up different upper bound and lower bound to the text"""
-        self.upperbnd = self.ub[region-1]*surface.get_height()/1080.
-        self.leftbnd = 120*surface.get_width()/1920.
+        self.upperbnd = self.kp.eval_sec[region-1]*surface.get_height()/1080.
+        self.leftbnd = self.kp.eval_LB*surface.get_width()/1920.
 
         return (self.leftbnd, self.upperbnd) 
 
@@ -242,8 +237,8 @@ class Evaluation(object):
         (x, y) = self.position(surface, region)
         x_ori, y_ori = x, y
 
-        max_width = (980-120)*surface.get_width()/1920.
-        max_height = (self.ub[region]-self.ub[region-1])*surface.get_height()/1080.
+        max_width = (self.kp.eval_RB-self.kp.eval_LB)*surface.get_width()/1920.
+        max_height = (self.kp.eval_sec[region]-self.kp.eval_sec[region-1])*surface.get_height()/1080.
 
         for line in words:
             for word in line:

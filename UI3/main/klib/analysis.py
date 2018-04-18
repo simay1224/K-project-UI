@@ -405,7 +405,7 @@ class Analysis(object):
                     else:   #ana.clasp.mode == 'spread' 
                         evalinst.blit_text(surface, exeno, kp, 'Start to spread', 2, color=self.c_normal)
                     evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.clsp.cnt)), 4, color=self.c_togo)
-                self.repcnt = self.clasp.cnt
+                self.repcnt = self.clsp.cnt
             else:
                 evalinst.blit_text(surface, self.exer[7].no, kp,
                                   ('Starting after %.2f second' % (self.exer[7].cntdown/30.)), 2,

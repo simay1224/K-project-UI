@@ -1,5 +1,6 @@
 from .klib import bodygame3
 from .klib import msgbox
+from .klib import welcome
 import wx, pdb
 # __main__ = "Kinect v2 Body Analysis"
 def main():
@@ -8,6 +9,7 @@ def main():
     while not (hasattr(info, 'name') and hasattr(info, 'age') and hasattr(info, 'gender')):
         info = msgbox.Msgbox(None, title="Welcome")
         app.MainLoop()
-    game = bodygame3.BodyGameRuntime(info)
-    game.run()
-    return game
+
+    main_win = welcome.Welcome_win(info, parent = None, title = 'Hello')
+    app.MainLoop()
+    return main_win.game

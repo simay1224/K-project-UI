@@ -163,16 +163,16 @@ class Dynamic_time_warping(object):
                                     self.Lcangle.append(min(self.joint_angle(reconJ)[:2]))
                                     self.Rcangle.append(min(self.joint_angle(reconJ, idx=[8, 9, 10])[:2]))
                                     if self.Lcangle[-1] < 80 or self.Rcangle[-1] < 80:
-                                        self.evalstr = 'Please keep your hand horizontally.'
-                                        self.eval = 'Please keep your hand horizontally.'
+                                        self.evalstr = 'Please keep your hand horizontally.\n'
+                                        self.eval = 'Please keep your hand horizontally.\n'
                                         self.err.append('The '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, hands is not horizontal.')
                                         self.errsum.append('Hands is not horizontal.')
                                 elif exeno == 3:
                                     self.Lcangle.append(self.joint_angle(reconJ)[2])
                                     self.Rcangle.append(self.joint_angle(reconJ, idx=[8, 9, 10])[2])                                 
                                     if self.Lcangle[-1] > 50 or self.Rcangle[-1] > 50:
-                                        self.evalstr = 'Please push your hand lower.'
-                                        self.eval = 'Please push your hand lower.'
+                                        self.evalstr = 'Please push your hand lower.\n'
+                                        self.eval = 'Please push your hand lower.\n'
                                         self.err.append('The '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, hands is not lower enough.')
                                         self.errsum.append('Hands is not lower enough.')
 
@@ -180,7 +180,7 @@ class Dynamic_time_warping(object):
                             if self.eval == '':
                                 self.evalstr = 'Subsequence done: Well done.'
                             else:
-                                self.evalstr = 'Subsequence done. '+self.eval
+                                self.evalstr = 'Subsequence done.\n'+self.eval
                                 self.eval = ''
                             # self.jspos.append(reconJ)
                             self.seg_update(endidx)
@@ -214,16 +214,16 @@ class Dynamic_time_warping(object):
                             self.Lcangle.append(min(self.joint_angle(reconJ)[:2]))
                             self.Rcangle.append(min(self.joint_angle(reconJ, idx=[8, 9, 10])[:2]))
                             if self.Lcangle[-1] < 80 or self.Rcangle[-1] < 80:
-                                self.evalstr = 'Please keep your hand horizontally.'
-                                self.eval = 'Please keep your hand horizontally.'
+                                self.evalstr = 'Please keep your hand horizontally.\n'
+                                self.eval = 'Please keep your hand horizontally.\n'
                                 self.err.append('The '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, hands is not horizontal.')
                                 self.errsum.append('Hands is not horizontal.')
                         elif self.gt_idx == 4:  # T-pose
                             self.Ltangle.append(min(self.joint_angle(reconJ)[:2]))
                             self.Rtangle.append(min(self.joint_angle(reconJ, idx=[8, 9, 10])[:2]))
                             if self.Ltangle[-1] < 80 or self.Rtangle[-1] < 80:
-                                self.evalstr = 'Please keep your hand horizontally.'
-                                self.eval = 'Please keep your hand horizontally.'
+                                self.evalstr = 'Please keep your hand horizontally.\n'
+                                self.eval = 'Please keep your hand horizontally.\n'
                                 self.err.append('The '+self.cnvt.ordinal(self.idxlist.count(3)+1)+ ' time try, hands is not horizontal.')
                                 self.errsum.append('Hands is not horizontal.')
                     elif exeno == 3:  # exercise 3
@@ -231,16 +231,16 @@ class Dynamic_time_warping(object):
                             self.Lcangle.append(self.joint_angle(reconJ)[2])
                             self.Rcangle.append(self.joint_angle(reconJ, idx=[8, 9, 10])[2])
                             if self.Lcangle[-1] > 50 or self.Rcangle[-1] > 50:
-                                self.evalstr = 'Please push your hand lower.'
-                                self.eval = 'Please push your hand lower.'
+                                self.evalstr = 'Please push your hand lower.\n'
+                                self.eval = 'Please push your hand lower.\n'
                                 self.err.append('The '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, hands is not lower enough.')
                                 self.errsum.append('Hands is not lower enough.')
                         elif self.gt_idx == 4:  # hand raise up
                             self.Ltangle.append(np.mean(self.joint_angle(reconJ)[::2]))
                             self.Rtangle.append(np.mean(self.joint_angle(reconJ, idx=[8, 9, 10])[::2]))
                             if self.Ltangle[-1] < 160 or self.Rtangle[-1] < 160:
-                                self.evalstr = 'Please straight your hand.'
-                                self.eval = 'Please straight your hand.'
+                                self.evalstr = 'Please straight your hand.\n'
+                                self.eval = 'Please straight your hand.\n'
                                 self.err.append('The '+self.cnvt.ordinal(self.idxlist.count(3)+1)+ ' time try, hands is not straight.')
                                 self.errsum.append('Hands is not straight.')
 

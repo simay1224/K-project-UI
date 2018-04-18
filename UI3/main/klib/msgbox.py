@@ -2,9 +2,15 @@ import wx, pdb
 
 class Msgbox(wx.Frame):
 
-    def __init__(self, parent, title):    
+    def __init__(self, parent, title):   
+        self.font = wx.Font(28, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)  
+        self.font_button = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)    
+        self.width  = 400*2
+        self.height = 260*2
+        self.sizer_w= 10
+        self.sizer_h= 10
         super(Msgbox, self).__init__(parent, title=title, 
-            size=(400, 260), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
+            size=(self.width, self.height), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
         self.fname  = 'Jane'
         self.lname  = 'Doe'
         self.age    = 'unknown'
@@ -17,52 +23,60 @@ class Msgbox(wx.Frame):
       
         self.panel = wx.Panel(self)
         
-        sizer = wx.GridBagSizer(6, 5)
+        sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
 
         line = wx.StaticLine(self.panel)
-        sizer.Add(line, pos=(1, 0), span=(1, 6), 
+        sizer.Add(line, pos=(1, 0), span=(0, int(self.width/self.sizer_w)), 
             flag=wx.EXPAND|wx.BOTTOM, border=10)
         # Name
-        text1 = wx.StaticText(self.panel, label="First Name")
-        sizer.Add(text1, pos=(2, 0), flag=wx.LEFT, border=10)
+        text1 = wx.StaticText(self.panel, label="First Name", style = wx.ALIGN_CENTRE_HORIZONTAL)
+        text1.SetFont(self.font)
+        sizer.Add(text1, pos=(2, 0), span=(0,0) , flag=wx.LEFT, border=20)
 
         self.tc1 = wx.TextCtrl(self.panel)
-        sizer.Add(self.tc1, pos=(2, 1), span=(1, 1))
+        sizer.Add(self.tc1, pos=(2, 1), flag=wx.EXPAND)
 
-        text2 = wx.StaticText(self.panel, label="Last Name")
-        sizer.Add(text2, pos=(2, 2), flag=wx.LEFT|wx.EXPAND, border=10)
+        text2 = wx.StaticText(self.panel, label="Last Name", style = wx.ALIGN_CENTRE_HORIZONTAL)
+        text2.SetFont(self.font)
+        sizer.Add(text2, pos=(2, 2), span=(0,0), flag=wx.LEFT)
 
         self.tc2 = wx.TextCtrl(self.panel)
-        sizer.Add(self.tc2, pos=(2, 3), span=(2, 1))
+        sizer.Add(self.tc2, pos=(2, 3), span=(0,1), flag=wx.EXPAND)
 
         # Age
         text3 = wx.StaticText(self.panel, label="Age")
-        sizer.Add(text3, pos=(3, 0), flag=wx.LEFT, border=10)
+        text3.SetFont(self.font)
+        sizer.Add(text3, pos=(3, 0), span=(0,0), flag=wx.LEFT, border=20)
 
         self.tc3 = wx.TextCtrl(self.panel)
-        sizer.Add(self.tc3, pos=(3, 1), span=(1, 1))
+        sizer.Add(self.tc3, pos=(3, 1), span=(0, 0), flag=wx.EXPAND)
 
         sb = wx.StaticBox(self.panel, label="Please Select Your Gender")
+        sb.SetFont(self.font)
         self.rb_female = wx.RadioButton(self.panel, label="Female")
+        self.rb_female.SetFont(self.font)
         self.rb_male   = wx.RadioButton(self.panel, label="Male")
+        self.rb_male.SetFont(self.font)
         boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
         boxsizer.Add(self.rb_female, 
             flag=wx.Center|wx.TOP, border=5)
         boxsizer.Add(self.rb_male,
             flag=wx.Center, border=5)
-        sizer.Add(boxsizer, pos=(4, 1), span=(2, 3), 
+        sizer.Add(boxsizer, pos=(4, 0), span=(0, 4), 
             flag=wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT , border=10)
 
-        button1 = wx.Button(self.panel, label="Ok")
-        sizer.Add(button1, pos=(6, 1))
+        button1 = wx.Button(self.panel, size=(200,50), label="Ok")
+        sizer.Add(button1, pos=(5, 0), span=(0, 0), flag=wx.LEFT, border=10)
+        button1.SetFont(self.font_button)
         button1.Bind(wx.EVT_BUTTON, self.ok)
 
-        button2 = wx.Button(self.panel, label="Cancel")
-        sizer.Add(button2, pos=(6, 3), span=(1, 1),  
-            flag=wx.BOTTOM|wx.RIGHT, border=5)
+        button2 = wx.Button(self.panel, size=(200,50), label="Cancel")
+        sizer.Add(button2, pos=(5, 3), span=(0, 0), 
+            flag=wx.RIGHT, border=5)
+        button2.SetFont(self.font_button)
         button2.Bind(wx.EVT_BUTTON, self.cancel)
 
-        sizer.AddGrowableCol(2)
+        sizer.AddGrowableCol(1)
         
         self.panel.SetSizer(sizer)
 
@@ -90,12 +104,9 @@ class Msgbox(wx.Frame):
                 else:
                     error = 'age out of range\n'
                     error_flag = True
-            else:
-                if self.age != 'unknown':
-                    error = 'age should be an integer\n'
-                    error_flag = True
-                else:
-                    self.age = 0
+            elif self.age != 'unknown' and type(self.age) != int:
+                error = 'age should be an integer\n'
+                error_flag = True
         else:
             error = 'please enter your age\n'
             error_flag = True
@@ -138,6 +149,8 @@ class Msgbox(wx.Frame):
         self.tc3.SetValue('')
         self.rb_female.SetValue(False)
         self.rb_male.SetValue(False)
+
+        
 
 # if __name__ == '__main__':
 #     app = wx.App()

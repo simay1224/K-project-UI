@@ -1,6 +1,5 @@
 import pygame
-import pdb
-
+from initial_param.kparam import Kparam
 
 class Movie(object):
     """A Movie playing class with pygame package
@@ -10,10 +9,9 @@ class Movie(object):
         pygame.mixer.quit()
         self._movie = pygame.movie.Movie('./video/ex'+str(filename)+'.mpg')
         self.w, self.h = [size for size in self._movie.get_size()]
-        # self.mscreen = pygame.Surface((self.w, self.h)).convert()
-        # self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.w), int(self.h)))
-        self.mscreen = pygame.Surface((375, 210)).convert()
-        self._movie.set_display(self.mscreen, pygame.Rect(0, 0, 375, 210))
+        self.kp = Kparam()
+        self.mscreen = pygame.Surface((self.kp.vid_w/2, self.kp.vid_h/2)).convert()
+        self._movie.set_display(self.mscreen, pygame.Rect(0, 0, self.kp.vid_w/2, self.kp.vid_h/2))
         self._movie.play()
 
     def stop(self, delete=False):
@@ -39,19 +37,15 @@ class Movie(object):
             Type : 1 => upper-left corner, 2 => lower-right corner 
         """
         if Type == 1:
-            # return [int(screen_w/8.), screen_h-int(self.h*scale)]
-            return [int(screen_w*0.5), int(screen_h*560./1080.)]
+            return [int(screen_w*self.kp.video_LB/1920.), int(screen_h*self.kp.video2_UB/1080.)]
         elif Type == 2:
-            # return [int(screen_w/8.), 0]
-            return [int(screen_w*1080./1920.), int(screen_h*110./1080.)]
+            return [int(screen_w*self.kp.video_LB/1920.), int(screen_h*self.kp.video1_UB/1080.)]
 
     def draw(self, surface, scale=1, pre_scale=1, Type=1):
         "Draw current frame to the surface"
         if scale/pre_scale != 1:
-            # self.mscreen = pygame.Surface((int(self.w*scale), int(self.h*scale))).convert()
-            # self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.w*scale), int(self.h*scale)))
-            self.mscreen = pygame.transform.scale(self.mscreen, (int(375*scale), int(210*scale)))
-            self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(375*scale), int(210*scale)))
+            self.mscreen = pygame.transform.scale(self.mscreen, (int(self.kp.vid_w/2.*scale), int(self.kp.vid_w/2.*scale)))
+            self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.kp.vid_w/2.*scale), int(self.kp.vid_w/2.*scale)))
         surface.blit(self.mscreen, self.position(surface.get_width(), surface.get_height(), scale, Type))
 
 

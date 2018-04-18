@@ -107,8 +107,8 @@ class Shld_state(object):
         elif self.type == 2:
             self.dep_diff.append(z[2][0]-z[3][0])
             # print('simple up and down')
-            self.evalstr = 'Rotate deeper !!'
-            self.eval = 'Rotate deeper !!'
+            self.evalstr = 'Rotate deeper !!\n'
+            self.eval = 'Rotate deeper !!\n'
             self.ngcnt += 1
             self.err.append('The '+self.cnvt.ordinal(self.ngcnt+self.cnt)+ 'time try, is not deep enough.')
             self.errsum.append('Rotation is not deep enough.')

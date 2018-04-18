@@ -56,6 +56,7 @@ class Clasp_spread(object):
         torso_z = np.mean([joints[kpm.SpineBase_z], joints[kpm.SpineMid_z]])
         if torso_z-joints[kpm.Neck_z] > th and torso_z-joints[kpm.Head_z] > th:
             self.evalstr = 'please stand straight.'
+            self.eval = 'please stand straight.'
             return False
         return True 
 
@@ -67,17 +68,21 @@ class Clasp_spread(object):
             if not self.first:
                 self.holdtime.append(self.spread_time/30.)
                 self.cnt += 1
+                print 'count: %s' %self.cnt
                 if not self.elbowstus['spread']:
                     if self.spread_time < spread_th:
-                        self.evalstr = 'Repitition done:\nElbows should put behind your head long enough!!'
+                        self.evalstr = 'Elbows should put behind your head long enough!!\n'
+                        self.eval += 'Elbows should put behind your head long enough!!\n'
                         self.err.append('The '+self.cnvt.ordinal(self.cnt)+ \
                                         ' time spread is not good. elbows should behind your head long enough!!')
-                        self.errsum.append('Elbows should behind your head long enough.')
+                        self.errsum.append('Elbows should behind your head long enough.\n')
                     self.elbowstus['spread'] = True
-                else:
-                    self.evalstr = 'Repitition done: Spread well done'
-                   
 
+                if self.eval == '':
+                    self.evalstr = 'Repitition done: Well done'
+                else:
+                    self.evalstr = 'Repitition done.\n'+self.eval
+                    self.eval = ''
         if np.abs(joints[kpm.LElbow_x]-joints[kpm.RElbow_x]) < 75:
             self.elbowstus['clasp'] = True
 
@@ -87,13 +92,18 @@ class Clasp_spread(object):
         if self.spread_cnt == self.hold:
             self.elbowstus['spread'] = False
             if not self.elbowstus['clasp']:
-                self.evalstr = 'Subsequence done:\nWhen raising the hands, elbows should close to each other.'
+                self.evalstr = 'When raising the hands, elbows should close to each other.\n'
+                self.eval = 'When raising the hands, elbows should close to each other.\n'
                 self.err.append('The '+self.cnvt.ordinal(self.cnt)+ ' time clasp is not good. Not clasp !!')
-                self.errsum.append('Elbows should close to each other.')
+                self.errsum.append('Elbows should close to each other.\n')
                 self.elbowstus['clasp'] = True
-            else:                    
+
+            if self.eval == '':
                 self.evalstr = 'Subsequence done: Clasp well done'
-                # self.claspsuc += 1
+            else:
+                self.evalstr = 'Subsequence done.\n'+self.eval
+
+
         if (joints[kpm.LElbow_z]+joints[kpm.RElbow_z])/2 > joints[kpm.Head_z]:
             self.spread_time += 1
         if self.spread_time >= spread_th:

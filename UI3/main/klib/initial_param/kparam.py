@@ -45,6 +45,27 @@ class Kparam(object):
         self.eval_fs_msg = 70
         self.eval_fs_cnt = 100
         self.inst_size = 40
+        #  === UI setting  ===
+        #  (based on 1920*1080 setting)
+        self.eval_LB = 120  # evaluation Left bound
+        self.eval_RB = 980  # evaluation Right bound
+        self.video_LB = 1080  # video Left bound
+        self.video_RB = 1830  # video Right bound
+        # video size 750*420
+        self.vid_w = 750
+        self.vid_h = 420
+        self.video1_UB = 110  # video1 upper bound
+        self.video2_UB = 560  # video2 upper bound
+        # eval sections
+        self.eval_sec1 = 110
+        self.eval_sec2 = 330
+        self.eval_sec3 = 455
+        self.eval_sec4 = 835
+        self.eval_sec5 = 900
+        self.eval_sec6 = 1080
+        self.eval_sec = [self.eval_sec1, self.eval_sec2, self.eval_sec3,
+                         self.eval_sec4, self.eval_sec5, self.eval_sec6]
+
 
 
                   
