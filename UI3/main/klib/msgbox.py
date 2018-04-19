@@ -3,10 +3,10 @@ import wx, pdb
 class Msgbox(wx.Frame):
 
     def __init__(self, parent, title):   
-        self.font = wx.Font(28, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)  
-        self.font_button = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)    
-        self.width  = 400*2
-        self.height = 260*2
+        self.font = wx.Font(28, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')  
+        self.font_button = wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')    
+        self.width  = 750 #400*2
+        self.height = 420 # 260*2
         self.sizer_w= 10
         self.sizer_h= 10
         super(Msgbox, self).__init__(parent, title=title, 
@@ -79,6 +79,7 @@ class Msgbox(wx.Frame):
         sizer.AddGrowableCol(1)
         
         self.panel.SetSizer(sizer)
+        self.panel.SetBackgroundColour((170, 0, 255))
 
     def ok(self, event):
         self.fname = self.tc1.GetValue()

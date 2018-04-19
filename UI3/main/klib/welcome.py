@@ -21,7 +21,7 @@ class Welcome_win(wx.Frame):
     def __init__(self, info, parent, title): 
         self.info = info
         self.game = None
-        self.font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)    
+        self.font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')    
         super(Welcome_win, self).__init__(parent, title = title,size = (410, 350))
         panel = wx.Panel(self) 
         sizer = wx.GridBagSizer(30, 30)
@@ -41,6 +41,7 @@ class Welcome_win(wx.Frame):
         sizer.Add(button3, pos=(3, 1), span=(1, 0))
 
         panel.SetSizer(sizer)
+        panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground) 
         self.Show(True)  
 
     def open_bodygame(self, event):
@@ -57,22 +58,37 @@ class Welcome_win(wx.Frame):
     def open_history(self, event):
         history  = History_view(None) 
 
+    def OnEraseBackground(self, evt):
+        """
+        Add a picture to the background
+        """
+        dc = evt.GetDC()
+        if not dc:
+            dc = wx.ClientDC(self)
+            rect = self.GetUpdateRegion().GetBox()
+            dc.SetClippingRect(rect)
+        dc.Clear()
+        bmp = wx.Bitmap("./data/bkimgs/BUMfk9.jpg")
+        dc.DrawBitmap(bmp, 0, 0)
+
 class Instrcution_win(wx.Frame): 
             
     def __init__(self, parent, title): 
         self.init_text()
-        super(Instrcution_win, self).__init__(parent, title = title,size = (1250, 600))
+        super(Instrcution_win, self).__init__(parent, title=title, size=(1250, 600))
             
         panel = wx.Panel(self) 
         box = wx.BoxSizer(wx.HORIZONTAL) 
-        self.font = wx.Font(28, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)    
+        self.font = wx.Font(28, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')    
         self.text = wx.TextCtrl(panel, size = (1000,600), style = wx.TE_MULTILINE|wx.TE_READONLY) 
-        self.text.SetFont(self.font)        
+        self.text.SetFont(self.font)
+        self.text.SetBackgroundColour((179, 236, 255))      
         languages = [self.str['exe'][1], self.str['exe'][2], self.str['exe'][3], self.str['exe'][4],\
                      self.str['exe'][5], self.str['exe'][6], self.str['exe'][7]]  
 
         box2 = wx.BoxSizer(wx.VERTICAL) 
-        lst = wx.ListBox(panel, size = (250, 600*0.9), choices = languages, style = wx.LB_SINGLE)
+        lst = wx.ListBox(panel, size = (250, 600*0.9), choices=languages, style=wx.LB_SINGLE)
+        lst.SetBackgroundColour((255, 255, 255))  
         button1 = wx.Button(panel, label="Close")
         button1.Bind(wx.EVT_BUTTON, self.close)
 
@@ -81,13 +97,14 @@ class Instrcution_win(wx.Frame):
 
         box.Add(box2,0,wx.EXPAND) 
         box.Add(self.text, 1, wx.EXPAND)   
-        panel.SetSizer(box) 
+        panel.SetSizer(box)
         panel.Fit() 
             
         self.Centre() 
         self.Bind(wx.EVT_LISTBOX, self.onListBox, lst) 
         self.Show(True)  
 
+ 
     def init_text(self):
         self.str = defaultdict(dict)
         self.str['exe'][1] = 'Exercise 1 : Muscle Tighting Deep Breathing'
@@ -145,29 +162,29 @@ class Instrcution_win(wx.Frame):
                              '\n5. Repeat 4 times.'\
                              '\n6. Put down your hands.'
         
-        self.str['note'][1] = 'Notice :'\
+        self.str['note'][1] = 'Tips :'\
                                 '\n1. Tight your muscle as much as you can.'\
                                 '\n2. Breath as deep as you can.'
-        self.str['note'][2] = 'Notice :'\
+        self.str['note'][2] = 'Tips :'\
                                 '\n1. When breathing in, you need to close your hands.'\
                                 '\n2. When breathing out, you need to open your hands.'\
                                 '\n3. Breath as deep as you can.'
-        self.str['note'][3] = 'Notice :'\
+        self.str['note'][3] = 'Tips :'\
                                 '\n1. When you raise up your hands, make sure that your hand, elbow and shoulder are straight.'\
                                 '\n2. When bending the elbow, hand-elbow-shoulder should be "V-shape" not "L-shape"'\
  
-        self.str['note'][4] = 'Notice :'\
+        self.str['note'][4] = 'Tips :'\
                                 '\n1. When doing "T-pose", make sure that your hand, elbow and shoulder are straight'\
                                 '\n2. When closing hands, make sure that your hand, and shoulder are in the same height.'\
 
-        self.str['note'][5] = 'Notice :'\
+        self.str['note'][5] = 'Tips :'\
                                 '\n1. When bending the body, make sure that your hand, elbow and shoulder are straight.'\
                                 '\n2. Keep your body staight'
 
-        self.str['note'][6] = 'Notice :'\
+        self.str['note'][6] = 'Tips :'\
                                 '\n1. Let your shoulders rotation movement as large as possible.'
 
-        self.str['note'][7] = 'Notice :'\
+        self.str['note'][7] = 'Tips :'\
                                 '\n1. When raising the hands to the forehead, keeping two elbows as close as possible.'\
                                 '\n2. When the hands is in the back of your head, spread the elnows open as wide as possible.'\
                                 '\n3. Keep your body staight.'
@@ -182,13 +199,13 @@ class Instrcution_win(wx.Frame):
         self.Destroy()
 
 class History_view( wx.Frame ):	
-    def __init__(self, parent, info = Info(), title = 'welcome'):
-        super(History_view, self).__init__(parent, title = title, size = (850, 520))
+    def __init__(self, parent, info=Info(), title='welcome'):
+        super(History_view, self).__init__(parent, title=title, size=(850, 520))
         self.info = info
         self.InitUI()
         self.Show()  
 
-    def InitUI(self, path = './output/log.xlsx'):
+    def InitUI(self, path='./output/log.xlsx'):
         self.path = path
         log_xl = pd.ExcelFile(path)
         self.panel = wx.Panel(self)
@@ -197,7 +214,7 @@ class History_view( wx.Frame ):
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.HORIZONTAL)
 
-        info_text = 'Name: '+self.info.name+'\n Gender: '+self.info.gender+'     Age: '+self.info.age
+        info_text = 'Name: '+self.info.name.title()+'\n Gender: '+self.info.gender+'     Age: '+self.info.age
         info = wx.StaticText(self.panel, wx.ID_ANY, label = info_text)
         box1.Add(info, 0, wx.EXPAND)
 
@@ -207,7 +224,7 @@ class History_view( wx.Frame ):
         box1.Add(self.choice, 1, wx.EXPAND)
         box2.Add(box1, 0)
 
-        self.lst = wx.ListBox(self.panel, size = (200, 300), choices = [], style = wx.LB_SINGLE)
+        self.lst = wx.ListBox(self.panel, size=(200, 300), choices=[], style=wx.LB_SINGLE)
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst) 
         box2.Add(self.lst, 1, wx.EXPAND)
         box3.Add(box2, 0, wx.EXPAND)
@@ -244,7 +261,7 @@ class History_view( wx.Frame ):
             self.axes.axhline(cri, color='r', linestyle='-', linewidth=4)
         else:
             cri = 0
-        self.axes.set_title(item)
+        self.axes.set_title(item.title())
         self.axes.set_xticks(x)
         self.axes.set_ylim(0,max(np.max(y),cri)+10)
         self.axes.set_xticklabels(x_name, rotation=25, fontsize=10)
