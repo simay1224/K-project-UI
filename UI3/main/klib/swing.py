@@ -7,7 +7,7 @@ import inflect,pdb
 
 class Swing(object):
     """ Dectect if body bend to left or right.
-        Also if hand is straight or not.
+        Also if arm is straight or not.
     """
     def __init__(self):
         self.angle_mean = []
@@ -46,7 +46,7 @@ class Swing(object):
         vec_SRER = joints[self.kpm.RElbow_x:self.kpm.RElbow_z+1] - joints[self.kpm.RShld_x:self.kpm.RShld_z+1]
         vec_SE   = (vec_SRER + vec_SLEL)/2  # combine vec_SLEL and vec_SRER
         self.angle_mean.append(self.vec_angle(vec_SE))  # angle btw vec_se and horizontal vector
-        # store left and right hand angles
+        # store left and right arm angles
         self.angel_le.append(self.vec_angle(joints[self.kpm.LElbow_x:self.kpm.LElbow_z+1] - joints[self.kpm.LShld_x:self.kpm.LShld_z+1],\
                                             joints[self.kpm.LElbow_x:self.kpm.LElbow_z+1] - joints[self.kpm.LWrist_x:self.kpm.LWrist_z+1]))
         self.angel_re.append(self.vec_angle(joints[self.kpm.RElbow_x:self.kpm.RElbow_z+1] - joints[self.kpm.RShld_x:self.kpm.RShld_z+1],\
@@ -111,7 +111,7 @@ class Swing(object):
         self.min_len = self.min_ary.shape[0]
 
     def straight_detection(self, angle_lsit, lr, rng=15, th=130):
-        """ check if the hand (wrist-elbow-shoulder) is straight
+        """ check if the arm (wrist-elbow-shoulder) is straight
         """
         if len(angle_lsit) < rng:
             res = np.mean(angle_lsit)

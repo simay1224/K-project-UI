@@ -41,7 +41,7 @@ class Welcome_win(wx.Frame):
         sizer.Add(button3, pos=(3, 1), span=(1, 0))
 
         panel.SetSizer(sizer)
-        panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground) 
+        # panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground) 
         self.Show(True)  
 
     def open_bodygame(self, event):

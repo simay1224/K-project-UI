@@ -80,8 +80,6 @@ class BodyGameRuntime(object):
         # here we will store skeleton data
         self._bodies = None
         self.info = info
-        # self.scene_type = 2
-        # self.emoji = None
         self.errimg = pygame.image.load("./data/err2.png").convert_alpha()
         self.corimg = pygame.image.load("./data/right.png").convert_alpha()
         self.wellimg = pygame.image.load("./data/excellent.png").convert_alpha()
@@ -121,6 +119,7 @@ class BodyGameRuntime(object):
         self.fcnt = 0
         self.errsums = ''
         self.evalhis = []  # evaluaton history
+        self.cntdown = 900
         # import class
         self.ana = Analysis()
         self.eval = Evaluation()
@@ -233,7 +232,6 @@ class BodyGameRuntime(object):
                 if self.kp.ratio > 0.4:
                     self.kp.ratio -= 0.05
                     self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
-            print self.kp.ratio
 
         if press[pygame.K_0]:  # use '0' to change the scene type
             print('scene change')
@@ -429,18 +427,30 @@ class BodyGameRuntime(object):
                             self.log.writein(self.info, self.exeno, self.kp.now, exelog, errs)
                             print self.ana.dtw.idxlist
                             self.kp.finish = True
+                            pdb.set_trace()
                             while len(self.evalhis) < 4:
                                 self.evalhis.append(False)
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                                             'Exercise '+str(self.exeno)+' is done', 2)
                         if self.errsums == '':
-                            self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                                'Overall evaluation:\n\nPerfect !!', 3)
+                            if len(self.evalhis) !=0: 
+                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                                    'Overall evaluation:\n\nPerfect !!', 3)
                         else:
                             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                                                 'Overall evaluation:\n\n- '+self.errsums, 3)
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                            'Press "Space" to start next exercise.', 5, fsize=40, color=self.kp.c_togo)
+                                            '(Press "Space" to start next exercise.)', 0, (120, 830), fsize=60, color=self.kp.c_togo)
+                        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                            'Next exercise will start in %s seconds.'% str(self.cntdown/30), 0, (120, 880) , fsize=60, color=self.kp.c_togo)
+                        self.cntdown -= 1
+                        if self.cntdown == 0:
+                            if self.exeno == 7:
+                                self.exeno = 1
+                            else:
+                                self.exeno += 1
+                            print('Next exercise ..................')
+                            self.reset()                 
                     # draw skel
                     self.skel.draw_body(joints, jps, SKELETON_COLORS[i], self._frame_surface, 8)
 
@@ -478,7 +488,7 @@ class BodyGameRuntime(object):
                 self.kp.bdjoints.append(bddic)
             else:
                 pass
-                self.io.typetext(self._frame_surface, 'Not Recording', (1580, 20), (0, 255, 0))
+                # self.io.typetext(self._frame_surface, 'Not Recording', (1580, 20), (0, 255, 0))
 
             # self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='exe', region=1) 
             # self.exeinst.blit_text(self.bk_frame_surface, self.exeno, self.kp, strtype='note', region=2, color=self.kp.c_tips)
@@ -486,11 +496,10 @@ class BodyGameRuntime(object):
             bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
             self._screen.blit(bksurface_to_draw, (0, 0))
             # emoji
-            if self.ana.evalstr != '':
-                emoji_size = min(int(self._screen.get_width()*130./1920), int(self._screen.get_height()*130/1080))
-                emoji_err = pygame.transform.scale(self.errimg, (int(emoji_size*0.8), int(emoji_size*0.8)))
-                emoji_cor = pygame.transform.scale(self.corimg, (emoji_size, emoji_size))
-                emoji_well = pygame.transform.scale(self.wellimg, (emoji_size*2, emoji_size*2))
+            emoji_size = min(int(self._screen.get_width()*130./1920), int(self._screen.get_height()*130/1080))
+            emoji_err = pygame.transform.scale(self.errimg, (int(emoji_size*0.8), int(emoji_size*0.8)))
+            emoji_cor = pygame.transform.scale(self.corimg, (emoji_size, emoji_size))
+            emoji_well = pygame.transform.scale(self.wellimg, (emoji_size*2, emoji_size*2))
 
             for eidx, res in enumerate(self.evalhis):
                 if res:
@@ -498,7 +507,7 @@ class BodyGameRuntime(object):
                 else:
                     self._screen.blit(emoji_err, (int((145+eidx*220)*self._screen.get_width()/1920.), int(self._screen.get_height()*940./1080)))
             if len(self.evalhis) == 4 and (not False in self.evalhis):
-                self._screen.blit(emoji_well, (int(550*self._screen.get_width()/1920.), int(self._screen.get_height()*600./1080)))
+                self._screen.blit(emoji_well, (int(420*self._screen.get_width()/1920.), int(self._screen.get_height()*600./1080)))
 
             # scene type
             if self.kp.scene_type == 2:
@@ -519,11 +528,12 @@ class BodyGameRuntime(object):
  
             self.kp.scale = self.kp.scale * scale
             # draw avatar
-            self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
-            self.kp.pre_scale = self.kp.scale
+            if not self.ana._done:
+                self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
+                self.kp.pre_scale = self.kp.scale
+            else:
+                self.exeinst.show_list(self._screen, self.exeno)
 
-            # surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*(1-self.kp.ratio)), int(self.h*(1-self.kp.ratio))))
-            # self._screen.blit(surface_to_draw, self.ori)
             surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*self.kp.vid_w/1920.), int(self.h*self.kp.vid_h/1080.)))
             self._screen.blit(surface_to_draw, self.ori)
 

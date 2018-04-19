@@ -44,8 +44,8 @@ class Movie(object):
     def draw(self, surface, scale=1, pre_scale=1, Type=1):
         "Draw current frame to the surface"
         if scale/pre_scale != 1:
-            self.mscreen = pygame.transform.scale(self.mscreen, (int(self.kp.vid_w/2.*scale), int(self.kp.vid_w/2.*scale)))
-            self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.kp.vid_w/2.*scale), int(self.kp.vid_w/2.*scale)))
+            self.mscreen = pygame.transform.scale(self.mscreen, (int(self.kp.vid_w/2.*scale), int(self.kp.vid_h/2.*scale)))
+            self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.kp.vid_w/2.*scale), int(self.kp.vid_h/2.*scale)))
         surface.blit(self.mscreen, self.position(surface.get_width(), surface.get_height(), scale, Type))
 
 

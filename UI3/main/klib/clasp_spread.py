@@ -61,7 +61,7 @@ class Clasp_spread(object):
         return True 
 
     def clasp(self, joints, kpm, spread_th=60, elbow_th=75):
-        """ hands clasp state
+        """ arms clasp state
         """ 
         if self.clasp_cnt == self.hold:
             self.elbowstus['clasp'] = False
@@ -87,13 +87,13 @@ class Clasp_spread(object):
             self.elbowstus['clasp'] = True
 
     def spread(self, joints, kpm, spread_th=30):
-        """ hands spread state
+        """ arms spread state
         """
         if self.spread_cnt == self.hold:
             self.elbowstus['spread'] = False
             if not self.elbowstus['clasp']:
-                self.evalstr = 'When raising the hands, elbows should close to each other.\n'
-                self.eval = 'When raising the hands, elbows should close to each other.\n'
+                self.evalstr = 'When raising the arms, elbows should close to each other.\n'
+                self.eval = 'When raising the arms, elbows should close to each other.\n'
                 self.err.append('The '+self.cnvt.ordinal(self.cnt)+ ' time clasp is not good. Not clasp !!')
                 self.errsum.append('Elbows should close to each other.\n')
                 self.elbowstus['clasp'] = True

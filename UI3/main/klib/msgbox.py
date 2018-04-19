@@ -79,7 +79,7 @@ class Msgbox(wx.Frame):
         sizer.AddGrowableCol(1)
         
         self.panel.SetSizer(sizer)
-        self.panel.SetBackgroundColour((170, 0, 255))
+        # self.panel.SetBackgroundColour((170, 0, 255))
 
     def ok(self, event):
         self.fname = self.tc1.GetValue()

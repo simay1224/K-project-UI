@@ -129,52 +129,55 @@ class Evaluation(object):
     def cmphist(self, log, userinfo, exeno, time, data=[]):
         """  compare user's latest data with its historical data
         """
-        if not os.path.isfile('./output/compare.txt'):
-            text_file = open("./output/compare.txt", "w") 
-        else:
-            text_file = open("./output/compare.txt", "a")
-        date = '-'.join(map(str,[time.year,time.month,time.day,time.hour,time.minute]))
-        str0 = '\n%10s: %s\n%10s: %s\n%10s: %s\n'% ('Exercise', exeno, 'Username', userinfo.name, 'Date', date)
+        if not all(x == '' for x in data):
+            if not os.path.isfile('./output/compare.txt'):
+                text_file = open("./output/compare.txt", "w") 
+            else:
+                text_file = open("./output/compare.txt", "a")
+            date = '-'.join(map(str,[time.year,time.month,time.day,time.hour,time.minute]))
+            str0 = '\n%10s: %s\n%10s: %s\n%10s: %s\n'% ('Exercise', exeno, 'Username', userinfo.name, 'Date', date)
 
-        text_file.write(str0)
-        print(str0)
-        if os.path.isfile(log.excelPath):
-            name = userinfo.name
-            df = pd.read_excel(log.excelPath, sheet_name='exercise %s' %exeno)
-            cols = log.colname[exeno][4:-1]  # donot neet common & errmsg info
-            roi = df[df['name'] == name]  # rows of interest
-            def_val = df[df['name'] == '$IDEAL VALUE$']
-            def_val = def_val.values.tolist()[0][4:4+len(cols)]
-            history = []
-            terms = []
-            for col in cols:
-                history.append(round(roi[col].mean(),2))
-                terms.append(col)
-            str1 = '%40s | %18s | %15s | %16s\n'%('Terms', 'In history record', 'This time', 'Results')
-            print(str1)
-            text_file.write(str1)
-            for i in xrange(len(cols)):
-                if def_val[i] == 'bigger is better':  # lager value is preferred
-                    if history[i] >= data[i]:
-                        evaluation = 'worsen'
-                    else:
-                        evaluation = 'improve'
-                    num = round(abs(data[i]-history[i])/history[i]*100, 2)
-                else:  # should compare with default values
-                    if abs(history[i]-def_val[i]) >= abs(data[i]-def_val[i]):
-                       evaluation = 'improve'
-                    else:
-                       evaluation = 'worsen'
-                    num = round(abs(abs(data[i]-def_val[i])-abs(history[i]-def_val[i]))/def_val[i]*100, 2)
-                
-                str2 = '%40s | %18s | %15s | %6s%s %8s\n' %(terms[i], history[i], round(data[i], 2), num, '%', evaluation) 
-                print(str2)
-                text_file.write(str2)
+            text_file.write(str0)
+            print(str0)
+            if os.path.isfile(log.excelPath):
+                name = userinfo.name
+                df = pd.read_excel(log.excelPath, sheet_name='exercise %s' %exeno)
+                cols = log.colname[exeno][4:-1]  # donot neet common & errmsg info
+                roi = df[df['name'] == name]  # rows of interest
+                def_val = df[df['name'] == '$IDEAL VALUE$']
+                def_val = def_val.values.tolist()[0][4:4+len(cols)]
+                history = []
+                terms = []
+                for col in cols:
+                    history.append(round(roi[col].mean(),2))
+                    terms.append(col)
+                str1 = '%40s | %18s | %15s | %16s\n'%('Terms', 'In history record', 'This time', 'Results')
+                print(str1)
+                text_file.write(str1)
+                for i in xrange(len(cols)):
+                    if def_val[i] == 'bigger is better':  # lager value is preferred
+                        if history[i] >= data[i]:
+                            evaluation = 'worsen'
+                        else:
+                            evaluation = 'improve'
+                        num = round(abs(data[i]-history[i])/history[i]*100, 2)
+                    else:  # should compare with default values
+                        if abs(history[i]-def_val[i]) >= abs(data[i]-def_val[i]):
+                            evaluation = 'improve'
+                        else:
+                            evaluation = 'worsen'
+                        num = round(abs(abs(data[i]-def_val[i])-abs(history[i]-def_val[i]))/def_val[i]*100, 2)
+                    
+                    str2 = '%40s | %18s | %15s | %6s%s %8s\n' %(terms[i], history[i], round(data[i], 2), num, '%', evaluation) 
+                    print(str2)
+                    text_file.write(str2)
+            else:
+                str1 = 'No historical data for this user.\n'
+                print(str1)
+                text_file.write(str1)
+            text_file.close()
         else:
-            str1 = 'No historical data for this user.\n'
-            print(str1)
-            text_file.write(str1)
-        text_file.close()
+            print('Did not capture any data.')
     def errmsg(self, errs=[], dolist=None, contents=['Breath eval', 'Hand eval', 'Exercise motion',\
                                                      'Shoulder State', 'Clasp & Spread', 'Swing']):
         """ According to the test results, showing evaluation results.
@@ -201,7 +204,7 @@ class Evaluation(object):
 
         return (self.leftbnd, self.upperbnd) 
 
-    def blit_text(self, surface, exeno, kp, text=None, region=1, emph=False, ita=False, fsize=0, color=None):
+    def blit_text(self, surface, exeno, kp, text=None, region=1, pos=(0, 0), emph=False, ita=False, fsize=0, color=None):
         """Creat a text surface, this surface will change according to the scene type,
            ratio and the region number. According to the size of the surface, the text 
            will auto change line also auto change size
@@ -233,9 +236,12 @@ class Evaluation(object):
             words = self.words[exeno]
         else:
             words = [word.split(' ') for word in text.splitlines()]
-
-        (x, y) = self.position(surface, region)
-        x_ori, y_ori = x, y
+        if region != 0:
+            (x, y) = self.position(surface, region)
+            x_ori, y_ori = x, y
+        else:  # customize position
+            (x, y) = pos
+            x_ori, y_ori = x, y
 
         max_width = (self.kp.eval_RB-self.kp.eval_LB)*surface.get_width()/1920.
         max_height = (self.kp.eval_sec[region]-self.kp.eval_sec[region-1])*surface.get_height()/1080.
