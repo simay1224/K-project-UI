@@ -33,12 +33,12 @@ class Historylog(object):
                  '2nd lower right elbow angle', '2nd straight right elbow angle',
                  '3rd lower right elbow angle', '3rd straight right elbow angle',
                  '4th lower right elbow angle', '4th straight right elbow angle',
-                 'average right hand straight angle', 'average right hand push down angle',
+                 'average right hand push down angle','average right hand straight angle', 
                  '1st lower left elbow angle', '1st straight left elbow angle',
                  '2nd lower left elbow angle', '2nd straight left elbow angle',
                  '3rd lower left elbow angle', '3rd straight left elbow angle',
                  '4th lower left elbow angle', '4th straight left elbow angle',
-                 'average left hand straight angle', 'average left hand push down angle']
+                 'average left hand push down angle', 'average left hand straight angle']
         exer4 = ['1st right hand angle (H-close)', '1st right hand angle (T-pose)',
                  '2nd right hand angle (H-close)', '2nd right hand angle (T-pose)',
                  '3rd right hand angle (H-close)', '3rd right hand angle (T-pose)',
@@ -56,8 +56,8 @@ class Historylog(object):
         ishld = ['bigger is better', 'bigger is better']
         iclsp  = ['bigger is better', 'bigger is better', 'bigger is better']
         iswing = [90, 'bigger is better', 90, 'bigger is better']
-        iexer3 = [10, 180, 10, 180, 10, 180, 10, 180, 180, 10,
-                    10, 180, 10, 180, 10, 180, 10, 180, 180, 10]
+        iexer3 = [10, 180, 10, 180, 10, 180, 10, 180, 10, 180,
+                    10, 180, 10, 180, 10, 180, 10, 180, 10, 180]
         iexer4 = [90]*20  
         ibackup = []   
         ibackup = []     
