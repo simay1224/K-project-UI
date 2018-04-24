@@ -427,7 +427,6 @@ class BodyGameRuntime(object):
                             self.log.writein(self.info, self.exeno, self.kp.now, exelog, errs)
                             print self.ana.dtw.idxlist
                             self.kp.finish = True
-                            pdb.set_trace()
                             while len(self.evalhis) < 4:
                                 self.evalhis.append(False)
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
@@ -507,7 +506,7 @@ class BodyGameRuntime(object):
                 else:
                     self._screen.blit(emoji_err, (int((145+eidx*220)*self._screen.get_width()/1920.), int(self._screen.get_height()*940./1080)))
             if len(self.evalhis) == 4 and (not False in self.evalhis):
-                self._screen.blit(emoji_well, (int(420*self._screen.get_width()/1920.), int(self._screen.get_height()*600./1080)))
+                self._screen.blit(emoji_well, (int(420*self._screen.get_width()/1920.), int(self._screen.get_height()*580./1080)))
 
             # scene type
             if self.kp.scene_type == 2:

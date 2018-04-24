@@ -92,9 +92,9 @@ class Hand_status(object):
         print('left and right hand synchronize rate is '+str(np.round(sync_rate, 2))+'%')
         self.hstate[1:-1] = foo[1:-1]
         if np.sum(self.hstate[0]) != 4:
-            self.err.append('two hand must open when you rise you arms')
+            self.err.append('two hands must open when you rise you arms')
         if np.sum(self.hstate[-1]) != 4:
-            self.err.append('two hand must open when you put down your arms')
+            self.err.append('two hands must open when you put down your arms')
         hand_pulse = (self.hstate - np.roll(self.hstate, -1, axis=0))[:-1]
         lh         = np.where(hand_pulse[:, 0] != 0)[0]
         lh_open    = np.where(hand_pulse[:, 0] == 1)[0]

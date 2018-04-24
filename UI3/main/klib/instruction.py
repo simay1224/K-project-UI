@@ -31,59 +31,59 @@ class Exeinst(object):
 
         self.str['exe'][2] = 'Exercise 2 : Over The Head Pumping'\
                              '\n  '\
-                             '\n1. Raise your hands up and hold there.'\
+                             '\n1. Raise your arms up and hold there.'\
                              '\n2. Wait until the sign shows "start breath in/out."'\
                              '\n3. Do deep breathing 4 times.' \
-                             '\n4. Put down your hands.'
+                             '\n4. Put down your arms.'
 
         self.str['exe'][3] = 'Exercise 3 : Push Down Pumping'\
                              '\n  '\
-                             '\n1. Raise your hands up.'\
+                             '\n1. Raise your arms up.'\
                              '\n2. Lower your elbows, let shoulder-elbow-hand be a V-shape.'\
-                             '\n3. Raise your hands up again.'\
+                             '\n3. Raise your arms up again.'\
                              '\n4. Repeat this repetition 4 times.'\
-                             '\n5. Put down your hands.'
+                             '\n5. Put down your arms.'
 
         self.str['exe'][4] = 'Exercise 4 : Horizontal Pumping'\
                              '\n  '\
-                             '\n1. Raise your hands up till "T-pose."'\
-                             '\n2. Move hands slowly to the chest.'\
+                             '\n1. Raise your arms up till "T-pose."'\
+                             '\n2. Move arms slowly to the chest.'\
                              '\n3. Back to "T-pose".'\
                              '\n4. Repeat this repetition 4 times.'\
-                             '\n5. Put down your hands.'
+                             '\n5. Put down your arns.'
 
         self.str['exe'][5] = 'Exercise 5 : Reach to the Sky'\
                              '\n  '\
-                             '\n1. Raise your hands up  as high as possible and clasp.'\
+                             '\n1. Raise your arms up  as high as possible and clasp.'\
                              '\n2. Bend your body to the left.'\
                              '\n3. Bend your body to the right.'\
                              '\n4. Repeat 4 times.'\
-                             '\n5. Put down your hands.'
+                             '\n5. Put down your arms.'
 
         self.str['exe'][6] = 'Exercise 6 : Shoulder Rolls'\
                              '\n  '\
                              '\n1. Put your hands on the belly position.'\
                              '\n2. Rotate you shoulder.'\
                              '\n3. Repeat 4 times.'\
-                             '\n4. Put down your hands.'
+                             '\n4. Put down your arms.'
 
         self.str['exe'][7] = 'Exercise 7 : Clasp and Spread'\
                              '\n  '\
-                             '\n1. Raise and clasp your hands till the belly position.'\
+                             '\n1. Raise and clasp your arms till the belly position.'\
                              '\n2. Raise clasped hands toward to your forehead and keep elbows together.'\
                              '\n3. Slide your heands to the back of your head and spread the elbows open wide.'\
                              '\n4. Back to the belly position.'\
                              '\n5. Repeat 4 times.'\
-                             '\n6. Put down your hands.'
+                             '\n6. Put down your arms.'
 
         
         self.str['note'][1] = '\nTips :'\
-                                '\n1. Tight your muscle as much as you can.'\
-                                '\n2. Breath as deep as you can.'
+                                '\n1. Tighten your muscle as much as you can.'\
+                                '\n2. Breathe as deep as you can.'
         self.str['note'][2] = '\nTips :'\
-                                '\n1. When breathing in, you need to close your hands.'\
-                                '\n2. When breathing out, you need to open your hands.'\
-                                '\n3. Breath as deep as you can.'
+                                '\n1. When you breathe in, you also need to close your hands.'\
+                                '\n2. When you breathe out, you also need to open your hands.'\
+                                '\n3. Breathe as deep as you can.'
         self.str['note'][3] = '\nTips :'\
                                 '\n1. When you raise up your hands, make sure that your hand, elbow and shoulder are straight.'\
                                 '\n2. When bending the elbow, hand-elbow-shoulder should be "V-shape" not "L-shape"'\
@@ -100,7 +100,7 @@ class Exeinst(object):
                                 '\n1. Let your shoulders rotation movement as large as possible.'
 
         self.str['note'][7] = '\nTips :'\
-                                '\n1. When raising the hands to the forehead, keeping two elbows as close as possible.'\
+                                '\n1. When raising the arms to the forehead, keeping two elbows as close as possible.'\
                                 '\n2. When the hands is in the back of your head, spread the elnows open as wide as possible.'\
                                 '\n3. Keep your body staight.'
 
@@ -155,7 +155,7 @@ class Exeinst(object):
 
         for idx, line in enumerate(words):
             if idx+1 == exeno:
-                color = self.kp.c_guide
+                color = self.kp.c_eval_err
             else:
                 color = self.kp.c_eval_well
             for word in line:

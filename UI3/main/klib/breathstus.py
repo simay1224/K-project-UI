@@ -114,28 +114,28 @@ class Breath_status(object):
                 if abs(breath_diff) > 10:  # really breath in/out
                     if abs(breath_diff) < 30:  # not deep breath
                         if breath_diff > 0:  # breath out
-                            print('breath out from frame '+str(i)+' to frame '+str(j)+
-                                  ' <== breath not deep enough')
+                            print('breathe out from frame '+str(i)+' to frame '+str(j)+
+                                  ' <== breathing not deep enough')
                             b_out.append(j-i)
                             self.ngframe.append((i+j)/2)
                         else:  # breath in
-                            print('breath in from frame '+str(i)+' to frame '+str(j)+
-                                  ' <== breath not deep enough')
+                            print('breathe in from frame '+str(i)+' to frame '+str(j)+
+                                  ' <== breathing not deep enough')
                             b_in.append(j-i)
                             self.ngframe.append((i+j)/2)
                     else:
                         if breath_diff > 0:  # breath out
-                            print('breath out from frame '+str(i)+' to frame '+str(j))
+                            print('breathe out from frame '+str(i)+' to frame '+str(j))
                             b_out.append(j-i)
                         else:  # breath in
-                            print('breath in from frame '+str(i)+' to frame '+str(j))
+                            print('breathe in from frame '+str(i)+' to frame '+str(j))
                             b_in.append(j-i)
                 else:
                     delidx.append(np.argwhere(self.breath == j)[0][0])
             if len(delidx) > 0:
                 self.breath = np.delete(self.breath, np.array(delidx))
-            print('\naverage breath out freq is: '+str(np.round(30./np.mean(b_out), 2))+' Hz')
-            print('\naverage breath in freq is: '+str(np.round(30./np.mean(b_in), 2))+' Hz')
+            print('\naverage breathe out freq is: '+str(np.round(30./np.mean(b_out), 2))+' Hz')
+            print('\naverage breathe in freq is: '+str(np.round(30./np.mean(b_in), 2))+' Hz')
         else:
             # raise ImportError('Doing too fast !! please redo again !!')
             self.evalstr = 'Doing too fast !! please redo again !!\n'
@@ -183,7 +183,7 @@ class Breath_status(object):
         self.missingbreath = hand_trunc[hand_chk == 1]
 
         self.sync_rate = min(cnt*1./len(hand_trunc)*100, 100)
-        print('hand and breath synchronize rate is '+str(np.round(self.sync_rate, 2))+'%')
+        print('hand and breathing synchronize rate is '+str(np.round(self.sync_rate, 2))+'%')
 
     def local_minmax(self, seq1, seq2, th, minmax_str, rng=15, scale=3):
         """ finding local min or max depending on the argument minmax

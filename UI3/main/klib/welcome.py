@@ -56,7 +56,7 @@ class Welcome_win(wx.Frame):
         instruct = Instrcution_win(None, 'Instruction')
 
     def open_history(self, event):
-        history  = History_view(None) 
+        history  = History_view(None, self.info) 
 
     def OnEraseBackground(self, evt):
         """
@@ -122,31 +122,31 @@ class Instrcution_win(wx.Frame):
                              '\n4. Put down your hands.'
 
         self.str['ins'][2] = '\n  '\
-                             '\n1. Raise your hands up and hold there.'\
+                             '\n1. Raise your harms up and hold there.'\
                              '\n2. Wait until the sign shows "start breath in/out."'\
                              '\n3. Do deep breathing 4 times.' \
-                             '\n4. Put down your hands.'
+                             '\n4. Put down your arms.'
 
         self.str['ins'][3] = '\n  '\
-                             '\n1. Raise your hands up.'\
+                             '\n1. Raise your arms up.'\
                              '\n2. Lower your elbows, let shoulder-elbow-hand be a V-shape.'\
-                             '\n3. Raise your hands up again.'\
+                             '\n3. Raise your arms up again.'\
                              '\n4. Repeat this repetition 4 times.'\
-                             '\n5. Put down your hands.'
+                             '\n5. Put down your arms.'
 
         self.str['ins'][4] = '\n  '\
-                             '\n1. Raise your hands up till "T-pose."'\
-                             '\n2. Move hands slowly to the chest.'\
+                             '\n1. Raise your arms up till "T-pose."'\
+                             '\n2. Move arms slowly to the chest.'\
                              '\n3. Back to "T-pose".'\
                              '\n4. Repeat this repetition 4 times.'\
-                             '\n5. Put down your hands.'
+                             '\n5. Put down your arms.'
 
         self.str['ins'][5] = '\n  '\
-                             '\n1. Raise your hands up  as high as possible and clasp.'\
+                             '\n1. Raise your arms up  as high as possible and clasp.'\
                              '\n2. Bend your body to the left.'\
                              '\n3. Bend your body to the right.'\
                              '\n4. Repeat 4 times.'\
-                             '\n5. Put down your hands.'
+                             '\n5. Put down your arms.'
 
         self.str['ins'][6] = '\n  '\
                              '\n1. Put your hands on the belly position.'\
@@ -155,22 +155,22 @@ class Instrcution_win(wx.Frame):
                              '\n4. Put down your hands.'
 
         self.str['ins'][7] = '\n  '\
-                             '\n1. Raise and clasp your hands till the belly position.'\
+                             '\n1. Raise and clasp your arms till the belly position.'\
                              '\n2. Raise clasped hands toward to your forehead and keep elbows together.'\
                              '\n3. Slide your heands to the back of your head and spread the elbows open wide.'\
                              '\n4. Back to the belly position.'\
                              '\n5. Repeat 4 times.'\
-                             '\n6. Put down your hands.'
+                             '\n6. Put down your arms.'
         
         self.str['note'][1] = 'Tips :'\
-                                '\n1. Tight your muscle as much as you can.'\
-                                '\n2. Breath as deep as you can.'
+                                '\n1. Tighten your muscle as much as you can.'\
+                                '\n2. Breathe as deep as you can.'
         self.str['note'][2] = 'Tips :'\
-                                '\n1. When breathing in, you need to close your hands.'\
-                                '\n2. When breathing out, you need to open your hands.'\
-                                '\n3. Breath as deep as you can.'
+                                '\n1. When you breathe in, you also need to close your hands.'\
+                                '\n2. When you breathe out, you also need to open your hands.'\
+                                '\n3. Breathe as deep as you can.'
         self.str['note'][3] = 'Tips :'\
-                                '\n1. When you raise up your hands, make sure that your hand, elbow and shoulder are straight.'\
+                                '\n1. When you raise up your arms, make sure that your hand, elbow and shoulder are straight.'\
                                 '\n2. When bending the elbow, hand-elbow-shoulder should be "V-shape" not "L-shape"'\
  
         self.str['note'][4] = 'Tips :'\
@@ -185,7 +185,7 @@ class Instrcution_win(wx.Frame):
                                 '\n1. Let your shoulders rotation movement as large as possible.'
 
         self.str['note'][7] = 'Tips :'\
-                                '\n1. When raising the hands to the forehead, keeping two elbows as close as possible.'\
+                                '\n1. When raising the arms to the forehead, keeping two elbows as close as possible.'\
                                 '\n2. When the hands is in the back of your head, spread the elnows open as wide as possible.'\
                                 '\n3. Keep your body staight.'
 
@@ -199,13 +199,14 @@ class Instrcution_win(wx.Frame):
         self.Destroy()
 
 class History_view( wx.Frame ):	
-    def __init__(self, parent, info=Info(), title='welcome'):
-        super(History_view, self).__init__(parent, title=title, size=(850, 520))
+    def __init__(self, parent, info = Info(), title = 'welcome'):
+        super(History_view, self).__init__(parent, title = title, size = (850, 520))
         self.info = info
         self.InitUI()
         self.Show()  
 
-    def InitUI(self, path='./output/log.xlsx'):
+    def InitUI(self, path = './output/log.xlsx'):
+        self.font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)  
         self.path = path
         log_xl = pd.ExcelFile(path)
         self.panel = wx.Panel(self)
@@ -214,18 +215,21 @@ class History_view( wx.Frame ):
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.HORIZONTAL)
 
-        info_text = 'Name: '+self.info.name.title()+'\n Gender: '+self.info.gender+'     Age: '+self.info.age
+        info_text = 'Name: '+self.info.name.title()+'\nGender: '+self.info.gender.title()+'     Age: '+str(self.info.age)
         info = wx.StaticText(self.panel, wx.ID_ANY, label = info_text)
+        info.SetFont(self.font)
         box1.Add(info, 0, wx.EXPAND)
 
         ex_choices = log_xl.sheet_names
         self.choice = wx.Choice(self.panel, choices=ex_choices)
+        self.choice.SetFont(self.font)
         self.choice.Bind(wx.EVT_CHOICE, self.update_choice)
         box1.Add(self.choice, 1, wx.EXPAND)
         box2.Add(box1, 0)
 
-        self.lst = wx.ListBox(self.panel, size=(200, 300), choices=[], style=wx.LB_SINGLE)
-        self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst) 
+        self.lst = wx.ListBox(self.panel, size = (330, 300), choices = [], style = wx.LB_SINGLE)
+        self.lst.SetFont(self.font)
+        self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)     
         box2.Add(self.lst, 1, wx.EXPAND)
         box3.Add(box2, 0, wx.EXPAND)
 
@@ -261,10 +265,8 @@ class History_view( wx.Frame ):
             self.axes.axhline(cri, color='r', linestyle='-', linewidth=4)
         else:
             cri = 0
-        self.axes.set_title(item.title())
+        self.axes.set_title(item)
         self.axes.set_xticks(x)
         self.axes.set_ylim(0,max(np.max(y),cri)+10)
         self.axes.set_xticklabels(x_name, rotation=25, fontsize=10)
         self.canvas.draw()
-
-

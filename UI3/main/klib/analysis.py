@@ -202,9 +202,9 @@ class Analysis(object):
                         self.brth.errsum.append('Arms are not straight when breathing.\n')
                     else:
                         if not self.brth.brth_out_flag:
-                            evalinst.blit_text(surface, exeno, kp, 'Breathe in and close arm.', 2, True, color=self.c_normal)
+                            evalinst.blit_text(surface, exeno, kp, 'Breathe in and close hands.', 2, True, color=self.c_normal)
                         else:
-                            evalinst.blit_text(surface, exeno, kp, 'Breathe out and open arm.', 2, True, color=self.c_normal)
+                            evalinst.blit_text(surface, exeno, kp, 'Breathe out and open hands.', 2, True, color=self.c_normal)
                     evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.brth.cnt)), 4, color=self.c_togo)
                 self.repcnt = self.brth.cnt
             elif stus == 'down':

@@ -43,9 +43,9 @@ class Evaluation(object):
                 for i in ana.brth.ngframe:
                     y1 = ana.brth.breath_list[i]
                     y2 = y1 - 20  
-                    ax.annotate('Not deep breath', xy=(i, y1-2), xytext=(i, y2),\
+                    ax.annotate('Not deep breathing', xy=(i, y1-2), xytext=(i, y2),\
                                 arrowprops=dict(facecolor='red', shrink=0.05),)
-            plt.title('Breath in and out')
+            plt.title('Breathe in and out')
             fig.savefig('output/Exer%s_bio_1.jpg' % str(exeno))
             plt.close(fig)
     
@@ -59,16 +59,16 @@ class Evaluation(object):
             for i in ana.brth.ngframe:
                 y1 = ana.brth.breath_list[i]#/self.breath_list[0]*2
                 y2 = 1.5*10
-                ax.annotate('breath not deep enough', xy=(i, y1), xytext=(i, y2),\
+                ax.annotate('breathing not deep enough', xy=(i, y1), xytext=(i, y2),\
                             arrowprops=dict(facecolor='red', shrink=0.05),)
         if len(ana.brth.missingbreath) != 0:
             for i in ana.brth.missingbreath:
                 x = sum(i)/2
                 y1 = ana.brth.breath_list[x]#/self.breath_list[0]*2 
                 y2 = 1*10
-                ax.annotate('missing breath', xy=(x, y1), xytext=(x, y2),\
+                ax.annotate('missing breathing', xy=(x, y1), xytext=(x, y2),\
                             arrowprops=dict(facecolor='green', shrink=0.05),)
-        plt.title('Breath in and out & hands open and close')
+        plt.title('Breathe in and out & hands open and close')
         fig.savefig('output/Exer%s_biohoc_1.jpg' %str(exeno)) 
         plt.close(fig)
   
@@ -178,7 +178,7 @@ class Evaluation(object):
             text_file.close()
         else:
             print('Did not capture any data.')
-    def errmsg(self, errs=[], dolist=None, contents=['Breath eval', 'Hand eval', 'Exercise motion',\
+    def errmsg(self, errs=[], dolist=None, contents=['Breathing eval', 'Hand eval', 'Exercise motion',\
                                                      'Shoulder State', 'Clasp & Spread', 'Swing']):
         """ According to the test results, showing evaluation results.
         """
