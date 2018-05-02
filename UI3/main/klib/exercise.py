@@ -2,9 +2,9 @@ import numpy as np
 import h5py, pdb
 
 
-data2 = h5py.File('data/GT_V_data_mod_EX2.h5', 'r')
-data3 = h5py.File('data/GT_V_data_mod_EX3.h5', 'r')
-data4 = h5py.File('data/GT_V_data_mod_EX4.h5', 'r')
+data2 = h5py.File('./data/model/ref data/GT_V_data_mod_EX2.h5', 'r')
+data3 = h5py.File('./data/model/ref data/GT_V_data_mod_EX3.h5', 'r')
+data4 = h5py.File('./data/model/ref data/GT_V_data_mod_EX4.h5', 'r')
 
 
 class Exercise(object):

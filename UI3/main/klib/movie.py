@@ -7,7 +7,7 @@ class Movie(object):
 
     def __init__(self, filename):
         pygame.mixer.quit()
-        self._movie = pygame.movie.Movie('./video/ex'+str(filename)+'.mpg')
+        self._movie = pygame.movie.Movie('./data/video/ex'+str(filename)+'.mpg')
         self.w, self.h = [size for size in self._movie.get_size()]
         self.kp = Kparam()
         self.mscreen = pygame.Surface((self.kp.vid_w/2, self.kp.vid_h/2)).convert()

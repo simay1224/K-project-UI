@@ -6,8 +6,6 @@ Created on Wed Dec 07 13:59:40 2016
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import pdb
 
 
 # joint in kinect

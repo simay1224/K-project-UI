@@ -70,7 +70,7 @@ class Breath_status(object):
 
     def breathextract(self, bdry, dmap):
         """according to the depth map in the chest region,
-           detect breath in and breath out.
+           detect breathe in and breathe out.
         """
         cur_bdry = np.array([bdry[0][1], bdry[3][1], bdry[1][0], bdry[2][0]])
         if len(self.ref_bdry) == 0:
@@ -91,7 +91,7 @@ class Breath_status(object):
                 self.ana_ary = [[0, 1, self.breath_list[0]]]
 
     def breath_analyze(self, th=10):
-        """ Analyze the human and breath in/out behavior
+        """ Analyze the human and breathe in/out behavior
         """
         for i in xrange(len(self.ana_ary)):
             if self.ana_ary[i][1] == 0:
@@ -115,12 +115,12 @@ class Breath_status(object):
                     if abs(breath_diff) < 30:  # not deep breath
                         if breath_diff > 0:  # breath out
                             print('breathe out from frame '+str(i)+' to frame '+str(j)+
-                                  ' <== breathing not deep enough')
+                                  ' <== breathing is not deep enough')
                             b_out.append(j-i)
                             self.ngframe.append((i+j)/2)
                         else:  # breath in
                             print('breathe in from frame '+str(i)+' to frame '+str(j)+
-                                  ' <== breathing not deep enough')
+                                  ' <== breathing is not deep enough')
                             b_in.append(j-i)
                             self.ngframe.append((i+j)/2)
                     else:
@@ -140,7 +140,7 @@ class Breath_status(object):
             # raise ImportError('Doing too fast !! please redo again !!')
             self.evalstr = 'Doing too fast !! please redo again !!\n'
     def brth_hand_sync(self, lhopen, lhclose):
-        """calculate breath and hand open/close relation
+        """calculate breathe and hand open/close relation
         """
         hand = np.sort(np.hstack([lhopen, lhclose]))
         if hand[0] == lhopen[0]:  # first term is open

@@ -10,7 +10,8 @@ from matplotlib.backends.backend_wx import NavigationToolbar2Wx
 from matplotlib.figure import Figure
 import wx
 import wx.lib.mixins.inspection as WIT
-
+from historylog import Historylog
+import cv2
 class Info():
     def __init__(self):
         self.name   = 'jane doe'
@@ -202,13 +203,21 @@ class History_view( wx.Frame ):
     def __init__(self, parent, info = Info(), title = 'welcome'):
         super(History_view, self).__init__(parent, title = title, size = (850, 520))
         self.info = info
+        self.no_hist_img = cv2.imread('./data/imgs/others/no_hist.jpg')
         self.InitUI()
         self.Show()  
 
     def InitUI(self, path = './output/log.xlsx'):
         self.font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)  
         self.path = path
-        log_xl = pd.ExcelFile(path)
+        try:
+            log_xl = pd.ExcelFile(path)
+        except:
+            print('log file do not exist, creating a new one')
+            hist = Historylog()
+            hist.newlog()
+            log_xl = pd.ExcelFile(path)
+
         self.panel = wx.Panel(self)
 
         box1 = wx.BoxSizer(wx.VERTICAL) 
@@ -258,15 +267,19 @@ class History_view( wx.Frame ):
         y = np.array(df_name[item])
         x = np.arange(0, len(y), 1)
         x_name = df_name['time'].tolist()
-        self.axes.clear()    
-        self.axes.bar(x, y, color='g')
-        if df_ideal[item].dtype == float:
-            cri = df_ideal[item][0]
-            self.axes.axhline(cri, color='r', linestyle='-', linewidth=4)
-        else:
-            cri = 0
-        self.axes.set_title(item)
-        self.axes.set_xticks(x)
-        self.axes.set_ylim(0,max(np.max(y),cri)+10)
-        self.axes.set_xticklabels(x_name, rotation=25, fontsize=10)
-        self.canvas.draw()
+        self.axes.clear()
+        try:    
+            self.axes.bar(x, y, color='g')
+            if df_ideal[item].dtype == float:
+                cri = df_ideal[item][0]
+                self.axes.axhline(cri, color='r', linestyle='-', linewidth=4)
+            else:
+                cri = 0
+            self.axes.set_title(item)
+            self.axes.set_xticks(x)
+            self.axes.set_ylim(0,max(np.max(y),cri)+10)
+            self.axes.set_xticklabels(x_name, rotation=25, fontsize=10)
+            self.canvas.draw()
+        except:
+            self.axes.imshow(self.no_hist_img)
+            self.canvas.draw()

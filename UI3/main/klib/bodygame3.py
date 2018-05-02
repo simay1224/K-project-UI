@@ -53,9 +53,9 @@ class BodyGameRuntime(object):
         self._screen = pygame.display.set_mode((self._infoObject.current_w >> 1, self._infoObject.current_h >> 1),
                                                 pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
-        pygame.display.set_caption("In-Home Exercise Intervention System")
+        pygame.display.set_caption("Lymph Coach")
         try :
-            pygame.display.set_icon(pygame.image.load('./data/icon.png'))
+            pygame.display.set_icon(pygame.image.load('./data/imgs/others/icon.png'))
         except:
             pass
 
@@ -74,15 +74,15 @@ class BodyGameRuntime(object):
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
 
         self.bkidx = 10
-        self.bklist = glob.glob(os.path.join('./data/bkimgs', '*.jpg'))
+        self.bklist = glob.glob(os.path.join('./data/imgs/bkimgs', '*.jpg'))
         self.readbackground()
         self.h_to_w = float(self.default_h) / self.default_w
         # here we will store skeleton data
         self._bodies = None
         self.info = info
-        self.errimg = pygame.image.load("./data/err2.png").convert_alpha()
-        self.corimg = pygame.image.load("./data/right.png").convert_alpha()
-        self.wellimg = pygame.image.load("./data/excellent.png").convert_alpha()
+        self.errimg = pygame.image.load("./data/imgs/emoji/err2.png").convert_alpha()
+        self.corimg = pygame.image.load("./data/imgs/emoji/right.png").convert_alpha()
+        self.wellimg = pygame.image.load("./data/imgs/emoji/excellent.png").convert_alpha()
         time.sleep(5)
 
         if self._kinect.has_new_color_frame():
@@ -367,7 +367,7 @@ class BodyGameRuntime(object):
                                 if all(ii > 0.6 for ii in Relary[limbidx]):  # all joints are reliable
                                     reconJ = modJary  # reconJ is 1*21 array
                                 else:  # contains unreliable joints
-                                    reconJ, unrelidx = self.denoise.run(modJary[:, 12:], Relary)
+                                    reconJ, unrelidx = self.denoise.run(modJary[:, 12:], Relary, self.exeno)
                                     JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
                                     reconJ = np.hstack([modJary[:, :12], reconJ]) 
                                     #  === recon 2D joints in color domain ===

@@ -1,7 +1,7 @@
 import cx_Freeze
 
 
-executables = [cx_Freeze.Executable("test.py")]
+executables = [cx_Freeze.Executable("kinect_project.py")]
 
 
 

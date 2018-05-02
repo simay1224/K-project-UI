@@ -10,14 +10,15 @@ class Denoise(object):
     """
     def __init__(self):
         self._done = True
-        exeno = 4
+        self.exeno = 4
         try:
-            self.gp = joblib.load('./data/GPR_cluster_800_meter_fix_ex%s.pkl' % exeno)
+            self.gp = joblib.load('./data/model/GPR data/GPR_cluster_800_meter_fix_ex%s.pkl' % self.exeno)
         except:
-            self.gp = joblib.load('./data/GPR_cluster_800_meter_fix_ex4.pkl')
+            self.gp = joblib.load('./data/model/GPR data/GPR_cluster_800_meter_fix_ex4.pkl')
         self.parameter = self.gp.kernel_.get_params(deep=True)
         self.limbidx = np.array([4, 5, 6, 8, 9, 10, 20])
-        [self.min, self.max] = h5py.File('data/model_CNN_0521_K2M_rel.h5', 'r')['minmax'][:]
+        # [self.min, self.max] = h5py.File('data/model_CNN_0521_K2M_rel.h5', 'r')['minmax'][:]
+        [self.min, self.max] = [482.775, 315.550]
 
     def cov(self, sita0, sita1, W1, W2, noise_level, x1, x2):
         """ calculate the covariance btw input data and the
@@ -50,11 +51,14 @@ class Denoise(object):
         y_mean  = k_trans.dot(alpha_)
         return y_train_mean + y_mean
 
-    def run(self, modjary, relary, threshold=0.6, onlyunrel=True):
+    def run(self, modjary, relary, exeno, threshold=0.6, onlyunrel=True):
         """ according the the relablity array reconstruct the 3D jpints
             position, only substitute the unreliable joints, if onlyunrel
             is True
         """
+        if exeno != self.exeno:
+            self.exeno = exeno
+            self.gp = joblib.load('./data/model/GPR data/GPR_cluster_800_meter_fix_ex%s.pkl' % self.exeno)
         mask = np.zeros([7, 3])
         modjary_norm = (modjary-self.min)/(self.max-self.min)
         reconj = (self.gp_pred(modjary_norm)*(self.max-self.min)+self.min)  # reconJ is 1*21 array
