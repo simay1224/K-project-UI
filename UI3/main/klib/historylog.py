@@ -39,7 +39,6 @@ class Historylog(object):
                  '3rd lower left elbow angle', '3rd straight left elbow angle',
                  '4th lower left elbow angle', '4th straight left elbow angle',
                  'average left hand push down angle', 'average left hand straight angle']
-
         exer4 = ['1st right hand angle (H-close)', '1st right hand angle (T-pose)',
                  '2nd right hand angle (H-close)', '2nd right hand angle (T-pose)',
                  '3rd right hand angle (H-close)', '3rd right hand angle (T-pose)',
