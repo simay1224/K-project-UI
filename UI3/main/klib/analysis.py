@@ -5,6 +5,7 @@ from breathstus import Breath_status
 from handstatus import Hand_status
 from shld_state import Shld_state
 from clasp_spread import Clasp_spread
+from horzp import Horzp
 from swing import Swing
 from initial_param.kinect_para import Kinect_para
 from initial_param.kparam      import Kparam
@@ -33,6 +34,7 @@ class Analysis(object):
         self.clsp = Clasp_spread()
         self.swing = Swing()
         self.kpm = Kinect_para()
+        self.horzp = Horzp()
         #
         self.cnvt = inflect.engine()  # converting numerals into ordinals
         self.cnt = 0
@@ -221,49 +223,119 @@ class Analysis(object):
                         print('================= exer END ======================')
                 else:
                     evalinst.blit_text(surface, exeno, kp, 'Please raise yours arms.', 2, color=self.c_normal)
-
-        elif exeno == 3:
-            if not self.exer[3].order[self.dtw.oidx] == 'end':
-                self.dtw.matching(reconJ21, self.exer[3], exeno)
-                #if self.dtw.gt_idx not in [1, 2]:
-                stus = self.handpos(self.exer[3], reconJ21)
-                if self.dtw.oidx not in [1, 2] and stus != 'down': 
-                    self.hs.hstus_proc(body.hand_left_state, body.hand_right_state)
-                    bdry = self.getcoord(djps)
-                    self.brth.run(bdry, dmap, 10)
+        # elif exeno == 3:
+        #     stus = self.handpos(self.exer[5], reconJ)
+        #     if stus == 'up':
+        #         self.pdp.do = True
+        #         self.pdp.run(reconJ)
+        #         if 'stand' not in self.evalstr:
+        #             self.bodystraight(reconJ)                
+        #     elif stus == 'down':
+        #         if self.pdp.do:
+        #             self._done = True
+        #             if self.pdp.cnt  < 4:
+        #                 self.pdp.err.append('Did not do enough repetition.')
+        #                 self.pdp.errsum.append('Did not do enough repetition.\n')
+        #             print('================= exer END ======================')    
+        #     if self.evalstr == '':
+        #         self.evalstr = self.pdp.evalstr
+        #         self.pdp.evalstr = ''
+        #     if self.pdp.cnt > 4:
+        #         evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
+        #         evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_err)
+        #         self.pdp.err.append('Only need to do 4 times')
+        #         self.pdp.errsum.append('Only need to do 4 times\n')
+        #     elif self.pdp.cnt == 4:
+        #         evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_handdown)
+        #     else:
+        #         if self.pdp.oidx in [1, 4]:
+        #             evalinst.blit_text(surface, exeno, kp, 'Close arms to chest', 2, color=self.c_normal)
+        #         elif self.pdp.oidx == 3:
+        #             evalinst.blit_text(surface, exeno, kp, 'Open arms to T-pose', 2, color=self.c_normal) 
+        #         evalinst.blit_text(surface, exeno, kp, '%s to go !!' %str(4-self.pdp.cnt),
+        #                             4, color=self.c_togo)
+        #     self.repcnt = self.pdp.cnt
+                                            
+        elif exeno == 4:
+            stus = self.handpos(self.exer[5], reconJ)
+            if stus == 'horizontal':  # T-pose
+                self.horzp._done = False
+            elif stus == 'down':
+                if self.horzp.do:
+                    self.horzp._done = True
+                    self._done = True
+                    pdb.set_trace()
+                    if self.horzp.cnt  < 4:
+                        self.horzp.err.append('Did not do enough repetition.')
+                        self.horzp.errsum.append('Did not do enough repetition.\n')
+                    print('================= exer END ======================')
+            if not self.horzp._done:
+                self.horzp.do = True
+                self.horzp.run(reconJ, dmap, djps)
                 if 'stand' not in self.evalstr:
-                    self.bodystraight(reconJ)
-                # === eval string update ===
-                if self.evalstr == '':
-                    self.evalstr = self.dtw.evalstr
-                    self.dtw.evalstr = ''
-                # === eval information ===
-                if self.dtw.idxlist.count(4) > 4:
-                    evalinst.blit_text(surface, exeno, kp,
-                                      'Only need to do 4 times', 3, False, color=self.c_err)
-                    self.dtw.err.append('Only need to do 4 times')
-                    self.dtw.errsum.append('Only need to do 4 times\n')
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms.', 2, color=self.c_err)
-                elif self.dtw.idxlist.count(4) == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_handdown)
-                else:
-                    if self.dtw.oidx in [1, 4]:
-                        evalinst.blit_text(surface, exeno, kp, 'Push down you arms', 2, color=self.c_normal)
-                    elif self.dtw.oidx == 3:
-                        evalinst.blit_text(surface, exeno, kp, 'Raise up your arms', 2, color=self.c_normal)
-                    evalinst.blit_text(surface, exeno, kp,
-                                      '%s to go !!' %str(4-min(self.dtw.idxlist.count(3),self.dtw.idxlist.count(4))),
-                                       4, color=self.c_togo)
-                self.repcnt = min(self.dtw.idxlist.count(3),self.dtw.idxlist.count(4))
+                    self.bodystraight(reconJ)  
+
+            if self.evalstr == '':
+                self.evalstr = self.horzp.evalstr
+                self.horzp.evalstr = ''
+            if self.horzp.cnt > 4:
+                evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
+                evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_err)
+                self.horzp.err.append('Only need to do 4 times')
+                self.horzp.errsum.append('Only need to do 4 times\n')
+            elif self.horzp.cnt == 4:
+                evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_handdown)
             else:
-                self._done = True
-                self.brth.breath_analyze()
-                hopen, hclose = self.hs.hstus_ana()
-                self.brth.brth_hand_sync(hopen, hclose)                
-                if self.dtw.idxlist.count(3) < 4:
-                    self.dtw.err.append('Did not do enough repetition.')
-                    self.dtw.errsum.append('Did not do enough repetition.\n')
-                print('================= exer END ======================')
+                if self.horzp.state == 'T-pose':
+                    evalinst.blit_text(surface, exeno, kp, 'Close arms to chest', 2, color=self.c_normal)
+                elif self.horzp.state == 'chest':
+                    evalinst.blit_text(surface, exeno, kp, 'Open arms to T-pose', 2, color=self.c_normal) 
+                evalinst.blit_text(surface, exeno, kp, '%s to go !!' %str(4-self.horzp.cnt),
+                                    4, color=self.c_togo)
+            self.repcnt = self.horzp.cnt  
+
+        # elif exeno == 3:
+        #     if not self.exer[3].order[self.dtw.oidx] == 'end':
+        #         self.dtw.matching(reconJ21, self.exer[3], exeno)
+        #         #if self.dtw.gt_idx not in [1, 2]:
+        #         stus = self.handpos(self.exer[3], reconJ21)
+        #         if self.dtw.oidx not in [1, 2] and stus != 'down': 
+        #             self.hs.hstus_proc(body.hand_left_state, body.hand_right_state)
+        #             bdry = self.getcoord(djps)
+        #             self.brth.run(bdry, dmap, 10)
+        #         if 'stand' not in self.evalstr:
+        #             self.bodystraight(reconJ)
+        #         # === eval string update ===
+        #         if self.evalstr == '':
+        #             self.evalstr = self.dtw.evalstr
+        #             self.dtw.evalstr = ''
+        #         # === eval information ===
+        #         if self.dtw.idxlist.count(4) > 4:
+        #             evalinst.blit_text(surface, exeno, kp,
+        #                               'Only need to do 4 times', 3, False, color=self.c_err)
+        #             self.dtw.err.append('Only need to do 4 times')
+        #             self.dtw.errsum.append('Only need to do 4 times\n')
+        #             evalinst.blit_text(surface, exeno, kp, 'Put down your arms.', 2, color=self.c_err)
+        #         elif self.dtw.idxlist.count(4) == 4:
+        #             evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_handdown)
+        #         else:
+        #             if self.dtw.oidx in [1, 4]:
+        #                 evalinst.blit_text(surface, exeno, kp, 'Push down you arms', 2, color=self.c_normal)
+        #             elif self.dtw.oidx == 3:
+        #                 evalinst.blit_text(surface, exeno, kp, 'Raise up your arms', 2, color=self.c_normal)
+        #             evalinst.blit_text(surface, exeno, kp,
+        #                               '%s to go !!' %str(4-min(self.dtw.idxlist.count(3),self.dtw.idxlist.count(4))),
+        #                                4, color=self.c_togo)
+        #         self.repcnt = min(self.dtw.idxlist.count(3),self.dtw.idxlist.count(4))
+        #     else:
+        #         self._done = True
+        #         self.brth.breath_analyze()
+        #         hopen, hclose = self.hs.hstus_ana()
+        #         self.brth.brth_hand_sync(hopen, hclose)                
+        #         if self.dtw.idxlist.count(3) < 4:
+        #             self.dtw.err.append('Did not do enough repetition.')
+        #             self.dtw.errsum.append('Did not do enough repetition.\n')
+        #         print('================= exer END ======================')
 
         elif exeno == 4:
             if not self.exer[4].order[self.dtw.oidx] == 'end':
