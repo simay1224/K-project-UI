@@ -1,5 +1,3 @@
-
-
 class Kinect_para(object):
     """ define some KinectV2 pre-assign parameters
     """

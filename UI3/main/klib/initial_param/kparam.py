@@ -5,7 +5,7 @@ class Kparam(object):
     """ Kinect intervention project parameters' initialization 
     """
 
-    def __init__(self,exeno='', username=''):
+    def __init__(self, exeno='', username=''):
 
         self.bdjoints   = []
         self.now  = datetime.datetime.now() 
@@ -54,6 +54,8 @@ class Kparam(object):
         # video size 750*420
         self.vid_w = 750
         self.vid_h = 420
+        self.vid_w_t = 825  # video width for taining mode
+        self.vid_h_t = 462  # video height for taining mode
         self.video1_UB = 110  # video1 upper bound
         self.video2_UB = 560  # video2 upper bound
         # eval sections

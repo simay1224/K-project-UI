@@ -309,7 +309,7 @@ class Analysis(object):
                 if self.swing.do:
                     if self.cnt > 90:
                         self._done = True
-                        if self.swing.cnt/2 < 4:
+                        if (self.swing.cnt >>1) < 4:
                             self.swing.err.append('Did not do enough repetition.')
                             self.swing.errsum.append('Did not do enough repetition.\n')
                         print('================= exer END ======================')
@@ -397,7 +397,7 @@ class Analysis(object):
                     evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_err)
                     self.clsp.err.append('Only need to do 4 times')
                     self.clsp.errsum.append('Only need to do 4 times\n')
-                elif self.shld.cnt == 4:
+                elif self.clsp.cnt == 4:
                     evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_handdown)
                 else:
                     if self.clsp.mode == 'clasp':

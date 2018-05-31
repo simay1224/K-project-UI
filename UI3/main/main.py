@@ -1,4 +1,5 @@
 from .klib import bodygame3
+from .klib import trainingmode
 from .klib import msgbox
 from .klib import welcome
 import wx, pdb

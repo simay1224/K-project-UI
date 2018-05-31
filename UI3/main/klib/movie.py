@@ -41,11 +41,18 @@ class Movie(object):
         elif Type == 2:
             return [int(screen_w*self.kp.video_LB/1920.), int(screen_h*self.kp.video1_UB/1080.)]
 
-    def draw(self, surface, scale=1, pre_scale=1, Type=1):
+    def draw(self, surface, scale=1, pre_scale=1, Type=1, tmode=False):
         "Draw current frame to the surface"
-        if scale/pre_scale != 1:
-            self.mscreen = pygame.transform.scale(self.mscreen, (int(self.kp.vid_w/2.*scale), int(self.kp.vid_h/2.*scale)))
-            self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.kp.vid_w/2.*scale), int(self.kp.vid_h/2.*scale)))
-        surface.blit(self.mscreen, self.position(surface.get_width(), surface.get_height(), scale, Type))
 
+        if not tmode:
+            if scale/pre_scale != 1:
+                self.mscreen = pygame.transform.scale(self.mscreen, (int(self.kp.vid_w/2.*scale), int(self.kp.vid_h/2.*scale)))
+                self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.kp.vid_w/2.*scale), int(self.kp.vid_h/2.*scale)))
+            surface.blit(self.mscreen, self.position(surface.get_width(), surface.get_height(), scale, Type))
+        else:
+            if scale/pre_scale != 1:
+                self.mscreen = pygame.transform.scale(self.mscreen, (int(self.kp.vid_w_t/2.*scale), int(self.kp.vid_h_t/2.*scale)))
+                self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.kp.vid_w_t/2.*scale), int(self.kp.vid_h_t/2.*scale)))
+            # surface.blit(self.mscreen, (surface.get_width()/2-int(self.kp.vid_w/4.*scale), int(surface.get_height()*self.kp.video1_UB/1080.)))
+            surface.blit(self.mscreen, (surface.get_width()/2-int(self.kp.vid_w_t/4.*scale), int(surface.get_height()*50/1080.)))
 

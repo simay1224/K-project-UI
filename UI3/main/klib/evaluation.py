@@ -46,7 +46,7 @@ class Evaluation(object):
                     ax.annotate('Not deep breathing', xy=(i, y1-2), xytext=(i, y2),\
                                 arrowprops=dict(facecolor='red', shrink=0.05),)
             plt.title('Breathe in and out')
-            fig.savefig('output/Exer%s_bio_1.jpg' % str(exeno))
+            fig.savefig('output/Exer%s_bio_1.jpg' % repr(exeno))
             plt.close(fig)
     
     def breath_hand_plot(self, ana, exeno, scale=5):
