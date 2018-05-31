@@ -95,7 +95,7 @@ class BodyGameRuntime(object):
         else:
             print 'Failed to extract .....'
 
-        self.exeno = 1  # exercise number
+        self.exeno = 3  # exercise number
         # Parameters needed to update for each exercise
         self.__param_init__()
     # Read global background
@@ -428,12 +428,12 @@ class BodyGameRuntime(object):
                                 self.fcnt  = 0
                     else:
                         if not self.kp.finish:
-                            errs = [self.ana.brth.err, self.ana.hs.err, self.ana.dtw.err,\
+                            errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
                                     self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
-                            self.errsums = '- '.join(set(self.ana.brth.errsum+
-                                            self.ana.hs.errsum+self.ana.dtw.errsum+self.ana.shld.errsum+
-                                            self.ana.clsp.errsum+self.ana.swing.errsum))
-                            dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.dtw.do,\
+                            self.errsums = '- '.join(set(self.ana.brth.errsum+self.ana.hs.errsum+self.ana.horzp.errsum+
+                                            self.ana.pushdp.errsum+self.ana.shld.errsum+self.ana.clsp.errsum
+                                            +self.ana.swing.errsum))
+                            dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.horzp.do, self.ana.pushdp.do,\
                                       self.ana.shld.do, self.ana.clsp.do, self.ana.swing.do]
                             exelog = self.eval.run(self.exeno, self.ana)
                             self.eval.errmsg(errs, dolist)

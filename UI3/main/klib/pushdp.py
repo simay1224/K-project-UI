@@ -3,22 +3,21 @@ from math import acos
 from scipy.signal import argrelextrema
 from initial_param.kinect_para import Kinect_para
 from scipy.ndimage.filters import gaussian_filter1d as gf
-import inflect
+import inflect, pdb
 
-class Horzp(object):
+class Pushdp(object):
     """ Exercise 4 : horizontal pumping
     """
     def __init__(self):
-        self.state = ''
-        self.flag = False
+        self.flag         = False
         self.cflag        = False
         self.tflag        = True
         self.Ltangle      = [0, 0, 0, 0]  # Armpit angle in T-pose
         self.Lcangle      = [0, 0, 0, 0]  # Armpit angle in arm close
         self.Rtangle      = [0, 0, 0, 0]  # Armpit angle in T-pose
         self.Rcangle      = [0, 0, 0, 0]  # Armpit angle in arm close 
-        self.Max_dist     = 700
-        self.Min_dist     = 300
+        self.Max_wrist_y  = -10**6
+        self.Min_wrist_y  = 10**6
         self.cnvt         = inflect.engine()
         # default parameters
         self.cnt     = 0
@@ -28,7 +27,7 @@ class Horzp(object):
         self.evalstr = ''
         self.eval    = ''
 
-    def joint_angle(self, joints, idx=[4, 5, 6], y_vec=np.array([0, -1, 0]) ,offset=0):
+    def joint_angle(self, joints, idx=[4, 5, 6], y_vec=np.array([0, 1, 0]) ,offset=0):
         """ finding the angle between 3 joints.
             default joints are left shld, elbow, wrist.
         """
@@ -40,26 +39,29 @@ class Horzp(object):
         vec1 = np.array([joints[(offset+1)*3]-joints[(offset*3)],
                         joints[(offset+1)*3+1]-joints[(offset*3)+1],
                         joints[(offset+1)*3+2]-joints[(offset*3)+2]])
+        # Elbow - Wrist
+        vec2 = np.array([joints[(offset+1)*3]-joints[(offset+2)*3],
+                        joints[(offset+1)*3+1]-joints[(offset+2)*3+1],
+                        joints[(offset+1)*3+2]-joints[(offset+2)*3+2]])
         costheta_ampit = vec1.dot(-1*y_vec)/sum(vec1**2)**.5/sum(y_vec**2)**.5
-        return acos(costheta_ampit)*180/np.pi
+        costheta_elbow = vec2.dot(-1*y_vec)/sum(vec2**2)**.5/sum(y_vec**2)**.5
+        costheta_sew = vec1.dot(vec2)/sum(vec1**2)**.5/sum(vec2**2)**.5
+        return np.array([acos(costheta_ampit), acos(costheta_elbow), acos(costheta_sew)])*180/np.pi
 
-    def run(self, joints):
-        dist = abs(joints[18]-joints[27])
-        if dist > 700:
+    def run(self, joints, stus):
+        wrist_y = joints[19]
+        if stus == 'up':
             if self.cflag:
                 self.cflag = False
                 if self.cnt > 0:
-                    if self.Lcangle[self.cnt] < 80 or self.Rcangle[self.cnt] < 80: 
-                        self.evalstr = 'Please keep your arms horizontally.\n'
-                        self.eval = 'Please keep your arms horizontally.\n'
-                        self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms is not horizontal.')
-                        self.errsum.append('Hands is not horizontal.')
-            if self.Max_dist < dist:
-                self.Max_dist = dist
+                    if self.Lcangle[self.cnt] > 50 or self.Rcangle[self.cnt] >50: 
+                        self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms is not lower enough.')
+                        self.errsum.append('Hands is not lower enough.')         
+            if self.Max_wrist_y < wrist_y:
+                self.Max_wrist_y = wrist_y
                 if self.cnt < 4:
-                    self.Ltangle[self.cnt] = self.joint_angle(joints)
-                    self.Rtangle[self.cnt] = self.joint_angle(joints, idx=[8, 9, 10])                                  
-            self.state = 'T-pose'
+                    self.Ltangle[self.cnt] = np.mean(self.joint_angle(joints)[::2])
+                    self.Rtangle[self.cnt] = np.mean(self.joint_angle(joints, idx=[8, 9, 10])[::2])                             
             if self.flag:
                 if self.eval == '':
                     self.evalstr = 'Subsequence done: Well done.'
@@ -67,22 +69,20 @@ class Horzp(object):
                     self.evalstr = 'Subsequence done.\n'+self.eval
                     self.eval = ''                 
                 self.flag = False
-                self.Min_dist = 300
+                self.Min_wrist_y = 10**6
                 self.tflag = True
-                self.cnt += 1    
-        elif dist < 300:
+                self.cnt += 1
+        elif stus == 'vshape':
             if self.tflag:
                 self.tflag = False
-                if self.Ltangle[self.cnt] < 80 or self.Rtangle[self.cnt] < 80:
-                    self.evalstr = 'Please keep your arms horizontally.\n'
-                    self.eval = 'Please keep your arms horizontally.\n'
-                    self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms is not horizontal.')
-                    self.errsum.append('Hands is not horizontal.')
-            if self.Min_dist > dist:
-                self.Min_dist = dist
+                if self.Ltangle[self.cnt] < 160 or self.Rtangle[self.cnt] < 160:
+                    self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms is not straight.')
+                    self.errsum.append('Hands is not straight.')
+            if self.Min_wrist_y > wrist_y:
+                self.Min_wrist_y = wrist_y
                 if self.cnt < 4:
-                    self.Lcangle[self.cnt] = self.joint_angle(joints)
-                    self.Rcangle[self.cnt] = self.joint_angle(joints, idx=[8, 9, 10]) 
+                    self.Lcangle[self.cnt] = self.joint_angle(joints)[2]
+                    self.Rcangle[self.cnt] = self.joint_angle(joints, idx=[8, 9, 10])[2]
             if not self.flag:
                 if self.eval == '':
                     self.evalstr = 'Subsequence done: Well done.'
@@ -91,5 +91,4 @@ class Horzp(object):
                     self.eval = ''                   
                 self.flag = True
                 self.cflag = True
-                self.state = 'chest'
-                self.Max_dist = 700
+                self.Max_wrist_y = -10**6

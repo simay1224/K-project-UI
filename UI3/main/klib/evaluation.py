@@ -99,16 +99,16 @@ class Evaluation(object):
             return [min(ana.brth.brth_diff), max(ana.brth.brth_diff), 
                     np.mean(ana.brth.brth_diff), ana.brth.sync_rate]
         elif exeno == 3:
-            self.breath_hand_plot(ana, exeno, 10)
-            langle = list(np.vstack([ana.dtw.Lcangle, ana.dtw.Ltangle]).T.flatten())
-            rangle = list(np.vstack([ana.dtw.Rcangle, ana.dtw.Rtangle]).T.flatten())
+            # self.breath_hand_plot(ana, exeno, 10)
+            langle = list(np.vstack([ana.pushdp.Lcangle, ana.pushdp.Ltangle]).T.flatten())
+            rangle = list(np.vstack([ana.pushdp.Rcangle, ana.pushdp.Rtangle]).T.flatten())
             rangle = (rangle+['-NaN']*8)[:8]
             langle = (langle+['-NaN']*8)[:8]         
-            result = rangle + [np.mean(ana.dtw.Rcangle), np.mean(ana.dtw.Rtangle)]+ langle + [np.mean(ana.dtw.Lcangle), np.mean(ana.dtw.Ltangle)]
+            result = rangle + [np.mean(ana.pushdp.Rcangle), np.mean(ana.pushdp.Rtangle)]+ langle + [np.mean(ana.pushdp.Lcangle), np.mean(ana.pushdp.Ltangle)]
             return result            
         elif exeno == 4:
-            langle = list(np.vstack([ana.dtw.Lcangle, ana.dtw.Ltangle]).T.flatten())
-            rangle = list(np.vstack([ana.dtw.Rcangle, ana.dtw.Rtangle]).T.flatten())
+            langle = np.vstack([ana.horzp.Lcangle, ana.horzp.Ltangle]).T.flatten().tolist()
+            rangle = np.vstack([ana.horzp.Rcangle, ana.horzp.Rtangle]).T.flatten().tolist()
             return rangle + [np.mean(rangle[::2]), np.mean(rangle[1::2])]+ langle + [np.mean(langle[::2]), np.mean(langle[1::2])]
         elif exeno == 5:
             max_right = np.abs(ana.swing.angle_ini - np.min(ana.swing.min_ary[1:, 1]))
@@ -178,7 +178,7 @@ class Evaluation(object):
             text_file.close()
         else:
             print('Did not capture any data.')
-    def errmsg(self, errs=[], dolist=None, contents=['Breathing eval', 'Hand eval', 'Exercise motion',\
+    def errmsg(self, errs=[], dolist=None, contents=['Breathing eval', 'Hand eval', 'P-pumping','H-pumping',\
                                                      'Shoulder State', 'Clasp & Spread', 'Swing']):
         """ According to the test results, showing evaluation results.
         """
