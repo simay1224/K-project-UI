@@ -1,17 +1,20 @@
 import pygame
 from main.klib import msgbox
+from main.klib import welcome
+
 import wx, pdb
-# from .klib import bodygame3
 # from .klib import trainingmode
-# from .klib import welcome
+# from .klib import bodygame3
 
 def main():
     info = None
     app = wx.App()
-    while not (hasattr(info, 'name') and hasattr(info, 'age') and hasattr(info, 'gender')):
-        info = msgbox.Msgbox(None, title="Welcome")
-        app.MainLoop()
+    # while not (hasattr(info, 'name') and hasattr(info, 'age') and hasattr(info, 'gender')):
+    #     info = msgbox.Msgbox(None, title="Welcome")
+    #     app.MainLoop()
 
+    main_win = welcome.Welcome_win(info, parent=None, title='Menu')
+    app.MainLoop()
 
 if __name__ == '__main__':
     result = main()
