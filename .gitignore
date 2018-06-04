@@ -156,3 +156,5 @@ $RECYCLE.BIN/
 *.jpg
 DTW/*.jpg
 
+
+!requirement.txt
