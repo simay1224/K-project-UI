@@ -3,7 +3,6 @@ import cv2
 import numpy as np
 import pandas as pd
 import wx.media
-# from ..klib import bodygame3
 # from ..klib import trainingmode
 import matplotlib
 from matplotlib.figure import Figure
@@ -14,6 +13,8 @@ import wx.lib.mixins.inspection as WIT
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
+
+from ..klib import bodygame3
 
 # matplotlib.use('WXAgg')
 

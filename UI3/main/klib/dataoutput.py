@@ -4,8 +4,12 @@ import cv2
 import h5py
 import glob
 import pygame
-import cPickle
-import win32com.client
+
+# https://askubuntu.com/questions/742782/how-to-install-cpickle-on-python-3-4
+import _pickle as cPickle
+# import cPickle
+
+# import win32com.client
 import numpy as np
 
 
@@ -37,7 +41,7 @@ class Dataoutput(object):
             filelist = glob.glob(os.path.join(path, '*.h5'))  # find all h5 files
 
             for infile in filelist:
-                print infile
+                print (infile)
                 filename = infile.split('\\')[-1][:-3]
                 f = h5py.File(infile, "r")
 

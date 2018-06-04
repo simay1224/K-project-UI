@@ -5,7 +5,7 @@ from scipy.ndimage.filters import gaussian_filter1d as gf
 
 class Shld_state(object):
     """ detect the shoulder state.
-        So far, we detect 1. shoulder rotate 2. shoulder up-and-down. 
+        So far, we detect 1. shoulder rotate 2. shoulder up-and-down.
     """
 
     def __init__(self):
@@ -29,17 +29,17 @@ class Shld_state(object):
         self.err     = []
         self.errsum  = []
         self.evalstr = ''
-        self.eval    = ''      
+        self.eval    = ''
 
     def findtops(self, bdimg, shld, bdidx):
-        """ find the shoulder top. 
-            (currently close this function, 
+        """ find the shoulder top.
+            (currently close this function,
              if wnat to open need to input bodyidx data.)
         """
         return np.where(bdimg[:shld[1], shld[0]] != bdidx)[0][::-1][0]+1
 
     def findminmax(self, data, rng=50, start=0, ignore=10, dtype='height'):
-        """ find local min & max. 
+        """ find local min & max.
         """
         foo = argrelextrema(gf(data, 5), np.less_equal, order=rng)[0]
         vall = foo[np.where((np.roll(foo, 1)-foo) != -1)[0]]
@@ -69,7 +69,7 @@ class Shld_state(object):
         """
         if (max(len(y[0]), len(y[1]), len(z[0]), len(z[1])) \
             - min(len(y[0]), len(y[1]), len(z[0]), len(z[1]))) > 1:
-            return 0 
+            return 0
         num = (len(y[0])+len(y[1])+len(z[0])+len(z[1])-1)/4
         if num > 0:
             chk = self.chkdepth(z[2], z[3])
@@ -79,17 +79,17 @@ class Shld_state(object):
                 return 2  # up-and-down
         else:
             return 0  # not a cycle
-    
+
     def statechk(self, ylist, dlist):
         """ check shoulder is 1. rotate 2. up and down.
         """
         y = self.findminmax(ylist, self.rng, start=self.cnt, ignore=self.ign, dtype='height')
-        z = self.findminmax(dlist, self.rng, start=self.cnt, ignore=self.ign, dtype='depth')  
-        print 'yvall : ' + str(y[1])
-        print 'ypeak : ' + str(y[0])
-        print 'zvall : ' + str(z[1])
-        print 'zpeak : ' + str(z[0])  
-        print('\n')            
+        z = self.findminmax(dlist, self.rng, start=self.cnt, ignore=self.ign, dtype='depth')
+        print ('yvall : ' + str(y[1]))
+        print ('ypeak : ' + str(y[0]))
+        print ('zvall : ' + str(z[1]))
+        print ('zpeak : ' + str(z[0]))
+        print('\n')
         if len(y[0]) and len(y[1]) and len(z[0]) and len(z[1]) and self.flag:
             self.flag = False
             self.ign = min(y[0][0], y[1][0], z[0][0], z[1][0])
@@ -120,7 +120,7 @@ class Shld_state(object):
         self.do = True
         self.fcnt += 1
         lshld = [int(joints[4].x), int(joints[4].y)]
-        # rshld = [int(joints[8].x), int(joints[8].y)]  
+        # rshld = [int(joints[8].x), int(joints[8].y)]
 
         self.lylist.append(lshld[1])
         self.ldlist.append(depth[lshld[1], lshld[0]])

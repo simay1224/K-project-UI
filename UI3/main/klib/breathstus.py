@@ -2,7 +2,7 @@ import numpy as np
 from scipy.signal import argrelextrema
 from scipy.ndimage.filters import gaussian_filter as gf_2D
 from scipy.ndimage.filters import gaussian_filter1d as gf
-from initial_param.kinect_para import Kinect_para
+from .initial_param.kinect_para import Kinect_para
 import inflect
 import pdb
 
@@ -26,7 +26,7 @@ class Breath_status(object):
         self.plot_flag     = False
         self.brth_out_flag = False
         self.cnvt          = inflect.engine()  # converting numerals into ordinals
-        self.kpm         = Kinect_para()        
+        self.kpm         = Kinect_para()
         #save in log
         self.sync_rate = 0
         self.brth_diff = []
@@ -169,7 +169,7 @@ class Breath_status(object):
             elif len(loc) == 0:
                 pass
             else:
-                print hand_trunc
+                print (hand_trunc)
         for idx, i in enumerate(self.breath_out):
             loc = np.where((i >= hand_trunc_open[:, 0]) & (i <= hand_trunc_open[:, 1]))[0]
             if len(loc) == 1:
@@ -179,7 +179,7 @@ class Breath_status(object):
             elif len(loc) == 0:
                 pass
             else:
-                print hand_trunc
+                print (hand_trunc)
         self.missingbreath = hand_trunc[hand_chk == 1]
 
         self.sync_rate = min(cnt*1./len(hand_trunc)*100, 100)

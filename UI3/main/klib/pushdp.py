@@ -1,7 +1,7 @@
 import numpy as np
 from math import acos
 from scipy.signal import argrelextrema
-from initial_param.kinect_para import Kinect_para
+from .initial_param.kinect_para import Kinect_para
 from scipy.ndimage.filters import gaussian_filter1d as gf
 import inflect, pdb
 
@@ -15,7 +15,7 @@ class Pushdp(object):
         self.Ltangle      = [0, 0, 0, 0]  # Armpit angle in T-pose
         self.Lcangle      = [0, 0, 0, 0]  # Armpit angle in arm close
         self.Rtangle      = [0, 0, 0, 0]  # Armpit angle in T-pose
-        self.Rcangle      = [0, 0, 0, 0]  # Armpit angle in arm close 
+        self.Rcangle      = [0, 0, 0, 0]  # Armpit angle in arm close
         self.Max_wrist_y  = -10**6
         self.Min_wrist_y  = 10**6
         self.cnvt         = inflect.engine()
@@ -35,7 +35,7 @@ class Pushdp(object):
             offset = 4
         if idx[0] == 8:  # right arm
             offset += 3
-        #  sholder -> Elbow 
+        #  sholder -> Elbow
         vec1 = np.array([joints[(offset+1)*3]-joints[(offset*3)],
                         joints[(offset+1)*3+1]-joints[(offset*3)+1],
                         joints[(offset+1)*3+2]-joints[(offset*3)+2]])
@@ -54,20 +54,20 @@ class Pushdp(object):
             if self.cflag:
                 self.cflag = False
                 if self.cnt > 0:
-                    if self.Lcangle[self.cnt] > 50 or self.Rcangle[self.cnt] >50: 
+                    if self.Lcangle[self.cnt] > 50 or self.Rcangle[self.cnt] >50:
                         self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms is not lower enough.')
-                        self.errsum.append('Hands is not lower enough.')         
+                        self.errsum.append('Hands is not lower enough.')
             if self.Max_wrist_y < wrist_y:
                 self.Max_wrist_y = wrist_y
                 if self.cnt < 4:
                     self.Ltangle[self.cnt] = np.mean(self.joint_angle(joints)[::2])
-                    self.Rtangle[self.cnt] = np.mean(self.joint_angle(joints, idx=[8, 9, 10])[::2])                             
+                    self.Rtangle[self.cnt] = np.mean(self.joint_angle(joints, idx=[8, 9, 10])[::2])
             if self.flag:
                 if self.eval == '':
                     self.evalstr = 'Subsequence done: Well done.'
                 else:
                     self.evalstr = 'Subsequence done.\n'+self.eval
-                    self.eval = ''                 
+                    self.eval = ''
                 self.flag = False
                 self.Min_wrist_y = 10**6
                 self.tflag = True
@@ -88,7 +88,7 @@ class Pushdp(object):
                     self.evalstr = 'Subsequence done: Well done.'
                 else:
                     self.evalstr = 'Subsequence done.\n'+self.eval
-                    self.eval = ''                   
+                    self.eval = ''
                 self.flag = True
                 self.cflag = True
                 self.Max_wrist_y = -10**6

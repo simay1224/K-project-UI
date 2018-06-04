@@ -4,10 +4,10 @@ import numpy as np
 import scipy.ndimage.morphology as ndm
 from scipy.ndimage.morphology import distance_transform_edt as dte
 from numpy.linalg import norm as nlnorm
-from dataoutput import Dataoutput
+from ..klib.dataoutput import Dataoutput
 
 class Finger_extract(object):
-    """ 
+    """
     """
     def __init__(self):
         self.io  = Dataoutput()
@@ -77,7 +77,7 @@ class Finger_extract(object):
                 cor.append(tuple(cnt[s][0]))  # append start pt
                 cor.append(tuple(cnt[e][0]))  # append end pt
                 # append twice
-                mid.append(tuple(cnt[f][0])) 
+                mid.append(tuple(cnt[f][0]))
                 mid.append(tuple(cnt[f][0]))
             # select real finger points
             cmtx = np.array(cor)
@@ -88,7 +88,7 @@ class Finger_extract(object):
 
             chkidx = np.where((aglchk & distchk & wristchk) == True)[0]
 
-            cor = list(set([cor[i] for i in chkidx]))  # remove duplicate pts 
+            cor = list(set([cor[i] for i in chkidx]))  # remove duplicate pts
             cormtx = np.array(cor)
             chk = len(cor)
             X = np.array([])
@@ -101,8 +101,8 @@ class Finger_extract(object):
                 YY1 = np.tile(cormtx.T[1], (chk, 1))
                 YY2 = np.tile(np.array([cormtx.T[1]]).T, (1, chk))
 
-                distpt = ((XX1-XX2)**2+(YY1-YY2)**2)**0.5   #pt dist mtx 
-    
+                distpt = ((XX1-XX2)**2+(YY1-YY2)**2)**0.5   #pt dist mtx
+
                 th = rad/5.
                 distpt[distpt > th] = 0
                 # find shortest dist in dist matrix (in upper triangle)
@@ -124,16 +124,16 @@ class Finger_extract(object):
                 fingeridx = np.delete(np.arange(chk), np.append(X, Y))
                 finger = [cor[i] for i in fingeridx]
                 for i,j in zip(X, Y):
-                    finger.append(tuple(np.add(cor[i], cor[j])//2))   
-                return finger 
+                    finger.append(tuple(np.add(cor[i], cor[j])//2))
+                return finger
             elif chk == 1:
                 return cor
             else:
                 return False
-        else:            
+        else:
             return False
-                    
-    def draw_hand(self, thresh, frame, offset, rad, wrist, color, frame_surface): 
+
+    def draw_hand(self, thresh, frame, offset, rad, wrist, color, frame_surface):
         """
         """
         try:
@@ -152,7 +152,7 @@ class Finger_extract(object):
                 for i in fingers:
                     pts = tuple(map(operator.add, i, offset))
                     pygame.draw.circle(frame_surface, color, pts, 10, 8)
-                    pygame.draw.line(frame_surface, color, pts, (center[0]+offset[0],center[1]+offset[1]), 8)  
+                    pygame.draw.line(frame_surface, color, pts, (center[0]+offset[0],center[1]+offset[1]), 8)
                 return fingers
             else:
                 return[]
@@ -162,42 +162,42 @@ class Finger_extract(object):
     def run(self, frame, bkimg, body, bddic, joint_points, color, frame_surface):
         """
         """
-        hsvimg = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)    
-        tmp = np.abs(hsvimg[:, :, 2] - bkimg[:, :, 2] )                                           
-        fgimg = np.zeros([1080, 1920])                  
-        fgimg[tmp > 80] = 1 
-                    
+        hsvimg = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+        tmp = np.abs(hsvimg[:, :, 2] - bkimg[:, :, 2] )
+        fgimg = np.zeros([1080, 1920])
+        fgimg[tmp > 80] = 1
+
         if (body.hand_left_state == 2) | (body.hand_left_state == 0):  # hand open
-            Lhand, bddic['Loffset'], Lrad = self.handseg(fgimg, joint_points[6], joint_points[7])                  
+            Lhand, bddic['Loffset'], Lrad = self.handseg(fgimg, joint_points[6], joint_points[7])
             bddic['Lhand'] = self.draw_hand(Lhand, frame, bddic['Loffset'], Lrad, joint_points[6], color, frame_surface)
-            self.io.typetext(frame_surface, 'Lhand :'+repr(len(bddic['Lhand'])) +' fingers ', (100, 100)) 
+            self.io.typetext(frame_surface, 'Lhand :'+repr(len(bddic['Lhand'])) +' fingers ', (100, 100))
             if  (body.hand_left_state == 2) & ( len(bddic['Lhand']) <= 3):
                 self.io.typetext(frame_surface, 'Open your left hand more !!', (1000, 100), (255, 0, 0), 60, True)
             else:
                 self.io.typetext(frame_surface, 'nice job !!', (1600, 100), (0, 255, 0))
         elif body.hand_left_state == 4:  # Lasso
-            Lhand, bddic['Loffset'], Lrad = self.handseg(fgimg, joint_points[6], joint_points[7])                  
+            Lhand, bddic['Loffset'], Lrad = self.handseg(fgimg, joint_points[6], joint_points[7])
             bddic['Lhand'] = self.draw_hand(Lhand, frame,bddic['Loffset'], Lrad,joint_points[6], color, frame_surface)
             self.io.typetext(frame_surface, 'Lhand :'+repr(len(bddic['Lhand'])) +' fingers ', (100, 100))
         elif body.hand_left_state == 3 :  # closed
             self.io.typetext(frame_surface, 'Lhand : closed', (100, 100))
         else:
             self.io.typetext(frame_surface, 'Lhand : Not detect', (100, 100))
-            
-        self.io.typetext(frame_surface, 'Rhand :'+repr(body.hand_right_state), (100, 200))     
+
+        self.io.typetext(frame_surface, 'Rhand :'+repr(body.hand_right_state), (100, 200))
         if (body.hand_right_state == 2) | (body.hand_right_state == 0):
             Rhand, bddic['Roffset'], Rrad = self.handseg(fgimg, joint_points[10], joint_points[11])
-            bddic['Rhand'] = self.draw_hand(Rhand, frame, bddic['Roffset'],Rrad, joint_points[10], color, frame_surface) 
+            bddic['Rhand'] = self.draw_hand(Rhand, frame, bddic['Roffset'],Rrad, joint_points[10], color, frame_surface)
             self.io.typetext(frame_surface, 'Rhand :'+repr(len(bddic['Rhand'])) +' fingers ', (100, 150))
             if  (body.hand_right_state == 2) & (len(bddic['Rhand']) <= 3):
                 self.io.typetext(frame_surface, 'Open your right hand more !!', (1000, 150), (255, 0, 0), 60, True)
             else:
                 self.io.typetext(frame_surface, 'nice job !!', (1600, 150), (0, 255, 0))
-  
+
         elif body.hand_right_state == 4:
             Rhand, bddic['Roffset'], Rrad = self.handseg(fgimg,joint_points[10],joint_points[11])
-            bddic['Rhand'] = self.draw_hand(Rhand, frame, bddic['Roffset'], Rrad, joint_points[10], color, frame_surface) 
-            self.io.typetext(frame_surface, 'Rhand :'+repr(len(bddic['Rhand'])) +' fingers ', (100, 150))                                                              
+            bddic['Rhand'] = self.draw_hand(Rhand, frame, bddic['Roffset'], Rrad, joint_points[10], color, frame_surface)
+            self.io.typetext(frame_surface, 'Rhand :'+repr(len(bddic['Rhand'])) +' fingers ', (100, 150))
         elif body.hand_right_state == 3:
             self.io.typetext(frame_surface, 'Rhand : closed', (100, 150))
         else:

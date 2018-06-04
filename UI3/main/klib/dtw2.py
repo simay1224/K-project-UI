@@ -3,10 +3,10 @@ from scipy.ndimage.filters import gaussian_filter1d as gf
 from scipy.ndimage.filters import gaussian_filter as gf_2D
 from scipy.linalg import norm
 from collections import defaultdict
-from w_fastdtw import fastdtw
+from ..klib.w_fastdtw import fastdtw
 import numpy as np
 from scipy.signal import argrelextrema
-from dataoutput import Dataoutput
+from ..klib.dataoutput import Dataoutput
 from math import acos
 import inflect
 import pdb
@@ -23,19 +23,19 @@ class Dynamic_time_warping(object):
     def __init__(self):
         """ initailize the order and weight for each exercise
             initailize dtw parameters
-        """    
+        """
         # dtw parameters initialization
         self.io            = Dataoutput()
         self.decTh         = 1800
         self.distp_prev    = 0
-        self.distp_cmp     = np.inf      
-        self.gt_idx        = 0   
+        self.distp_cmp     = np.inf
+        self.gt_idx        = 0
         self.idxlist       = []
         self.idx_cmp       = 0
         self.srchfw        = 10  # forward search range
         self.srchbw        = 20  # backward search range
         self.seqlist_gf    = np.array([])
-        self.cnvt          = inflect.engine() 
+        self.cnvt          = inflect.engine()
         # updatable parameters
         self.fcnt          = 0
         self.dpfirst       = {}
@@ -44,23 +44,23 @@ class Dynamic_time_warping(object):
         self.seqlist       = np.array([])
         self.seqlist_reg   = np.array([])
         self.presv_size    = 0
-        self.oidx          = 0  # initail       
+        self.oidx          = 0  # initail
         self.chk_flag      = False
         self.deflag        = False  # decreasing flag
         self.segini        = True
         self.Ltangle      = []  # Armpit angle in T-pose
         self.Lcangle      = []  # Armpit angle in arm close
         self.Rtangle      = []  # Armpit angle in T-pose
-        self.Rcangle      = []  # Armpit angle in arm close 
+        self.Rcangle      = []  # Armpit angle in arm close
         #save in log
-        # self.jspos = []  # record the joints position when finish one subsequence 
+        # self.jspos = []  # record the joints position when finish one subsequence
         # default parameters
         self.cnt     = 0
         self.do      = False
         self.err     = []
         self.errsum  = []
         self.evalstr = ''
-        self.eval    = ''       
+        self.eval    = ''
 
     def wt_euclidean(self, u, v, w):
         """ normal euclidean dist with the weighting
@@ -110,11 +110,11 @@ class Dynamic_time_warping(object):
             offset = 4
         if idx[0] == 8:  # right arm
             offset += 3
-        #  sholder -> Elbow 
+        #  sholder -> Elbow
         vec1 = np.array([reconJ[(offset+1)*3]-reconJ[(offset*3)],
                         reconJ[(offset+1)*3+1]-reconJ[(offset*3)+1],
                         reconJ[(offset+1)*3+2]-reconJ[(offset*3)+2]])
-        # Wrist -> Elbow 
+        # Wrist -> Elbow
         vec2 = np.array([reconJ[(offset+1)*3]-reconJ[(offset+2)*3],
                         reconJ[(offset+1)*3+1]-reconJ[(offset+2)*3+1],
                         reconJ[(offset+1)*3+2]-reconJ[(offset+2)*3+2]])
@@ -169,7 +169,7 @@ class Dynamic_time_warping(object):
                                         self.errsum.append('Hands is not horizontal.')
                                 elif exeno == 3:
                                     self.Lcangle.append(self.joint_angle(reconJ)[2])
-                                    self.Rcangle.append(self.joint_angle(reconJ, idx=[8, 9, 10])[2])                                 
+                                    self.Rcangle.append(self.joint_angle(reconJ, idx=[8, 9, 10])[2])
                                     if self.Lcangle[-1] > 50 or self.Rcangle[-1] > 50:
                                         self.evalstr = 'Please push your arms lower.\n'
                                         self.eval = 'Please push your arms lower.\n'
@@ -210,7 +210,7 @@ class Dynamic_time_warping(object):
                     print(' ==== reset ====')
                 elif self.fcnt == self.srchfw:
                     if exeno == 4:  # exercise 4
-                        if self.gt_idx == 3:  # arm close 
+                        if self.gt_idx == 3:  # arm close
                             self.Lcangle.append(min(self.joint_angle(reconJ)[:2]))
                             self.Rcangle.append(min(self.joint_angle(reconJ, idx=[8, 9, 10])[:2]))
                             if self.Lcangle[-1] < 80 or self.Rcangle[-1] < 80:
@@ -248,7 +248,7 @@ class Dynamic_time_warping(object):
                         self.evalstr = 'Subsequence done: Well done.'
                     else:
                         self.evalstr = 'Subsequence done.\n'+self.eval
-                        self.eval = ''        
+                        self.eval = ''
                     # self.jspos.append(reconJ)
                     tgrad = 0
                     for ii in xrange(self.seqlist.shape[1]):  # maybe can include jweight

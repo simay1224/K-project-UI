@@ -9,9 +9,9 @@ import pdb, time, cv2, cPickle
 import numpy as np
 # import class
 import movie
-from initial_param.kparam      import Kparam
-from dataoutput  import Dataoutput
-from skeleton    import Skeleton
+from .initial_param.kparam      import Kparam
+from ..klib.dataoutput  import Dataoutput
+from ..klib.skeleton    import Skeleton
 
 fps = 30
 bkimg = np.zeros([1080, 1920])
@@ -82,7 +82,7 @@ class BodyGameRuntime(object):
         self.io  = Dataoutput()
         self.skel = Skeleton()
 
-    def draw_color_frame(self, frame, target_surface): 
+    def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
         address = self._kinect.surface_as_array(target_surface.get_buffer())
         ctypes.memmove(address, frame.ctypes.data, frame.size)
@@ -108,17 +108,17 @@ class BodyGameRuntime(object):
 
         if press[pygame.K_w]: # use 'w' to change background image
             self.bkidx += 1
-            if self.bkidx >= len(self.bklist):      
-                self.bkidx -= len(self.bklist) 
+            if self.bkidx >= len(self.bklist):
+                self.bkidx -= len(self.bklist)
             self.readbackground()
 
         # if press[pygame.K_z]:  # use 'z' to lower the ratio of avatar to color frame
         #                        # 'ctrl+z' to larger the ratio of avatar to color frame
         #     if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
         #         if self.kp.ratio <= 0.6:
-        #             self.kp.ratio += 0.05  
-        #             self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)                  
-        #     else:    
+        #             self.kp.ratio += 0.05
+        #             self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
+        #     else:
         #         if self.kp.ratio > 0.4:
         #             self.kp.ratio -= 0.05
         #             self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
@@ -158,7 +158,7 @@ class BodyGameRuntime(object):
                 self.exeno += 1
             print('Next exercise ..................')
             self.reset()
-            
+
         if press[pygame.K_p]:
             pdb.set_trace()
 
@@ -182,7 +182,7 @@ class BodyGameRuntime(object):
                     self._screen = pygame.display.set_mode(event.dict['size'],
                                    pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
-            # initail background frame 
+            # initail background frame
             self.draw_color_frame(self.bkimg, self.bk_frame_surface)
 
             # === extract data from kinect ===
@@ -218,7 +218,7 @@ class BodyGameRuntime(object):
                     #     else:
                     #         self.exeno += 1
                     #     print('Next exercise ..................')
-                    #     self.reset()                 
+                    #     self.reset()
             else:
                 self.io.typetext(self._frame_surface, 'Kinect does not connect!!', (20, 100))
 
@@ -235,12 +235,12 @@ class BodyGameRuntime(object):
             else:
                 scale = h_scale
             self.w = self.w *scale
-            self.h = self.h *scale  
- 
+            self.h = self.h *scale
+
             self.kp.scale = self.kp.scale * scale
-            
+
             # draw avatar
-            
+
             self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, tmode=True)
             self.kp.pre_scale = self.kp.scale
             surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*self.kp.vid_w_t/1920.), int(self.h*self.kp.vid_h_t/1080.)))
@@ -258,5 +258,3 @@ class BodyGameRuntime(object):
         self._kinect.close()    # close Kinect sensor
 
         pygame.quit()  # quit
-
-

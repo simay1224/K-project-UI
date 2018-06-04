@@ -1,6 +1,6 @@
 import pygame
 import numpy as np
-from initial_param.kinect_para import Kinect_para
+from .initial_param.kinect_para import Kinect_para
 
 
 class Skeleton(Kinect_para):
@@ -15,7 +15,7 @@ class Skeleton(Kinect_para):
         joint0State = joints[joint0].TrackingState;
         joint1State = joints[joint1].TrackingState;
         # both joints are not tracked
-        if (joint0State == self.TrackingState_NotTracked) or (joint1State == self.TrackingState_NotTracked): 
+        if (joint0State == self.TrackingState_NotTracked) or (joint1State == self.TrackingState_NotTracked):
             return
         # both joints are not *really* tracked
         if (joint0State == self.TrackingState_Inferred) and (joint1State == self.TrackingState_Inferred):
@@ -26,7 +26,7 @@ class Skeleton(Kinect_para):
             end = (jointPoints[joint1].x, jointPoints[joint1].y)
         else:  # reconstruct joints
             start = (jointPoints[joint0, 0], jointPoints[joint0, 1])
-            end = (jointPoints[joint1, 0], jointPoints[joint1, 1])            
+            end = (jointPoints[joint1, 0], jointPoints[joint1, 1])
 
         try:
             pygame.draw.line(surface, color, start, end ,linewidth)
@@ -45,7 +45,7 @@ class Skeleton(Kinect_para):
         self.draw_body_bone(joints, jointPoints, color, self.JointType_SpineShoulder, self.JointType_ShoulderLeft, surface, linewidth)
         self.draw_body_bone(joints, jointPoints, color, self.JointType_SpineBase, self.JointType_HipRight, surface, linewidth)
         self.draw_body_bone(joints, jointPoints, color, self.JointType_SpineBase, self.JointType_HipLeft, surface, linewidth)
-        # Right Arm    
+        # Right Arm
         self.draw_body_bone(joints, jointPoints, color, self.JointType_ShoulderRight, self.JointType_ElbowRight, surface, linewidth)
         self.draw_body_bone(joints, jointPoints, color, self.JointType_ElbowRight, self.JointType_WristRight, surface, linewidth)
         #draw_body_bone(joints, jointPoints, color, self.JointType_WristRight, self.JointType_HandRight, surface, linewidth)

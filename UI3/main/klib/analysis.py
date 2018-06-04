@@ -1,15 +1,15 @@
 import numpy as np
-from exercise import *
-from dtw2 import Dynamic_time_warping
-from breathstus import Breath_status
-from handstatus import Hand_status
-from shld_state import Shld_state
-from clasp_spread import Clasp_spread
-from horzp import Horzp
-from pushdp import Pushdp
-from swing import Swing
-from initial_param.kinect_para import Kinect_para
-from initial_param.kparam      import Kparam
+from ..klib.exercise import *
+from ..klib.dtw2 import Dynamic_time_warping
+from ..klib.breathstus import Breath_status
+from ..klib.handstatus import Hand_status
+from ..klib.shld_state import Shld_state
+from ..klib.clasp_spread import Clasp_spread
+from ..klib.horzp import Horzp
+from ..klib.pushdp import Pushdp
+from ..klib.swing import Swing
+from .initial_param.kinect_para import Kinect_para
+from .initial_param.kparam      import Kparam
 from math import acos
 import inflect
 import pdb
@@ -127,7 +127,7 @@ class Analysis(object):
         torso_z = np.mean([joints[self.kpm.SpineBase_z], joints[self.kpm.SpineMid_z]])
         if torso_z-joints[self.kpm.Neck_z] > th and torso_z-joints[self.kpm.Head_z] > th:
             if 'Well done.' in self.evalstr:
-                self.evalstr = self.evalstr.replace('Well done.', '')  
+                self.evalstr = self.evalstr.replace('Well done.', '')
             self.evalstr += 'please stand straight.\n'
 
     def run(self, exeno, reconJ, surface, evalinst, kp, body, dmap=[], djps=[]):
@@ -236,7 +236,7 @@ class Analysis(object):
 
         elif exeno == 3:
             stus = self.handpos(self.exer[3], reconJ)
-            if stus == 'up':  
+            if stus == 'up':
                 self.pushdp.do = True
             elif stus == 'down':
                 if self.pushdp.do:
@@ -250,7 +250,7 @@ class Analysis(object):
             if self.pushdp.do:
                 self.pushdp.run(reconJ, stus)
                 if 'stand' not in self.evalstr:
-                    self.bodystraight(reconJ) 
+                    self.bodystraight(reconJ)
                 if self.evalstr == '':
                     self.evalstr = self.pushdp.evalstr
                     self.pushdp.evalstr = ''
@@ -265,20 +265,20 @@ class Analysis(object):
                     if stus == 'up':
                         evalinst.blit_text(surface, exeno, kp, 'Push down you arms', 2, color=self.c_normal)
                     elif stus == 'upnotstraight':
-                        evalinst.blit_text(surface, exeno, kp, 'Please straighten your arms', 2, color=self.c_err)           
+                        evalinst.blit_text(surface, exeno, kp, 'Please straighten your arms', 2, color=self.c_err)
                     elif stus == 'vshape':
-                        evalinst.blit_text(surface, exeno, kp, 'Raise up your arms', 2, color=self.c_normal) 
+                        evalinst.blit_text(surface, exeno, kp, 'Raise up your arms', 2, color=self.c_normal)
                     evalinst.blit_text(surface, exeno, kp, '%s to go !!' %str(4-self.pushdp.cnt),
                                         4, color=self.c_togo)
                 self.repcnt = self.pushdp.cnt
-                                            
+
         elif exeno == 4:
             stus = self.handpos(self.exer[4], reconJ)
             if stus == 'horizontal' or stus == 'horizontal_bend':  # T-pose
                 self.horzp.do = True
                 self.horzp.run(reconJ)
                 if 'stand' not in self.evalstr:
-                    self.bodystraight(reconJ) 
+                    self.bodystraight(reconJ)
             elif stus == 'down':
                 if self.horzp.do:
                     self._done = True
@@ -307,9 +307,9 @@ class Analysis(object):
                         self.horzp.err.append('The '+self.cnvt.ordinal(self.repcnt+1)+ ' time try, arms is not horizontal.')
                         self.horzp.errsum.append('Hands is not horizontal.')
                     elif self.horzp.state == 'T-pose':
-                        evalinst.blit_text(surface, exeno, kp, 'Close arms to chest', 2, color=self.c_normal)                    
+                        evalinst.blit_text(surface, exeno, kp, 'Close arms to chest', 2, color=self.c_normal)
                     elif self.horzp.state == 'chest':
-                        evalinst.blit_text(surface, exeno, kp, 'Open arms to T-pose', 2, color=self.c_normal) 
+                        evalinst.blit_text(surface, exeno, kp, 'Open arms to T-pose', 2, color=self.c_normal)
                     evalinst.blit_text(surface, exeno, kp, '%s to go !!' %str(4-self.horzp.cnt),
                                         4, color=self.c_togo)
                 self.repcnt = self.horzp.cnt
@@ -319,7 +319,7 @@ class Analysis(object):
         #         self.dtw.matching(reconJ21, self.exer[3], exeno)
         #         #if self.dtw.gt_idx not in [1, 2]:
         #         stus = self.handpos(self.exer[3], reconJ21)
-        #         if self.dtw.oidx not in [1, 2] and stus != 'down': 
+        #         if self.dtw.oidx not in [1, 2] and stus != 'down':
         #             self.hs.hstus_proc(body.hand_left_state, body.hand_right_state)
         #             bdry = self.getcoord(djps)
         #             self.brth.run(bdry, dmap, 10)
@@ -351,7 +351,7 @@ class Analysis(object):
         #         self._done = True
         #         self.brth.breath_analyze()
         #         hopen, hclose = self.hs.hstus_ana()
-        #         self.brth.brth_hand_sync(hopen, hclose)                
+        #         self.brth.brth_hand_sync(hopen, hclose)
         #         if self.dtw.idxlist.count(3) < 4:
         #             self.dtw.err.append('Did not do enough repetition.')
         #             self.dtw.errsum.append('Did not do enough repetition.\n')
@@ -378,7 +378,7 @@ class Analysis(object):
                     if self.dtw.oidx in [1, 4]:
                         evalinst.blit_text(surface, exeno, kp, 'Close arms to chest', 2, color=self.c_normal)
                     elif self.dtw.oidx == 3:
-                        evalinst.blit_text(surface, exeno, kp, 'Open arms to T-pose', 2, color=self.c_normal) 
+                        evalinst.blit_text(surface, exeno, kp, 'Open arms to T-pose', 2, color=self.c_normal)
                     evalinst.blit_text(surface, exeno, kp,
                                        '%s to go !!' %str(4-min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4))),
                                         4, color=self.c_togo)
@@ -494,7 +494,7 @@ class Analysis(object):
                 else:
                     if self.clsp.mode == 'clasp':
                         evalinst.blit_text(surface, exeno, kp, 'Start to clasp', 2, color=self.c_normal)
-                    else:   #ana.clasp.mode == 'spread' 
+                    else:   #ana.clasp.mode == 'spread'
                         evalinst.blit_text(surface, exeno, kp, 'Start to spread', 2, color=self.c_normal)
                     evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.clsp.cnt)), 4, color=self.c_togo)
                 self.repcnt = self.clsp.cnt
