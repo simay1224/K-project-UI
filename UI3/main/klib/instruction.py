@@ -2,7 +2,7 @@ from collections import defaultdict
 from .initial_param.kparam import Kparam
 import pygame, pdb
 
-pygame.init()
+# pygame.init()
 
 class Exeinst(object):
     "Exercise instruxtion"
