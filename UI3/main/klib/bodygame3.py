@@ -437,11 +437,11 @@ class BodyGameRuntime(object):
             #                     if len(self.evalhis) < min(self.ana.repcnt, 4):
             #                         self.evalhis.append(False)
             #
-            #                 # How long the evaluation show up
-            #                 self.fcnt += 1
-            #                 if self.fcnt > 60:
-            #                     self.ana.evalstr = ''
-            #                     self.fcnt  = 0
+                            # # # How long the evaluation show up
+                            # # self.fcnt += 1
+                            # # if self.fcnt > 60:
+                            # #     self.ana.evalstr = ''
+                            # #     self.fcnt  = 0
             #         else:
             #             if not self.kp.finish:
             #                 errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
