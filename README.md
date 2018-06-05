@@ -15,3 +15,11 @@ To run shell command in ipython;
 ```
 ![command]
 ```
+
+
+Anaconda installation of related packages:
+
+```
+conda install -c congsci pygame
+conda install -c menpo opencv
+```

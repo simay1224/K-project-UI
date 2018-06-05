@@ -71,6 +71,7 @@ class Analysis(object):
         """ finding the angle between 3 joints.
             default joints are left shld, elbow, wrist.
         """
+        # 11 joints are useful, each has 3 coordinates
         if joints.shape[0] == 33:
             offset = 4
         # Elbow - sholder
