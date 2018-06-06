@@ -350,7 +350,7 @@ class BodyGameRuntime(object):
             #     dframe, oridframe = self._kinect.get_last_depth_frame()
             #     dframe = dframe.reshape((424, 512))
             #
-            # === when user is detected ===
+            # # === when user is detected ===
             # if self._bodies is not None:
             #     closest_ID = -1
             #     cdist      = np.inf
@@ -418,9 +418,9 @@ class BodyGameRuntime(object):
             #             else:
             #                 reconJ = modJary
             #
-            # === analyze ===
-            self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
-                         self.eval, self.kp, body, dframe, djps)
+            #             # === analyze ===
+            #             self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
+            #                          self.eval, self.kp, body, dframe, djps)
             #
             #             # === show hand status ===
             #             # self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
@@ -437,11 +437,11 @@ class BodyGameRuntime(object):
             #                     if len(self.evalhis) < min(self.ana.repcnt, 4):
             #                         self.evalhis.append(False)
             #
-                            # # # How long the evaluation show up
-                            # # self.fcnt += 1
-                            # # if self.fcnt > 60:
-                            # #     self.ana.evalstr = ''
-                            # #     self.fcnt  = 0
+            #                 # # How long the evaluation show up
+            #                 # self.fcnt += 1
+            #                 # if self.fcnt > 60:
+            #                 #     self.ana.evalstr = ''
+            #                 #     self.fcnt  = 0
             #         else:
             #             if not self.kp.finish:
             #                 errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
