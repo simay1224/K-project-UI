@@ -88,8 +88,11 @@ class BodyGameRuntime(object):
         self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  # Kinect surface
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  #background surface
 
-        self.bkidx = 10
+        self.bkidx = 0
         self.bklist = glob.glob(os.path.join('./data/imgs/bkimgs', '*.jpg'))
+
+        print(self.bklist)
+
         self.readbackground()
         self.h_to_w = float(self.default_h) / self.default_w
         # here we will store skeleton data
@@ -131,11 +134,15 @@ class BodyGameRuntime(object):
         self.fig = None
         # Predefined param
         self.kp = Kparam(self.exeno, self.info.name)
-        # Avator with exeno
+        # # Avator with exeno
         # self.movie = movie.Movie(self.exeno)
         # self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         # self.kp.ini_scale = self.kp.scale
         # self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
+
+        # tentatively create a black image to replace movie
+        self.movie = np.zeros((int(self._screen.get_width() / 2), int(self._screen.get_height() / 2), 3))
+
         # origin to put the down video
         self.ori = (int(self._screen.get_width()/12.), int(self._screen.get_height()*0.5))  # origin of the color frame
         # Frame count
@@ -159,8 +166,15 @@ class BodyGameRuntime(object):
     # Do not touch
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
+
+        # test = np.zeros((frame.shape[0], frame.shape[1]))
+        # print(test)
+
+        # frame = np.dstack((frame, 255 * np.ones((frame.shape[0], frame.shape[1]))))
+
         # address = self._kinect.surface_as_array(target_surface.get_buffer())
-        # ctypes.memmove(address, frame.ctypes.data, frame.size)
+        address = target_surface._pixels_address
+        ctypes.memmove(address, frame.ctypes.data, frame.size)
         # del address
         target_surface.unlock()
 
@@ -174,6 +188,10 @@ class BodyGameRuntime(object):
             doing correspond action
         """
         if press[pygame.K_ESCAPE]:
+            self.kp._done = True
+            # self.movie.stop()
+
+        if press[pygame.K_q]:
             self.kp._done = True
             # self.movie.stop()
 
@@ -322,7 +340,7 @@ class BodyGameRuntime(object):
             # === Main event loop ===
             for event in pygame.event.get():  # User did something
                 if event.type == pygame.QUIT:  # If user clicked close
-                    self._done = True  # Flag that we are done so we exit this loop
+                    self.kp._done = True  # Flag that we are done so we exit this loop
                     # self.movie.stop()
                 elif event.type == pygame.VIDEORESIZE:  # window resized
                     self._screen = pygame.display.set_mode(event.dict['size'],

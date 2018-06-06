@@ -11,7 +11,8 @@ def main():
     app = wx.App()
     # while not (hasattr(info, 'name') and hasattr(info, 'age') and hasattr(info, 'gender')):
     info = msgbox.Msgbox(None, title="Welcome")
-    app.MainLoop()
+    info._pass()
+    # app.MainLoop()
 
     main_win = welcome.Welcome_win(info, parent=None, title='Menu')
     app.MainLoop()
