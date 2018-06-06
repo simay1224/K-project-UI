@@ -139,9 +139,9 @@ class BodyGameRuntime(object):
         # Predefined param
         self.kp = Kparam(self.exeno, self.info.name)
 
+        self.movie = movie.Movie(self.exeno)
         if Kinect:
             # Avator with exeno
-            self.movie = movie.Movie(self.exeno)
             self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
             self.kp.ini_scale = self.kp.scale
             self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
@@ -196,11 +196,13 @@ class BodyGameRuntime(object):
         """
         if press[pygame.K_ESCAPE]:
             self.kp._done = True
-            # self.movie.stop()
+            if Kinect:
+                self.movie.stop()
 
         if press[pygame.K_q]:
             self.kp._done = True
-            # self.movie.stop()
+            if Kinect:
+                self.movie.stop()
 
         if press[pygame.K_h]:  # use 'h' to open, 'ctrl+h' to close finger detection
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
@@ -351,7 +353,8 @@ class BodyGameRuntime(object):
             for event in pygame.event.get():  # User did something
                 if event.type == pygame.QUIT:  # If user clicked close
                     self.kp._done = True  # Flag that we are done so we exit this loop
-                    # self.movie.stop()
+                    if Kinect:
+                        self.movie.stop()
                 elif event.type == pygame.VIDEORESIZE:  # window resized
                     self._screen = pygame.display.set_mode(event.dict['size'],
                                    pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
@@ -466,11 +469,11 @@ class BodyGameRuntime(object):
                                     if len(self.evalhis) < min(self.ana.repcnt, 4):
                                         self.evalhis.append(False)
 
-                                # # How long the evaluation show up
-                                # self.fcnt += 1
-                                # if self.fcnt > 60:
-                                #     self.ana.evalstr = ''
-                                #     self.fcnt  = 0
+                                # How long the evaluation show up
+                                self.fcnt += 1
+                                if self.fcnt > 60:
+                                    self.ana.evalstr = ''
+                                    self.fcnt  = 0
                         else:
                             if not self.kp.finish:
                                 errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
@@ -589,7 +592,8 @@ class BodyGameRuntime(object):
             self.kp.scale = self.kp.scale * scale
             # draw avatar
             if not self.ana._done:
-                # self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
+                if Kinect:
+                    self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
                 self.kp.pre_scale = self.kp.scale
             else:
                 self.exeinst.show_list(self._screen, self.exeno)
