@@ -7,7 +7,10 @@ import ctypes, os, datetime, glob
 import pygame, h5py, sys, copy
 
 # https://askubuntu.com/questions/742782/how-to-install-cpickle-on-python-3-4
-import _pickle as cPickle
+if sys.version_info >= (3, 0):
+    import _pickle as cPickle
+else:
+    import cPickle
 import pdb, time, cv2
 # import pdb, time, cv2, cPickle
 
@@ -66,6 +69,8 @@ class BodyGameRuntime(object):
         self._screen = pygame.display.set_mode((self._infoObject.current_w >> 1, self._infoObject.current_h >> 1),
                                                 pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
+        # print(self._infoObject.current_w, self._infoObject.current_h)
+
         pygame.display.set_caption("LymphCoach")
         try :
             pygame.display.set_icon(pygame.image.load('./data/imgs/others/icon.png'))
@@ -90,9 +95,6 @@ class BodyGameRuntime(object):
 
         self.bkidx = 0
         self.bklist = glob.glob(os.path.join('./data/imgs/bkimgs', '*.jpg'))
-
-        print(self.bklist)
-
         self.readbackground()
         self.h_to_w = float(self.default_h) / self.default_w
         # here we will store skeleton data
@@ -120,7 +122,8 @@ class BodyGameRuntime(object):
     # Read global background
     def readbackground(self):
         self.bkimg = cv2.imread(self.bklist[self.bkidx])
-        self.bkimg = np.dstack([cv2.resize(self.bkimg, (1920, 1080)), np.zeros([1080, 1920])]).astype(np.uint8)
+        self.bkimg = cv2.resize(self.bkimg, (self._infoObject.current_w, self._infoObject.current_h))
+        self.bkimg = np.dstack([255 * np.ones([self._infoObject.current_h, self._infoObject.current_w]), self.bkimg[:, :, ::-1]]).astype(np.uint8)
 
     def __param_init__(self, clean=False):
         try:
@@ -164,19 +167,16 @@ class BodyGameRuntime(object):
         self.exeinst = Exeinst() # exercise intruction
         self.log = Historylog()
     # Do not touch
+
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
-
-        # test = np.zeros((frame.shape[0], frame.shape[1]))
-        # print(test)
-
-        # frame = np.dstack((frame, 255 * np.ones((frame.shape[0], frame.shape[1]))))
 
         # address = self._kinect.surface_as_array(target_surface.get_buffer())
         address = target_surface._pixels_address
         ctypes.memmove(address, frame.ctypes.data, frame.size)
         # del address
         target_surface.unlock()
+
 
     def reset(self, clean=False, change=False):
         # self.movie.stop(True)

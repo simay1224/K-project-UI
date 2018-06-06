@@ -4,10 +4,13 @@ import cv2
 import h5py
 import glob
 import pygame
+import sys
 
 # https://askubuntu.com/questions/742782/how-to-install-cpickle-on-python-3-4
-import _pickle as cPickle
-# import cPickle
+if sys.version_info >= (3, 0):
+    import _pickle as cPickle
+else:
+    import cPickle
 
 # import win32com.client
 import numpy as np

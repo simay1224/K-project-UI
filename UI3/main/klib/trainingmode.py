@@ -5,7 +5,11 @@ from .pykinect2.PyKinectV2 import *
 from .pykinect2 import PyKinectRuntime
 import ctypes, os, datetime, glob
 import pygame, h5py, sys, copy
-import pdb, time, cv2, cPickle
+import pdb, time, cv2
+if sys.version_info >= (3, 0):
+    import _pickle as cPickle
+else:
+    import cPickle
 import numpy as np
 # import class
 import movie

@@ -2,19 +2,19 @@ import datetime
 
 
 class Kparam(object):
-    """ Kinect intervention project parameters' initialization 
+    """ Kinect intervention project parameters' initialization
     """
 
     def __init__(self, exeno='', username=''):
 
         self.bdjoints   = []
-        self.now  = datetime.datetime.now() 
+        self.now  = datetime.datetime.now()
         self.dstr = './output/'+username+'data'+repr(self.now.year)+repr(self.now.month).zfill(2)\
                                +repr(self.now.day).zfill(2)+repr(self.now.hour).zfill(2)\
                                +repr(self.now.minute).zfill(2)+repr(self.now.second).zfill(2)+str(exeno)
         self.scale       = 1.0
         self.scene_type  = 2
-        self.pre_scale   = 1.0  
+        self.pre_scale   = 1.0
         self.ini_scale   = 1.0
         self.ratio       = 0.5  # propotion of avatar and color frame
         self._done       = False
@@ -24,7 +24,7 @@ class Kparam(object):
         self.model_draw  = False
         self.model_frame = False
         self.clipNo      = 0
-        self.fno         = 0 
+        self.fno         = 0
         self.framecnt    = 0
 
         # === Font setting ===
@@ -67,11 +67,3 @@ class Kparam(object):
         self.eval_sec6 = 1080
         self.eval_sec = [self.eval_sec1, self.eval_sec2, self.eval_sec3,
                          self.eval_sec4, self.eval_sec5, self.eval_sec6]
-
-
-
-                  
-
-
-
-
