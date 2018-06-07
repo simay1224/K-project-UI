@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 
-kinect = False
+kinect = True
 
-if kinect:
-    import h5py
-    from .pykinect2 import PykinectV2
-    from .pykinect2.PykinectV2 import *
-    from .pykinect2 import PykinectRuntime
 
 import ctypes, os, datetime, glob
 import pygame, sys, copy
@@ -17,13 +12,17 @@ if sys.version_info >= (3, 0):
 else:
     import cPickle
 import pdb, time, cv2
-
+if kinect:  
+    from .pykinect2 import PyKinectV2
+    from .pykinect2.PyKinectV2 import *
+    from .pykinect2 import PyKinectRuntime
+    import h5py
+from ..klib import movie
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.externals import joblib
 from collections import defaultdict
 # import class
-from ..klib import movie
 from .initial_param.kparam      import Kparam
 # from dtw         import Dtw
 from .analysis    import Analysis
@@ -75,10 +74,10 @@ class BodyGameRuntime(object):
 
         if kinect:
             # kinect runtime object, we want only color and body frames
-            self._kinect = PykinectRuntime.PykinectRuntime(PykinectV2.FrameSourceTypes_Color |
-                                                           PykinectV2.FrameSourceTypes_Body |
-                                                           PykinectV2.FrameSourceTypes_Depth |
-                                                           PykinectV2.FrameSourceTypes_BodyIndex)
+            self._kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color |
+                                                           PyKinectV2.FrameSourceTypes_Body |
+                                                           PyKinectV2.FrameSourceTypes_Depth |
+                                                           PyKinectV2.FrameSourceTypes_BodyIndex)
 
 
         # back buffer surface for getting kinect color frames, 32bit color, width and height equal to the kinect color frame size
