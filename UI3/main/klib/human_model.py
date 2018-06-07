@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 # from mpl_toolkits.mplot3d import Axes3D
-from initial_param.kinect_para import Kinect_para
+from .initial_param.kinect_para import Kinect_para
 import pdb
 
 
@@ -99,7 +99,7 @@ class Human_model(Kinect_para):
     def human_mod_pts(self, Body, limb=True, J={}):
         """ (online version) calaulate each joints pair's uni-vector
             and convert it to a unified model domain.
-            Body : dictionary-like object. The keys in Body represent corresponding 
+            Body : dictionary-like object. The keys in Body represent corresponding
                    joint's order.
             limb : True  => only process limb part L/R wrist, elbow and shoulder
                    Flase => process all upper body part

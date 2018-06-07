@@ -1,8 +1,8 @@
 from collections import defaultdict
-from initial_param.kparam import Kparam
-import pygame, pdb
+from .initial_param.kparam import Kparam
+import pygame, pdb, sys
 
-pygame.init()
+# pygame.init()
 
 class Exeinst(object):
     "Exercise instruxtion"
@@ -76,7 +76,7 @@ class Exeinst(object):
                              '\n5. Repeat 4 times.'\
                              '\n6. Put down your arms.'
 
-        
+
         self.str['note'][1] = '\nTips :'\
                                 '\n1. Tighten your muscle as much as you can.'\
                                 '\n2. Breathe as deep as you can.'
@@ -87,7 +87,7 @@ class Exeinst(object):
         self.str['note'][3] = '\nTips :'\
                                 '\n1. When you raise up your hands, make sure that your hand, elbow and shoulder are straight.'\
                                 '\n2. When bending the elbow, hand-elbow-shoulder should be "V-shape" not "L-shape"'\
- 
+
         self.str['note'][4] = '\nTips :'\
                                 '\n1. When doing "T-pose", make sure that your hand, elbow and shoulder are straight'\
                                 '\n2. When closing hands, make sure that your hand, and shoulder are in the same height.'\
@@ -142,9 +142,14 @@ class Exeinst(object):
 
     def show_list(self, surface, exeno):
         """Creat a text surface, this surface will change according to the scene type,
-           ratio and the region number. According to the size of the surface, the text 
+           ratio and the region number. According to the size of the surface, the text
            will auto change line also auto change the font size"""
-        self.font = pygame.font.SysFont(self.kp.s_normal, 60)
+
+        font_size = 60
+        if sys.platform == "darwin":
+            font_size = 40
+
+        self.font = pygame.font.SysFont(self.kp.s_normal, font_size)
         self.space = self.font.size(' ')[0]  # The width of a space.
 
         words = self.words['title'][0]
@@ -172,7 +177,7 @@ class Exeinst(object):
 
     # def blit_text(self, surface, exeno, kp, strtype='exe', text=None, region=1, emph=False, color=None):
     #     """Creat a text surface, this surface will change according to the scene type,
-    #        ratio and the region number. According to the size of the surface, the text 
+    #        ratio and the region number. According to the size of the surface, the text
     #        will auto change line also auto change the font size"""
     #     color = self.kp.c_inst if color is None else color
     #     if emph:
@@ -180,7 +185,7 @@ class Exeinst(object):
     #     else:
     #         self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)
     #     self.space = self.font.size(' ')[0]  # The width of a space.
-    #     if text == None:  # if there is no assign text, use the text in data base 
+    #     if text == None:  # if there is no assign text, use the text in data base
     #         words = self.words[strtype][exeno]
     #     else:
     #         words = [word.split(' ') for word in text.splitlines()]
@@ -224,4 +229,4 @@ class Exeinst(object):
         #         if emph:
         #             self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True, italic=True)
         #         else:
-        #             self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)   
+        #             self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)

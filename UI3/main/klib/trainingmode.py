@@ -1,17 +1,26 @@
 # -*- coding: utf-8 -*-
-import h5py
-from .pykinect2 import PyKinectV2
-from .pykinect2.PyKinectV2 import *
-from .pykinect2 import PyKinectRuntime
+
+kinect = False
+
+if kinect:
+    import h5py
+    from .pykinect2 import PyKinectV2
+    from .pykinect2.PyKinectV2 import *
+    from .pykinect2 import PyKinectRuntime
+
 import ctypes, os, datetime, glob
-import pygame, h5py, sys, copy
-import pdb, time, cv2, cPickle
+import pygame, sys, copy
+import pdb, time, cv2
+if sys.version_info >= (3, 0):
+    import _pickle as cPickle
+else:
+    import cPickle
 import numpy as np
 # import class
-import movie
-from initial_param.kparam      import Kparam
-from dataoutput  import Dataoutput
-from skeleton    import Skeleton
+from ..klib import movie
+from .initial_param.kparam      import Kparam
+from ..klib.dataoutput  import Dataoutput
+from ..klib.skeleton    import Skeleton
 
 fps = 30
 bkimg = np.zeros([1080, 1920])
@@ -43,10 +52,11 @@ class BodyGameRuntime(object):
         except:
             pass
 
-        # Kinect runtime object, we want only color and body frames
-        self._kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color |
-                                                       PyKinectV2.FrameSourceTypes_Body
-                                                       )
+        if kinect:
+            # Kinect runtime object, we want only color and body frames
+            self._kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color |
+                                                           PyKinectV2.FrameSourceTypes_Body
+                                                           )
         # back buffer surface for getting Kinect color frames, 32bit color, width and height equal to the Kinect color frame size
         self.default_h = self._infoObject.current_h
         self.default_w = self._infoObject.current_w
@@ -56,7 +66,7 @@ class BodyGameRuntime(object):
         self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
 
-        self.bkidx = 10
+        self.bkidx = 11
         self.bklist = glob.glob(os.path.join('./data/imgs/bkimgs', '*.jpg'))
         self.readbackground()
         self.h_to_w = float(self.default_h) / self.default_w
@@ -67,14 +77,25 @@ class BodyGameRuntime(object):
         self.exeno = 1  # exercise number
         self.__param_init__()
 
+    # Read global background
     def readbackground(self):
         self.bkimg = cv2.imread(self.bklist[self.bkidx])
-        self.bkimg = np.dstack([cv2.resize(self.bkimg, (1920, 1080)), np.zeros([1080, 1920])]).astype(np.uint8)
+        self.bkimg = cv2.resize(self.bkimg, (self._infoObject.current_w, self._infoObject.current_h))
+
+        if sys.platform == "win32":
+            self.bkimg = np.dstack([cv2.resize(self.bkimg, (1920, 1080)), np.zeros([1080, 1920])]).astype(np.uint8)
+        else:
+            self.bkimg = np.dstack([255 * np.ones([self._infoObject.current_h, self._infoObject.current_w]), self.bkimg[:, :, ::-1]]).astype(np.uint8)
 
     def __param_init__(self, clean=False):
 
         self.kp = Kparam(self.exeno)
-        self.movie = movie.Movie(self.exeno)
+
+        if kinect:
+            self.movie = movie.Movie(self.exeno)
+        else:
+            self.movie = movie.Movie(self.exeno, False, 480, 272)
+
         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
         self.ori = (int(self._screen.get_width()*self.kp.video_LB/1920.), int(self._screen.get_height()*0.5))  # origin of the color frame
@@ -82,16 +103,23 @@ class BodyGameRuntime(object):
         self.io  = Dataoutput()
         self.skel = Skeleton()
 
-    def draw_color_frame(self, frame, target_surface): 
+    def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
-        address = self._kinect.surface_as_array(target_surface.get_buffer())
-        ctypes.memmove(address, frame.ctypes.data, frame.size)
-        del address
+
+        if kinect:
+            address = self._kinect.surface_as_array(target_surface.get_buffer())
+            ctypes.memmove(address, frame.ctypes.data, frame.size)
+            del address
+        else:
+            address = target_surface._pixels_address
+            ctypes.memmove(address, frame.ctypes.data, frame.size)
         target_surface.unlock()
 
+
     def reset(self, clean=False, change=False):
-        self.movie.stop(True)
-        del self.movie
+        if kinect:
+            self.movie.stop(True)
+            del self.movie
         self.__param_init__(clean)
 
     def press_event(self, press):
@@ -100,7 +128,13 @@ class BodyGameRuntime(object):
         """
         if press[pygame.K_ESCAPE]:
             self.kp._done = True
-            self.movie.stop()
+            if kinect:
+                self.movie.stop()
+
+        if press[pygame.K_q]:
+            self.kp._done = True
+            if kinect:
+                self.movie.stop()
 
         if press[pygame.K_i]:  # use 'i' to reset every parameter
             print('Reseting ............................')
@@ -108,17 +142,17 @@ class BodyGameRuntime(object):
 
         if press[pygame.K_w]: # use 'w' to change background image
             self.bkidx += 1
-            if self.bkidx >= len(self.bklist):      
-                self.bkidx -= len(self.bklist) 
+            if self.bkidx >= len(self.bklist):
+                self.bkidx -= len(self.bklist)
             self.readbackground()
 
         # if press[pygame.K_z]:  # use 'z' to lower the ratio of avatar to color frame
         #                        # 'ctrl+z' to larger the ratio of avatar to color frame
         #     if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
         #         if self.kp.ratio <= 0.6:
-        #             self.kp.ratio += 0.05  
-        #             self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)                  
-        #     else:    
+        #             self.kp.ratio += 0.05
+        #             self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
+        #     else:
         #         if self.kp.ratio > 0.4:
         #             self.kp.ratio -= 0.05
         #             self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
@@ -158,7 +192,7 @@ class BodyGameRuntime(object):
                 self.exeno += 1
             print('Next exercise ..................')
             self.reset()
-            
+
         if press[pygame.K_p]:
             pdb.set_trace()
 
@@ -177,48 +211,52 @@ class BodyGameRuntime(object):
             for event in pygame.event.get():  # User did something
                 if event.type == pygame.QUIT:  # If user clicked close
                     self._done = True  # Flag that we are done so we exit this loop
-                    self.movie.stop()
+                    if kinect:
+                        self.movie.stop()
                 elif event.type == pygame.VIDEORESIZE:  # window resized
                     self._screen = pygame.display.set_mode(event.dict['size'],
                                    pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
-            # initail background frame 
+            # initail background frame
             self.draw_color_frame(self.bkimg, self.bk_frame_surface)
 
-            # === extract data from kinect ===
-            if self._kinect.has_new_color_frame():
-                frame = self._kinect.get_last_color_frame()
-                self.draw_color_frame(frame, self._frame_surface)
-            if self._kinect.has_new_body_frame():
-                self._bodies = self._kinect.get_last_body_frame()
+            if kinect:
+                # === extract data from kinect ===
+                if self._kinect.has_new_color_frame():
+                    frame = self._kinect.get_last_color_frame()
+                    self.draw_color_frame(frame, self._frame_surface)
+                if self._kinect.has_new_body_frame():
+                    self._bodies = self._kinect.get_last_body_frame()
 
-            # === when user is detected ===
-            if self._bodies is not None:
-                closest_ID = -1
-                cdist      = np.inf
-                for i in range(0, self._kinect.max_body_count):
-                    body = self._bodies.bodies[i]
-                    if not body.is_tracked:
-                        continue
-                    if body.joints[20].Position.z <= cdist:  # find the closest body
-                        closest_ID = i
-                        cdist = body.joints[20].Position.z
-                if (closest_ID != -1):
-                    body   = self._bodies.bodies[closest_ID]
-                    joints = body.joints
-                    jps  = self._kinect.body_joints_to_color_space(joints)  # joint points in color domain
+                # === when user is detected ===
+                if self._bodies is not None:
+                    closest_ID = -1
+                    cdist      = np.inf
+                    for i in range(0, self._kinect.max_body_count):
+                        body = self._bodies.bodies[i]
+                        if not body.is_tracked:
+                            continue
+                        if body.joints[20].Position.z <= cdist:  # find the closest body
+                            closest_ID = i
+                            cdist = body.joints[20].Position.z
+                    if (closest_ID != -1):
+                        body   = self._bodies.bodies[closest_ID]
+                        joints = body.joints
+                        jps  = self._kinect.body_joints_to_color_space(joints)  # joint points in color domain
 
-                    # draw skel
-                    self.skel.draw_body(joints, jps, SKELETON_COLORS[i], self._frame_surface, 8)
+                        # draw skel
+                        self.skel.draw_body(joints, jps, SKELETON_COLORS[i], self._frame_surface, 8)
 
-                    # self.cntdown -= 1
-                    # if self.cntdown == 0:
-                    #     if self.exeno == 7:
-                    #         self.exeno = 1
-                    #     else:
-                    #         self.exeno += 1
-                    #     print('Next exercise ..................')
-                    #     self.reset()                 
+                        # self.cntdown -= 1
+                        # if self.cntdown == 0:
+                        #     if self.exeno == 7:
+                        #         self.exeno = 1
+                        #     else:
+                        #         self.exeno += 1
+                        #     print('Next exercise ..................')
+                        #     self.reset()
+                else:
+                    self.io.typetext(self._frame_surface, 'Kinect does not connect!!', (20, 100))
             else:
                 self.io.typetext(self._frame_surface, 'Kinect does not connect!!', (20, 100))
 
@@ -235,12 +273,12 @@ class BodyGameRuntime(object):
             else:
                 scale = h_scale
             self.w = self.w *scale
-            self.h = self.h *scale  
- 
+            self.h = self.h *scale
+
             self.kp.scale = self.kp.scale * scale
-            
+
             # draw avatar
-            
+
             self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, tmode=True)
             self.kp.pre_scale = self.kp.scale
             surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*self.kp.vid_w_t/1920.), int(self.h*self.kp.vid_h_t/1080.)))
@@ -254,9 +292,8 @@ class BodyGameRuntime(object):
             # limit frames per second
             self._clock.tick(fps)
         # user end the programe
-        self.movie.stop(True)   # close avatar
-        self._kinect.close()    # close Kinect sensor
+        if kinect:
+            self.movie.stop(True)   # close avatar
+            self._kinect.close()    # close Kinect sensor
 
         pygame.quit()  # quit
-
-

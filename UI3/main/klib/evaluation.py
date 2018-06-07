@@ -7,7 +7,7 @@ import pygame, pdb
 import pandas as pd
 import os.path
 from openpyxl import load_workbook
-from initial_param.kparam import Kparam
+from .initial_param.kparam import Kparam
 
 class Evaluation(object):
     def __init__(self):
@@ -42,13 +42,13 @@ class Evaluation(object):
             if len(ana.brth.ngframe) != 0:
                 for i in ana.brth.ngframe:
                     y1 = ana.brth.breath_list[i]
-                    y2 = y1 - 20  
+                    y2 = y1 - 20
                     ax.annotate('Not deep breathing', xy=(i, y1-2), xytext=(i, y2),\
                                 arrowprops=dict(facecolor='red', shrink=0.05),)
             plt.title('Breathe in and out')
             fig.savefig('output/Exer%s_bio_1.jpg' % repr(exeno))
             plt.close(fig)
-    
+
     def breath_hand_plot(self, ana, exeno, scale=5):
         fig = plt.figure(1)
         ax = fig.add_subplot(111)
@@ -64,14 +64,14 @@ class Evaluation(object):
         if len(ana.brth.missingbreath) != 0:
             for i in ana.brth.missingbreath:
                 x = sum(i)/2
-                y1 = ana.brth.breath_list[x]#/self.breath_list[0]*2 
+                y1 = ana.brth.breath_list[x]#/self.breath_list[0]*2
                 y2 = 1*10
                 ax.annotate('missing breathing', xy=(x, y1), xytext=(x, y2),\
                             arrowprops=dict(facecolor='green', shrink=0.05),)
         plt.title('Breathe in and out & hands open and close')
-        fig.savefig('output/Exer%s_biohoc_1.jpg' %str(exeno)) 
+        fig.savefig('output/Exer%s_biohoc_1.jpg' %str(exeno))
         plt.close(fig)
-  
+
 
     def cutdata(self, data, length=4):
         """ if data too long (user do more than default repitition), cut it
@@ -93,19 +93,19 @@ class Evaluation(object):
             if len(ana.brth.brth_diff) == 0:
                 return ['','','']
             return [min(ana.brth.brth_diff), max(ana.brth.brth_diff),
-                    np.mean(ana.brth.brth_diff)]        
+                    np.mean(ana.brth.brth_diff)]
         elif exeno == 2:
             self.breath_hand_plot(ana, exeno)
-            return [min(ana.brth.brth_diff), max(ana.brth.brth_diff), 
+            return [min(ana.brth.brth_diff), max(ana.brth.brth_diff),
                     np.mean(ana.brth.brth_diff), ana.brth.sync_rate]
         elif exeno == 3:
             # self.breath_hand_plot(ana, exeno, 10)
             langle = list(np.vstack([ana.pushdp.Lcangle, ana.pushdp.Ltangle]).T.flatten())
             rangle = list(np.vstack([ana.pushdp.Rcangle, ana.pushdp.Rtangle]).T.flatten())
             rangle = (rangle+['-NaN']*8)[:8]
-            langle = (langle+['-NaN']*8)[:8]         
+            langle = (langle+['-NaN']*8)[:8]
             result = rangle + [np.mean(ana.pushdp.Rcangle), np.mean(ana.pushdp.Rtangle)]+ langle + [np.mean(ana.pushdp.Lcangle), np.mean(ana.pushdp.Ltangle)]
-            return result            
+            return result
         elif exeno == 4:
             langle = np.vstack([ana.horzp.Lcangle, ana.horzp.Ltangle]).T.flatten().tolist()
             rangle = np.vstack([ana.horzp.Rcangle, ana.horzp.Rtangle]).T.flatten().tolist()
@@ -131,7 +131,7 @@ class Evaluation(object):
         """
         if not all(x == '' for x in data):
             if not os.path.isfile('./output/compare.txt'):
-                text_file = open("./output/compare.txt", "w") 
+                text_file = open("./output/compare.txt", "w")
             else:
                 text_file = open("./output/compare.txt", "a")
             date = '-'.join(map(str,[time.year,time.month,time.day,time.hour,time.minute]))
@@ -167,8 +167,8 @@ class Evaluation(object):
                         else:
                             evaluation = 'worsen'
                         num = round(abs(abs(data[i]-def_val[i])-abs(history[i]-def_val[i]))/def_val[i]*100, 2)
-                    
-                    str2 = '%40s | %18s | %15s | %6s%s %8s\n' %(terms[i], history[i], round(data[i], 2), num, '%', evaluation) 
+
+                    str2 = '%40s | %18s | %15s | %6s%s %8s\n' %(terms[i], history[i], round(data[i], 2), num, '%', evaluation)
                     print(str2)
                     text_file.write(str2)
             else:
@@ -202,11 +202,11 @@ class Evaluation(object):
         self.upperbnd = self.kp.eval_sec[region-1]*surface.get_height()/1080.
         self.leftbnd = self.kp.eval_LB*surface.get_width()/1920.
 
-        return (self.leftbnd, self.upperbnd) 
+        return (self.leftbnd, self.upperbnd)
 
     def blit_text(self, surface, exeno, kp, text=None, region=1, pos=(0, 0), emph=False, ita=False, fsize=0, color=None):
         """Creat a text surface, this surface will change according to the scene type,
-           ratio and the region number. According to the size of the surface, the text 
+           ratio and the region number. According to the size of the surface, the text
            will auto change line also auto change size
         """
         color = self.kp.c_guide if color is None else color
@@ -271,7 +271,4 @@ class Evaluation(object):
         #         if emph:
         #             self.font = pygame.font.SysFont(self.kp.s_emp, self.font_size, bold=True)
         #         else:
-        #             self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)            
-                
-
-
+        #             self.font = pygame.font.SysFont(self.kp.s_normal, self.font_size)

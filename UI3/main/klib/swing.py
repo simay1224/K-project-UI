@@ -1,7 +1,7 @@
 import numpy as np
 from math import acos
 from scipy.signal import argrelextrema
-from initial_param.kinect_para import Kinect_para
+from .initial_param.kinect_para import Kinect_para
 from scipy.ndimage.filters import gaussian_filter1d as gf
 import inflect,pdb
 
@@ -80,10 +80,10 @@ class Swing(object):
 
     def bending(self, joints, rng=15):
         """ check body bending
-        """ 
-        if self.bend_left:               
+        """
+        if self.bend_left:
             self.min_ary = self.updata_minmax(self.min_ary,'min')
-            self.max_ary = self.local_minmax(self.max_ary, self.angle_ini+self.bend_th, np.greater, rng)  
+            self.max_ary = self.local_minmax(self.max_ary, self.angle_ini+self.bend_th, np.greater, rng)
             if self.max_ary.shape[0] > self.max_len:
                 self.bend_left = False
                 if self.eval == '':
@@ -91,7 +91,7 @@ class Swing(object):
                 else:
                     self.evalstr = 'Repitition done.\n'+self.eval
                     self.eval = ''
-                print '========  left  ========='
+                print ('========  left  =========')
                 self.cnt += 1
                 # print ('bend to left  ' +str(self.max_ary[-1, 0])+'\n')
         else:
@@ -104,7 +104,7 @@ class Swing(object):
                 else:
                     self.evalstr = 'Repitition done.\n'+self.eval
                     self.eval = ''
-                print ' ========  right  ========='
+                print (' ========  right  =========')
                 self.cnt += 1
                 # print 'bend to right ' +str(self.min_ary[-1, 0])+'\n'
         self.max_len = self.max_ary.shape[0]

@@ -2,31 +2,31 @@ import wx, pdb
 
 class Msgbox(wx.Frame):
 
-    def __init__(self, parent, title):   
-        self.font = wx.Font(28, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')  
-        self.font_button = wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')    
+    def __init__(self, parent, title):
+        self.font = wx.Font(28, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_button = wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.width  = 750 #400*2
         self.height = 420 # 260*2
         self.sizer_w= 10
         self.sizer_h= 10
-        super(Msgbox, self).__init__(parent, title=title, 
+        super(Msgbox, self).__init__(parent, title=title,
             size=(self.width, self.height), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
         self.fname  = 'Jane'
         self.lname  = 'Doe'
         self.age    = 'unknown'
-        self.gender = 'unknown' 
+        self.gender = 'unknown'
         self.InitUI()
         self.Centre()
-        self.Show()     
+        self.Show()
 
     def InitUI(self):
-      
+
         self.panel = wx.Panel(self)
-        
+
         sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
 
         line = wx.StaticLine(self.panel)
-        sizer.Add(line, pos=(1, 0), span=(0, int(self.width/self.sizer_w)), 
+        sizer.Add(line, pos=(1, 0), span=(0, int(self.width/self.sizer_w)),
             flag=wx.EXPAND|wx.BOTTOM, border=10)
         # Name
         text1 = wx.StaticText(self.panel, label="First Name", style = wx.ALIGN_CENTRE_HORIZONTAL)
@@ -58,11 +58,11 @@ class Msgbox(wx.Frame):
         self.rb_male   = wx.RadioButton(self.panel, label="Male")
         self.rb_male.SetFont(self.font)
         boxsizer = wx.StaticBoxSizer(sb, wx.VERTICAL)
-        boxsizer.Add(self.rb_female, 
+        boxsizer.Add(self.rb_female,
             flag=wx.Center|wx.TOP, border=5)
         boxsizer.Add(self.rb_male,
             flag=wx.Center, border=5)
-        sizer.Add(boxsizer, pos=(4, 0), span=(0, 4), 
+        sizer.Add(boxsizer, pos=(4, 0), span=(0, 4),
             flag=wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT , border=10)
 
         button1 = wx.Button(self.panel, size=(200,50), label="Ok")
@@ -71,13 +71,13 @@ class Msgbox(wx.Frame):
         button1.Bind(wx.EVT_BUTTON, self.ok)
 
         button2 = wx.Button(self.panel, size=(200,50), label="Cancel")
-        sizer.Add(button2, pos=(5, 3), span=(0, 0), 
+        sizer.Add(button2, pos=(5, 3), span=(0, 0),
             flag=wx.RIGHT, border=5)
         button2.SetFont(self.font_button)
         button2.Bind(wx.EVT_BUTTON, self.cancel)
 
         sizer.AddGrowableCol(1)
-        
+
         self.panel.SetSizer(sizer)
         # self.panel.SetBackgroundColour((170, 0, 255))
 
@@ -118,7 +118,7 @@ class Msgbox(wx.Frame):
         if error_flag:
             dlg = wx.MessageDialog(self.panel, error,'', wx.YES_NO | wx.ICON_ERROR)
             result = dlg.ShowModal() == wx.ID_YES
-            dlg.Destroy()          
+            dlg.Destroy()
         else:
             message = 'Is the following infomation correct?\nName: %s\nAge: %s\nGender: %s' %(self.fname+' '+self.lname, self.age, self.gender)
             dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
@@ -151,10 +151,15 @@ class Msgbox(wx.Frame):
         self.rb_female.SetValue(False)
         self.rb_male.SetValue(False)
 
-        
+    def _pass(self):
+        self.fname = 'Jane'
+        self.lname = 'Doe'
+        self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
+        self.age = 'unknown'
+        self.gender = 'unknown'
+
 
 # if __name__ == '__main__':
 #     app = wx.App()
 #     ex = Msgbox(None, title="Welcome")
 #     app.MainLoop()
-

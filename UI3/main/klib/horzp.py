@@ -1,7 +1,7 @@
 import numpy as np
 from math import acos
 from scipy.signal import argrelextrema
-from initial_param.kinect_para import Kinect_para
+from .initial_param.kinect_para import Kinect_para
 from scipy.ndimage.filters import gaussian_filter1d as gf
 import inflect
 
@@ -16,7 +16,7 @@ class Horzp(object):
         self.Ltangle      = [0, 0, 0, 0]  # Armpit angle in T-pose
         self.Lcangle      = [0, 0, 0, 0]  # Armpit angle in arm close
         self.Rtangle      = [0, 0, 0, 0]  # Armpit angle in T-pose
-        self.Rcangle      = [0, 0, 0, 0]  # Armpit angle in arm close 
+        self.Rcangle      = [0, 0, 0, 0]  # Armpit angle in arm close
         self.Max_dist     = 700
         self.Min_dist     = 300
         self.cnvt         = inflect.engine()
@@ -36,7 +36,7 @@ class Horzp(object):
             offset = 4
         if idx[0] == 8:  # right arm
             offset += 3
-        #  sholder -> Elbow 
+        #  sholder -> Elbow
         vec1 = np.array([joints[(offset+1)*3]-joints[(offset*3)],
                         joints[(offset+1)*3+1]-joints[(offset*3)+1],
                         joints[(offset+1)*3+2]-joints[(offset*3)+2]])
@@ -49,7 +49,7 @@ class Horzp(object):
             if self.cflag:
                 self.cflag = False
                 if self.cnt > 0:
-                    if self.Lcangle[self.cnt] < 80 or self.Rcangle[self.cnt] < 80: 
+                    if self.Lcangle[self.cnt] < 80 or self.Rcangle[self.cnt] < 80:
                         self.evalstr = 'Please keep your arms horizontally.\n'
                         self.eval = 'Please keep your arms horizontally.\n'
                         self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms is not horizontal.')
@@ -58,18 +58,18 @@ class Horzp(object):
                 self.Max_dist = dist
                 if self.cnt < 4:
                     self.Ltangle[self.cnt] = self.joint_angle(joints)
-                    self.Rtangle[self.cnt] = self.joint_angle(joints, idx=[8, 9, 10])                                  
+                    self.Rtangle[self.cnt] = self.joint_angle(joints, idx=[8, 9, 10])
             self.state = 'T-pose'
             if self.flag:
                 if self.eval == '':
                     self.evalstr = 'Subsequence done: Well done.'
                 else:
                     self.evalstr = 'Subsequence done.\n'+self.eval
-                    self.eval = ''                 
+                    self.eval = ''
                 self.flag = False
                 self.Min_dist = 300
                 self.tflag = True
-                self.cnt += 1    
+                self.cnt += 1
         elif dist < 300:
             if self.tflag:
                 self.tflag = False
@@ -82,13 +82,13 @@ class Horzp(object):
                 self.Min_dist = dist
                 if self.cnt < 4:
                     self.Lcangle[self.cnt] = self.joint_angle(joints)
-                    self.Rcangle[self.cnt] = self.joint_angle(joints, idx=[8, 9, 10]) 
+                    self.Rcangle[self.cnt] = self.joint_angle(joints, idx=[8, 9, 10])
             if not self.flag:
                 if self.eval == '':
                     self.evalstr = 'Subsequence done: Well done.'
                 else:
                     self.evalstr = 'Subsequence done.\n'+self.eval
-                    self.eval = ''                   
+                    self.eval = ''
                 self.flag = True
                 self.cflag = True
                 self.state = 'chest'

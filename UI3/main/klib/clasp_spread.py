@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter1d as gf
 import inflect
-from initial_param.kinect_para import Kinect_para
+from .initial_param.kinect_para import Kinect_para
 
 class Clasp_spread(object):
     """
@@ -46,9 +46,9 @@ class Clasp_spread(object):
         if self.spread_cnt >= self.hold and self.handsdown:
             self.handsdown = False
             self.first = False
-            self.do    = True    
+            self.do    = True
             self.spread_time = 0
-            # self.elbowstus['spread'] == False  
+            # self.elbowstus['spread'] == False
 
     def bodystraight(self, joints, kpm, th=20):
         """ check whether body is straight or not
@@ -58,17 +58,17 @@ class Clasp_spread(object):
             self.evalstr = 'please stand straight.'
             self.eval = 'please stand straight.'
             return False
-        return True 
+        return True
 
     def clasp(self, joints, kpm, spread_th=60, elbow_th=75):
         """ arms clasp state
-        """ 
+        """
         if self.clasp_cnt == self.hold:
             self.elbowstus['clasp'] = False
             if not self.first:
                 self.holdtime.append(self.spread_time/30.)
                 self.cnt += 1
-                print 'count: %s' %self.cnt
+                print ('count: %s' %self.cnt)
                 if not self.elbowstus['spread']:
                     if self.spread_time < spread_th:
                         self.evalstr = 'Elbows should put behind your head long enough!!\n'

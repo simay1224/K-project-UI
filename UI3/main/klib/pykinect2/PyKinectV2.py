@@ -1,7 +1,7 @@
-# -*- coding: mbcs -*-
+# -*- coding: utf-8 -*-
 typelib_path = 'c:\\Users\\vladkol\\Documents\\PyKinect2\\idl\\Kinect.tlb'
 _lcid = 0 # change this if required
-import ctypes 
+import ctypes
 import comtypes
 from ctypes import *
 from comtypes import *
@@ -19,19 +19,19 @@ from ctypes.wintypes import _FILETIME
 WSTRING = c_wchar_p
 
 from _ctypes import COMError
-comtypes.hresult.E_PENDING = 0x8000000A 
+comtypes.hresult.E_PENDING = 0x8000000A
 
 class _event(object):
     """class used for adding/removing/invoking a set of listener functions"""
     __slots__ = ['handlers']
-        
+
     def __init__(self):
         self.handlers = []
-    
+
     def __iadd__(self, other):
         self.handlers.append(other)
         return self
-        
+
     def __isub__(self, other):
         self.handlers.remove(other)
         return self
@@ -284,7 +284,7 @@ IAudioBeamFrameReader._methods_ = [
 ##
 ##    def UnsubscribeFrameArrived(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def _get(self):
 ##        '-no docstring-'
@@ -436,7 +436,7 @@ IColorFrameSource._methods_ = [
 ##class IColorFrameSource_Impl(object):
 ##    def UnsubscribeFrameCaptured(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def KinectSensor(self):
@@ -568,7 +568,7 @@ ILongExposureInfraredFrameReader._methods_ = [
 ##
 ##    def UnsubscribeFrameArrived(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def _get(self):
 ##        '-no docstring-'
@@ -719,7 +719,7 @@ IBodyFrameSource._methods_ = [
 ##class IBodyFrameSource_Impl(object):
 ##    def UnsubscribeFrameCaptured(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def KinectSensor(self):
@@ -732,11 +732,11 @@ IBodyFrameSource._methods_ = [
 ##
 ##    def OverrideHandTracking(self, TrackingId):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def OverrideAndReplaceHandTracking(self, oldTrackingId, newTrackingId):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def GetFrameCapturedEventData(self, waitableHandle):
 ##        '-no docstring-'
@@ -820,7 +820,7 @@ IColorFrameReader._methods_ = [
 ##
 ##    def UnsubscribeFrameArrived(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def ColorFrameSource(self):
@@ -898,7 +898,7 @@ IDepthFrameSource._methods_ = [
 ##class IDepthFrameSource_Impl(object):
 ##    def UnsubscribeFrameCaptured(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def KinectSensor(self):
@@ -1057,7 +1057,7 @@ IBodyFrameReader._methods_ = [
 ##
 ##    def UnsubscribeFrameArrived(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def BodyFrameSource(self):
@@ -1172,7 +1172,7 @@ IAudioSource._methods_ = [
 ##class IAudioSource_Impl(object):
 ##    def UnsubscribeFrameCaptured(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def KinectSensor(self):
@@ -1274,7 +1274,7 @@ IBodyIndexFrameReader._methods_ = [
 ##
 ##    def UnsubscribeFrameArrived(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def _get(self):
 ##        '-no docstring-'
@@ -1427,7 +1427,7 @@ IDepthFrameReader._methods_ = [
 ##
 ##    def UnsubscribeFrameArrived(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def _get(self):
 ##        '-no docstring-'
@@ -1472,7 +1472,7 @@ IBodyIndexFrameSource._methods_ = [
 ##class IBodyIndexFrameSource_Impl(object):
 ##    def UnsubscribeFrameCaptured(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def KinectSensor(self):
@@ -1754,7 +1754,7 @@ IStream._methods_ = [
 ##
 ##    def UnlockRegion(self, libOffset, cb, dwLockType):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Clone(self):
 ##        '-no docstring-'
@@ -1762,7 +1762,7 @@ IStream._methods_ = [
 ##
 ##    def Revert(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def RemoteCopyTo(self, pstm, cb):
 ##        '-no docstring-'
@@ -1770,15 +1770,15 @@ IStream._methods_ = [
 ##
 ##    def LockRegion(self, libOffset, cb, dwLockType):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def Commit(self, grfCommitFlags):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def SetSize(self, libNewSize):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 
 IDepthFrameReference._methods_ = [
@@ -1954,7 +1954,7 @@ ILongExposureInfraredFrameSource._methods_ = [
 ##class ILongExposureInfraredFrameSource_Impl(object):
 ##    def UnsubscribeFrameCaptured(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def KinectSensor(self):
@@ -2180,7 +2180,7 @@ ICoordinateMapper._methods_ = [
 ##
 ##    def UnsubscribeCoordinateMappingChanged(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def MapCameraPointsToColorSpace(self, cameraPointCount, cameraPoints, colorPointCount):
 ##        '-no docstring-'
@@ -2289,7 +2289,7 @@ IInfraredFrameReader._methods_ = [
 ##
 ##    def UnsubscribeFrameArrived(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def _get(self):
 ##        '-no docstring-'
@@ -2329,7 +2329,7 @@ IInfraredFrameSource._methods_ = [
 ##class IInfraredFrameSource_Impl(object):
 ##    def UnsubscribeFrameCaptured(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def KinectSensor(self):
@@ -2466,7 +2466,7 @@ IEnumKinectSensor._methods_ = [
 ##
 ##    def Reset(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 
 IBodyFrame._methods_ = [
@@ -2622,7 +2622,7 @@ IKinectSensor._methods_ = [
 ##
 ##    def UnsubscribeIsAvailableChanged(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def ColorFrameSource(self):
@@ -2646,7 +2646,7 @@ IKinectSensor._methods_ = [
 ##
 ##    def Close(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def IsAvailable(self):
@@ -2655,7 +2655,7 @@ IKinectSensor._methods_ = [
 ##
 ##    def Open(self):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    @property
 ##    def CoordinateMapper(self):
@@ -2750,7 +2750,7 @@ IMultiSourceFrameReader._methods_ = [
 ##
 ##    def UnsubscribeMultiSourceFrameArrived(self, waitableHandle):
 ##        '-no docstring-'
-##        #return 
+##        #return
 ##
 ##    def SubscribeMultiSourceFrameArrived(self):
 ##        '-no docstring-'
@@ -2872,11 +2872,11 @@ from comtypes import _check_version; _check_version('')
 
 KINECT_SKELETON_COUNT = 6
 
-class DefaultKinectSensor: 
+class DefaultKinectSensor:
     _kinect20 = ctypes.WinDLL('Kinect20.dll')
     _GetDefaultKinectSensorProto = _kinect20.GetDefaultKinectSensor
     _GetDefaultKinectSensorProto.argtypes = [ctypes.POINTER(ctypes.POINTER(IKinectSensor))]
-    _GetDefaultKinectSensorProto.restype = ctypes.HRESULT 
+    _GetDefaultKinectSensorProto.restype = ctypes.HRESULT
 
 
 _kernel32 = ctypes.WinDLL('kernel32')
@@ -2888,11 +2888,11 @@ _CloseHandle = _kernel32.CloseHandle
 _CloseHandle.argtypes = [ctypes.c_voidp]
 _CloseHandle.restype = c_bool
 
-_WaitForSingleObject = _kernel32.WaitForSingleObject 
+_WaitForSingleObject = _kernel32.WaitForSingleObject
 _WaitForSingleObject.argtypes = [ctypes.c_voidp, ctypes.c_uint32]
 _WaitForSingleObject.restype = ctypes.c_uint32
 
-_WaitForMultipleObjects = _kernel32.WaitForMultipleObjects 
+_WaitForMultipleObjects = _kernel32.WaitForMultipleObjects
 _WaitForMultipleObjects.argtypes = [ctypes.c_uint32, ctypes.POINTER(ctypes.c_voidp), ctypes.c_uint, ctypes.c_uint32]
 _WaitForMultipleObjects.restype = ctypes.c_uint32
 
@@ -2906,11 +2906,11 @@ _SysFreeString.argtypes = [ctypes.c_voidp]
 _SysFreeString.restype = ctypes.HRESULT
 
 def HRValue(hr):
-    _hr = comtypes.HRESULT(hr) 
+    _hr = comtypes.HRESULT(hr)
     return ctypes.c_ulong(_hr.value).value
 
 def IsHR(hr, value):
-    _hr = comtypes.HRESULT(hr) 
+    _hr = comtypes.HRESULT(hr)
     return ctypes.c_ulong(_hr.value).value == value
 
 
