@@ -26,17 +26,17 @@ from collections import defaultdict
 from ..klib import movie
 from .initial_param.kparam      import Kparam
 # from dtw         import Dtw
-from ..klib.analysis    import Analysis
-from ..klib.evaluation  import Evaluation
-from ..klib.denoise     import Denoise
-from ..klib.rel         import Rel
-from ..klib.dataoutput  import Dataoutput
-from ..klib.human_model import Human_model
-from ..klib.skeleton    import Skeleton
-from ..klib.fextract    import Finger_extract
-from ..klib.instruction import Exeinst
-from ..klib.handstatus  import Hand_status
-from ..klib.historylog  import Historylog
+from .analysis    import Analysis
+from .evaluation  import Evaluation
+from .denoise     import Denoise
+from .rel         import Rel
+from .dataoutput  import Dataoutput
+from .human_model import Human_model
+from .skeleton    import Skeleton
+from .fextract    import Finger_extract
+from .instruction import Exeinst
+from .handstatus  import Hand_status
+from .historylog  import Historylog
 
 fps = 30
 bkimg = np.zeros([1080, 1920])
@@ -544,92 +544,89 @@ class BodyGameRuntime(object):
 
             # if Kinect == False:
             else:
-                        # === dtw analyze & denoising process ===
-                        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                            self.exeinst.str['name'][self.exeno], 1)# 1 is location
-                            # === show hand status ===
-                            # self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                            #                     self.ana.hs.htext(body.hand_left_state, body.hand_right_state), 4 ,\
-                            #                     (255, 130, 45, 255))
-                        if not self.ana._done:
-                            if self.ana.evalstr != '':
-                                if 'well' in (self.ana.evalstr).lower():
-                                    self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_well)
-                                    if len(self.evalhis) < min(self.ana.repcnt, 4):
-                                        self.evalhis.append(True)
-                                else:
-                                    self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_err)
-                                    if len(self.evalhis) < min(self.ana.repcnt, 4):
-                                        self.evalhis.append(False)
-
-                                # How long the evaluation show up
-                                self.fcnt += 1
-                                if self.fcnt > 60:
-                                    self.ana.evalstr = ''
-                                    self.fcnt  = 0
-                        else:
-                            if not self.kp.finish:
-                                errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
-                                        self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
-                                self.errsums = '- '.join(set(self.ana.brth.errsum+self.ana.hs.errsum+self.ana.horzp.errsum+
-                                                self.ana.pushdp.errsum+self.ana.shld.errsum+self.ana.clsp.errsum
-                                                +self.ana.swing.errsum))
-                                dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.horzp.do, self.ana.pushdp.do,\
-                                          self.ana.shld.do, self.ana.clsp.do, self.ana.swing.do]
-                                exelog = self.eval.run(self.exeno, self.ana)
-                                self.eval.errmsg(errs, dolist)
-                                self.eval.cmphist(self.log, self.info, self.exeno, self.kp.now, exelog)
-                                self.log.writein(self.info, self.exeno, self.kp.now, exelog, errs)
-                                print (self.ana.dtw.idxlist)
-                                self.kp.finish = True
-                                while len(self.evalhis) < 4:
-                                    self.evalhis.append(False)
-                            self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                                'Exercise '+str(self.exeno)+' is done', 2)
-                            if self.errsums == '':
-                                if len(self.evalhis) !=0:
-                                    self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                                        'Overall evaluation:\n\nPerfect !!', 3)
-                            else:
-                                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                                    'Overall evaluation:\n\n- '+self.errsums, 3)
-                            self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                                '(Press "Space" to start next exercise.)', 0, (120, 830), fsize=60, color=self.kp.c_togo)
-                            self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                                'Next exercise will start in %s seconds.'% str(self.cntdown/30), 0, (120, 880) , fsize=60, color=self.kp.c_togo)
-                            self.cntdown -= 1
-                            if self.cntdown == 0:
-                                if self.exeno == 7:
-                                    self.exeno = 1
-                                else:
-                                    self.exeno += 1
-                                print('Next exercise ..................')
-                                self.reset()
-                        # draw skel
-                        self.skel.draw_body(joints, jps, SKELETON_COLORS[i], self._frame_surface, 8)
-
-                        # === draw unify human model ===
-                        if self.kp.model_draw:
-                            modJoints = self.h_mod.human_mod_pts(joints, limb=False)
-                            if not self.kp.model_frame:
-                                self.fig = plt.figure(1)
-                                ax = self.fig.add_subplot(111, projection='3d')
-                                self.kp.model_frame = True
-                            else:
-                                plt.cla()
-                            self.h_mod.draw_human_mod_pts(modJoints, ax)
-                        # === save data ===
-                        bddic['timestamp'] = timestamp
-                        bddic['jointspts'] = jps   # joints' coordinate in color space (2D)
-                        bddic['depth_jointspts'] = djps  # joints' coordinate in depth space (2D)
-                        bddic['joints'] = jdic  # joints' coordinate in camera space (3D)
-                        bddic['vidclip'] = self.kp.clipNo
-                        bddic['Rel'] = Rel
-                        bddic['LHS'] = body.hand_left_state
-                        bddic['RHS'] = body.hand_right_state
-
-                    self.kp.framecnt += 1  # frame no
-                    self.io.typetext(self._frame_surface, 'Kinect does not connect!!', (20, 100))
+                # # === dtw analyze & denoising process ===
+                # self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                #                     self.exeinst.str['name'][self.exeno], 1)# 1 is location
+                # if not self.ana._done:
+                #
+                #     # === analyze ===
+                #     # reconJ, body, dframe, djps: all from kinect
+                #     self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
+                #                  self.eval, self.kp, body, dframe, djps)
+                #
+                #     if self.ana.evalstr != '':
+                #         if 'well' in (self.ana.evalstr).lower():
+                #             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_well)
+                #             if len(self.evalhis) < min(self.ana.repcnt, 4):
+                #                 self.evalhis.append(True)
+                #         else:
+                #             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_err)
+                #             if len(self.evalhis) < min(self.ana.repcnt, 4):
+                #                 self.evalhis.append(False)
+                #
+                # else:
+                #     if not self.kp.finish:
+                #         errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
+                #                 self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
+                #         self.errsums = '- '.join(set(self.ana.brth.errsum+self.ana.hs.errsum+self.ana.horzp.errsum+
+                #                         self.ana.pushdp.errsum+self.ana.shld.errsum+self.ana.clsp.errsum
+                #                         +self.ana.swing.errsum))
+                #         dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.horzp.do, self.ana.pushdp.do,\
+                #                   self.ana.shld.do, self.ana.clsp.do, self.ana.swing.do]
+                #         exelog = self.eval.run(self.exeno, self.ana)
+                #         self.eval.errmsg(errs, dolist)
+                #         self.eval.cmphist(self.log, self.info, self.exeno, self.kp.now, exelog)
+                #         self.log.writein(self.info, self.exeno, self.kp.now, exelog, errs)
+                #         print (self.ana.dtw.idxlist)
+                #         self.kp.finish = True
+                #         while len(self.evalhis) < 4:
+                #             self.evalhis.append(False)
+                #     self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                #                         'Exercise '+str(self.exeno)+' is done', 2)
+                #     if self.errsums == '':
+                #         if len(self.evalhis) !=0:
+                #             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                #                                 'Overall evaluation:\n\nPerfect !!', 3)
+                #     else:
+                #         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                #                             'Overall evaluation:\n\n- '+self.errsums, 3)
+                #     self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                #                         '(Press "Space" to start next exercise.)', 0, (120, 830), fsize=60, color=self.kp.c_togo)
+                #     self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                #                         'Next exercise will start in %s seconds.'% str(self.cntdown/30), 0, (120, 880) , fsize=60, color=self.kp.c_togo)
+                #     self.cntdown -= 1
+                #     if self.cntdown == 0:
+                #         if self.exeno == 7:
+                #             self.exeno = 1
+                #         else:
+                #             self.exeno += 1
+                #         print('Next exercise ..................')
+                #         self.reset()
+                # # draw skel
+                # self.skel.draw_body(joints, jps, SKELETON_COLORS[i], self._frame_surface, 8)
+                #
+                # # === draw unify human model ===
+                # if self.kp.model_draw:
+                #     modJoints = self.h_mod.human_mod_pts(joints, limb=False)
+                #     if not self.kp.model_frame:
+                #         self.fig = plt.figure(1)
+                #         ax = self.fig.add_subplot(111, projection='3d')
+                #         self.kp.model_frame = True
+                #     else:
+                #         plt.cla()
+                #     self.h_mod.draw_human_mod_pts(modJoints, ax)
+                # # === save data ===
+                # bddic['timestamp'] = timestamp
+                # bddic['jointspts'] = jps   # joints' coordinate in color space (2D)
+                # bddic['depth_jointspts'] = djps  # joints' coordinate in depth space (2D)
+                # bddic['joints'] = jdic  # joints' coordinate in camera space (3D)
+                # bddic['vidclip'] = self.kp.clipNo
+                # bddic['Rel'] = Rel
+                # bddic['LHS'] = body.hand_left_state
+                # bddic['RHS'] = body.hand_right_state
+                #
+                # self.kp.framecnt += 1  # frame no
+                self.io.typetext(self._frame_surface, 'Kinect does not connect!!', (20, 100))
 
             # === text infomation on the surface ===
             if self.kp.vid_rcd:  # video recoding text

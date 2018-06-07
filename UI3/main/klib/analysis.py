@@ -1,13 +1,13 @@
 import numpy as np
-from ..klib.exercise import *
-from ..klib.dtw2 import Dynamic_time_warping
-from ..klib.breathstus import Breath_status
-from ..klib.handstatus import Hand_status
-from ..klib.shld_state import Shld_state
-from ..klib.clasp_spread import Clasp_spread
-from ..klib.horzp import Horzp
-from ..klib.pushdp import Pushdp
-from ..klib.swing import Swing
+from .exercise import *
+from .dtw2 import Dynamic_time_warping
+from .breathstus import Breath_status
+from .handstatus import Hand_status
+from .shld_state import Shld_state
+from .clasp_spread import Clasp_spread
+from .horzp import Horzp
+from .pushdp import Pushdp
+from .swing import Swing
 from .initial_param.kinect_para import Kinect_para
 from .initial_param.kparam      import Kparam
 from math import acos
@@ -131,6 +131,21 @@ class Analysis(object):
                 self.evalstr = self.evalstr.replace('Well done.', '')
             self.evalstr += 'please stand straight.\n'
 
+    def eval_common(self, surface, exeno, kp):
+        # === eval string update ===
+        if self.evalstr == '':
+            self.evalstr = self.brth.evalstr
+            self.brth.evalstr = ''
+        # === eval information ===
+        if self.brth.cnt > 4:
+            evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
+            evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2 ,color=self.c_err)
+            self.brth.err.append('Only need to do 4 times')
+            self.brth.errsum.append('Only need to do 4 times\n')
+        elif self.brth.cnt == 4:
+            evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_handdown)
+
+
     def run(self, exeno, reconJ, surface, evalinst, kp, body, dmap=[], djps=[]):
         """ analysis main function
         """
@@ -158,19 +173,8 @@ class Analysis(object):
                                 self.brth.err.append('Did not do enough repetition.')
                                 self.brth.errsum.append('Did not do enough repetition.\n')
                             print('================= exer END ======================')
-                # === eval string update ===
-                if self.evalstr == '':
-                    self.evalstr = self.brth.evalstr
-                    self.brth.evalstr = ''
-                # === eval information ===
-                if self.brth.cnt > 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2 ,color=self.c_err)
-                    self.brth.err.append('Only need to do 4 times')
-                    self.brth.errsum.append('Only need to do 4 times\n')
-                elif self.brth.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_handdown)
-                else:
+                self.eval_common(surface, exeno, kp)
+                if self.brth.cnt < 4:
                     if self.brth.brth_out_flag:
                         evalinst.blit_text(surface, exeno, kp, 'Breathe out', 2, color=self.c_normal)
                     else:
@@ -357,39 +361,39 @@ class Analysis(object):
         #             self.dtw.err.append('Did not do enough repetition.')
         #             self.dtw.errsum.append('Did not do enough repetition.\n')
         #         print('================= exer END ======================')
-
-        elif exeno == 4:
-            if not self.exer[4].order[self.dtw.oidx] == 'end':
-                self.dtw.matching(reconJ21, self.exer[4], exeno)
-                if 'stand' not in self.evalstr:
-                    self.bodystraight(reconJ)
-                # === eval string update ===
-                if self.evalstr == '':
-                    self.evalstr = self.dtw.evalstr
-                    self.dtw.evalstr = ''
-                # === eval information ===
-                if self.dtw.idxlist.count(4) > 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_err)
-                    self.dtw.err.append('Only need to do 4 times')
-                    self.dtw.errsum.append('Only need to do 4 times\n')
-                elif self.dtw.idxlist.count(4) == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_handdown)
-                else:
-                    if self.dtw.oidx in [1, 4]:
-                        evalinst.blit_text(surface, exeno, kp, 'Close arms to chest', 2, color=self.c_normal)
-                    elif self.dtw.oidx == 3:
-                        evalinst.blit_text(surface, exeno, kp, 'Open arms to T-pose', 2, color=self.c_normal)
-                    evalinst.blit_text(surface, exeno, kp,
-                                       '%s to go !!' %str(4-min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4))),
-                                        4, color=self.c_togo)
-                self.repcnt = min(self.dtw.idxlist.count(3),self.dtw.idxlist.count(4))
-            else:
-                self._done = True
-                if self.dtw.idxlist.count(3) < 4:
-                    self.dtw.err.append('Did not do enough repetition.')
-                    self.dtw.errsum.append('Did not do enough repetition.\n')
-                print('================= exer END ======================')
+        #
+        # elif exeno == 4:
+        #     if not self.exer[4].order[self.dtw.oidx] == 'end':
+        #         self.dtw.matching(reconJ21, self.exer[4], exeno)
+        #         if 'stand' not in self.evalstr:
+        #             self.bodystraight(reconJ)
+        #         # === eval string update ===
+        #         if self.evalstr == '':
+        #             self.evalstr = self.dtw.evalstr
+        #             self.dtw.evalstr = ''
+        #         # === eval information ===
+        #         if self.dtw.idxlist.count(4) > 4:
+        #             evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
+        #             evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_err)
+        #             self.dtw.err.append('Only need to do 4 times')
+        #             self.dtw.errsum.append('Only need to do 4 times\n')
+        #         elif self.dtw.idxlist.count(4) == 4:
+        #             evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_handdown)
+        #         else:
+        #             if self.dtw.oidx in [1, 4]:
+        #                 evalinst.blit_text(surface, exeno, kp, 'Close arms to chest', 2, color=self.c_normal)
+        #             elif self.dtw.oidx == 3:
+        #                 evalinst.blit_text(surface, exeno, kp, 'Open arms to T-pose', 2, color=self.c_normal)
+        #             evalinst.blit_text(surface, exeno, kp,
+        #                                '%s to go !!' %str(4-min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4))),
+        #                                 4, color=self.c_togo)
+        #         self.repcnt = min(self.dtw.idxlist.count(3),self.dtw.idxlist.count(4))
+        #     else:
+        #         self._done = True
+        #         if self.dtw.idxlist.count(3) < 4:
+        #             self.dtw.err.append('Did not do enough repetition.')
+        #             self.dtw.errsum.append('Did not do enough repetition.\n')
+        #         print('================= exer END ======================')
 
         elif exeno == 5:
             stus = self.handpos(self.exer[5], reconJ)
