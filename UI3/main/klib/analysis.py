@@ -136,8 +136,11 @@ class Analysis(object):
         """
         kinect = (reconJ or body or dmap or djps)
         if not kinect:
-            stus = "up"
-            self.evalstr = "well"
+            stus = "down"
+            self.evalstr = "not possible"
+            self._done = True
+            kp.finish = True
+
             # self.brth.cnt = 6
 
         if kinect and self.exer[exeno].limbjoints:

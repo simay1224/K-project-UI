@@ -1,6 +1,6 @@
 from collections import defaultdict
 from .initial_param.kparam import Kparam
-import pygame, pdb
+import pygame, pdb, sys
 
 # pygame.init()
 
@@ -144,7 +144,12 @@ class Exeinst(object):
         """Creat a text surface, this surface will change according to the scene type,
            ratio and the region number. According to the size of the surface, the text
            will auto change line also auto change the font size"""
-        self.font = pygame.font.SysFont(self.kp.s_normal, 40)
+
+        font_size = 60
+        if sys.platform == "darwin":
+            font_size = 40
+
+        self.font = pygame.font.SysFont(self.kp.s_normal, font_size)
         self.space = self.font.size(' ')[0]  # The width of a space.
 
         words = self.words['title'][0]

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-Kinect = False
+kinect = False
 
-if Kinect:
+if kinect:
     import h5py
-    from .pykinect2 import PyKinectV2
-    from .pykinect2.PyKinectV2 import *
-    from .pykinect2 import PyKinectRuntime
+    from .pykinect2 import PykinectV2
+    from .pykinect2.PykinectV2 import *
+    from .pykinect2 import PykinectRuntime
 
 import ctypes, os, datetime, glob
 import pygame, h5py, sys, copy
@@ -73,21 +73,21 @@ class BodyGameRuntime(object):
         except:
             pass
 
-        if Kinect:
-            # Kinect runtime object, we want only color and body frames
-            self._kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color |
-                                                           PyKinectV2.FrameSourceTypes_Body |
-                                                           PyKinectV2.FrameSourceTypes_Depth |
-                                                           PyKinectV2.FrameSourceTypes_BodyIndex)
+        if kinect:
+            # kinect runtime object, we want only color and body frames
+            self._kinect = PykinectRuntime.PykinectRuntime(PykinectV2.FrameSourceTypes_Color |
+                                                           PykinectV2.FrameSourceTypes_Body |
+                                                           PykinectV2.FrameSourceTypes_Depth |
+                                                           PykinectV2.FrameSourceTypes_BodyIndex)
 
 
-        # back buffer surface for getting Kinect color frames, 32bit color, width and height equal to the Kinect color frame size
+        # back buffer surface for getting kinect color frames, 32bit color, width and height equal to the kinect color frame size
         self.default_h = self._infoObject.current_h
         self.default_w = self._infoObject.current_w
         self.h = self.default_h >> 1
         self.w = self.default_w >> 1
 
-        self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  # Kinect surface
+        self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  # kinect surface
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  #background surface
 
         self.bkidx = 11
@@ -104,7 +104,7 @@ class BodyGameRuntime(object):
         self.wellimg = pygame.image.load("./data/imgs/emoji/excellent.png").convert_alpha()
         time.sleep(5)
 
-        if Kinect:
+        if kinect:
             # Extract bk image of scene
             if self._kinect.has_new_color_frame():
                 frame = self._kinect.get_last_color_frame().reshape([1080, 1920, 4])[:, :, :3]
@@ -142,7 +142,7 @@ class BodyGameRuntime(object):
         self.kp = Kparam(self.exeno, self.info.name)
 
         # Avator with exeno
-        if Kinect:
+        if kinect:
             self.movie = movie.Movie(self.exeno)
         else:
             self.movie = movie.Movie(self.exeno, False)
@@ -177,7 +177,7 @@ class BodyGameRuntime(object):
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
 
-        if Kinect:
+        if kinect:
             address = self._kinect.surface_as_array(target_surface.get_buffer())
             ctypes.memmove(address, frame.ctypes.data, frame.size)
             del address
@@ -188,7 +188,7 @@ class BodyGameRuntime(object):
 
 
     def reset(self, clean=False, change=False):
-        if Kinect:
+        if kinect:
             self.movie.stop(True)
             del self.movie
         self.__param_init__(clean)
@@ -199,12 +199,12 @@ class BodyGameRuntime(object):
         """
         if press[pygame.K_ESCAPE]:
             self.kp._done = True
-            if Kinect:
+            if kinect:
                 self.movie.stop()
 
         if press[pygame.K_q]:
             self.kp._done = True
-            if Kinect:
+            if kinect:
                 self.movie.stop()
 
         if press[pygame.K_h]:  # use 'h' to open, 'ctrl+h' to close finger detection
@@ -284,12 +284,12 @@ class BodyGameRuntime(object):
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
                 if self.kp.ratio <= 0.6:
                     self.kp.ratio += 0.05
-                    if Kinect:
+                    if kinect:
                         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
             else:
                 if self.kp.ratio > 0.4:
                     self.kp.ratio -= 0.05
-                    if Kinect:
+                    if kinect:
                         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         # Switch avator and kinect
         if press[pygame.K_0]:  # use '0' to change the scene type
@@ -357,7 +357,7 @@ class BodyGameRuntime(object):
             for event in pygame.event.get():  # User did something
                 if event.type == pygame.QUIT:  # If user clicked close
                     self.kp._done = True  # Flag that we are done so we exit this loop
-                    if Kinect:
+                    if kinect:
                         self.movie.stop()
                 elif event.type == pygame.VIDEORESIZE:  # window resized
                     self._screen = pygame.display.set_mode(event.dict['size'],
@@ -369,7 +369,7 @@ class BodyGameRuntime(object):
             self.draw_color_frame(self.bkimg, self.bk_frame_surface)
 
 
-            if Kinect:
+            if kinect:
                 # self.bk_frame_surface.fill(255,50,50)
                 # === extract data from kinect ===
                 if self._kinect.has_new_color_frame():
@@ -541,9 +541,9 @@ class BodyGameRuntime(object):
 
                     self.kp.framecnt += 1  # frame no
                 else:
-                    self.io.typetext(self._frame_surface, 'Kinect does not connect!!', (20, 100))
+                    self.io.typetext(self._frame_surface, 'kinect does not connect!!', (20, 100))
 
-            # if Kinect == False:
+            # if kinect == False:
             else:
                 # === dtw analyze & denoising process ===
                 self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
@@ -554,80 +554,84 @@ class BodyGameRuntime(object):
                     # self.ana.run(self.exeno, None, self.bk_frame_surface,\
                     self.ana.run(7, None, self.bk_frame_surface,\
                                  self.eval, self.kp, None, None, None)
-                #
-                #     if self.ana.evalstr != '':
-                #         if 'well' in (self.ana.evalstr).lower():
-                #             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_well)
-                #             if len(self.evalhis) < min(self.ana.repcnt, 4):
-                #                 self.evalhis.append(True)
-                #         else:
-                #             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_err)
-                #             if len(self.evalhis) < min(self.ana.repcnt, 4):
-                #                 self.evalhis.append(False)
-                #
-                # else:
-                #     if not self.kp.finish:
-                #         errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
-                #                 self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
-                #         self.errsums = '- '.join(set(self.ana.brth.errsum+self.ana.hs.errsum+self.ana.horzp.errsum+
-                #                         self.ana.pushdp.errsum+self.ana.shld.errsum+self.ana.clsp.errsum
-                #                         +self.ana.swing.errsum))
-                #         dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.horzp.do, self.ana.pushdp.do,\
-                #                   self.ana.shld.do, self.ana.clsp.do, self.ana.swing.do]
-                #         exelog = self.eval.run(self.exeno, self.ana)
-                #         self.eval.errmsg(errs, dolist)
-                #         self.eval.cmphist(self.log, self.info, self.exeno, self.kp.now, exelog)
-                #         self.log.writein(self.info, self.exeno, self.kp.now, exelog, errs)
-                #         print (self.ana.dtw.idxlist)
-                #         self.kp.finish = True
-                #         while len(self.evalhis) < 4:
-                #             self.evalhis.append(False)
-                #     self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                #                         'Exercise '+str(self.exeno)+' is done', 2)
-                #     if self.errsums == '':
-                #         if len(self.evalhis) !=0:
-                #             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                #                                 'Overall evaluation:\n\nPerfect !!', 3)
-                #     else:
-                #         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                #                             'Overall evaluation:\n\n- '+self.errsums, 3)
-                #     self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                #                         '(Press "Space" to start next exercise.)', 0, (120, 830), fsize=60, color=self.kp.c_togo)
-                #     self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                #                         'Next exercise will start in %s seconds.'% str(self.cntdown/30), 0, (120, 880) , fsize=60, color=self.kp.c_togo)
-                #     self.cntdown -= 1
-                #     if self.cntdown == 0:
-                #         if self.exeno == 7:
-                #             self.exeno = 1
-                #         else:
-                #             self.exeno += 1
-                #         print('Next exercise ..................')
-                #         self.reset()
-                # # draw skel
-                # self.skel.draw_body(joints, jps, SKELETON_COLORS[i], self._frame_surface, 8)
-                #
-                # # === draw unify human model ===
-                # if self.kp.model_draw:
-                #     modJoints = self.h_mod.human_mod_pts(joints, limb=False)
-                #     if not self.kp.model_frame:
-                #         self.fig = plt.figure(1)
-                #         ax = self.fig.add_subplot(111, projection='3d')
-                #         self.kp.model_frame = True
-                #     else:
-                #         plt.cla()
-                #     self.h_mod.draw_human_mod_pts(modJoints, ax)
-                # # === save data ===
-                # bddic['timestamp'] = timestamp
-                # bddic['jointspts'] = jps   # joints' coordinate in color space (2D)
-                # bddic['depth_jointspts'] = djps  # joints' coordinate in depth space (2D)
-                # bddic['joints'] = jdic  # joints' coordinate in camera space (3D)
-                # bddic['vidclip'] = self.kp.clipNo
-                # bddic['Rel'] = Rel
-                # bddic['LHS'] = body.hand_left_state
-                # bddic['RHS'] = body.hand_right_state
-                #
-                # self.kp.framecnt += 1  # frame no
-                self.io.typetext(self._frame_surface, 'Kinect does not connect!!', (20, 100))
+
+                    if self.ana.evalstr != '':
+                        if 'well' in (self.ana.evalstr).lower():
+                            self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_well)
+                            if len(self.evalhis) < min(self.ana.repcnt, 4):
+                                self.evalhis.append(True)
+                        else:
+                            self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_err)
+                            if len(self.evalhis) < min(self.ana.repcnt, 4):
+                                self.evalhis.append(False)
+
+                else:
+                    self.evalhis = [True, True, True, True]
+                    if not self.kp.finish:
+                        errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
+                                self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
+                        self.errsums = '- '.join(set(self.ana.brth.errsum+self.ana.hs.errsum+self.ana.horzp.errsum+
+                                        self.ana.pushdp.errsum+self.ana.shld.errsum+self.ana.clsp.errsum
+                                        +self.ana.swing.errsum))
+                        dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.horzp.do, self.ana.pushdp.do,\
+                                  self.ana.shld.do, self.ana.clsp.do, self.ana.swing.do]
+                        exelog = self.eval.run(self.exeno, self.ana)
+                        self.eval.errmsg(errs, dolist)
+                        self.eval.cmphist(self.log, self.info, self.exeno, self.kp.now, exelog)
+                        self.log.writein(self.info, self.exeno, self.kp.now, exelog, errs)
+                        print (self.ana.dtw.idxlist)
+                        self.kp.finish = True
+                        while len(self.evalhis) < 4:
+                            self.evalhis.append(False)
+                    self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                        'Exercise '+str(self.exeno)+' is done', 2)
+                    if self.errsums == '':
+                        if len(self.evalhis) !=0:
+                            self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                                'Overall evaluation:\n\nPerfect !!', 3)
+                    else:
+                        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                            'Overall evaluation:\n\n- '+self.errsums, 3)
+                    self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                        '(Press "Space" to start next exercise.)', 0, (120, 830), fsize=60, color=self.kp.c_togo)
+                    self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                        'Next exercise will start in %s seconds.'% str(self.cntdown/30), 0, (120, 880) , fsize=60, color=self.kp.c_togo)
+                    self.cntdown -= 1
+                    if self.cntdown == 0:
+                        if self.exeno == 7:
+                            self.exeno = 1
+                        else:
+                            self.exeno += 1
+                        print('Next exercise ..................')
+                        self.reset()
+                # draw skel
+                if kinect:
+                    self.skel.draw_body(joints, jps, SKELETON_COLORS[i], self._frame_surface, 8)
+
+                # === draw unify human model ===
+                if kinect and self.kp.model_draw:
+                    modJoints = self.h_mod.human_mod_pts(joints, limb=False)
+                    if not self.kp.model_frame:
+                        self.fig = plt.figure(1)
+                        ax = self.fig.add_subplot(111, projection='3d')
+                        self.kp.model_frame = True
+                    else:
+                        plt.cla()
+                    self.h_mod.draw_human_mod_pts(modJoints, ax)
+
+                # === save data ===
+                if kinect:
+                    bddic['timestamp'] = timestamp
+                    bddic['jointspts'] = jps   # joints' coordinate in color space (2D)
+                    bddic['depth_jointspts'] = djps  # joints' coordinate in depth space (2D)
+                    bddic['joints'] = jdic  # joints' coordinate in camera space (3D)
+                    bddic['vidclip'] = self.kp.clipNo
+                    bddic['Rel'] = Rel
+                    bddic['LHS'] = body.hand_left_state
+                    bddic['RHS'] = body.hand_right_state
+
+                self.kp.framecnt += 1  # frame no
+                self.io.typetext(self._frame_surface, 'kinect does not connect!!', (20, 100))
 
             # === text infomation on the surface ===
             if self.kp.vid_rcd:  # video recoding text
@@ -646,19 +650,6 @@ class BodyGameRuntime(object):
             # draw back ground
             bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
             self._screen.blit(bksurface_to_draw, (0, 0))
-            # emoji
-            emoji_size = min(int(self._screen.get_width()*130./1920), int(self._screen.get_height()*130./1080))
-            emoji_err = pygame.transform.scale(self.errimg, (int(emoji_size*0.8), int(emoji_size*0.8)))
-            emoji_cor = pygame.transform.scale(self.corimg, (emoji_size, emoji_size))
-            emoji_well = pygame.transform.scale(self.wellimg, (emoji_size*2, emoji_size*2))
-
-            for eidx, res in enumerate(self.evalhis):
-                if res:
-                    self._screen.blit(emoji_cor, (int((145+eidx*220)*self._screen.get_width()/1920.), int(self._screen.get_height()*940./1080)))
-                else:
-                    self._screen.blit(emoji_err, (int((145+eidx*220)*self._screen.get_width()/1920.), int(self._screen.get_height()*940./1080)))
-            if len(self.evalhis) == 4 and (not False in self.evalhis) and self.ana._done and self.errsums == '':
-                self._screen.blit(emoji_well, (int(420*self._screen.get_width()/1920.), int(self._screen.get_height()*580./1080)))
 
             # scene type
             if self.kp.scene_type == 2:
@@ -680,13 +671,28 @@ class BodyGameRuntime(object):
             self.kp.scale = self.kp.scale * scale
             # draw avatar
             if not self.ana._done:
-                # if Kinect:
+                # if kinect:
                 self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
                 self.kp.pre_scale = self.kp.scale
             else:
                 self.exeinst.show_list(self.bk_frame_surface, self.exeno)
                 bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
                 self._screen.blit(bksurface_to_draw, (0, 0))
+
+
+            # emoji
+            emoji_size = min(int(self._screen.get_width()*130./1920), int(self._screen.get_height()*130./1080))
+            emoji_err = pygame.transform.scale(self.errimg, (int(emoji_size*0.8), int(emoji_size*0.8)))
+            emoji_cor = pygame.transform.scale(self.corimg, (emoji_size, emoji_size))
+            emoji_well = pygame.transform.scale(self.wellimg, (emoji_size*2, emoji_size*2))
+
+            for eidx, res in enumerate(self.evalhis):
+                if res:
+                    self._screen.blit(emoji_cor, (int((145+eidx*220)*self._screen.get_width()/1920.), int(self._screen.get_height()*940./1080)))
+                else:
+                    self._screen.blit(emoji_err, (int((145+eidx*220)*self._screen.get_width()/1920.), int(self._screen.get_height()*940./1080)))
+            if len(self.evalhis) == 4 and (not False in self.evalhis) and self.ana._done and self.errsums == '':
+                self._screen.blit(emoji_well, (int(420*self._screen.get_width()/1920.), int(self._screen.get_height()*580./1080)))
 
 
             surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*self.kp.vid_w/1920.), int(self.h*self.kp.vid_h/1080.)))
@@ -700,9 +706,9 @@ class BodyGameRuntime(object):
             self._clock.tick(fps)
         # user end the programe
 
-        if Kinect:
+        if kinect:
             self.movie.stop(True)   # close avatar
-            self._kinect.close()    # close Kinect sensor
+            self._kinect.close()    # close kinect sensor
 
         # print self.dtw.idxlist  # show the analyzed result
         # save the recording data

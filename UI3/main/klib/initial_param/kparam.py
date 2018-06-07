@@ -1,4 +1,4 @@
-import datetime
+import datetime, sys
 
 
 class Kparam(object):
@@ -45,6 +45,15 @@ class Kparam(object):
         self.eval_fs_msg = 70
         self.eval_fs_cnt = 100
         self.inst_size = 40
+
+        if sys.platform == "darwin":
+            self.eval_fs_title -= 10
+            self.eval_fs_guide -= 10
+            self.eval_fs_msg -= 10
+            self.eval_fs_cnt -= 10
+            self.inst_size -= 10
+
+
         #  === UI setting  ===
         #  (based on 1920*1080 setting)
         self.eval_LB = 120  # evaluation Left bound
