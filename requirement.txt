@@ -6,3 +6,4 @@ scikit-learn == 0.19.1
 scipy == 1.1.0
 inflect == 0.3.1
 openpyxl == 2.5.3
+wxpython == 4.0.1

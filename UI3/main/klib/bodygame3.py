@@ -88,7 +88,7 @@ class BodyGameRuntime(object):
         self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  # Kinect surface
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  #background surface
 
-        self.bkidx = 0
+        self.bkidx = 11
         self.bklist = glob.glob(os.path.join('./data/imgs/bkimgs', '*.jpg'))
         self.readbackground()
         self.h_to_w = float(self.default_h) / self.default_w
@@ -139,15 +139,16 @@ class BodyGameRuntime(object):
         # Predefined param
         self.kp = Kparam(self.exeno, self.info.name)
 
-        self.movie = movie.Movie(self.exeno)
+        # Avator with exeno
         if Kinect:
-            # Avator with exeno
-            self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
-            self.kp.ini_scale = self.kp.scale
-            self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
+            self.movie = movie.Movie(self.exeno)
         else:
-            # tentatively create a black image to replace movie
-            self.movie = np.zeros((int(self._screen.get_width() / 2), int(self._screen.get_height() / 2), 3))
+            self.movie = movie.Movie(self.exeno, False, self._screen.get_width(), self._screen.get_height() - 50)
+        self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
+        self.kp.ini_scale = self.kp.scale
+        self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
+        # # tentatively create a black image to replace movie
+        # self.movie = np.zeros((int(self._screen.get_width() / 2), int(self._screen.get_height() / 2), 3))
 
         # origin to put the down video
         self.ori = (int(self._screen.get_width()/12.), int(self._screen.get_height()*0.5))  # origin of the color frame
@@ -592,8 +593,8 @@ class BodyGameRuntime(object):
             self.kp.scale = self.kp.scale * scale
             # draw avatar
             if not self.ana._done:
-                if Kinect:
-                    self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
+                # if Kinect:
+                self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
                 self.kp.pre_scale = self.kp.scale
             else:
                 self.exeinst.show_list(self._screen, self.exeno)

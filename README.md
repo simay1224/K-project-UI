@@ -20,6 +20,6 @@ To run shell command in ipython;
 Anaconda installation of related packages:
 
 ```
-conda install -c congsci pygame
+conda install -c cogsci pygame
 conda install -c menpo opencv
 ```
