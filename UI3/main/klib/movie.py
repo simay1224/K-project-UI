@@ -6,7 +6,7 @@ class Movie(object):
     """A Movie playing class with pygame package
     """
 
-    def __init__(self, filename, Kinect = True, width = 0, height = 0):
+    def __init__(self, filename, Kinect = True):
         self.kinect = Kinect
         if self.kinect:
             pygame.mixer.quit()
@@ -17,9 +17,9 @@ class Movie(object):
             self._movie.set_display(self.mscreen, pygame.Rect(0, 0, self.kp.vid_w/2, self.kp.vid_h/2))
             self._movie.play()
         else:
-            self._movie = np.zeros((width, height, 3))
-            self.w, self.h = width, height
             self.kp = Kparam()
+            self.w, self.h = self.kp.vid_w, self.kp.vid_h
+            self._movie = np.zeros((self.w, self.h, 3))
             self.mscreen = pygame.Surface((self.kp.vid_w/2, self.kp.vid_h/2)).convert()
 
     def stop(self, delete=False):
@@ -38,8 +38,6 @@ class Movie(object):
         self._movie.rewind()
 
     def ini_resize(self, screen_w, screen_h, ratio=0.5):
-        if not self.kinect:
-            return 0.7
         "movie initial resize"
         if screen_w*ratio/self.w >=  screen_h*ratio/self.h:
             return screen_h*ratio/self.h
