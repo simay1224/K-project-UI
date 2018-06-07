@@ -131,29 +131,22 @@ class Analysis(object):
                 self.evalstr = self.evalstr.replace('Well done.', '')
             self.evalstr += 'please stand straight.\n'
 
-    def eval_common(self, surface, exeno, kp):
-        # === eval string update ===
-        if self.evalstr == '':
-            self.evalstr = self.brth.evalstr
-            self.brth.evalstr = ''
-        # === eval information ===
-        if self.brth.cnt > 4:
-            evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
-            evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2 ,color=self.c_err)
-            self.brth.err.append('Only need to do 4 times')
-            self.brth.errsum.append('Only need to do 4 times\n')
-        elif self.brth.cnt == 4:
-            evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_handdown)
-
-
     def run(self, exeno, reconJ, surface, evalinst, kp, body, dmap=[], djps=[]):
         """ analysis main function
         """
-        if self.exer[exeno].limbjoints:
+        kinect = (reconJ or body or dmap or djps)
+        if not kinect:
+            stus = "up"
+            self.evalstr = "well"
+            # self.brth.cnt = 6
+
+        if kinect and self.exer[exeno].limbjoints:
             reconJ21 = reconJ[12:]
+
         if exeno == 1:
             if self.exer[1].cntdown <= 0:
-                stus = self.handpos(self.exer[1], reconJ21)
+                if kinect:
+                    stus = self.handpos(self.exer[1], reconJ21)
                 if stus != 'down':
                     if len(self.jointslist) == 0:  # store joints information
                         self.jointslist = reconJ21
@@ -173,8 +166,20 @@ class Analysis(object):
                                 self.brth.err.append('Did not do enough repetition.')
                                 self.brth.errsum.append('Did not do enough repetition.\n')
                             print('================= exer END ======================')
-                self.eval_common(surface, exeno, kp)
-                if self.brth.cnt < 4:
+                # self.eval_common(surface, exeno, kp)
+                # === eval string update ===
+                if self.evalstr == '':
+                    self.evalstr = self.brth.evalstr
+                    self.brth.evalstr = ''
+                # === eval information ===
+                if self.brth.cnt > 4:
+                    evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2 ,color=self.c_err)
+                    self.brth.err.append('Only need to do 4 times')
+                    self.brth.errsum.append('Only need to do 4 times\n')
+                elif self.brth.cnt == 4:
+                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_handdown)
+                else:
                     if self.brth.brth_out_flag:
                         evalinst.blit_text(surface, exeno, kp, 'Breathe out', 2, color=self.c_normal)
                     else:
@@ -188,17 +193,19 @@ class Analysis(object):
                 self.exer[1].cntdown -= 1
 
         elif exeno == 2:
-            stus = self.handpos(self.exer[2], reconJ21)
+            if kinect:
+                stus = self.handpos(self.exer[2], reconJ21)
             if stus == 'up' or stus == 'upnotstraight':
-                if len(self.jointslist) == 0:  # store joints information
-                    self.jointslist = reconJ21
-                else:
-                    self.jointslist = np.vstack([self.jointslist, reconJ21])
-                self.hs.hstus_proc(body.hand_left_state, body.hand_right_state)
-                bdry = self.getcoord(djps)
-                self.brth.run(bdry, dmap)
-                if 'stand' not in self.evalstr:
-                    self.bodystraight(reconJ)
+                if kinect:
+                    if len(self.jointslist) == 0:  # store joints information
+                        self.jointslist = reconJ21
+                    else:
+                        self.jointslist = np.vstack([self.jointslist, reconJ21])
+                    self.hs.hstus_proc(body.hand_left_state, body.hand_right_state)
+                    bdry = self.getcoord(djps)
+                    self.brth.run(bdry, dmap)
+                    if 'stand' not in self.evalstr:
+                        self.bodystraight(reconJ)
                 # === eval string update ===
                 if self.evalstr == '':
                     self.evalstr = self.brth.evalstr
@@ -240,7 +247,8 @@ class Analysis(object):
                     evalinst.blit_text(surface, exeno, kp, 'Please raise yours arms.', 2, color=self.c_normal)
 
         elif exeno == 3:
-            stus = self.handpos(self.exer[3], reconJ)
+            if kinect:
+                stus = self.handpos(self.exer[3], reconJ)
             if stus == 'up':
                 self.pushdp.do = True
             elif stus == 'down':
@@ -253,9 +261,11 @@ class Analysis(object):
                 else:
                     evalinst.blit_text(surface, exeno, kp, 'Please raise yours arms.', 2, color=self.c_normal)
             if self.pushdp.do:
-                self.pushdp.run(reconJ, stus)
+                if kinect:
+                    self.pushdp.run(reconJ, stus)
                 if 'stand' not in self.evalstr:
-                    self.bodystraight(reconJ)
+                    if kinect:
+                        self.bodystraight(reconJ)
                 if self.evalstr == '':
                     self.evalstr = self.pushdp.evalstr
                     self.pushdp.evalstr = ''
@@ -278,12 +288,14 @@ class Analysis(object):
                 self.repcnt = self.pushdp.cnt
 
         elif exeno == 4:
-            stus = self.handpos(self.exer[4], reconJ)
+            if kinect:
+                stus = self.handpos(self.exer[4], reconJ)
             if stus == 'horizontal' or stus == 'horizontal_bend':  # T-pose
-                self.horzp.do = True
-                self.horzp.run(reconJ)
-                if 'stand' not in self.evalstr:
-                    self.bodystraight(reconJ)
+                if kinect:
+                    self.horzp.do = True
+                    self.horzp.run(reconJ)
+                    if 'stand' not in self.evalstr:
+                        self.bodystraight(reconJ)
             elif stus == 'down':
                 if self.horzp.do:
                     self._done = True
@@ -319,89 +331,15 @@ class Analysis(object):
                                         4, color=self.c_togo)
                 self.repcnt = self.horzp.cnt
 
-        # elif exeno == 3:
-        #     if not self.exer[3].order[self.dtw.oidx] == 'end':
-        #         self.dtw.matching(reconJ21, self.exer[3], exeno)
-        #         #if self.dtw.gt_idx not in [1, 2]:
-        #         stus = self.handpos(self.exer[3], reconJ21)
-        #         if self.dtw.oidx not in [1, 2] and stus != 'down':
-        #             self.hs.hstus_proc(body.hand_left_state, body.hand_right_state)
-        #             bdry = self.getcoord(djps)
-        #             self.brth.run(bdry, dmap, 10)
-        #         if 'stand' not in self.evalstr:
-        #             self.bodystraight(reconJ)
-        #         # === eval string update ===
-        #         if self.evalstr == '':
-        #             self.evalstr = self.dtw.evalstr
-        #             self.dtw.evalstr = ''
-        #         # === eval information ===
-        #         if self.dtw.idxlist.count(4) > 4:
-        #             evalinst.blit_text(surface, exeno, kp,
-        #                               'Only need to do 4 times', 3, False, color=self.c_err)
-        #             self.dtw.err.append('Only need to do 4 times')
-        #             self.dtw.errsum.append('Only need to do 4 times\n')
-        #             evalinst.blit_text(surface, exeno, kp, 'Put down your arms.', 2, color=self.c_err)
-        #         elif self.dtw.idxlist.count(4) == 4:
-        #             evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_handdown)
-        #         else:
-        #             if self.dtw.oidx in [1, 4]:
-        #                 evalinst.blit_text(surface, exeno, kp, 'Push down you arms', 2, color=self.c_normal)
-        #             elif self.dtw.oidx == 3:
-        #                 evalinst.blit_text(surface, exeno, kp, 'Raise up your arms', 2, color=self.c_normal)
-        #             evalinst.blit_text(surface, exeno, kp,
-        #                               '%s to go !!' %str(4-min(self.dtw.idxlist.count(3),self.dtw.idxlist.count(4))),
-        #                                4, color=self.c_togo)
-        #         self.repcnt = min(self.dtw.idxlist.count(3),self.dtw.idxlist.count(4))
-        #     else:
-        #         self._done = True
-        #         self.brth.breath_analyze()
-        #         hopen, hclose = self.hs.hstus_ana()
-        #         self.brth.brth_hand_sync(hopen, hclose)
-        #         if self.dtw.idxlist.count(3) < 4:
-        #             self.dtw.err.append('Did not do enough repetition.')
-        #             self.dtw.errsum.append('Did not do enough repetition.\n')
-        #         print('================= exer END ======================')
-        #
-        # elif exeno == 4:
-        #     if not self.exer[4].order[self.dtw.oidx] == 'end':
-        #         self.dtw.matching(reconJ21, self.exer[4], exeno)
-        #         if 'stand' not in self.evalstr:
-        #             self.bodystraight(reconJ)
-        #         # === eval string update ===
-        #         if self.evalstr == '':
-        #             self.evalstr = self.dtw.evalstr
-        #             self.dtw.evalstr = ''
-        #         # === eval information ===
-        #         if self.dtw.idxlist.count(4) > 4:
-        #             evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
-        #             evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_err)
-        #             self.dtw.err.append('Only need to do 4 times')
-        #             self.dtw.errsum.append('Only need to do 4 times\n')
-        #         elif self.dtw.idxlist.count(4) == 4:
-        #             evalinst.blit_text(surface, exeno, kp, 'Put your arms down', 2, color=self.c_handdown)
-        #         else:
-        #             if self.dtw.oidx in [1, 4]:
-        #                 evalinst.blit_text(surface, exeno, kp, 'Close arms to chest', 2, color=self.c_normal)
-        #             elif self.dtw.oidx == 3:
-        #                 evalinst.blit_text(surface, exeno, kp, 'Open arms to T-pose', 2, color=self.c_normal)
-        #             evalinst.blit_text(surface, exeno, kp,
-        #                                '%s to go !!' %str(4-min(self.dtw.idxlist.count(3), self.dtw.idxlist.count(4))),
-        #                                 4, color=self.c_togo)
-        #         self.repcnt = min(self.dtw.idxlist.count(3),self.dtw.idxlist.count(4))
-        #     else:
-        #         self._done = True
-        #         if self.dtw.idxlist.count(3) < 4:
-        #             self.dtw.err.append('Did not do enough repetition.')
-        #             self.dtw.errsum.append('Did not do enough repetition.\n')
-        #         print('================= exer END ======================')
-
         elif exeno == 5:
-            stus = self.handpos(self.exer[5], reconJ)
+            if kinect:
+                stus = self.handpos(self.exer[5], reconJ)
             if stus == 'up':
-                self.swing.do = True
-                self.swing.run(reconJ)
-                if 'stand' not in self.evalstr:
-                    self.bodystraight(reconJ)
+                if kinect:
+                    self.swing.do = True
+                    self.swing.run(reconJ)
+                    if 'stand' not in self.evalstr:
+                        self.bodystraight(reconJ)
             elif stus == 'down':
                 if self.swing.do:
                     if self.cnt > 90:
@@ -433,10 +371,12 @@ class Analysis(object):
 
         elif exeno == 6:
             if self.exer[6].cntdown <= 0:
-                stus = self.handpos(self.exer[6], reconJ)
+                if kinect:
+                    stus = self.handpos(self.exer[6], reconJ)
                 if stus == 'belly':
                     self.cnt = 0
-                    self.shld.run(dmap, djps)
+                    if kinect:
+                        self.shld.run(dmap, djps)
                     # self.exer[6].hraise = True
                 elif stus == 'down':
                     if self.shld.do:
@@ -471,7 +411,8 @@ class Analysis(object):
 
         elif exeno == 7:
             if self.exer[7].cntdown <= 0:
-                stus = self.handpos(self.exer[7], reconJ)
+                if kinect:
+                    stus = self.handpos(self.exer[7], reconJ)
                 if stus == 'down':
                     if self.clsp.do:
                         if self.cnt > 90:
@@ -483,7 +424,8 @@ class Analysis(object):
                         self.cnt += 1
                 else:
                     self.cnt = 0
-                    self.clsp.run(reconJ)
+                    if kinect:
+                        self.clsp.run(reconJ)
                 # === eval string update ===
                 if self.evalstr == '':
                     self.evalstr = self.clsp.evalstr

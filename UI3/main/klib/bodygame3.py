@@ -123,7 +123,7 @@ class BodyGameRuntime(object):
         self.bkimg = cv2.imread(self.bklist[self.bkidx])
         self.bkimg = cv2.resize(self.bkimg, (self._infoObject.current_w, self._infoObject.current_h))
 
-        if sys.platform == "windows":
+        if sys.platform == "win32":
             self.bkimg = np.dstack([cv2.resize(self.bkimg, (1920, 1080)), np.zeros([1080, 1920])]).astype(np.uint8)
         else:
             self.bkimg = np.dstack([255 * np.ones([self._infoObject.current_h, self._infoObject.current_w]), self.bkimg[:, :, ::-1]]).astype(np.uint8)
@@ -253,6 +253,7 @@ class BodyGameRuntime(object):
         if press[pygame.K_d]:  # use 'd' to to open, 'ctrl+d' to close dtw
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
                 print('Disable human behavior analyze .....')
+                # self.ana._done: if true: display the exercise list
                 self.ana._done = True
                 self.kp.finish = True
             else:
@@ -422,36 +423,36 @@ class BodyGameRuntime(object):
                             modJary = self.h_mod.human_mod_pts(joints, False)  # modJary is 11*3 array
                             modJary = modJary.flatten().reshape(-1, 33)  # change shape to 1*33 array
 
-                            # reconJ = modJary   # uncomment it when disable the denosing process
-                            if not self.denoise._done:
-                                if len(Relary) != 0:  # len =0 if first frame
-                                    # === GPR denoising ===
-                                    if all(ii > 0.6 for ii in Relary[limbidx]):  # all joints are reliable
-                                        reconJ = modJary  # reconJ is 1*21 array
-                                    else:  # contains unreliable joints
-                                        reconJ, unrelidx = self.denoise.run(modJary[:, 12:], Relary, self.exeno)
-                                        # draw reconstruction skeleton
-                                        JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
-                                        reconJ = np.hstack([modJary[:, :12], reconJ])
-                                        #  === recon 2D joints in color domain ===
-                                        for ii in [4, 5, 6, 8, 9, 10, 20]:
-                                            rec_joints[ii].Position.x = JJ[ii][0]
-                                            rec_joints[ii].Position.y = JJ[ii][1]
-                                            rec_joints[ii].Position.z = JJ[ii][2]
-                                        tmp_jps = self._kinect.body_joints_to_color_space(rec_joints)  # joints in color domain
-                                        rec_jps = np.zeros([21,2])
-                                        for ii in xrange(21):
-                                            if ii in unrelidx:
-                                                rec_jps[ii, 0] = tmp_jps[ii].x
-                                                rec_jps[ii, 1] = tmp_jps[ii].y
-                                            else:
-                                                rec_jps[ii, 0] = jps[ii].x
-                                                rec_jps[ii, 1] = jps[ii].y
-                                        self.skel.draw_body(rec_joints, rec_jps, SKELETON_COLORS[3], self._frame_surface, 30)
-                                else:
-                                    reconJ = modJary
-                            else:
-                                reconJ = modJary
+                            reconJ = modJary   # uncomment it when disable the denosing process
+                            # if not self.denoise._done:
+                            #     if len(Relary) != 0:  # len =0 if first frame
+                            #         # === GPR denoising ===
+                            #         if all(ii > 0.6 for ii in Relary[limbidx]):  # all joints are reliable
+                            #             reconJ = modJary  # reconJ is 1*21 array
+                            #         else:  # contains unreliable joints
+                            #             reconJ, unrelidx = self.denoise.run(modJary[:, 12:], Relary, self.exeno)
+                            #             # draw reconstruction skeleton
+                            #             JJ = self.h_mod.reconj2joints(rec_joints, reconJ.reshape(7, 3))
+                            #             reconJ = np.hstack([modJary[:, :12], reconJ])
+                            #             #  === recon 2D joints in color domain ===
+                            #             for ii in [4, 5, 6, 8, 9, 10, 20]:
+                            #                 rec_joints[ii].Position.x = JJ[ii][0]
+                            #                 rec_joints[ii].Position.y = JJ[ii][1]
+                            #                 rec_joints[ii].Position.z = JJ[ii][2]
+                            #             tmp_jps = self._kinect.body_joints_to_color_space(rec_joints)  # joints in color domain
+                            #             rec_jps = np.zeros([21,2])
+                            #             for ii in xrange(21):
+                            #                 if ii in unrelidx:
+                            #                     rec_jps[ii, 0] = tmp_jps[ii].x
+                            #                     rec_jps[ii, 1] = tmp_jps[ii].y
+                            #                 else:
+                            #                     rec_jps[ii, 0] = jps[ii].x
+                            #                     rec_jps[ii, 1] = jps[ii].y
+                            #             self.skel.draw_body(rec_joints, rec_jps, SKELETON_COLORS[3], self._frame_surface, 30)
+                            #     else:
+                            #         reconJ = modJary
+                            # else:
+                            #     reconJ = modJary
 
                             # === analyze ===
                             self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
@@ -544,15 +545,15 @@ class BodyGameRuntime(object):
 
             # if Kinect == False:
             else:
-                # # === dtw analyze & denoising process ===
-                # self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                #                     self.exeinst.str['name'][self.exeno], 1)# 1 is location
-                # if not self.ana._done:
-                #
-                #     # === analyze ===
-                #     # reconJ, body, dframe, djps: all from kinect
-                #     self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
-                #                  self.eval, self.kp, body, dframe, djps)
+                # === dtw analyze & denoising process ===
+                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                    self.exeinst.str['name'][self.exeno], 1)# 1 is location
+                if not self.ana._done:
+                    # === analyze ===
+                    # reconJ, body, dframe, djps: all from kinect
+                    # self.ana.run(self.exeno, None, self.bk_frame_surface,\
+                    self.ana.run(7, None, self.bk_frame_surface,\
+                                 self.eval, self.kp, None, None, None)
                 #
                 #     if self.ana.evalstr != '':
                 #         if 'well' in (self.ana.evalstr).lower():
@@ -683,7 +684,10 @@ class BodyGameRuntime(object):
                 self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
                 self.kp.pre_scale = self.kp.scale
             else:
-                self.exeinst.show_list(self._screen, self.exeno)
+                self.exeinst.show_list(self.bk_frame_surface, self.exeno)
+                bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
+                self._screen.blit(bksurface_to_draw, (0, 0))
+
 
             surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*self.kp.vid_w/1920.), int(self.h*self.kp.vid_h/1080.)))
             self._screen.blit(surface_to_draw, self.ori)

@@ -144,7 +144,7 @@ class Exeinst(object):
         """Creat a text surface, this surface will change according to the scene type,
            ratio and the region number. According to the size of the surface, the text
            will auto change line also auto change the font size"""
-        self.font = pygame.font.SysFont(self.kp.s_normal, 60)
+        self.font = pygame.font.SysFont(self.kp.s_normal, 40)
         self.space = self.font.size(' ')[0]  # The width of a space.
 
         words = self.words['title'][0]
