@@ -136,10 +136,10 @@ class Analysis(object):
         """
         kinect = (reconJ or body or dmap or djps)
         if not kinect:
-            stus = "down"
+            stus = "up"
             self.evalstr = "not possible"
-            self._done = True
-            kp.finish = True
+            # self._done = True
+            # kp.finish = True
 
             # self.brth.cnt = 6
 

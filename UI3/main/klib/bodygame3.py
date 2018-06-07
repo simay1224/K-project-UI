@@ -9,7 +9,7 @@ if kinect:
     from .pykinect2 import PykinectRuntime
 
 import ctypes, os, datetime, glob
-import pygame, h5py, sys, copy
+import pygame, sys, copy
 
 # https://askubuntu.com/questions/742782/how-to-install-cpickle-on-python-3-4
 if sys.version_info >= (3, 0):
@@ -145,7 +145,7 @@ class BodyGameRuntime(object):
         if kinect:
             self.movie = movie.Movie(self.exeno)
         else:
-            self.movie = movie.Movie(self.exeno, False)
+            self.movie = movie.Movie(self.exeno, False, self.kp.vid_w, self.kp.vid_h)
         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
         self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
@@ -172,7 +172,6 @@ class BodyGameRuntime(object):
         self.fextr = Finger_extract()
         self.exeinst = Exeinst() # exercise intruction
         self.log = Historylog()
-    # Do not touch
 
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
@@ -704,8 +703,8 @@ class BodyGameRuntime(object):
             pygame.display.update()
             # limit frames per second
             self._clock.tick(fps)
-        # user end the programe
 
+        # user end the programe
         if kinect:
             self.movie.stop(True)   # close avatar
             self._kinect.close()    # close kinect sensor

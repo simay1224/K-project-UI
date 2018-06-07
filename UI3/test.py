@@ -3,8 +3,6 @@ from main.klib import msgbox
 from main.klib import welcome
 
 import wx, pdb
-# from .klib import trainingmode
-# from .klib import bodygame3
 
 def main():
     info = None

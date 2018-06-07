@@ -6,7 +6,7 @@ class Movie(object):
     """A Movie playing class with pygame package
     """
 
-    def __init__(self, filename, Kinect = True):
+    def __init__(self, filename, Kinect = True, width = 0, height = 0):
         self.kinect = Kinect
         if self.kinect:
             pygame.mixer.quit()
@@ -18,7 +18,7 @@ class Movie(object):
             self._movie.play()
         else:
             self.kp = Kparam()
-            self.w, self.h = self.kp.vid_w, self.kp.vid_h
+            self.w, self.h = width, height
             self._movie = np.zeros((self.w, self.h, 3))
             self.mscreen = pygame.Surface((self.kp.vid_w/2, self.kp.vid_h/2)).convert()
 

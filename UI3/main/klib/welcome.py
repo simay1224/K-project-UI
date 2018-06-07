@@ -3,10 +3,8 @@ import cv2
 import numpy as np
 import pandas as pd
 import wx.media
-# from ..klib import trainingmode
 import matplotlib
 from matplotlib.figure import Figure
-# from historylog import Historylog
 from collections import defaultdict
 import wx.lib.mixins.inspection as WIT
 
@@ -15,8 +13,9 @@ from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
 
 from ..klib import bodygame3
+from ..klib import trainingmode
+from .historylog import Historylog
 
-# matplotlib.use('WXAgg')
 
 class Info():
     def __init__(self):
