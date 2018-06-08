@@ -1,20 +1,21 @@
-import wx 
-import wx.media
-from collections import defaultdict
+import wx
+import cv2
 import numpy as np
 import pandas as pd
-import bodygame3
+import wx.media
 import matplotlib
+from matplotlib.figure import Figure
+from collections import defaultdict
+import wx.lib.mixins.inspection as WIT
+
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
-from matplotlib.figure import Figure
-import wx
-import wx.lib.mixins.inspection as WIT
-from historylog import Historylog
-import cv2
-import os
-import pdb
+
+from ..klib import bodygame3
+from ..klib import trainingmode
+from .historylog import Historylog
+
 class Info():
     def __init__(self):
         self.name   = 'jane doe'
@@ -22,12 +23,12 @@ class Info():
         self.gender = 'unknown'
 
 class Welcome_win(wx.Frame):
-    def __init__(self, info, parent, title): 
+    def __init__(self, info, parent, title):
         self.info = info
         self.game = None
-        self.font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')    
-        super(Welcome_win, self).__init__(parent, title = title,size = (410, 350))
-        panel = wx.Panel(self) 
+        self.font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        super(Welcome_win, self).__init__(parent, title = title, size = (410, 350))
+        panel = wx.Panel(self)
         sizer = wx.GridBagSizer(30, 30)
         button1 = wx.Button(panel, size=(300,50), label="Live Evaluation")
         button1.SetFont(self.font)
@@ -45,8 +46,8 @@ class Welcome_win(wx.Frame):
         sizer.Add(button3, pos=(3, 1), span=(1, 0))
 
         panel.SetSizer(sizer)
-        # panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground) 
-        self.Show(True)  
+        # panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+        self.Show(True)
 
     def open_bodygame(self, event):
         # myobject = event.GetEventObject()
@@ -55,12 +56,12 @@ class Welcome_win(wx.Frame):
         self.game.run()
         if self.game.kp._done:
             self.Destroy()
-        
+
     def open_instruction(self, event):
         instruct = Instrcution_win(None, 'Instruction')
 
     def open_history(self, event):
-        history  = History_view(None, self.info) 
+        history  = History_view(None, self.info)
 
     def OnEraseBackground(self, evt):
         """
@@ -75,26 +76,26 @@ class Welcome_win(wx.Frame):
         bmp = wx.Bitmap("./data/bkimgs/BUMfk9.jpg")
         dc.DrawBitmap(bmp, 0, 0)
 
-class Instrcution_win(wx.Frame): 
-            
-    def __init__(self, parent, title): 
+class Instrcution_win(wx.Frame):
+
+    def __init__(self, parent, title):
         self.init_text()
         super(Instrcution_win, self).__init__(parent, title=title, size=(1250, 700))
-            
-        panel = wx.Panel(self) 
-        box = wx.BoxSizer(wx.HORIZONTAL) 
-        self.font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')    
-        self.text = wx.TextCtrl(panel, size = (900,300), style = wx.TE_MULTILINE|wx.TE_READONLY) 
+
+        panel = wx.Panel(self)
+        box = wx.BoxSizer(wx.HORIZONTAL)
+        self.font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.text = wx.TextCtrl(panel, size = (900,300), style = wx.TE_MULTILINE|wx.TE_READONLY)
         self.player = Panel1(panel, -1)
         self.text.SetFont(self.font)
-        self.text.SetBackgroundColour((179, 236, 255))      
+        self.text.SetBackgroundColour((179, 236, 255))
         languages = [self.str['exe'][1], self.str['exe'][2], self.str['exe'][3], self.str['exe'][4],\
-                     self.str['exe'][5], self.str['exe'][6], self.str['exe'][7]]  
+                     self.str['exe'][5], self.str['exe'][6], self.str['exe'][7]]
 
-        box2 = wx.BoxSizer(wx.VERTICAL) 
+        box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.VERTICAL)
         lst = wx.ListBox(panel, size = (250, 600*0.95), choices=languages, style=wx.LB_SINGLE)
-        lst.SetBackgroundColour((255, 255, 255))  
+        lst.SetBackgroundColour((255, 255, 255))
         button1 = wx.Button(panel, label="Close")
         button1.Bind(wx.EVT_BUTTON, self.close)
 
@@ -103,16 +104,16 @@ class Instrcution_win(wx.Frame):
         box3.Add(self.text,0,wx.EXPAND)
         box3.Add(self.player,1,wx.EXPAND)
 
-        box.Add(box2,0,wx.EXPAND) 
-        box.Add(box3, 1, wx.EXPAND)   
+        box.Add(box2,0,wx.EXPAND)
+        box.Add(box3, 1, wx.EXPAND)
         panel.SetSizer(box)
-        panel.Fit() 
-            
-        self.Centre() 
-        self.Bind(wx.EVT_LISTBOX, self.onListBox, lst) 
-        self.Show(True)  
+        panel.Fit()
 
- 
+        self.Centre()
+        self.Bind(wx.EVT_LISTBOX, self.onListBox, lst)
+        self.Show(True)
+
+
     def init_text(self):
         self.str = defaultdict(dict)
         self.str['exe'][1] = 'Exercise 1 : Muscle Tighting Deep Breathing'
@@ -169,7 +170,7 @@ class Instrcution_win(wx.Frame):
                              '\n4. Back to the belly position.'\
                              '\n5. Repeat 4 times.'\
                              '\n6. Put down your arms.'
-        
+
         self.str['note'][1] = 'Tips :'\
                                 '\n1. Tighten your muscle as much as you can.'\
                                 '\n2. Breathe as deep as you can.'
@@ -180,7 +181,7 @@ class Instrcution_win(wx.Frame):
         self.str['note'][3] = 'Tips :'\
                                 '\n1. When you raise up your arms, make sure that your hand, elbow and shoulder are straight.'\
                                 '\n2. When bending the elbow, hand-elbow-shoulder should be "V-shape" not "L-shape"'\
- 
+
         self.str['note'][4] = 'Tips :'\
                                 '\n1. When doing "T-pose", make sure that your hand, elbow and shoulder are straight'\
                                 '\n2. When closing hands, make sure that your hand, and shoulder are in the same height.'\
@@ -197,7 +198,7 @@ class Instrcution_win(wx.Frame):
                                 '\n2. When the hands is in the back of your head, spread the elnows open as wide as possible.'\
                                 '\n3. Keep your body staight.'
 
-    def onListBox(self, event): 
+    def onListBox(self, event):
         self.text.Clear()
         ex = event.GetEventObject().GetSelection()+1
         self.text.AppendText(self.str['exe'][ex]+self.str['ins'][ex]+'\n\n')
@@ -207,16 +208,16 @@ class Instrcution_win(wx.Frame):
     def close(self, event):
         self.Destroy()
 
-class History_view( wx.Frame ):	
+class History_view( wx.Frame ):
     def __init__(self, parent, info = Info(), title = 'welcome'):
         super(History_view, self).__init__(parent, title = title, size = (850, 520))
         self.info = info
         self.no_hist_img = cv2.imread('./data/no_hist.jpg')
         self.InitUI()
-        self.Show()  
+        self.Show()
 
     def InitUI(self, path = './output/log.xlsx'):
-        self.font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)  
+        self.font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)
         self.path = path
         try:
             log_xl = pd.ExcelFile(path)
@@ -228,7 +229,7 @@ class History_view( wx.Frame ):
 
         self.panel = wx.Panel(self)
 
-        box1 = wx.BoxSizer(wx.VERTICAL) 
+        box1 = wx.BoxSizer(wx.VERTICAL)
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -246,7 +247,7 @@ class History_view( wx.Frame ):
 
         self.lst = wx.ListBox(self.panel, size = (330, 300), choices = [], style = wx.LB_SINGLE)
         self.lst.SetFont(self.font)
-        self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)     
+        self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
         box2.Add(self.lst, 1, wx.EXPAND)
         box3.Add(box2, 0, wx.EXPAND)
 
@@ -256,8 +257,8 @@ class History_view( wx.Frame ):
         self.canvas = FigureCanvas(self.panel, -1, self.figure)
         box3.Add(self.canvas, 1, wx.EXPAND)
 
-        self.panel.SetSizer(box3) 
-        self.panel.Fit() 
+        self.panel.SetSizer(box3)
+        self.panel.Fit()
 
     def update_choice (self, event):
         cur_choice = self.choice.GetSelection()
@@ -267,7 +268,7 @@ class History_view( wx.Frame ):
         idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0]+1
         idx_2 = [i for i, elem in enumerate(lst_choice) if 'errmsg' in elem][0]
         self.lst.InsertItems(lst_choice[idx_1:idx_2], 0)
-    
+
     def update_figure(self, event):
         df_name  = self.df[self.df['name'] == self.info.name]
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
@@ -276,7 +277,7 @@ class History_view( wx.Frame ):
         x = np.arange(0, len(y), 1)
         x_name = df_name['time'].tolist()
         self.axes.clear()
-        try:    
+        try:
             self.axes.bar(x, y, color='g')
             if df_ideal[item].dtype == float:
                 cri = df_ideal[item][0]
@@ -297,23 +298,23 @@ class Panel1(wx.Panel):
     def __init__(self, parent, id):
         #self.log = log
         wx.Panel.__init__(self, parent, -1, style=wx.TAB_TRAVERSAL|wx.CLIP_CHILDREN)
- 
+
         # Create some controls
         self.mc = wx.media.MediaCtrl(self, size=(500,300), style=wx.SIMPLE_BORDER)
-        
+
         playButton = wx.Button(self, -1, "Play")
         self.Bind(wx.EVT_BUTTON, self.onPlay, playButton)
-        
+
         pauseButton = wx.Button(self, -1, "Pause")
         self.Bind(wx.EVT_BUTTON, self.onPause, pauseButton)
-        
+
         stopButton = wx.Button(self, -1, "Stop")
-        self.Bind(wx.EVT_BUTTON, self.onStop, stopButton)       
+        self.Bind(wx.EVT_BUTTON, self.onStop, stopButton)
         self.st_file = wx.StaticText(self, -1, ".mid .mp3 .wav .au .avi .mpg", size=(200,-1))
         self.st_size = wx.StaticText(self, -1, size=(100,-1))
         self.st_len  = wx.StaticText(self, -1, size=(100,-1))
         self.st_pos  = wx.StaticText(self, -1, size=(100,-1))
-        
+
         # setup the button/label layout using a sizer
         sizer = wx.GridBagSizer(5,5)
         # sizer.Add(loadButton, (1,1))
@@ -322,8 +323,8 @@ class Panel1(wx.Panel):
         sizer.Add(stopButton, (4,1))
         sizer.Add(self.mc, (1,3), span=(4,1))  # for .avi .mpg video files
         self.SetSizer(sizer)
- 
-             
+
+
     def doLoadFile(self, path):
         if not self.mc.Load(path):
             wx.MessageBox("Unable to load %s: Unsupported format?" % path, "ERROR", wx.ICON_ERROR | wx.OK)
@@ -332,12 +333,12 @@ class Panel1(wx.Panel):
             self.st_file.SetLabel('%s' % filename)
             self.GetSizer().Layout()
             self.mc.Play()#ITS TO PROBLEM, WHY IT DOESNT PLAY HERE?#
-        
+
     def onPlay(self, evt):
         self.mc.Play()
-    
+
     def onPause(self, evt):
         self.mc.Pause()
-    
+
     def onStop(self, evt):
         self.mc.Stop()

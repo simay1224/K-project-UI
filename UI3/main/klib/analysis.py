@@ -138,8 +138,8 @@ class Analysis(object):
         if not kinect:
             stus = "up"
             self.evalstr = "not possible"
-            # self._done = True
-            # kp.finish = True
+            self._done = True
+            kp.finish = True
 
             # self.brth.cnt = 6
 

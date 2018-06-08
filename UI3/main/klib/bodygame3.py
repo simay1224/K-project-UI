@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-kinect = True
+kinect = False
 
 
 import ctypes, os, datetime, glob
@@ -12,7 +12,7 @@ if sys.version_info >= (3, 0):
 else:
     import cPickle
 import pdb, time, cv2
-if kinect:  
+if kinect:
     from .pykinect2 import PyKinectV2
     from .pykinect2.PyKinectV2 import *
     from .pykinect2 import PyKinectRuntime
