@@ -6,6 +6,9 @@ class Kparam(object):
     """
 
     def __init__(self, exeno='', username=''):
+        self.kinect = True
+        if sys.platform == "darwin":
+            self.kinect = False
 
         self.bdjoints   = []
         self.now  = datetime.datetime.now()

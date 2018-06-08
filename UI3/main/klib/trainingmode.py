@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
+import ctypes, os, datetime, glob
+import pygame, sys, copy
+import pdb, time, cv2
 
-kinect = False
-
-if kinect:
+if sys.platform == "win32":
     import h5py
     from .pykinect2 import PyKinectV2
     from .pykinect2.PyKinectV2 import *
     from .pykinect2 import PyKinectRuntime
 
-import ctypes, os, datetime, glob
-import pygame, sys, copy
-import pdb, time, cv2
 if sys.version_info >= (3, 0):
     import _pickle as cPickle
 else:
     import cPickle
+    
 import numpy as np
 # import class
 from ..klib import movie
@@ -52,7 +51,7 @@ class BodyGameRuntime(object):
         except:
             pass
 
-        if kinect:
+        if sys.platform == "win32":
             # Kinect runtime object, we want only color and body frames
             self._kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color |
                                                            PyKinectV2.FrameSourceTypes_Body
@@ -91,7 +90,7 @@ class BodyGameRuntime(object):
 
         self.kp = Kparam(self.exeno)
 
-        if kinect:
+        if self.kp.kinect:
             self.movie = movie.Movie(self.exeno)
         else:
             self.movie = movie.Movie(self.exeno, False, 480, 272)
@@ -106,7 +105,7 @@ class BodyGameRuntime(object):
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
 
-        if kinect:
+        if self.kp.kinect:
             address = self._kinect.surface_as_array(target_surface.get_buffer())
             ctypes.memmove(address, frame.ctypes.data, frame.size)
             del address
@@ -117,7 +116,7 @@ class BodyGameRuntime(object):
 
 
     def reset(self, clean=False, change=False):
-        if kinect:
+        if self.kp.kinect:
             self.movie.stop(True)
             del self.movie
         self.__param_init__(clean)
@@ -128,12 +127,12 @@ class BodyGameRuntime(object):
         """
         if press[pygame.K_ESCAPE]:
             self.kp._done = True
-            if kinect:
+            if self.kp.kinect:
                 self.movie.stop()
 
         if press[pygame.K_q]:
             self.kp._done = True
-            if kinect:
+            if self.kp.kinect:
                 self.movie.stop()
 
         if press[pygame.K_i]:  # use 'i' to reset every parameter
@@ -211,7 +210,7 @@ class BodyGameRuntime(object):
             for event in pygame.event.get():  # User did something
                 if event.type == pygame.QUIT:  # If user clicked close
                     self._done = True  # Flag that we are done so we exit this loop
-                    if kinect:
+                    if self.kp.kinect:
                         self.movie.stop()
                 elif event.type == pygame.VIDEORESIZE:  # window resized
                     self._screen = pygame.display.set_mode(event.dict['size'],
@@ -220,7 +219,7 @@ class BodyGameRuntime(object):
             # initail background frame
             self.draw_color_frame(self.bkimg, self.bk_frame_surface)
 
-            if kinect:
+            if self.kp.kinect:
                 # === extract data from kinect ===
                 if self._kinect.has_new_color_frame():
                     frame = self._kinect.get_last_color_frame()
@@ -292,7 +291,7 @@ class BodyGameRuntime(object):
             # limit frames per second
             self._clock.tick(fps)
         # user end the programe
-        if kinect:
+        if self.kp.kinect:
             self.movie.stop(True)   # close avatar
             self._kinect.close()    # close Kinect sensor
 
