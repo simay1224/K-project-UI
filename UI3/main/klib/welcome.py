@@ -27,16 +27,23 @@ class Welcome_win(wx.Frame):
         self.info = info
         self.game = None
 
-        self.font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
 
-        super(Welcome_win, self).__init__(parent, title = title, size = (410, 400))
+        super(Welcome_win, self).__init__(parent, title = title, size = (410, 460))
         panel = wx.Panel(self)
 
         # sizers
         topSizer = wx.BoxSizer(wx.VERTICAL)
         titleSizer = wx.GridBagSizer(5, 5)
         sizer = wx.GridBagSizer(5, 5)
+
+        # title
+        text = wx.StaticText(panel, label="LymphCoach")
+        text.SetFont(self.font_title)
+        topSizer.Add(text, 0, wx.CENTER)
+
 
         # Basic information
         text11 = wx.StaticText(panel, label="Name:")
@@ -60,22 +67,26 @@ class Welcome_win(wx.Frame):
         text3 = wx.StaticText(panel, label=self.info.gender)
         text3.SetFont(self.font)
         titleSizer.Add(text3, pos=(3, 1))
-        button1 = wx.Button(panel, size=(300,50), label="Training")
+
+
+        button_size = (300, 50)
+
+        button1 = wx.Button(panel, size=button_size, label="Training")
         button1.SetFont(self.font)
         button1.Bind(wx.EVT_BUTTON, self.open_trainingmode)
         sizer.Add(button1, pos=(1, 1), span=(1, 0))
 
-        button2 = wx.Button(panel, size=(300,50), label="Instructions")
+        button2 = wx.Button(panel, size=button_size, label="Instructions")
         button2.SetFont(self.font)
         button2.Bind(wx.EVT_BUTTON, self.open_instruction)
         sizer.Add(button2, pos=(2, 1), span=(1, 0))
 
-        button3 = wx.Button(panel, size=(300,50), label="Live Evaluation")
+        button3 = wx.Button(panel, size=button_size, label="Live Evaluation")
         button3.SetFont(self.font)
         button3.Bind(wx.EVT_BUTTON, self.open_bodygame)
         sizer.Add(button3, pos=(3, 1), span=(1, 0))
 
-        button3 = wx.Button(panel, size=(300,50), label="History Review")
+        button3 = wx.Button(panel, size=button_size, label="History Review")
         button3.SetFont(self.font)
         button3.Bind(wx.EVT_BUTTON, self.open_history)
         sizer.Add(button3, pos=(4, 1), span=(1, 0))
