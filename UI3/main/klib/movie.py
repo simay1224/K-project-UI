@@ -6,24 +6,23 @@ class Movie(object):
     """A Movie playing class with pygame package
     """
 
-    def __init__(self, filename, Kinect = True, width = 0, height = 0):
-        self.kinect = Kinect
-        if self.kinect:
-            pygame.mixer.quit()
-            self._movie = pygame.movie.Movie('./data/video/ex'+str(filename)+'.mpg')
-            self.w, self.h = [size for size in self._movie.get_size()]
+    def __init__(self, filename, width = 0, height = 0):
             self.kp = Kparam()
-            self.mscreen = pygame.Surface((self.kp.vid_w/2, self.kp.vid_h/2)).convert()
-            self._movie.set_display(self.mscreen, pygame.Rect(0, 0, self.kp.vid_w/2, self.kp.vid_h/2))
-            self._movie.play()
-        else:
-            self.kp = Kparam()
-            self.w, self.h = width, height
-            self._movie = np.zeros((self.w, self.h, 3))
-            self.mscreen = pygame.Surface((self.kp.vid_w/2, self.kp.vid_h/2)).convert()
+
+            if self.kp.kinect:
+                pygame.mixer.quit()
+                self._movie = pygame.movie.Movie('./data/video/ex'+str(filename)+'.mpg')
+                self.w, self.h = [size for size in self._movie.get_size()]
+                self.mscreen = pygame.Surface((self.kp.vid_w/2, self.kp.vid_h/2)).convert()
+                self._movie.set_display(self.mscreen, pygame.Rect(0, 0, self.kp.vid_w/2, self.kp.vid_h/2))
+                self._movie.play()
+            else:
+                self.w, self.h = width, height
+                self._movie = np.zeros((self.w, self.h, 3))
+                self.mscreen = pygame.Surface((self.kp.vid_w/2, self.kp.vid_h/2)).convert()
 
     def stop(self, delete=False):
-        if not self.kinect:
+        if not self.kp.kinect:
             return
 
         self._movie.stop()
@@ -32,7 +31,7 @@ class Movie(object):
             pygame.mixer.init()
 
     def rewind(self):
-        if not self.kinect:
+        if not self.kp.kinect:
             return
         "replay the movie"
         self._movie.rewind()
@@ -60,13 +59,13 @@ class Movie(object):
         if not tmode:
             if scale/pre_scale != 1:
                 self.mscreen = pygame.transform.scale(self.mscreen, (int(self.kp.vid_w/2.*scale), int(self.kp.vid_h/2.*scale)))
-                if self.kinect:
+                if self.kp.kinect:
                     self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.kp.vid_w/2.*scale), int(self.kp.vid_h/2.*scale)))
             surface.blit(self.mscreen, self.position(surface.get_width(), surface.get_height(), scale, Type))
         else:
             if scale/pre_scale != 1:
                 self.mscreen = pygame.transform.scale(self.mscreen, (int(self.kp.vid_w_t/2.*scale), int(self.kp.vid_h_t/2.*scale)))
-                if self.kinect:
+                if self.kp.kinect:
                     self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.kp.vid_w_t/2.*scale), int(self.kp.vid_h_t/2.*scale)))
             # surface.blit(self.mscreen, (surface.get_width()/2-int(self.kp.vid_w/4.*scale), int(surface.get_height()*self.kp.video1_UB/1080.)))
             surface.blit(self.mscreen, (surface.get_width()/2-int(self.kp.vid_w_t/4.*scale), int(surface.get_height()*50/1080.)))

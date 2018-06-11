@@ -158,4 +158,4 @@ DTW/*.jpg
 
 
 !requirement.txt
-!img/*.png
+test/

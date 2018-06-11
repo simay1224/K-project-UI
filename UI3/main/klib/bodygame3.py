@@ -144,7 +144,7 @@ class BodyGameRuntime(object):
         if self.kp.kinect:
             self.movie = movie.Movie(self.exeno)
         else:
-            self.movie = movie.Movie(self.exeno, False, self.kp.vid_w, self.kp.vid_h)
+            self.movie = movie.Movie(self.exeno, self.kp.vid_w, self.kp.vid_h)
         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
         self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
@@ -543,6 +543,7 @@ class BodyGameRuntime(object):
 
             # if self.kp.kinect == False:
             else:
+
                 # === dtw analyze & denoising process ===
                 self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                                     self.exeinst.str['name'][self.exeno], 1)# 1 is location
@@ -550,7 +551,7 @@ class BodyGameRuntime(object):
                     # === analyze ===
                     # reconJ, body, dframe, djps: all from kinect
                     # self.ana.run(self.exeno, None, self.bk_frame_surface,\
-                    self.ana.run(7, None, self.bk_frame_surface,\
+                    self.ana.run(self.exeno, None, self.bk_frame_surface,\
                                  self.eval, self.kp, None, None, None)
 
                     if self.ana.evalstr != '':
@@ -564,7 +565,6 @@ class BodyGameRuntime(object):
                                 self.evalhis.append(False)
 
                 else:
-                    self.evalhis = [True, True, True, True]
                     if not self.kp.finish:
                         errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
                                 self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here

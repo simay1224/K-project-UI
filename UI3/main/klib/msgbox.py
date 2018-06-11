@@ -138,18 +138,18 @@ class Msgbox(wx.Frame):
         message = 'Do you want to use following information?\nName: %s\nAge: %s\nGender: %s' %(self.fname+' '+self.lname, self.age, self.gender)
         dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
         result = dlg.ShowModal() == wx.ID_YES
+
+        dlg.Destroy()
         if result:
-            dlg.Destroy()
             self.Destroy()
-        else:
-            dlg.Destroy()
-        self.fname = ''
-        self.lname = ''
-        self.tc1.SetValue('')
-        self.tc2.SetValue('')
-        self.tc3.SetValue('')
-        self.rb_female.SetValue(False)
-        self.rb_male.SetValue(False)
+
+        # self.fname = ''
+        # self.lname = ''
+        # self.tc1.SetValue('')
+        # self.tc2.SetValue('')
+        # self.tc3.SetValue('')
+        # self.rb_female.SetValue(False)
+        # self.rb_male.SetValue(False)
 
     def _pass(self):
         self.fname = 'Jane'

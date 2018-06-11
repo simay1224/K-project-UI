@@ -134,21 +134,21 @@ class Analysis(object):
     def run(self, exeno, reconJ, surface, evalinst, kp, body, dmap=[], djps=[]):
         """ analysis main function
         """
-        kinect = (reconJ or body or dmap or djps)
-        if not kinect:
+
+        if not self.kp.kinect:
             stus = "up"
             self.evalstr = "not possible"
             self._done = True
             kp.finish = True
+            self.brth.cnt = 6
 
-            # self.brth.cnt = 6
 
-        if kinect and self.exer[exeno].limbjoints:
+        if self.kp.kinect and self.exer[exeno].limbjoints:
             reconJ21 = reconJ[12:]
 
         if exeno == 1:
             if self.exer[1].cntdown <= 0:
-                if kinect:
+                if self.kp.kinect:
                     stus = self.handpos(self.exer[1], reconJ21)
                 if stus != 'down':
                     if len(self.jointslist) == 0:  # store joints information
@@ -196,10 +196,10 @@ class Analysis(object):
                 self.exer[1].cntdown -= 1
 
         elif exeno == 2:
-            if kinect:
+            if self.kp.kinect:
                 stus = self.handpos(self.exer[2], reconJ21)
             if stus == 'up' or stus == 'upnotstraight':
-                if kinect:
+                if self.kp.kinect:
                     if len(self.jointslist) == 0:  # store joints information
                         self.jointslist = reconJ21
                     else:
@@ -250,7 +250,7 @@ class Analysis(object):
                     evalinst.blit_text(surface, exeno, kp, 'Please raise yours arms.', 2, color=self.c_normal)
 
         elif exeno == 3:
-            if kinect:
+            if self.kp.kinect:
                 stus = self.handpos(self.exer[3], reconJ)
             if stus == 'up':
                 self.pushdp.do = True
@@ -264,10 +264,10 @@ class Analysis(object):
                 else:
                     evalinst.blit_text(surface, exeno, kp, 'Please raise yours arms.', 2, color=self.c_normal)
             if self.pushdp.do:
-                if kinect:
+                if self.kp.kinect:
                     self.pushdp.run(reconJ, stus)
                 if 'stand' not in self.evalstr:
-                    if kinect:
+                    if self.kp.kinect:
                         self.bodystraight(reconJ)
                 if self.evalstr == '':
                     self.evalstr = self.pushdp.evalstr
@@ -291,10 +291,10 @@ class Analysis(object):
                 self.repcnt = self.pushdp.cnt
 
         elif exeno == 4:
-            if kinect:
+            if self.kp.kinect:
                 stus = self.handpos(self.exer[4], reconJ)
             if stus == 'horizontal' or stus == 'horizontal_bend':  # T-pose
-                if kinect:
+                if self.kp.kinect:
                     self.horzp.do = True
                     self.horzp.run(reconJ)
                     if 'stand' not in self.evalstr:
@@ -335,10 +335,10 @@ class Analysis(object):
                 self.repcnt = self.horzp.cnt
 
         elif exeno == 5:
-            if kinect:
+            if self.kp.kinect:
                 stus = self.handpos(self.exer[5], reconJ)
             if stus == 'up':
-                if kinect:
+                if self.kp.kinect:
                     self.swing.do = True
                     self.swing.run(reconJ)
                     if 'stand' not in self.evalstr:
@@ -374,11 +374,11 @@ class Analysis(object):
 
         elif exeno == 6:
             if self.exer[6].cntdown <= 0:
-                if kinect:
+                if self.kp.kinect:
                     stus = self.handpos(self.exer[6], reconJ)
                 if stus == 'belly':
                     self.cnt = 0
-                    if kinect:
+                    if self.kp.kinect:
                         self.shld.run(dmap, djps)
                     # self.exer[6].hraise = True
                 elif stus == 'down':
@@ -414,7 +414,7 @@ class Analysis(object):
 
         elif exeno == 7:
             if self.exer[7].cntdown <= 0:
-                if kinect:
+                if self.kp.kinect:
                     stus = self.handpos(self.exer[7], reconJ)
                 if stus == 'down':
                     if self.clsp.do:
@@ -427,7 +427,7 @@ class Analysis(object):
                         self.cnt += 1
                 else:
                     self.cnt = 0
-                    if kinect:
+                    if self.kp.kinect:
                         self.clsp.run(reconJ)
                 # === eval string update ===
                 if self.evalstr == '':
