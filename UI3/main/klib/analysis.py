@@ -140,8 +140,8 @@ class Analysis(object):
             self.evalstr = "not possible"
             self._done = True
             kp.finish = True
+            self.brth.cnt = 6
 
-            # self.brth.cnt = 6
 
         if kinect and self.exer[exeno].limbjoints:
             reconJ21 = reconJ[12:]

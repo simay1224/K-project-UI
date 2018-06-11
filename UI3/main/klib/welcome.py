@@ -30,7 +30,7 @@ class Welcome_win(wx.Frame):
         self.font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
 
-        super(Welcome_win, self).__init__(parent, title = title, size = (410, 350))
+        super(Welcome_win, self).__init__(parent, title = title, size = (410, 400))
         panel = wx.Panel(self)
 
         # sizers
@@ -60,21 +60,25 @@ class Welcome_win(wx.Frame):
         text3 = wx.StaticText(panel, label=self.info.gender)
         text3.SetFont(self.font)
         titleSizer.Add(text3, pos=(3, 1))
-
-        button1 = wx.Button(panel, size=(300, 50), label="Live Evaluation")
+        button1 = wx.Button(panel, size=(300,50), label="Training")
         button1.SetFont(self.font)
-        button1.Bind(wx.EVT_BUTTON, self.open_bodygame)
-        sizer.Add(button1, pos=(2, 0), span=(1, 0))
+        button1.Bind(wx.EVT_BUTTON, self.open_trainingmode)
+        sizer.Add(button1, pos=(1, 1), span=(1, 0))
 
-        button2 = wx.Button(panel, size=(300, 50), label="Exercise Instruction")
+        button2 = wx.Button(panel, size=(300,50), label="Instructions")
         button2.SetFont(self.font)
         button2.Bind(wx.EVT_BUTTON, self.open_instruction)
-        sizer.Add(button2, pos=(3, 0), span=(1, 0))
+        sizer.Add(button2, pos=(2, 1), span=(1, 0))
 
-        button3 = wx.Button(panel, size=(300, 50), label="History Review")
+        button3 = wx.Button(panel, size=(300,50), label="Live Evaluation")
+        button3.SetFont(self.font)
+        button3.Bind(wx.EVT_BUTTON, self.open_bodygame)
+        sizer.Add(button3, pos=(3, 1), span=(1, 0))
+
+        button3 = wx.Button(panel, size=(300,50), label="History Review")
         button3.SetFont(self.font)
         button3.Bind(wx.EVT_BUTTON, self.open_history)
-        sizer.Add(button3, pos=(4, 0), span=(1, 0))
+        sizer.Add(button3, pos=(4, 1), span=(1, 0))
 
         topSizer.Add(titleSizer, 0, wx.CENTER)
         topSizer.Add(sizer, 0, wx.CENTER)
@@ -97,6 +101,12 @@ class Welcome_win(wx.Frame):
 
     def open_history(self, event):
         history  = History_view(None, self.info)
+
+    def open_trainingmode(self, event):
+        self.train = trainingmode.BodyGameRuntime()
+        self.train.run()
+        # if self.train.kp._done:
+        #     self.Destroy()
 
     def OnEraseBackground(self, evt):
         """
