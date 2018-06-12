@@ -8,6 +8,8 @@ from matplotlib.figure import Figure
 from collections import defaultdict
 import wx.lib.mixins.inspection as WIT
 
+import sys, math
+
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
@@ -464,15 +466,38 @@ class History_view(wx.Frame):
         x_name = df_name['time'].tolist()
         self.axes.clear()
         try:
-            self.axes.bar(x, y, color='g')
+            self.axes.plot(x, y, color='#0000FF')
+            # self.axes.bar(x, y, color='g')
             if df_ideal[item].dtype == float:
                 cri = df_ideal[item][0]
                 self.axes.axhline(cri, color='r', linestyle='-', linewidth=4)
             else:
-                cri = 0
+                cri = -1
             self.axes.set_title(item)
             self.axes.set_xticks(x)
-            self.axes.set_ylim(0,max(np.max(y),cri)+10)
+            # self.axes.set_ylim(0,max(np.max(y),cri)+10)
+
+            # not sure why np.min() / np.max() not working
+            y_min = sys.float_info.max
+            y_max = -sys.float_info.max
+            for i in range(0, y.shape[0]):
+                if (math.isnan(y[i])):
+                    continue
+                if (y[i] < y_min):
+                    y_min = y[i]
+                elif (y[i] > y_max):
+                    y_max = y[i]
+
+            # print(y_min, y_max, np.amin(y), np.amax(y))
+            # 4.43289792333271 62.82625302045408 31.89259259259258 31.89259259259258
+
+            if cri == -1:
+                self.axes.set_ylim(y_min - 10, y_max + 10)
+            else:
+                self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
+
+
+
             self.axes.set_xticklabels(x_name, rotation=25, fontsize=10)
             self.canvas.draw()
         except:
