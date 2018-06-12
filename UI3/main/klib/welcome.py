@@ -27,16 +27,23 @@ class Welcome_win(wx.Frame):
         self.info = info
         self.game = None
 
-        self.font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
 
-        super(Welcome_win, self).__init__(parent, title = title, size = (410, 400))
+        super(Welcome_win, self).__init__(parent, title = title, size = (410, 460))
         panel = wx.Panel(self)
 
         # sizers
         topSizer = wx.BoxSizer(wx.VERTICAL)
         titleSizer = wx.GridBagSizer(5, 5)
         sizer = wx.GridBagSizer(5, 5)
+
+        # title
+        text = wx.StaticText(panel, label="LymphCoach")
+        text.SetFont(self.font_title)
+        topSizer.Add(text, 0, wx.CENTER)
+
 
         # Basic information
         text11 = wx.StaticText(panel, label="Name:")
@@ -60,22 +67,26 @@ class Welcome_win(wx.Frame):
         text3 = wx.StaticText(panel, label=self.info.gender)
         text3.SetFont(self.font)
         titleSizer.Add(text3, pos=(3, 1))
-        button1 = wx.Button(panel, size=(300,50), label="Training")
+
+
+        button_size = (300, 50)
+
+        button1 = wx.Button(panel, size=button_size, label="Training")
         button1.SetFont(self.font)
         button1.Bind(wx.EVT_BUTTON, self.open_trainingmode)
         sizer.Add(button1, pos=(1, 1), span=(1, 0))
 
-        button2 = wx.Button(panel, size=(300,50), label="Instructions")
+        button2 = wx.Button(panel, size=button_size, label="Instructions")
         button2.SetFont(self.font)
         button2.Bind(wx.EVT_BUTTON, self.open_instruction)
         sizer.Add(button2, pos=(2, 1), span=(1, 0))
 
-        button3 = wx.Button(panel, size=(300,50), label="Live Evaluation")
+        button3 = wx.Button(panel, size=button_size, label="Live Evaluation")
         button3.SetFont(self.font)
         button3.Bind(wx.EVT_BUTTON, self.open_bodygame)
         sizer.Add(button3, pos=(3, 1), span=(1, 0))
 
-        button3 = wx.Button(panel, size=(300,50), label="History Review")
+        button3 = wx.Button(panel, size=button_size, label="History Review")
         button3.SetFont(self.font)
         button3.Bind(wx.EVT_BUTTON, self.open_history)
         sizer.Add(button3, pos=(4, 1), span=(1, 0))
@@ -126,32 +137,45 @@ class Instrcution_win(wx.Frame):
 
     def __init__(self, parent, title):
         self.init_text()
-        super(Instrcution_win, self).__init__(parent, title=title, size=(1250, 700))
+        super(Instrcution_win, self).__init__(parent, title=title, size=(950, 700))
 
         panel = wx.Panel(self)
         box = wx.BoxSizer(wx.HORIZONTAL)
-        self.font = wx.Font(20, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
-        self.text = wx.TextCtrl(panel, size = (900,300), style = wx.TE_MULTILINE|wx.TE_READONLY)
-        self.player = Panel1(panel, -1)
+        self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        # self.text = wx.TextCtrl(panel, size = (900,300), style = wx.TE_MULTILINE|wx.TE_READONLY)
+        self.player = MoviePanel(panel, -1)
+        self.text = wx.TextCtrl(panel, size=self.player.mc.GetBestSize(), style=wx.TE_MULTILINE|wx.TE_READONLY)
         self.text.SetFont(self.font)
+        # self.text.SetBackgroundColour((255, 255, 255))
         self.text.SetBackgroundColour((179, 236, 255))
         languages = [self.str['exe'][1], self.str['exe'][2], self.str['exe'][3], self.str['exe'][4],\
                      self.str['exe'][5], self.str['exe'][6], self.str['exe'][7]]
 
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.VERTICAL)
-        lst = wx.ListBox(panel, size = (250, 600*0.95), choices=languages, style=wx.LB_SINGLE)
+        lst = wx.ListBox(panel, size = (250, self.player.mc.GetBestSize()[1] * 2), choices=languages, style=wx.LB_SINGLE)
         lst.SetBackgroundColour((255, 255, 255))
         button1 = wx.Button(panel, label="Close")
         button1.Bind(wx.EVT_BUTTON, self.close)
 
-        box2.Add(lst,0,wx.EXPAND)
-        box2.Add(button1,1,wx.EXPAND)
-        box3.Add(self.text,0,wx.EXPAND)
-        box3.Add(self.player,1,wx.EXPAND)
+        button_print = wx.Button(panel, id=wx.ID_PRINT, label="")
+        button_print.SetFocus()
+        self.Bind(wx.EVT_BUTTON, self.OnBtnPrint, button_print)
 
-        box.Add(box2,0,wx.EXPAND)
+        box2.Add(lst, 0, wx.EXPAND)
+        box2.Add(button1, 1, wx.EXPAND)
+        box3.Add(self.player, 0, wx.EXPAND)
+
+        text_sizer = wx.GridBagSizer(5, 5)
+        text_sizer.Add(button_print, (4, 4))
+        text_sizer.Add(self.text, (0, 0), span=(5, 0))  # for .avi .mpg video files
+
+        # box3.Add(self.text, 0, wx.LEFT)
+        box3.Add(text_sizer, 0, wx.LEFT)
+
+        box.Add(box2, 0,wx.EXPAND)
         box.Add(box3, 1, wx.EXPAND)
+        # box.Add(button_print, 2, wx.RIGHT)
         panel.SetSizer(box)
         panel.Fit()
 
@@ -251,8 +275,122 @@ class Instrcution_win(wx.Frame):
         self.text.AppendText(self.str['note'][ex])
         self.player.doLoadFile('./video/ex'+str(ex)+'.mpg')
 
+
+    def OnBtnPrint(self, event):
+        """
+        Print the document.
+        """
+
+        text = self.text.GetValue()
+
+        #------------
+
+        pd = wx.PrintData()
+
+        pd.SetPrinterName("")
+        pd.SetOrientation(wx.PORTRAIT)
+        pd.SetPaperId(wx.PAPER_A4)
+        pd.SetQuality(wx.PRINT_QUALITY_DRAFT)
+        # Black and white printing if False.
+        pd.SetColour(True)
+        pd.SetNoCopies(1)
+        pd.SetCollate(True)
+
+        #------------
+
+        pdd = wx.PrintDialogData()
+
+        pdd.SetPrintData(pd)
+        pdd.SetMinPage(1)
+        pdd.SetMaxPage(1)
+        pdd.SetFromPage(1)
+        pdd.SetToPage(1)
+        pdd.SetPrintToFile(False)
+        # pdd.SetSetupDialog(False)
+        # pdd.EnableSelection(True)
+        # pdd.EnablePrintToFile(True)
+        # pdd.EnablePageNumbers(True)
+        # pdd.SetAllPages(True)
+
+        #------------
+
+        dlg = wx.PrintDialog(self, pdd)
+
+        if dlg.ShowModal() == wx.ID_OK:
+            dc = dlg.GetPrintDC()
+
+            dc.StartDoc("My document title")
+            dc.StartPage()
+
+            # (wx.MM_METRIC) ---> Each logical unit is 1 mm.
+            # (wx.MM_POINTS) ---> Each logical unit is a "printer point" i.e.
+            dc.SetMapMode(wx.MM_POINTS)
+
+            dc.SetTextForeground("red")
+            dc.SetFont(wx.Font(20, wx.SWISS, wx.NORMAL, wx.BOLD))
+            dc.DrawText(text, 50, 100)
+
+            dc.EndPage()
+            dc.EndDoc()
+            del dc
+
+        else :
+            dlg.Destroy()
+
+
     def close(self, event):
         self.Destroy()
+
+
+class MoviePanel(wx.Panel):
+    def __init__(self, parent, id):
+        #self.log = log
+        wx.Panel.__init__(self, parent, -1, style=wx.TAB_TRAVERSAL|wx.CLIP_CHILDREN)
+
+        # Create some controls
+        self.mc = wx.media.MediaCtrl(self, size=(500,300), style=wx.SIMPLE_BORDER)
+        playButton = wx.Button(self, -1, "Play")
+        self.Bind(wx.EVT_BUTTON, self.onPlay, playButton)
+
+        pauseButton = wx.Button(self, -1, "Pause")
+        self.Bind(wx.EVT_BUTTON, self.onPause, pauseButton)
+
+        stopButton = wx.Button(self, -1, "Stop")
+        self.Bind(wx.EVT_BUTTON, self.onStop, stopButton)
+        # self.st_file = wx.StaticText(self, -1, ".mid .mp3 .wav .au .avi .mpg", size=(200,-1))
+        self.st_size = wx.StaticText(self, -1, size=(100, -1))
+        self.st_len  = wx.StaticText(self, -1, size=(100, -1))
+        self.st_pos  = wx.StaticText(self, -1, size=(100, -1))
+
+        # setup the button/label layout using a sizer
+        sizer = wx.GridBagSizer(5, 5)
+        # sizer.Add(loadButton, (1,1))
+        sizer.Add(playButton, (2, 4))
+        sizer.Add(pauseButton, (3, 4))
+        sizer.Add(stopButton, (4, 4))
+        sizer.Add(self.mc, (0, 0), span=(5, 0))  # for .avi .mpg video files
+        self.SetSizer(sizer)
+
+
+    def doLoadFile(self, path):
+        if not self.mc.Load(path):
+            wx.MessageBox("Unable to load %s: Unsupported format?" % path, "ERROR", wx.ICON_ERROR | wx.OK)
+        else:
+            filename = './video/ex'+str(1)+'.mpg'
+            self.st_file.SetLabel('%s' % filename)
+            self.GetSizer().Layout()
+            self.mc.Play()#ITS TO PROBLEM, WHY IT DOESNT PLAY HERE?#
+
+    def onPlay(self, evt):
+        self.mc.Play()
+
+    def onPause(self, evt):
+        self.mc.Pause()
+
+    def onStop(self, evt):
+        self.mc.Stop()
+
+
 
 class History_view( wx.Frame ):
     def __init__(self, parent, info = Info(), title = 'welcome'):
@@ -338,53 +476,3 @@ class History_view( wx.Frame ):
         except:
             self.axes.imshow(self.no_hist_img)
             self.canvas.draw()
-
-
-class Panel1(wx.Panel):
-    def __init__(self, parent, id):
-        #self.log = log
-        wx.Panel.__init__(self, parent, -1, style=wx.TAB_TRAVERSAL|wx.CLIP_CHILDREN)
-
-        # Create some controls
-        self.mc = wx.media.MediaCtrl(self, size=(500,300), style=wx.SIMPLE_BORDER)
-
-        playButton = wx.Button(self, -1, "Play")
-        self.Bind(wx.EVT_BUTTON, self.onPlay, playButton)
-
-        pauseButton = wx.Button(self, -1, "Pause")
-        self.Bind(wx.EVT_BUTTON, self.onPause, pauseButton)
-
-        stopButton = wx.Button(self, -1, "Stop")
-        self.Bind(wx.EVT_BUTTON, self.onStop, stopButton)
-        self.st_file = wx.StaticText(self, -1, ".mid .mp3 .wav .au .avi .mpg", size=(200,-1))
-        self.st_size = wx.StaticText(self, -1, size=(100,-1))
-        self.st_len  = wx.StaticText(self, -1, size=(100,-1))
-        self.st_pos  = wx.StaticText(self, -1, size=(100,-1))
-
-        # setup the button/label layout using a sizer
-        sizer = wx.GridBagSizer(5,5)
-        # sizer.Add(loadButton, (1,1))
-        sizer.Add(playButton, (2,1))
-        sizer.Add(pauseButton, (3,1))
-        sizer.Add(stopButton, (4,1))
-        sizer.Add(self.mc, (1,3), span=(4,1))  # for .avi .mpg video files
-        self.SetSizer(sizer)
-
-
-    def doLoadFile(self, path):
-        if not self.mc.Load(path):
-            wx.MessageBox("Unable to load %s: Unsupported format?" % path, "ERROR", wx.ICON_ERROR | wx.OK)
-        else:
-            filename = './video/ex'+str(1)+'.mpg'
-            self.st_file.SetLabel('%s' % filename)
-            self.GetSizer().Layout()
-            self.mc.Play()#ITS TO PROBLEM, WHY IT DOESNT PLAY HERE?#
-
-    def onPlay(self, evt):
-        self.mc.Play()
-
-    def onPause(self, evt):
-        self.mc.Pause()
-
-    def onStop(self, evt):
-        self.mc.Stop()
