@@ -137,7 +137,7 @@ class Instrcution_win(wx.Frame):
 
     def __init__(self, parent, title):
         self.init_text()
-        super(Instrcution_win, self).__init__(parent, title=title, size=(1080, 700))
+        super(Instrcution_win, self).__init__(parent, title=title, size=(950, 700))
 
         panel = wx.Panel(self)
         box = wx.BoxSizer(wx.HORIZONTAL)
