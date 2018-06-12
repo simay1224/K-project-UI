@@ -13,8 +13,9 @@ class Msgbox(wx.Frame):
             size=(self.width, self.height), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
         self.fname  = 'Jane'
         self.lname  = 'Doe'
-        self.age    = 'unknown'
-        self.gender = 'unknown'
+        self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
+        self.age    = '19'
+        self.gender = 'Female'
         self.InitUI()
         self.Centre()
         self.Show()
@@ -53,7 +54,7 @@ class Msgbox(wx.Frame):
 
         sb = wx.StaticBox(self.panel, label="Please Select Your Gender")
         sb.SetFont(self.font)
-        self.rb_female = wx.RadioButton(self.panel, label="Female")
+        self.rb_female = wx.RadioButton(self.panel, label="female")
         self.rb_female.SetFont(self.font)
         self.rb_male   = wx.RadioButton(self.panel, label="Male")
         self.rb_male.SetFont(self.font)
@@ -130,11 +131,11 @@ class Msgbox(wx.Frame):
                 dlg.Destroy()
 
     def cancel(self, event):
-        self.fname = 'Jane'
-        self.lname = 'Doe'
-        self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
-        self.age = 'unknown'
-        self.gender = 'unknown'
+        # self.fname = 'Jane'
+        # self.lname = 'Doe'
+        # self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
+        # self.age = '9'
+        # self.gender = 'Female'
         message = 'Do you want to use following information?\nName: %s\nAge: %s\nGender: %s' %(self.fname+' '+self.lname, self.age, self.gender)
         dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
         result = dlg.ShowModal() == wx.ID_YES
@@ -151,12 +152,6 @@ class Msgbox(wx.Frame):
         # self.rb_female.SetValue(False)
         # self.rb_male.SetValue(False)
 
-    def _pass(self):
-        self.fname = 'Jane'
-        self.lname = 'Doe'
-        self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
-        self.age = 'unknown'
-        self.gender = 'unknown'
 
 
 # if __name__ == '__main__':

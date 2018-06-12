@@ -16,11 +16,11 @@ from ..klib import bodygame3
 from ..klib import trainingmode
 from .historylog import Historylog
 
-class Info():
-    def __init__(self):
-        self.name   = 'jane doe'
-        self.age    = 'unknown'
-        self.gender = 'unknown'
+# class Info():
+#     def __init__(self):
+#         self.name   = 'jane doe'
+#         self.age    = '19'
+#         self.gender = 'female'
 
 class Welcome_win(wx.Frame):
     def __init__(self, info, parent, title):
@@ -31,7 +31,7 @@ class Welcome_win(wx.Frame):
         self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
 
-        super(Welcome_win, self).__init__(parent, title = title, size = (410, 460))
+        super(Welcome_win, self).__init__(parent, title=title, size=(410, 500))
         panel = wx.Panel(self)
 
         # sizers
@@ -54,20 +54,19 @@ class Welcome_win(wx.Frame):
         text1.SetFont(self.font)
         titleSizer.Add(text1, pos=(1, 1))
 
-        text21 = wx.StaticText(panel, label="Age:")
+        text21 = wx.StaticText(panel, label="Gender:")
         text21.SetFont(self.font_field)
         titleSizer.Add(text21, pos=(2, 0))
-        text2 = wx.StaticText(panel, label=self.info.age)
+        text2 = wx.StaticText(panel, label=self.info.gender)
         text2.SetFont(self.font)
         titleSizer.Add(text2, pos=(2, 1))
 
-        text31 = wx.StaticText(panel, label="Gender:")
+        text31 = wx.StaticText(panel, label="Age:")
         text31.SetFont(self.font_field)
         titleSizer.Add(text31, pos=(3, 0))
-        text3 = wx.StaticText(panel, label=self.info.gender)
+        text3 = wx.StaticText(panel, label=self.info.age)
         text3.SetFont(self.font)
         titleSizer.Add(text3, pos=(3, 1))
-
 
         button_size = (300, 50)
 
@@ -392,15 +391,15 @@ class MoviePanel(wx.Panel):
 
 
 
-class History_view( wx.Frame ):
-    def __init__(self, parent, info = Info(), title = 'welcome'):
-        super(History_view, self).__init__(parent, title = title, size = (850, 520))
+class History_view(wx.Frame):
+    def __init__(self, parent, info, title='welcome'):
+        super(History_view, self).__init__(parent, title=title, size=(850, 520))
         self.info = info
         self.no_hist_img = cv2.imread('./data/no_hist.jpg')
         self.InitUI()
         self.Show()
 
-    def InitUI(self, path = './output/log.xlsx'):
+    def InitUI(self, path='./output/log.xlsx'):
         self.font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)
         self.path = path
         try:
@@ -417,8 +416,11 @@ class History_view( wx.Frame ):
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.HORIZONTAL)
 
-        info_text = 'Name: '+self.info.name.title()+'\nGender: '+self.info.gender.title()+'     Age: '+str(self.info.age)
-        info = wx.StaticText(self.panel, wx.ID_ANY, label = info_text)
+        info_text = 'Name: ' + self.info.name.title() + \
+                    '\nGender: ' + self.info.gender.title() + \
+                    '\nAge: ' + str(self.info.age)
+
+        info = wx.StaticText(self.panel, wx.ID_ANY, label=info_text)
         info.SetFont(self.font)
         box1.Add(info, 0, wx.EXPAND)
 
@@ -429,7 +431,7 @@ class History_view( wx.Frame ):
         box1.Add(self.choice, 1, wx.EXPAND)
         box2.Add(box1, 0)
 
-        self.lst = wx.ListBox(self.panel, size = (330, 300), choices = [], style = wx.LB_SINGLE)
+        self.lst = wx.ListBox(self.panel, size=(330, 300), choices=[], style=wx.LB_SINGLE)
         self.lst.SetFont(self.font)
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
         box2.Add(self.lst, 1, wx.EXPAND)
@@ -449,7 +451,7 @@ class History_view( wx.Frame ):
         self.df = pd.read_excel(self.path, sheetname=cur_choice)
         self.lst.Clear()
         lst_choice = self.df.columns.values.tolist()
-        idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0]+1
+        idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0] + 1
         idx_2 = [i for i, elem in enumerate(lst_choice) if 'errmsg' in elem][0]
         self.lst.InsertItems(lst_choice[idx_1:idx_2], 0)
 
