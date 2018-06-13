@@ -16,7 +16,7 @@ def main():
     info = msgbox.Msgbox(None, title="Welcome")
     # info._pass()
 
-    main_win = welcome.Welcome_win(info, parent=None, title='Menu')
+    # main_win = welcome.Welcome_win(info, parent=None, title='Menu')
     app.MainLoop()
 
     return main_win.game
