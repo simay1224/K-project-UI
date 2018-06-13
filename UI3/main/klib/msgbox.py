@@ -221,9 +221,9 @@ class Msgbox(wx.Frame):
 
         else:
             self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
-            message = 'Is the following infomation correct?\nName: %s\nAge: %s\nGender: %s' %(self.fname+' '+self.lname, self.age, self.gender)
+            message = 'Is the following infomation correct?\nPatient:\n\tName: %s\n\tAge: %s\n\tGender: %s' %(self.fname+' '+self.lname, self.age, self.gender)
             if self.isCli:
-                message = 'Is the following infomation correct?\nName: %s' %(self.fcname+' '+self.lcname)
+                message = 'Is the following infomation correct?\nClinician:\n\tName: %s' %(self.fcname+' '+self.lcname)
                 self.name = '%s %s' %(self.fcname.lower(), self.lcname.lower())
             dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
             result = dlg.ShowModal() == wx.ID_YES
@@ -259,3 +259,9 @@ class Msgbox(wx.Frame):
         self.tcc3.SetValue('')
         self.rb_female.SetValue(False)
         self.rb_male.SetValue(False)
+    def _pass(self):
+        self.fname = 'Jane'
+        self.lname = 'Doe'
+        self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
+        self.age = '19'
+        self.gender = 'Female'

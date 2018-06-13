@@ -33,71 +33,79 @@ class Welcome_win(wx.Frame):
         self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
 
-        super(Welcome_win, self).__init__(parent, title=title, size=(410, 500))
-        panel = wx.Panel(self)
+        self.width = 410
+        self.height = 500
+        self.sizer_w = 5
+        self.sizer_h = 5
+        super(Welcome_win, self).__init__(parent, title=title, size=(self.width, self.height))
+        self.panel = wx.Panel(self)
 
         # sizers
         topSizer = wx.BoxSizer(wx.VERTICAL)
         titleSizer = wx.GridBagSizer(5, 5)
+        lineSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         sizer = wx.GridBagSizer(5, 5)
 
         # title
-        text = wx.StaticText(panel, label="LymphCoach")
+        text = wx.StaticText(self.panel, label="LymphCoach")
         text.SetFont(self.font_title)
         topSizer.Add(text, 0, wx.CENTER)
 
+        line = wx.StaticLine(self.panel)
+        lineSizer.Add(line, pos=(0, 0), span=(0, int(self.width/self.sizer_w / 2)), flag=wx.EXPAND|wx.BOTTOM)
 
         # Basic information
-        text11 = wx.StaticText(panel, label="Name:")
+        text11 = wx.StaticText(self.panel, label="Name:")
         text11.SetFont(self.font_field)
         titleSizer.Add(text11, pos=(1, 0))
 
-        text1 = wx.StaticText(panel, label=self.info.fname + " " + self.info.lname)
+        text1 = wx.StaticText(self.panel, label=self.info.fname + " " + self.info.lname)
         text1.SetFont(self.font)
         titleSizer.Add(text1, pos=(1, 1))
 
-        text21 = wx.StaticText(panel, label="Gender:")
+        text21 = wx.StaticText(self.panel, label="Gender:")
         text21.SetFont(self.font_field)
         titleSizer.Add(text21, pos=(2, 0))
-        text2 = wx.StaticText(panel, label=self.info.gender)
+        text2 = wx.StaticText(self.panel, label=self.info.gender)
         text2.SetFont(self.font)
         titleSizer.Add(text2, pos=(2, 1))
 
-        text31 = wx.StaticText(panel, label="Age:")
+        text31 = wx.StaticText(self.panel, label="Age:")
         text31.SetFont(self.font_field)
         titleSizer.Add(text31, pos=(3, 0))
-        text3 = wx.StaticText(panel, label=self.info.age)
+        text3 = wx.StaticText(self.panel, label=self.info.age)
         text3.SetFont(self.font)
         titleSizer.Add(text3, pos=(3, 1))
 
         button_size = (300, 50)
 
-        button1 = wx.Button(panel, size=button_size, label="Training")
+        button1 = wx.Button(self.panel, size=button_size, label="Instruction with Video")
         button1.SetFont(self.font)
         button1.Bind(wx.EVT_BUTTON, self.open_trainingmode)
         sizer.Add(button1, pos=(1, 1), span=(1, 0))
 
-        button2 = wx.Button(panel, size=button_size, label="Instructions")
+        button2 = wx.Button(self.panel, size=button_size, label="Training Mode")
         button2.SetFont(self.font)
         button2.Bind(wx.EVT_BUTTON, self.open_instruction)
         sizer.Add(button2, pos=(2, 1), span=(1, 0))
 
-        button3 = wx.Button(panel, size=button_size, label="Live Evaluation")
+        button3 = wx.Button(self.panel, size=button_size, label="Evaluation Mode")
         button3.SetFont(self.font)
         button3.Bind(wx.EVT_BUTTON, self.open_bodygame)
         sizer.Add(button3, pos=(3, 1), span=(1, 0))
 
-        button3 = wx.Button(panel, size=button_size, label="History Review")
+        button3 = wx.Button(self.panel, size=button_size, label="History Review")
         button3.SetFont(self.font)
         button3.Bind(wx.EVT_BUTTON, self.open_history)
         sizer.Add(button3, pos=(4, 1), span=(1, 0))
 
+        topSizer.Add(lineSizer, 0, wx.CENTER)
         topSizer.Add(titleSizer, 0, wx.CENTER)
         topSizer.Add(sizer, 0, wx.CENTER)
-        panel.SetSizer(topSizer)
+        self.panel.SetSizer(topSizer)
 
-        # panel.SetSizer(sizer)
-        # panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+        # self.panel.SetSizer(sizer)
+        # self.panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Show(True)
 
     def open_bodygame(self, event):
@@ -140,12 +148,12 @@ class Instrcution_win(wx.Frame):
         self.init_text()
         super(Instrcution_win, self).__init__(parent, title=title, size=(950, 700))
 
-        panel = wx.Panel(self)
+        self.panel = wx.Panel(self)
         box = wx.BoxSizer(wx.HORIZONTAL)
         self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
-        # self.text = wx.TextCtrl(panel, size = (900,300), style = wx.TE_MULTILINE|wx.TE_READONLY)
-        self.player = MoviePanel(panel, -1)
-        self.text = wx.TextCtrl(panel, size=self.player.mc.GetBestSize(), style=wx.TE_MULTILINE|wx.TE_READONLY)
+        # self.text = wx.TextCtrl(self.panel, size = (900,300), style = wx.TE_MULTILINE|wx.TE_READONLY)
+        self.player = MoviePanel(self.panel, -1)
+        self.text = wx.TextCtrl(self.panel, size=self.player.mc.GetBestSize(), style=wx.TE_MULTILINE|wx.TE_READONLY)
         self.text.SetFont(self.font)
         # self.text.SetBackgroundColour((255, 255, 255))
         self.text.SetBackgroundColour((179, 236, 255))
@@ -154,12 +162,12 @@ class Instrcution_win(wx.Frame):
 
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.VERTICAL)
-        lst = wx.ListBox(panel, size = (250, self.player.mc.GetBestSize()[1] * 2), choices=languages, style=wx.LB_SINGLE)
+        lst = wx.ListBox(self.panel, size = (250, self.player.mc.GetBestSize()[1] * 2), choices=languages, style=wx.LB_SINGLE)
         lst.SetBackgroundColour((255, 255, 255))
-        button1 = wx.Button(panel, label="Close")
+        button1 = wx.Button(self.panel, label="Close")
         button1.Bind(wx.EVT_BUTTON, self.close)
 
-        button_print = wx.Button(panel, id=wx.ID_PRINT, label="")
+        button_print = wx.Button(self.panel, id=wx.ID_PRINT, label="")
         button_print.SetFocus()
         self.Bind(wx.EVT_BUTTON, self.OnBtnPrint, button_print)
 
@@ -177,8 +185,8 @@ class Instrcution_win(wx.Frame):
         box.Add(box2, 0,wx.EXPAND)
         box.Add(box3, 1, wx.EXPAND)
         # box.Add(button_print, 2, wx.RIGHT)
-        panel.SetSizer(box)
-        panel.Fit()
+        self.panel.SetSizer(box)
+        self.panel.Fit()
 
         self.Centre()
         self.Bind(wx.EVT_LISTBOX, self.onListBox, lst)
@@ -412,7 +420,7 @@ class History_view(wx.Frame):
             hist.newlog()
             log_xl = pd.ExcelFile(path)
 
-        self.panel = wx.Panel(self)
+        self.self.panel = wx.Panel(self)
 
         box1 = wx.BoxSizer(wx.VERTICAL)
         box2 = wx.BoxSizer(wx.VERTICAL)
@@ -422,18 +430,18 @@ class History_view(wx.Frame):
                     '\nGender: ' + self.info.gender.title() + \
                     '\nAge: ' + str(self.info.age)
 
-        info = wx.StaticText(self.panel, wx.ID_ANY, label=info_text)
+        info = wx.StaticText(self.self.panel, wx.ID_ANY, label=info_text)
         info.SetFont(self.font)
         box1.Add(info, 0, wx.EXPAND)
 
         ex_choices = log_xl.sheet_names
-        self.choice = wx.Choice(self.panel, choices=ex_choices)
+        self.choice = wx.Choice(self.self.panel, choices=ex_choices)
         self.choice.SetFont(self.font)
         self.choice.Bind(wx.EVT_CHOICE, self.update_choice)
         box1.Add(self.choice, 1, wx.EXPAND)
         box2.Add(box1, 0)
 
-        self.lst = wx.ListBox(self.panel, size=(330, 300), choices=[], style=wx.LB_SINGLE)
+        self.lst = wx.ListBox(self.self.panel, size=(330, 300), choices=[], style=wx.LB_SINGLE)
         self.lst.SetFont(self.font)
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
         box2.Add(self.lst, 1, wx.EXPAND)
@@ -442,11 +450,11 @@ class History_view(wx.Frame):
 
         self.figure = Figure()
         self.axes = self.figure.add_subplot(111)
-        self.canvas = FigureCanvas(self.panel, -1, self.figure)
+        self.canvas = FigureCanvas(self.self.panel, -1, self.figure)
         box3.Add(self.canvas, 1, wx.EXPAND)
 
-        self.panel.SetSizer(box3)
-        self.panel.Fit()
+        self.self.panel.SetSizer(box3)
+        self.self.panel.Fit()
 
     def update_choice (self, event):
         cur_choice = self.choice.GetSelection()
