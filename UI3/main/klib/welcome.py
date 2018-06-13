@@ -29,9 +29,6 @@ class Welcome_win(wx.Frame):
         self.info = info
         self.game = None
 
-        self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
-        self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
-        self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
 
         self.width = 410
         self.height = 500
@@ -39,6 +36,14 @@ class Welcome_win(wx.Frame):
         self.sizer_h = 5
         super(Welcome_win, self).__init__(parent, title=title, size=(self.width, self.height))
         self.panel = wx.Panel(self)
+
+        self.init_ui()
+
+    def init_ui(self):
+        self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
+
 
         # sizers
         topSizer = wx.BoxSizer(wx.VERTICAL)
@@ -205,13 +210,13 @@ class Instrcution_win(wx.Frame):
 
         self.str['ins'][1] = '\n  '\
                              '\n1. Put your hands on the belly position.'\
-                             '\n2. Wait until the sign shows "start breath in/out."'\
+                             '\n2. Wait until the sign shows "start breathe in/out."'\
                              '\n3. Do deep breathing 4 times.'\
                              '\n4. Put down your hands.'
 
         self.str['ins'][2] = '\n  '\
                              '\n1. Raise your harms up and hold there.'\
-                             '\n2. Wait until the sign shows "start breath in/out."'\
+                             '\n2. Wait until the sign shows "start breathe in/out."'\
                              '\n3. Do deep breathing 4 times.' \
                              '\n4. Put down your arms.'
 
@@ -406,10 +411,12 @@ class History_view(wx.Frame):
         super(History_view, self).__init__(parent, title=title, size=(850, 520))
         self.info = info
         self.no_hist_img = cv2.imread('./data/no_hist.jpg')
-        self.InitUI()
+        self.init_ui()
+        self.color_correct = (0.41, 0.75, 0.07, 0.6)
+        self.color_line = '#005A73'
         self.Show()
 
-    def InitUI(self, path='./output/log.xlsx'):
+    def init_ui(self, path='./output/log.xlsx'):
         self.font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)
         self.path = path
         try:
@@ -420,7 +427,7 @@ class History_view(wx.Frame):
             hist.newlog()
             log_xl = pd.ExcelFile(path)
 
-        self.self.panel = wx.Panel(self)
+        self.panel = wx.Panel(self)
 
         box1 = wx.BoxSizer(wx.VERTICAL)
         box2 = wx.BoxSizer(wx.VERTICAL)
@@ -430,18 +437,18 @@ class History_view(wx.Frame):
                     '\nGender: ' + self.info.gender.title() + \
                     '\nAge: ' + str(self.info.age)
 
-        info = wx.StaticText(self.self.panel, wx.ID_ANY, label=info_text)
+        info = wx.StaticText(self.panel, wx.ID_ANY, label=info_text)
         info.SetFont(self.font)
         box1.Add(info, 0, wx.EXPAND)
 
         ex_choices = log_xl.sheet_names
-        self.choice = wx.Choice(self.self.panel, choices=ex_choices)
+        self.choice = wx.Choice(self.panel, choices=ex_choices)
         self.choice.SetFont(self.font)
         self.choice.Bind(wx.EVT_CHOICE, self.update_choice)
         box1.Add(self.choice, 1, wx.EXPAND)
         box2.Add(box1, 0)
 
-        self.lst = wx.ListBox(self.self.panel, size=(330, 300), choices=[], style=wx.LB_SINGLE)
+        self.lst = wx.ListBox(self.panel, size=(330, 300), choices=[], style=wx.LB_SINGLE)
         self.lst.SetFont(self.font)
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
         box2.Add(self.lst, 1, wx.EXPAND)
@@ -450,11 +457,11 @@ class History_view(wx.Frame):
 
         self.figure = Figure()
         self.axes = self.figure.add_subplot(111)
-        self.canvas = FigureCanvas(self.self.panel, -1, self.figure)
+        self.canvas = FigureCanvas(self.panel, -1, self.figure)
         box3.Add(self.canvas, 1, wx.EXPAND)
 
-        self.self.panel.SetSizer(box3)
-        self.self.panel.Fit()
+        self.panel.SetSizer(box3)
+        self.panel.Fit()
 
     def update_choice (self, event):
         cur_choice = self.choice.GetSelection()
@@ -474,11 +481,11 @@ class History_view(wx.Frame):
         x_name = df_name['time'].tolist()
         self.axes.clear()
         try:
-            self.axes.plot(x, y, color='#0000FF')
+            self.axes.plot(x, y, color=self.color_line)
             # self.axes.bar(x, y, color='g')
             if df_ideal[item].dtype == float:
                 cri = df_ideal[item][0]
-                self.axes.axhline(cri, color='r', linestyle='-', linewidth=4)
+                self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
             else:
                 cri = -1
             self.axes.set_title(item)

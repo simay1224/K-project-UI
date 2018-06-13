@@ -175,24 +175,24 @@ class BodyGameRuntime(object):
     def draw_color_frame(self, frame, target_surface):
         target_surface.lock()
 
-        # if self.kp.kinect:
-        #     address = self._kinect.surface_as_array(target_surface.get_buffer())
-        #     ctypes.memmove(address, frame.ctypes.data, frame.size)
-        #     del address
-        # else:
-        address = target_surface._pixels_address
-        print(address)
-        print(frame.size)
-        INTP = ctypes.POINTER(ctypes.c_int)
-        print('address:', address, type(address))
-        print('address + size:', address + frame.size, type(address))
-        ptr = ctypes.cast(address + frame.size, INTP)
-        print('pointer:', ptr)
+        if self.kp.kinect:
+            address = self._kinect.surface_as_array(target_surface.get_buffer())
+            ctypes.memmove(address, frame.ctypes.data, frame.size)
+            del address
+        else:
+            address = target_surface._pixels_address
+            # print(address)
+            # print(frame.size)
+            # INTP = ctypes.POINTER(ctypes.c_int)
+            # print('address:', address, type(address))
+            # print('address + size:', address + frame.size, type(address))
+            # ptr = ctypes.cast(address + frame.size, INTP)
+            # print('pointer:', ptr)
+            #
+            # print(frame.ctypes.data)
+            # print('pointer of source:', ctypes.cast(frame.ctypes.data, INTP))
 
-        print(frame.ctypes.data)
-        print('pointer of source:', ctypes.cast(frame.ctypes.data, INTP))
-
-        ctypes.memmove(address, frame.ctypes.data, frame.size)
+            ctypes.memmove(address, frame.ctypes.data, frame.size)
         target_surface.unlock()
 
 
