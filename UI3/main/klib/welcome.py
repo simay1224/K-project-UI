@@ -47,9 +47,9 @@ class Welcome_win(wx.Frame):
 
         # sizers
         topSizer = wx.BoxSizer(wx.VERTICAL)
-        titleSizer = wx.GridBagSizer(5, 5)
+        titleSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         lineSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
-        sizer = wx.GridBagSizer(5, 5)
+        sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
 
         # title
         text = wx.StaticText(self.panel, label="LymphCoach")
@@ -180,7 +180,7 @@ class Instrcution_win(wx.Frame):
         box2.Add(button1, 1, wx.EXPAND)
         box3.Add(self.player, 0, wx.EXPAND)
 
-        text_sizer = wx.GridBagSizer(5, 5)
+        text_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         text_sizer.Add(button_print, (4, 4))
         text_sizer.Add(self.text, (0, 0), span=(5, 0))  # for .avi .mpg video files
 
@@ -377,7 +377,7 @@ class MoviePanel(wx.Panel):
         self.st_pos  = wx.StaticText(self, -1, size=(100, -1))
 
         # setup the button/label layout using a sizer
-        sizer = wx.GridBagSizer(5, 5)
+        sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         # sizer.Add(loadButton, (1,1))
         sizer.Add(playButton, (2, 4))
         sizer.Add(pauseButton, (3, 4))
@@ -407,8 +407,13 @@ class MoviePanel(wx.Panel):
 
 
 class History_view(wx.Frame):
-    def __init__(self, parent, info, title='welcome'):
-        super(History_view, self).__init__(parent, title=title, size=(850, 520))
+    def __init__(self, parent, info, title='history log'):
+        self.width = 850
+        self.height = 520
+        self.sizer_w = 5
+        self.sizer_h = 5
+
+        super(History_view, self).__init__(parent, title=title, size=(self.width, self.height))
         self.info = info
         self.no_hist_img = cv2.imread('./data/no_hist.jpg')
         self.init_ui()
@@ -429,7 +434,7 @@ class History_view(wx.Frame):
 
         self.panel = wx.Panel(self)
 
-        box1 = wx.BoxSizer(wx.VERTICAL)
+        box1 = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -439,15 +444,19 @@ class History_view(wx.Frame):
 
         info = wx.StaticText(self.panel, wx.ID_ANY, label=info_text)
         info.SetFont(self.font)
-        box1.Add(info, 0, wx.EXPAND)
+        box1.Add(info, pos=(1, 2))
 
         ex_choices = log_xl.sheet_names
         self.choice = wx.Choice(self.panel, choices=ex_choices)
         self.choice.SetFont(self.font)
         self.choice.Bind(wx.EVT_CHOICE, self.update_choice)
-        box1.Add(self.choice, 1, wx.EXPAND)
-        box2.Add(box1, 0)
+        box1.Add(self.choice, pos=(2, 2))
 
+        line = wx.StaticLine(self.panel)
+        box1.Add(line, pos=(4, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
+
+
+        box2.Add(box1, 0)
         self.lst = wx.ListBox(self.panel, size=(330, 300), choices=[], style=wx.LB_SINGLE)
         self.lst.SetFont(self.font)
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
@@ -468,6 +477,7 @@ class History_view(wx.Frame):
         self.df = pd.read_excel(self.path, sheetname=cur_choice)
         self.lst.Clear()
         lst_choice = self.df.columns.values.tolist()
+        display = ["         " + x for x in lst_choice]
         idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0] + 1
         idx_2 = [i for i, elem in enumerate(lst_choice) if 'errmsg' in elem][0]
         self.lst.InsertItems(lst_choice[idx_1:idx_2], 0)
