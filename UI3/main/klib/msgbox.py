@@ -8,18 +8,22 @@ class Msgbox(wx.Frame):
         self.font_button = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
 
-        self.width  = 750 #400*2
-        self.height = 700 # 260*2
-        self.sizer_w= 10
-        self.sizer_h= 10
+        self.width = 750
+        self.height = 500
+        self.sizer_w = 10
+        self.sizer_h = 10
 
-        super(Msgbox, self).__init__(parent, title=title,
-            size=(self.width, self.height), style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER)
-        self.fname  = 'Jane'
-        self.lname  = 'Doe'
+        super(Msgbox, self).__init__(parent, title=title, size=(self.width, self.height), style=wx.DEFAULT_FRAME_STYLE | wx.RESIZE_BORDER)
+
+        self.fname = ''
+        self.lname = ''
         self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
-        self.age    = '19'
-        self.gender = 'Female'
+        self.age = ''
+        self.num = ''
+        self.gender = ''
+        self.isCli = False
+        self.isPat = False
+
         self.InitUI()
         self.Centre()
         self.Show()
@@ -43,9 +47,9 @@ class Msgbox(wx.Frame):
         topSizer.Add(text, 0, wx.CENTER, border=0)
 
         line = wx.StaticLine(self.panel)
-        lineSizer.Add(line, pos=(0, 0), span=(0, int(self.width/self.sizer_w)),
-            flag=wx.EXPAND|wx.BOTTOM, border=20)
+        lineSizer.Add(line, pos=(0, 0), span=(0, int(self.width/self.sizer_w / 2)), flag=wx.EXPAND|wx.BOTTOM)
 
+        # -------------- Patient -------------- #
 
         patient = wx.StaticText(self.panel, label="Patient")
         patient.SetFont(self.font_field)
@@ -74,7 +78,6 @@ class Msgbox(wx.Frame):
         self.tc3 = wx.TextCtrl(self.panel)
         patiSizer.Add(self.tc3, pos=(4, 1), flag=wx.EXPAND)
 
-
         sb = wx.StaticBox(self.panel, label="Please Select Your Gender")
         sb.SetFont(self.font)
         self.rb_female = wx.RadioButton(self.panel, label="Female")
@@ -88,27 +91,51 @@ class Msgbox(wx.Frame):
         patiSizer.Add(boxsizer, pos=(5, 0), span=(0, 3), flag=wx.EXPAND)
 
 
+        # -------------- Clinician -------------- #
+
         clinician = wx.StaticText(self.panel, label="Clinician")
         clinician.SetFont(self.font_field)
-        clinSizer.Add(clinician, pos=(1, 3), flag=wx.CENTER)
+        clinSizer.Add(clinician, pos=(1, 0), flag=wx.CENTER)
 
+        # Name
+        text1 = wx.StaticText(self.panel, label="First Name")
+        text1.SetFont(self.font)
+        clinSizer.Add(text1, pos=(2, 0), flag=wx.LEFT)
+
+        self.tcc1 = wx.TextCtrl(self.panel)
+        clinSizer.Add(self.tcc1, pos=(2, 1), flag=wx.EXPAND)
+
+        text2 = wx.StaticText(self.panel, label="Last Name")
+        text2.SetFont(self.font)
+        clinSizer.Add(text2, pos=(3, 0), flag=wx.LEFT)
+
+        self.tcc2 = wx.TextCtrl(self.panel)
+        clinSizer.Add(self.tcc2, pos=(3, 1), flag=wx.EXPAND)
+
+        text3 = wx.StaticText(self.panel, label="Permission #\n(112233)")
+        text3.SetFont(self.font)
+        clinSizer.Add(text3, pos=(4, 0), flag=wx.LEFT)
+
+        self.tcc3 = wx.TextCtrl(self.panel)
+        clinSizer.Add(self.tcc3, pos=(4, 1), flag=wx.EXPAND)
 
 
         button1 = wx.Button(self.panel, size=(200, 50), label="Ok")
-        sizer.Add(button1, pos=(6, 0), span=(0, 0), flag=wx.LEFT, border=10)
+        sizer.Add(button1, pos=(0, 0), span=(0, 0), flag=wx.LEFT, border=10)
         button1.SetFont(self.font_button)
         button1.Bind(wx.EVT_BUTTON, self.ok)
 
         button2 = wx.Button(self.panel, size=(200, 50), label="Cancel")
-        sizer.Add(button2, pos=(6, 3), span=(0, 0),
-            flag=wx.RIGHT, border=5)
+        sizer.Add(button2, pos=(0, 3), span=(0, 0), flag=wx.RIGHT, border=10)
         button2.SetFont(self.font_button)
         button2.Bind(wx.EVT_BUTTON, self.cancel)
 
         # sizer.AddGrowableCol(1)
 
         infoSizer.Add(patiSizer, pos=(1, 0), span=(0, 0), flag=wx.LEFT)
-        infoSizer.Add(clinSizer, pos=(1, 1), span=(0, 0), flag=wx.RIGHT)
+        line = wx.StaticLine(self.panel, -1, size=(5, self.height / 5), style=wx.LI_VERTICAL)
+        infoSizer.Add(line, pos=(1, 1), span=(3, 0), flag=wx.EXPAND)
+        infoSizer.Add(clinSizer, pos=(1, 2), span=(0, 0), flag=wx.RIGHT)
 
         topSizer.Add(titleSizer, 0, wx.CENTER)
         topSizer.Add(lineSizer, 0, wx.CENTER)
@@ -120,45 +147,84 @@ class Msgbox(wx.Frame):
         # self.panel.SetBackgroundColour((170, 0, 255))
 
     def ok(self, event):
+        # -------------- Patient -------------- #
         self.fname = self.tc1.GetValue()
         self.lname = self.tc2.GetValue()
-        self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
-        try:
-            self.age = int(self.tc3.GetValue())
-        except:
-            self.age = self.tc3.GetValue()
+        self.age = self.tc3.GetValue()
+        if (self.age != ''):
+            self.age = int(self.age)
+
         if self.rb_female.GetValue():
-            self.gender = 'female'
+            self.gender = 'Female'
         elif self.rb_male.GetValue():
-            self.gender = 'male'
+            self.gender = 'Male'
+        else:
+            self.gender = ''
+        # -------------- Clinician -------------- #
+        self.fcname = self.tcc1.GetValue()
+        self.lcname = self.tcc2.GetValue()
+        self.num = self.tcc3.GetValue()
+        if (self.num != ''):
+            self.num = int(self.num)
+
+        self.isCli = True if (len(self.fcname) != 0 or len(self.lcname) != 0 or self.num != '') else False
+        self.isPat = True if (len(self.fname) != 0 or len(self.lname) != 0 or self.age != '') else False
+
         error = ''
         error_flag = False
-        if len(self.lname) == 0 or len(self.fname) == 0:
-            error = 'please enter your name\n'
-            error_flag = True
-        if self.age != '':
-            if type(self.age) == int:
-                if 0 < self.age < 150:
-                    pass
-                else:
-                    error = 'age out of range\n'
-                    error_flag = True
-            elif self.age != 'unknown' and type(self.age) != int:
-                error = 'age should be an integer\n'
-                error_flag = True
-        else:
-            error = 'please enter your age\n'
-            error_flag = True
 
-        if (not self.rb_female.GetValue()) and (not self.rb_male.GetValue()) :
-            error += 'please choose your gender'
+        # xor to check input
+        if not self.isCli ^ self.isPat:
+            error += 'please confirm your identity as (patient or clinician)'
             error_flag = True
+        else:
+            if self.isPat:
+                if len(self.lname) == 0 or len(self.fname) == 0:
+                    error += 'please enter your name\n'
+                    error_flag = True
+                if self.age != '':
+                    if type(self.age) == int:
+                        if 0 < self.age < 150:
+                            pass
+                        else:
+                            error += 'age out of range\n'
+                            error_flag = True
+                    elif self.age != 'unknown' and type(self.age) != int:
+                        error += 'age should be an integer\n'
+                        error_flag = True
+                else:
+                    error += 'please enter your age\n'
+                    error_flag = True
+
+                if (not self.rb_female.GetValue()) and (not self.rb_male.GetValue()) :
+                    error += 'please choose your gender'
+                    error_flag = True
+            else:
+                if len(self.fcname) == 0 or len(self.lcname) == 0:
+                    error += 'please enter your name\n'
+                    error_flag = True
+                if self.num != '':
+                    if type(self.num) != int:
+                        error += 'age should be an integer\n'
+                        error_flag = True
+                    if self.num != 112233:
+                        error += 'permission number is not correct\n'
+                        error_flag = True
+                else:
+                    error += 'please enter permission number\n'
+                    error_flag = True
+
         if error_flag:
             dlg = wx.MessageDialog(self.panel, error,'', wx.YES_NO | wx.ICON_ERROR)
             result = dlg.ShowModal() == wx.ID_YES
             dlg.Destroy()
+
         else:
+            self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
             message = 'Is the following infomation correct?\nName: %s\nAge: %s\nGender: %s' %(self.fname+' '+self.lname, self.age, self.gender)
+            if self.isCli:
+                message = 'Is the following infomation correct?\nName: %s' %(self.fcname+' '+self.lcname)
+                self.name = '%s %s' %(self.fcname.lower(), self.lcname.lower())
             dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
             result = dlg.ShowModal() == wx.ID_YES
             if result:
@@ -168,11 +234,11 @@ class Msgbox(wx.Frame):
                 dlg.Destroy()
 
     def cancel(self, event):
-        # self.fname = 'Jane'
-        # self.lname = 'Doe'
-        # self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
-        # self.age = '9'
-        # self.gender = 'Female'
+        self.fname = 'Jane'
+        self.lname = 'Doe'
+        self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
+        self.age = '19'
+        self.gender = 'Female'
         message = 'Do you want to use following information?\nName: %s\nAge: %s\nGender: %s' %(self.fname+' '+self.lname, self.age, self.gender)
         dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
         result = dlg.ShowModal() == wx.ID_YES
@@ -181,17 +247,15 @@ class Msgbox(wx.Frame):
         if result:
             self.Destroy()
 
-        # self.fname = ''
-        # self.lname = ''
-        # self.tc1.SetValue('')
-        # self.tc2.SetValue('')
-        # self.tc3.SetValue('')
-        # self.rb_female.SetValue(False)
-        # self.rb_male.SetValue(False)
-
-
-
-# if __name__ == '__main__':
-#     app = wx.App()
-#     ex = Msgbox(None, title="Welcome")
-#     app.MainLoop()
+        self.fname = ''
+        self.lname = ''
+        self.fcname = ''
+        self.lcname = ''
+        self.tc1.SetValue('')
+        self.tc2.SetValue('')
+        self.tc3.SetValue('')
+        self.tcc1.SetValue('')
+        self.tcc2.SetValue('')
+        self.tcc3.SetValue('')
+        self.rb_female.SetValue(False)
+        self.rb_male.SetValue(False)
