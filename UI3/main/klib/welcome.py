@@ -478,7 +478,20 @@ class History_view(wx.Frame):
         item = self.lst.GetStringSelection()
         y = np.array(df_name[item])
         x = np.arange(0, len(y), 1)
-        x_name = df_name['time'].tolist()
+
+        # reformat x_name to only present mm/dd
+        x_name = np.array([x.split("-") for x in df_name['time']])
+        x_name = np.array([(x[1] + "/" + x[2]) for x in x_name])
+
+        prev_index = 0
+        for i in range(1, len(x_name)):
+            if x_name[prev_index] == x_name[i]:
+                x_name[i] = ""
+            else:
+                prev_index = i
+        # print(x_name)
+        # print(x_name.shape)
+
         self.axes.clear()
         try:
             self.axes.plot(x, y, color=self.color_line)
@@ -511,9 +524,7 @@ class History_view(wx.Frame):
             else:
                 self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
 
-
-
-            self.axes.set_xticklabels(x_name, rotation=25, fontsize=10)
+            self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
             self.canvas.draw()
         except:
             self.axes.imshow(self.no_hist_img)

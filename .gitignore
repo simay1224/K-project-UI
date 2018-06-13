@@ -154,8 +154,7 @@ $RECYCLE.BIN/
 *.csv
 *.dll
 *.jpg
-DTW/*.jpg
-
+*.numbers
 
 !requirement.txt
 test/
