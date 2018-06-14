@@ -425,7 +425,7 @@ class History_view(wx.Frame):
         self.no_hist_img = cv2.imread('./data/imgs/others/no_hist.jpg')
         self.init_ui()
         self.color_correct = (0.41, 0.75, 0.07, 0.6)
-        self.color_line = '#005A73'
+        self.color_line = ['#0096BF', '#005A73', '#BFA600', '#736400', '#ffae25', '#af7900', '#d957b4', '#75005b']
         self.Show()
 
     def init_ui(self, path='./output/log2.xlsx'):
@@ -507,6 +507,10 @@ class History_view(wx.Frame):
         self.axes.clear()
 
         max_y = 0
+        cri = -1
+        if df_ideal[item].dtype == float:
+            cri = df_ideal[item][0]
+            self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
 
         # try:
         for i in range(1, df_unique_names.size):
@@ -515,15 +519,9 @@ class History_view(wx.Frame):
             x = np.arange(0, len(y))
             if len(y) > max_y:
                 max_y = len(y)
-            self.axes.plot(x, y, color=self.color_line)
 
-            if df_ideal[item].dtype == float:
-                cri = df_ideal[item][0]
-                self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
-            else:
-                cri = -1
+            self.axes.plot(x, y, color=self.color_line[2*(i-1)])
             self.axes.set_title(item)
-            self.axes.set_xticks(x)
 
             y_min, y_max = self.find_min_max(y)
 
@@ -534,18 +532,17 @@ class History_view(wx.Frame):
 
 
             # reformat x_name to only present mm/dd
-            x_name = np.array([i.split("-") for i in df_name['time']])
-            x_name = np.array([(i[1] + "/" + i[2]) for i in x_name])
+            x_name = np.array([a.split("-") for a in df_name['time']])
+            x_name = np.array([(a[1] + "/" + a[2]) for a in x_name])
             prev_index = 0
 
-            self.axes.annotate(x_name[0], xy=(0, y[0]), textcoords='data')
-            for i in range(1, len(x_name)):
-                if x_name[prev_index] == x_name[i]:
-                    x_name[i] = ""
+            self.axes.annotate(x_name[0], xy=(0, y[0]), textcoords='data', color=self.color_line[2*(i-1) + 1])
+            for j in range(1, len(x_name)):
+                if x_name[prev_index] == x_name[j]:
+                    x_name[j] = ""
                 else:
-                    prev_index = i
-                    self.axes.annotate(x_name[i], xy=(i, y[i]), textcoords='data')
-
+                    prev_index = j
+                    self.axes.annotate(x_name[j], xy=(j, y[j]), textcoords='data', color=self.color_line[2*(i-1) + 1])
             # self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
 
             self.canvas.draw()
@@ -570,7 +567,7 @@ class History_view(wx.Frame):
 
         self.axes.clear()
         try:
-            self.axes.plot(x, y, color=self.color_line)
+            self.axes.plot(x, y, color=self.color_line[0])
             # self.axes.bar(x, y, color='g')
             if df_ideal[item].dtype == float:
                 cri = df_ideal[item][0]
