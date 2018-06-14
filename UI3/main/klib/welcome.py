@@ -86,12 +86,12 @@ class Welcome_win(wx.Frame):
 
         button1 = wx.Button(self.panel, size=button_size, label="Instruction with Video")
         button1.SetFont(self.font)
-        button1.Bind(wx.EVT_BUTTON, self.open_trainingmode)
+        button1.Bind(wx.EVT_BUTTON, self.open_instruction)
         sizer.Add(button1, pos=(1, 1), span=(1, 0))
 
         button2 = wx.Button(self.panel, size=button_size, label="Training Mode")
         button2.SetFont(self.font)
-        button2.Bind(wx.EVT_BUTTON, self.open_instruction)
+        button2.Bind(wx.EVT_BUTTON, self.open_trainingmode)
         sizer.Add(button2, pos=(2, 1), span=(1, 0))
 
         button3 = wx.Button(self.panel, size=button_size, label="Evaluation Mode")
@@ -118,8 +118,8 @@ class Welcome_win(wx.Frame):
         # myobject.Disable()
         self.game = bodygame3.BodyGameRuntime(self.info)
         self.game.run()
-        if self.game.kp._done:
-            self.Destroy()
+        # if self.game.kp._done:
+        #     self.Destroy()
 
     def open_instruction(self, event):
         instruct = Instrcution_win(None, 'Instruction')
@@ -151,6 +151,10 @@ class Instrcution_win(wx.Frame):
 
     def __init__(self, parent, title):
         self.init_text()
+
+        self.sizer_w = 5
+        self.sizer_h = 5
+
         super(Instrcution_win, self).__init__(parent, title=title, size=(950, 700))
 
         self.panel = wx.Panel(self)
@@ -267,7 +271,7 @@ class Instrcution_win(wx.Frame):
                                 '\n2. When you bend your elbow, hand - elbow - shoulder should be "V-shape" not "L-shape"'\
 
         self.str['note'][4] = 'Tips :'\
-                                '\n1. When you do the "T-pose", make sure that your hand, elbow ,and shoulder are straight'\
+                                '\n1. When you do the "T-pose", make sure that your hand, elbow, and shoulder are straight'\
                                 '\n2. When you close your hands, make sure that your hand and shoulder are in the same height.'\
 
         self.str['note'][5] = 'Tips :'\
@@ -360,6 +364,9 @@ class MoviePanel(wx.Panel):
     def __init__(self, parent, id):
         #self.log = log
         wx.Panel.__init__(self, parent, -1, style=wx.TAB_TRAVERSAL|wx.CLIP_CHILDREN)
+
+        self.sizer_w = 5
+        self.sizer_h = 5
 
         # Create some controls
         self.mc = wx.media.MediaCtrl(self, size=(500,300), style=wx.SIMPLE_BORDER)

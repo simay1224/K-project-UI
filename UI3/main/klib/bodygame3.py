@@ -89,7 +89,12 @@ class BodyGameRuntime(object):
         self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  # kinect surface
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  #background surface
 
-        self.bkidx = 11
+
+        if sys.platform == "win32":
+            self.bkidx = 10
+        else:
+            self.bkidx = 11
+
         self.bklist = glob.glob(os.path.join('./data/imgs/bkimgs', '*.jpg'))
         self.readbackground()
         self.h_to_w = float(self.default_h) / self.default_w
@@ -182,17 +187,6 @@ class BodyGameRuntime(object):
             del address
         else:
             address = target_surface._pixels_address
-            # print(address)
-            # print(frame.size)
-            # INTP = ctypes.POINTER(ctypes.c_int)
-            # print('address:', address, type(address))
-            # print('address + size:', address + frame.size, type(address))
-            # ptr = ctypes.cast(address + frame.size, INTP)
-            # print('pointer:', ptr)
-            #
-            # print(frame.ctypes.data)
-            # print('pointer of source:', ctypes.cast(frame.ctypes.data, INTP))
-
             ctypes.memmove(address, frame.ctypes.data, frame.size)
         target_surface.unlock()
 
@@ -603,9 +597,9 @@ class BodyGameRuntime(object):
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                                             'Overall evaluation:\n\n- '+self.errsums, 3)
                     self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                        '(Press "Space" to start next exercise.)', 0, (120, 830), fsize=60, color=self.kp.c_togo)
+                                        '(Press "Space" to start next exercise.)', 0, (100, 800), fsize=60, color=self.kp.c_togo)
                     self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                        'Next exercise will start in %s seconds.'% str(self.cntdown/30), 0, (120, 880) , fsize=60, color=self.kp.c_togo)
+                                        'Next exercise will start in %s seconds.'% str(self.cntdown/30), 0, (100, 880) , fsize=60, color=self.kp.c_togo)
                     self.cntdown -= 1
                     if self.cntdown == 0:
                         if self.exeno == 7:
