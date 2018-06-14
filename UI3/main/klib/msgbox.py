@@ -253,11 +253,18 @@ class Msgbox(wx.Frame):
         dlg.Destroy()
         if result:
             self.Destroy()
+        self.reset()
 
+    def reset(self):
         self.fname = ''
         self.lname = ''
         self.fcname = ''
         self.lcname = ''
+        self.age = ''
+        self.num = ''
+        self.gender = ''
+        self.isCli = False
+        self.isPat = False
         self.tc1.SetValue('')
         self.tc2.SetValue('')
         self.tc3.SetValue('')
@@ -266,9 +273,12 @@ class Msgbox(wx.Frame):
         self.tcc3.SetValue('')
         self.rb_female.SetValue(False)
         self.rb_male.SetValue(False)
+
     def _pass(self):
         self.fname = 'Jane'
         self.lname = 'Doe'
         self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
         self.age = '19'
         self.gender = 'Female'
+        self.isPat = False
+        self.isCli = True

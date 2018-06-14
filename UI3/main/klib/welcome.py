@@ -428,7 +428,7 @@ class History_view(wx.Frame):
         self.color_line = '#005A73'
         self.Show()
 
-    def init_ui(self, path='./output/log.xlsx'):
+    def init_ui(self, path='./output/log2.xlsx'):
         self.font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)
         self.path = path
         try:
@@ -445,9 +445,15 @@ class History_view(wx.Frame):
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.HORIZONTAL)
 
-        info_text = 'Name: ' + self.info.name.title() + \
-                    '\nGender: ' + self.info.gender.title() + \
-                    '\nAge: ' + str(self.info.age)
+        if self.info.isPat:
+            info_text = 'Patient:' + \
+                        '\nName: ' + self.info.name.title() + \
+                        '\nGender: ' + self.info.gender.title() + \
+                        '\nAge: ' + str(self.info.age)
+        else:
+            info_text = 'Clinician:' + \
+                        '\nName: ' + self.info.name.title() + \
+                        '\nGender: ' + self.info.gender.title()
 
         info = wx.StaticText(self.panel, wx.ID_ANY, label=info_text)
         info.SetFont(self.font)
@@ -489,6 +495,73 @@ class History_view(wx.Frame):
         self.lst.InsertItems(lst_choice[idx_1:idx_2], 0)
 
     def update_figure(self, event):
+        if (self.info.isPat):
+            self.update_figure_pat()
+        else:
+            self.update_figure_cli()
+
+    def update_figure_cli(self):
+        df_unique_names = self.df['name'].unique()
+        df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
+        item = self.lst.GetStringSelection()
+        self.axes.clear()
+
+        max_y = 0
+
+        # try:
+        for i in range(1, df_unique_names.size):
+            df_name = self.df[self.df['name'] == df_unique_names[i]]
+            y = np.array(df_name[item])
+            x = np.arange(0, len(y))
+            if len(y) > max_y:
+                max_y = len(y)
+            self.axes.plot(x, y, color=self.color_line)
+
+            if df_ideal[item].dtype == float:
+                cri = df_ideal[item][0]
+                self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
+            else:
+                cri = -1
+            self.axes.set_title(item)
+            self.axes.set_xticks(x)
+
+            y_min, y_max = self.find_min_max(y)
+
+            if cri == -1:
+                self.axes.set_ylim(y_min - 10, y_max + 10)
+            else:
+                self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
+
+
+            # reformat x_name to only present mm/dd
+            x_name = np.array([i.split("-") for i in df_name['time']])
+            x_name = np.array([(i[1] + "/" + i[2]) for i in x_name])
+            prev_index = 0
+
+            self.axes.annotate(x_name[0], xy=(0, y[0]), textcoords='data')
+            for i in range(1, len(x_name)):
+                if x_name[prev_index] == x_name[i]:
+                    x_name[i] = ""
+                else:
+                    prev_index = i
+                    self.axes.annotate(x_name[i], xy=(i, y[i]), textcoords='data')
+
+            # self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
+
+            self.canvas.draw()
+
+        self.axes.set_xticks(np.arange(0, max_y))
+        self.canvas.draw()
+
+
+        # except:
+        #     self.axes.clear()
+        #     self.axes.imshow(self.no_hist_img)
+        #     self.canvas.draw()
+
+
+    def update_figure_pat(self):
+
         df_name  = self.df[self.df['name'] == self.info.name]
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
         item = self.lst.GetStringSelection()
@@ -506,21 +579,8 @@ class History_view(wx.Frame):
                 cri = -1
             self.axes.set_title(item)
             self.axes.set_xticks(x)
-            # self.axes.set_ylim(0,max(np.max(y),cri)+10)
 
-            # not sure why np.min() / np.max() not working
-            y_min = sys.float_info.max
-            y_max = -sys.float_info.max
-            for i in range(0, y.shape[0]):
-                if (math.isnan(y[i])):
-                    continue
-                if (y[i] < y_min):
-                    y_min = y[i]
-                elif (y[i] > y_max):
-                    y_max = y[i]
-
-            # print(y_min, y_max, np.amin(y), np.amax(y))
-            # 4.43289792333271 62.82625302045408 31.89259259259258 31.89259259259258
+            y_min, y_max = self.find_min_max(y)
 
             if cri == -1:
                 self.axes.set_ylim(y_min - 10, y_max + 10)
@@ -543,3 +603,15 @@ class History_view(wx.Frame):
         except:
             self.axes.imshow(self.no_hist_img)
             self.canvas.draw()
+
+    def find_min_max(self, y):
+        y_min = sys.float_info.max
+        y_max = -sys.float_info.max
+        for i in range(0, y.shape[0]):
+            if (math.isnan(y[i])):
+                continue
+            if (y[i] < y_min):
+                y_min = y[i]
+            elif (y[i] > y_max):
+                y_max = y[i]
+        return (y_min, y_max)
