@@ -123,7 +123,8 @@ class BodyGameRuntime(object):
         self.bkimg = cv2.resize(self.bkimg, (self._infoObject.current_w, self._infoObject.current_h))
 
         if sys.platform == "win32":
-            self.bkimg = np.dstack([cv2.resize(self.bkimg, (1920, 1080)), np.zeros([1080, 1920])]).astype(np.uint8)
+            # self.bkimg = np.dstack([cv2.resize(self.bkimg, (1920, 1080)), np.zeros([1080, 1920])]).astype(np.uint8)
+            self.bkimg = np.dstack([self.bkimg, 255 * np.ones([self._infoObject.current_h, self._infoObject.current_w])]).astype(np.uint8)
         else:
             self.bkimg = np.dstack([255 * np.ones([self._infoObject.current_h, self._infoObject.current_w]), self.bkimg[:, :, ::-1]]).astype(np.uint8)
 
