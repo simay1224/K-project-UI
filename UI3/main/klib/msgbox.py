@@ -1,4 +1,4 @@
-import wx, pdb
+import wx, pdb, sys
 
 class Msgbox(wx.Frame):
 
@@ -7,9 +7,15 @@ class Msgbox(wx.Frame):
         self.font_field = wx.Font(30, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_button = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
-
-        self.width = 750
-        self.height = 500
+        self.windows = True
+        if sys.platform == "darwin":
+            self.windows = False
+        if not self.windows:
+            self.width = 750
+            self.height = 500
+        else:
+            self.width = 750
+            self.height = 550
         self.sizer_w = 10
         self.sizer_h = 10
 
@@ -119,6 +125,7 @@ class Msgbox(wx.Frame):
         self.tcc3 = wx.TextCtrl(self.panel)
         clinSizer.Add(self.tcc3, pos=(4, 1), flag=wx.EXPAND)
 
+        # -------------- General -------------- #
 
         button1 = wx.Button(self.panel, size=(200, 50), label="Ok")
         sizer.Add(button1, pos=(0, 0), span=(0, 0), flag=wx.LEFT, border=10)
@@ -133,8 +140,8 @@ class Msgbox(wx.Frame):
         # sizer.AddGrowableCol(1)
 
         infoSizer.Add(patiSizer, pos=(1, 0), span=(0, 0), flag=wx.LEFT)
-        line = wx.StaticLine(self.panel, -1, size=(5, self.height / 5), style=wx.LI_VERTICAL)
-        infoSizer.Add(line, pos=(1, 1), span=(3, 0), flag=wx.EXPAND)
+        line = wx.StaticLine(self.panel, -1, size=(1, self.height / 5), style=wx.LI_VERTICAL)
+        infoSizer.Add(line, pos=(1, 1), span=(1, 0), flag=wx.EXPAND)
         infoSizer.Add(clinSizer, pos=(1, 2), span=(0, 0), flag=wx.RIGHT)
 
         topSizer.Add(titleSizer, 0, wx.CENTER)

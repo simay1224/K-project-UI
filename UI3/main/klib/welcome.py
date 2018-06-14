@@ -415,7 +415,7 @@ class History_view(wx.Frame):
 
         super(History_view, self).__init__(parent, title=title, size=(self.width, self.height))
         self.info = info
-        self.no_hist_img = cv2.imread('./data/no_hist.jpg')
+        self.no_hist_img = cv2.imread('./data/imgs/others/no_hist.jpg')
         self.init_ui()
         self.color_correct = (0.41, 0.75, 0.07, 0.6)
         self.color_line = '#005A73'
@@ -477,7 +477,6 @@ class History_view(wx.Frame):
         self.df = pd.read_excel(self.path, sheetname=cur_choice)
         self.lst.Clear()
         lst_choice = self.df.columns.values.tolist()
-        display = ["         " + x for x in lst_choice]
         idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0] + 1
         idx_2 = [i for i, elem in enumerate(lst_choice) if 'errmsg' in elem][0]
         self.lst.InsertItems(lst_choice[idx_1:idx_2], 0)
@@ -487,20 +486,7 @@ class History_view(wx.Frame):
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
         item = self.lst.GetStringSelection()
         y = np.array(df_name[item])
-        x = np.arange(0, len(y), 1)
-
-        # reformat x_name to only present mm/dd
-        x_name = np.array([x.split("-") for x in df_name['time']])
-        x_name = np.array([(x[1] + "/" + x[2]) for x in x_name])
-
-        prev_index = 0
-        for i in range(1, len(x_name)):
-            if x_name[prev_index] == x_name[i]:
-                x_name[i] = ""
-            else:
-                prev_index = i
-        # print(x_name)
-        # print(x_name.shape)
+        x = np.arange(0, len(y))
 
         self.axes.clear()
         try:
@@ -533,6 +519,17 @@ class History_view(wx.Frame):
                 self.axes.set_ylim(y_min - 10, y_max + 10)
             else:
                 self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
+
+            # reformat x_name to only present mm/dd
+            x_name = np.array([x.split("-") for x in df_name['time']])
+            x_name = np.array([(x[1] + "/" + x[2]) for x in x_name])
+
+            prev_index = 0
+            for i in range(1, len(x_name)):
+                if x_name[prev_index] == x_name[i]:
+                    x_name[i] = ""
+                else:
+                    prev_index = i
 
             self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
             self.canvas.draw()
