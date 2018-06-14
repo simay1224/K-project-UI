@@ -224,14 +224,14 @@ class Instrcution_win(wx.Frame):
                              '\n1. Raise your arms up.'\
                              '\n2. Lower your elbows, let shoulder-elbow-hand be a V-shape.'\
                              '\n3. Raise your arms up again.'\
-                             '\n4. Repeat this repetition 4 times.'\
+                             '\n4. Repeat this 4 times.'\
                              '\n5. Put down your arms.'
 
         self.str['ins'][4] = '\n  '\
                              '\n1. Raise your arms up till "T-pose."'\
                              '\n2. Move arms slowly to the chest.'\
                              '\n3. Back to "T-pose".'\
-                             '\n4. Repeat this repetition 4 times.'\
+                             '\n4. Repeat this 4 times.'\
                              '\n5. Put down your arms.'
 
         self.str['ins'][5] = '\n  '\
@@ -248,9 +248,9 @@ class Instrcution_win(wx.Frame):
                              '\n4. Put down your hands.'
 
         self.str['ins'][7] = '\n  '\
-                             '\n1. Raise and clasp your arms till the belly position.'\
+                             '\n1. Raise and clasp your hands to the belly position.'\
                              '\n2. Raise clasped hands toward to your forehead and keep elbows together.'\
-                             '\n3. Slide your heands to the back of your head and spread the elbows open wide.'\
+                             '\n3. Slide your hands to the back of your head and spread the elbows open wide.'\
                              '\n4. Back to the belly position.'\
                              '\n5. Repeat 4 times.'\
                              '\n6. Put down your arms.'
@@ -263,23 +263,23 @@ class Instrcution_win(wx.Frame):
                                 '\n2. When you breathe out, you also need to open your hands.'\
                                 '\n3. Breathe as deep as you can.'
         self.str['note'][3] = 'Tips :'\
-                                '\n1. When you raise up your arms, make sure that your hand, elbow and shoulder are straight.'\
-                                '\n2. When bending the elbow, hand-elbow-shoulder should be "V-shape" not "L-shape"'\
+                                '\n1. When you raise your arms, make sure that your hand, elbow, and shoulder are straight.'\
+                                '\n2. When you bend your elbow, hand - elbow - shoulder should be "V-shape" not "L-shape"'\
 
         self.str['note'][4] = 'Tips :'\
-                                '\n1. When doing "T-pose", make sure that your hand, elbow and shoulder are straight'\
-                                '\n2. When closing hands, make sure that your hand, and shoulder are in the same height.'\
+                                '\n1. When you do the "T-pose", make sure that your hand, elbow ,and shoulder are straight'\
+                                '\n2. When you close your hands, make sure that your hand and shoulder are in the same height.'\
 
         self.str['note'][5] = 'Tips :'\
-                                '\n1. When bending the body, make sure that your hand, elbow and shoulder are straight.'\
+                                '\n1. When you bend your body, make sure that your hand, elbow, and shoulder are straight.'\
                                 '\n2. Keep your body staight'
 
         self.str['note'][6] = 'Tips :'\
-                                '\n1. Let your shoulders rotation movement as large as possible.'
+                                '\n1. Try to rotate your shoulders in a full circle'
 
         self.str['note'][7] = 'Tips :'\
-                                '\n1. When raising the arms to the forehead, keeping two elbows as close as possible.'\
-                                '\n2. When the hands is in the back of your head, spread the elnows open as wide as possible.'\
+                                '\n1. When you raise your arms to the forehead, keep two elbows as close as possible.'\
+                                '\n2. When your hands are in the back, spread the elbows open as wide as possible.'\
                                 '\n3. Keep your body staight.'
 
     def onListBox(self, event):
