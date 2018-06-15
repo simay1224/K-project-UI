@@ -465,6 +465,12 @@ class History_view(wx.Frame):
         self.choice.Bind(wx.EVT_CHOICE, self.update_choice)
         box1.Add(self.choice, pos=(2, 2))
 
+        if self.info.isCli:
+            self.name = wx.Choice(self.panel, choices=[])
+            self.name.SetFont(self.font)
+            self.name.Bind(wx.EVT_CHOICE, self.update_name_cli)
+            box1.Add(self.name, pos=(3, 2))
+
         line = wx.StaticLine(self.panel)
         box1.Add(line, pos=(4, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
 
@@ -485,7 +491,7 @@ class History_view(wx.Frame):
         self.panel.SetSizer(box3)
         self.panel.Fit()
 
-    def update_choice (self, event):
+    def update_choice(self, event):
         cur_choice = self.choice.GetSelection()
         self.df = pd.read_excel(self.path, sheetname=cur_choice)
         self.lst.Clear()
@@ -493,72 +499,66 @@ class History_view(wx.Frame):
         idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0] + 1
         idx_2 = [i for i, elem in enumerate(lst_choice) if 'errmsg' in elem][0]
         self.lst.InsertItems(lst_choice[idx_1:idx_2], 0)
+        if (self.info.isCli):
+            self.update_name_list_cli()
+
+    def update_name_list_cli(self):
+        df_unique_names = self.df['name'].unique()[1:]
+        self.name.Clear()
+        self.name.AppendItems(df_unique_names)
+
+    def update_name_cli(self, event):
+        self.cur_choice = self.name.GetString(self.name.GetSelection())
+        print(self.cur_choice)
 
     def update_figure(self, event):
-        if (self.info.isPat):
+        if self.info.isPat:
             self.update_figure_pat()
-        else:
+        elif self.info.isCli:
             self.update_figure_cli()
 
+
     def update_figure_cli(self):
-        df_unique_names = self.df['name'].unique()
+        df_name = self.df[self.df['name'] == self.cur_choice]
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
         item = self.lst.GetStringSelection()
         self.axes.clear()
 
-        max_y = 0
+        # try:
         cri = -1
         if df_ideal[item].dtype == float:
             cri = df_ideal[item][0]
             self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
 
-        # try:
-        for i in range(1, df_unique_names.size):
-            df_name = self.df[self.df['name'] == df_unique_names[i]]
-            y = np.array(df_name[item])
-            x = np.arange(0, len(y))
-            if len(y) > max_y:
-                max_y = len(y)
+        y = np.array(df_name[item])
+        x = np.arange(0, len(y))
 
-            self.axes.plot(x, y, color=self.color_line[2*(i-1)])
-            self.axes.set_title(item)
+        self.axes.plot(x, y, color=self.color_line[0])
+        self.axes.set_title(item)
 
-            y_min, y_max = self.find_min_max(y)
+        y_min, y_max = self.find_min_max(y)
 
-            if cri == -1:
-                self.axes.set_ylim(y_min - 10, y_max + 10)
+        if cri == -1:
+            self.axes.set_ylim(y_min - 10, y_max + 10)
+        else:
+            self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
+
+        x_name = np.array([a.split("-") for a in df_name['time']])
+        x_name = np.array([(a[1] + "/" + a[2]) for a in x_name])
+        prev_index = 0
+        for i in range(1, len(x_name)):
+            if x_name[prev_index] == x_name[i]:
+                x_name[i] = ""
             else:
-                self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
-
-
-            # reformat x_name to only present mm/dd
-            x_name = np.array([a.split("-") for a in df_name['time']])
-            x_name = np.array([(a[1] + "/" + a[2]) for a in x_name])
-            prev_index = 0
-
-            self.axes.annotate(x_name[0], xy=(0, y[0]), textcoords='data', color=self.color_line[2*(i-1) + 1])
-            for j in range(1, len(x_name)):
-                if x_name[prev_index] == x_name[j]:
-                    x_name[j] = ""
-                else:
-                    prev_index = j
-                    self.axes.annotate(x_name[j], xy=(j, y[j]), textcoords='data', color=self.color_line[2*(i-1) + 1])
-            # self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
-
-            self.canvas.draw()
-
-        self.axes.set_xticks(np.arange(0, max_y))
+                prev_index = i
+        self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
         self.canvas.draw()
-
-
         # except:
-        #     self.axes.clear()
         #     self.axes.imshow(self.no_hist_img)
         #     self.canvas.draw()
 
 
     def update_figure_pat(self):
-
         df_name  = self.df[self.df['name'] == self.info.name]
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
         item = self.lst.GetStringSelection()
