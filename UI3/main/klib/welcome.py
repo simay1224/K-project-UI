@@ -462,18 +462,32 @@ class History_view(wx.Frame):
         ex_choices = log_xl.sheet_names
         self.choice = wx.Choice(self.panel, choices=ex_choices)
         self.choice.SetFont(self.font)
+        # default selection: exercise 1
+        self.choice.SetSelection(0)
         self.choice.Bind(wx.EVT_CHOICE, self.update_choice)
         box1.Add(self.choice, pos=(2, 2))
 
+        # provide list of patients to review
         if self.info.isCli:
             self.name = wx.Choice(self.panel, choices=[])
             self.name.SetFont(self.font)
             self.name.Bind(wx.EVT_CHOICE, self.update_name_cli)
             box1.Add(self.name, pos=(3, 2))
 
-        line = wx.StaticLine(self.panel)
-        box1.Add(line, pos=(4, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
+            self.score = wx.StaticText(self.panel, wx.ID_ANY, label="Score: ")
+            self.score.SetFont(self.font)
+            box1.Add(self.score, pos=(4, 2))
 
+            line = wx.StaticLine(self.panel)
+            box1.Add(line, pos=(5, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
+
+        else:
+            self.score = wx.StaticText(self.panel, wx.ID_ANY, label="Score: ")
+            self.score.SetFont(self.font)
+            box1.Add(self.score, pos=(3, 2))
+
+            line = wx.StaticLine(self.panel)
+            box1.Add(line, pos=(4, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
 
         box2.Add(box1, 0)
         self.lst = wx.ListBox(self.panel, size=(330, 300), choices=[], style=wx.LB_SINGLE)
@@ -481,7 +495,6 @@ class History_view(wx.Frame):
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
         box2.Add(self.lst, 1, wx.EXPAND)
         box3.Add(box2, 0, wx.EXPAND)
-
 
         self.figure = Figure()
         self.axes = self.figure.add_subplot(111)
@@ -491,9 +504,13 @@ class History_view(wx.Frame):
         self.panel.SetSizer(box3)
         self.panel.Fit()
 
+        # default selection: exercise 1
+        self.update_choice(None)
+
+
     def update_choice(self, event):
         cur_choice = self.choice.GetSelection()
-        self.df = pd.read_excel(self.path, sheetname=cur_choice)
+        self.df = pd.read_excel(self.path, sheet_name=cur_choice)
         self.lst.Clear()
         lst_choice = self.df.columns.values.tolist()
         idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0] + 1
@@ -501,15 +518,19 @@ class History_view(wx.Frame):
         self.lst.InsertItems(lst_choice[idx_1:idx_2], 0)
         if (self.info.isCli):
             self.update_name_list_cli()
+        self.get_score()
 
     def update_name_list_cli(self):
         df_unique_names = self.df['name'].unique()[1:]
         self.name.Clear()
         self.name.AppendItems(df_unique_names)
+        self.name.SetSelection(0)
+        self.cur_choice = self.name.GetStringSelection()
 
     def update_name_cli(self, event):
-        self.cur_choice = self.name.GetString(self.name.GetSelection())
-        print(self.cur_choice)
+        self.cur_choice = self.name.GetStringSelection()
+        if self.lst.GetStringSelection() != '':
+            self.update_figure_cli()
 
     def update_figure(self, event):
         if self.info.isPat:
@@ -517,29 +538,66 @@ class History_view(wx.Frame):
         elif self.info.isCli:
             self.update_figure_cli()
 
+    def get_score(self):
+        list = np.array(self.lst.GetStrings())
+        df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
+
+        result = 0
+        no_ideal = True
+        for i in list:
+            temp_result = 0
+            df_name = self.df[self.df['name'] == self.cur_choice]
+
+            cri = -1
+            if df_ideal[i].dtype == float:
+                cri = df_ideal[i][0]
+                no_ideal = False
+            else:
+                continue
+
+            y = np.array(df_name[i])
+            y = y[np.logical_not(np.isnan(y))]
+            y_min, y_max = self.find_min_max(y)
+            range = y_max - y_min
+            y -= cri
+            temp_result = y.sum() / y.shape[0] / range
+            # print(temp_result)
+            result += temp_result
+
+        if no_ideal:
+            self.score.SetLabel("Score: None")
+        else:
+            percent = (1 - result) * 100 / list.shape[0]
+            self.score.SetLabel("Score: %.2f %%" % percent)
+
 
     def update_figure_cli(self):
         df_name = self.df[self.df['name'] == self.cur_choice]
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
         item = self.lst.GetStringSelection()
         self.axes.clear()
+        # self.figure.texts.clear()
 
         # try:
         cri = -1
         if df_ideal[item].dtype == float:
             cri = df_ideal[item][0]
             self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
+        #     self.figure.text(0.8, 0.9, "Some Score")
+        # else:
+        #     self.figure.text(0.8, 0.9, "No Score")
 
         y = np.array(df_name[item])
         x = np.arange(0, len(y))
-
+        self.axes.set_xticks(x)
+        self.axes.set_title("Patient: " + self.cur_choice + "\n" + item)
         self.axes.plot(x, y, color=self.color_line[0])
-        self.axes.set_title(item)
 
         y_min, y_max = self.find_min_max(y)
 
         if cri == -1:
             self.axes.set_ylim(y_min - 10, y_max + 10)
+
         else:
             self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
 
@@ -552,7 +610,9 @@ class History_view(wx.Frame):
             else:
                 prev_index = i
         self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
+
         self.canvas.draw()
+
         # except:
         #     self.axes.imshow(self.no_hist_img)
         #     self.canvas.draw()
@@ -567,15 +627,15 @@ class History_view(wx.Frame):
 
         self.axes.clear()
         try:
-            self.axes.plot(x, y, color=self.color_line[0])
-            # self.axes.bar(x, y, color='g')
             if df_ideal[item].dtype == float:
                 cri = df_ideal[item][0]
                 self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
             else:
                 cri = -1
+
             self.axes.set_title(item)
-            self.axes.set_xticks(x)
+            self.axes.plot(x, y, color=self.color_line[0])
+            # self.axes.bar(x, y, color='g')
 
             y_min, y_max = self.find_min_max(y)
 
@@ -587,14 +647,13 @@ class History_view(wx.Frame):
             # reformat x_name to only present mm/dd
             x_name = np.array([x.split("-") for x in df_name['time']])
             x_name = np.array([(x[1] + "/" + x[2]) for x in x_name])
-
             prev_index = 0
             for i in range(1, len(x_name)):
                 if x_name[prev_index] == x_name[i]:
                     x_name[i] = ""
                 else:
                     prev_index = i
-
+            self.axes.set_xticks(x)
             self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
             self.canvas.draw()
         except:
