@@ -559,7 +559,12 @@ class History_view(wx.Frame):
             y = y[np.logical_not(np.isnan(y))]
             y_min, y_max = self.find_min_max(y)
             range = y_max - y_min
-            y -= cri
+
+            if ("lower" not in i) and ("push down" not in i):
+                y -= cri
+            else:
+                y = cri - y
+
             temp_result = y.sum() / y.shape[0] / range
             # print(temp_result)
             result += temp_result
