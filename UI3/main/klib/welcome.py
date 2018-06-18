@@ -511,14 +511,15 @@ class History_view(wx.Frame):
     def update_choice(self, event):
         cur_choice = self.choice.GetSelection()
         self.df = pd.read_excel(self.path, sheet_name=cur_choice)
+        # self.df.fillna(0, inplace=True)
         self.lst.Clear()
         lst_choice = self.df.columns.values.tolist()
         idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0] + 1
         idx_2 = [i for i, elem in enumerate(lst_choice) if 'errmsg' in elem][0]
         self.lst.InsertItems(lst_choice[idx_1:idx_2], 0)
-        self.lst.InsertItems(["overall score"], 0)
         if (self.info.isCli):
             self.update_name_list_cli()
+            self.lst.InsertItems(["overall score"], 0)
 
     def update_name_list_cli(self):
         df_unique_names = self.df['name'].unique()[1:]
@@ -538,49 +539,56 @@ class History_view(wx.Frame):
         elif self.info.isCli:
             self.update_figure_cli()
 
-
     def debug(self, arr):
         print(arr, arr.shape, type(arr))
 
     def get_score_list(self):
+        self.axes.clear()
+        self.axes.set_title("Patient: " + self.cur_choice + "\n" + "overall score")
+
+
         # list of features
         list = np.array(self.lst.GetStrings())
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
 
-        total_score = np.zeros((self.df.shape[0] - 1, 1))
+        total_score = np.zeros((self.df[self.df['name'] == self.cur_choice].shape[0], 1))
         no_ideal = True
-
         exercise_4 = False
-        # selection by index
         if self.choice.GetSelection() == 3:
+            # selection by index
             exercise_4 = True
 
         # get total score for each day
         for i in range(1, len(list)):
+            df_name = self.df[self.df['name'] == self.cur_choice]
+            y = np.array(df_name[list[i]])
+            self.debug(y)
+            # y = y[np.logical_not(np.isnan(y))]
+            # y = y[np.logical_not(pd.isnull(y))]
+            y = np.reshape(y, (len(y), 1))
+            y_min, y_max = self.find_min_max(y)
+            y_span = y_max - y_min
+
             cri = -1
             if df_ideal[list[i]].dtype == float:
                 cri = df_ideal[list[i]][0]
                 no_ideal = False
             else:
                 # need fix
-                continue
-
-            df_name = self.df[self.df['name'] == self.cur_choice]
-            y = np.array(df_name[list[i]])
-            y = y[np.logical_not(np.isnan(y))]
-            y = np.reshape(y, (len(y), 1))
-            y_min, y_max = self.find_min_max(y)
-            y_span = y_max - y_min
+                cri = y_max - y_span * 0.1
 
             if exercise_4:
                 y = -abs(y - cri)
             else:
                 if ("lower" not in list[i]) and ("push down" not in list[i]):
-                    y -= cri
+                    y = y - cri
                 else:
                     y = cri - y
 
-            total_score += y / y_span
+            if (np.all(pd.isnull(y))):
+                continue
+            else:
+                total_score = total_score + y / y_span
 
         total_score = 1 + total_score / (len(list) - 1)
         self.debug(total_score)
@@ -588,13 +596,12 @@ class History_view(wx.Frame):
         y = total_score * 100
         x = np.arange(0, len(y))
 
+        self.debug(y)
 
-        self.axes.clear()
-        self.axes.set_title("Patient: " + self.cur_choice + "\n" + "overall score")
         self.axes.plot(x, y, color=self.color_line[0])
 
         y_min, y_max = self.find_min_max(y)
-        self.axes.set_ylim(y_min - 5, y_max + 5)
+        self.axes.set_ylim(y_min[0] - 5, y_max[0] + 5)
 
         df_name = self.df[self.df['name'] == self.cur_choice]
         x_name = np.array([x.split("-") for x in df_name['time']])
@@ -649,6 +656,34 @@ class History_view(wx.Frame):
             self.score.SetLabel("Score: %.2f %%" % percent)
 
 
+    def draw_figure(self, x, y, name, item, df_name, df_ideal):
+        self.axes.set_xticks(x)
+        self.axes.set_title("Patient: " + name + "\n" + item)
+        self.axes.plot(x, y, color=self.color_line[0])
+
+        y_min, y_max = self.find_min_max(y)
+        y_span = y_max - y_min
+
+        if df_ideal[item].dtype == float:
+            cri = df_ideal[item][0]
+        else:
+            cri = y_max - y_span * 0.1
+
+        self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
+        self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
+
+        x_name = np.array([a.split("-") for a in df_name['time']])
+        x_name = np.array([(a[1] + "/" + a[2]) for a in x_name])
+        prev_index = 0
+        for i in range(1, len(x_name)):
+            if x_name[prev_index] == x_name[i]:
+                x_name[i] = ""
+            else:
+                prev_index = i
+        self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
+        self.canvas.draw()
+
+
     def update_figure_cli(self):
         df_name = self.df[self.df['name'] == self.cur_choice]
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
@@ -661,40 +696,9 @@ class History_view(wx.Frame):
             return
 
         # try:
-        cri = -1
-        if df_ideal[item].dtype == float:
-            cri = df_ideal[item][0]
-            self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
-        #     self.figure.text(0.8, 0.9, "Some Score")
-        # else:
-        #     self.figure.text(0.8, 0.9, "No Score")
-
         y = np.array(df_name[item])
         x = np.arange(0, len(y))
-        self.axes.set_xticks(x)
-        self.axes.set_title("Patient: " + self.cur_choice + "\n" + item)
-        self.axes.plot(x, y, color=self.color_line[0])
-
-        y_min, y_max = self.find_min_max(y)
-
-        if cri == -1:
-            self.axes.set_ylim(y_min - 10, y_max + 10)
-
-        else:
-            self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
-
-        x_name = np.array([a.split("-") for a in df_name['time']])
-        x_name = np.array([(a[1] + "/" + a[2]) for a in x_name])
-        prev_index = 0
-        for i in range(1, len(x_name)):
-            if x_name[prev_index] == x_name[i]:
-                x_name[i] = ""
-            else:
-                prev_index = i
-        self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
-
-        self.canvas.draw()
-
+        self.draw_figure(x, y, self.cur_choice, item, df_name, df_ideal)
         # except:
         #     self.axes.imshow(self.no_hist_img)
         #     self.canvas.draw()
@@ -704,43 +708,15 @@ class History_view(wx.Frame):
         df_name  = self.df[self.df['name'] == self.info.name]
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
         item = self.lst.GetStringSelection()
-        y = np.array(df_name[item])
-        x = np.arange(0, len(y))
 
         self.axes.clear()
-        try:
-            if df_ideal[item].dtype == float:
-                cri = df_ideal[item][0]
-                self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
-            else:
-                cri = -1
-
-            self.axes.set_title(item)
-            self.axes.plot(x, y, color=self.color_line[0])
-            # self.axes.bar(x, y, color='g')
-
-            y_min, y_max = self.find_min_max(y)
-
-            if cri == -1:
-                self.axes.set_ylim(y_min - 10, y_max + 10)
-            else:
-                self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
-
-            # reformat x_name to only present mm/dd
-            x_name = np.array([x.split("-") for x in df_name['time']])
-            x_name = np.array([(x[1] + "/" + x[2]) for x in x_name])
-            prev_index = 0
-            for i in range(1, len(x_name)):
-                if x_name[prev_index] == x_name[i]:
-                    x_name[i] = ""
-                else:
-                    prev_index = i
-            self.axes.set_xticks(x)
-            self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
-            self.canvas.draw()
-        except:
-            self.axes.imshow(self.no_hist_img)
-            self.canvas.draw()
+        # try:
+        y = np.array(df_name[item])
+        x = np.arange(0, len(y))
+        self.draw_figure(x, y, self.info.name, item, df_name, df_ideal)
+        # except:
+        #     self.axes.imshow(self.no_hist_img)
+        #     self.canvas.draw()
 
     def find_min_max(self, y):
         y_min = sys.float_info.max
