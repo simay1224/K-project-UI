@@ -474,17 +474,17 @@ class History_view(wx.Frame):
             self.name.Bind(wx.EVT_CHOICE, self.update_name_cli)
             box1.Add(self.name, pos=(3, 2))
 
-            self.score = wx.StaticText(self.panel, wx.ID_ANY, label="Score: ")
-            self.score.SetFont(self.font)
-            box1.Add(self.score, pos=(4, 2))
+            # self.score = wx.StaticText(self.panel, wx.ID_ANY, label="Score: ")
+            # self.score.SetFont(self.font)
+            # box1.Add(self.score, pos=(4, 2))
 
             line = wx.StaticLine(self.panel)
             box1.Add(line, pos=(5, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
 
         else:
-            self.score = wx.StaticText(self.panel, wx.ID_ANY, label="Score: ")
-            self.score.SetFont(self.font)
-            box1.Add(self.score, pos=(3, 2))
+            # self.score = wx.StaticText(self.panel, wx.ID_ANY, label="Score: ")
+            # self.score.SetFont(self.font)
+            # box1.Add(self.score, pos=(3, 2))
 
             line = wx.StaticLine(self.panel)
             box1.Add(line, pos=(4, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
@@ -516,9 +516,9 @@ class History_view(wx.Frame):
         idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0] + 1
         idx_2 = [i for i, elem in enumerate(lst_choice) if 'errmsg' in elem][0]
         self.lst.InsertItems(lst_choice[idx_1:idx_2], 0)
+        self.lst.InsertItems(["overall score"], 0)
         if (self.info.isCli):
             self.update_name_list_cli()
-        self.get_score()
 
     def update_name_list_cli(self):
         df_unique_names = self.df['name'].unique()[1:]
@@ -538,7 +538,80 @@ class History_view(wx.Frame):
         elif self.info.isCli:
             self.update_figure_cli()
 
-    def get_score(self):
+
+    def debug(self, arr):
+        print(arr, arr.shape, type(arr))
+
+    def get_score_list(self):
+        # list of features
+        list = np.array(self.lst.GetStrings())
+        df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
+
+        total_score = np.zeros((self.df.shape[0] - 1, 1))
+        no_ideal = True
+
+        exercise_4 = False
+        # selection by index
+        if self.choice.GetSelection() == 3:
+            exercise_4 = True
+
+        # get total score for each day
+        for i in range(1, len(list)):
+            cri = -1
+            if df_ideal[list[i]].dtype == float:
+                cri = df_ideal[list[i]][0]
+                no_ideal = False
+            else:
+                # need fix
+                continue
+
+            df_name = self.df[self.df['name'] == self.cur_choice]
+            y = np.array(df_name[list[i]])
+            y = y[np.logical_not(np.isnan(y))]
+            y = np.reshape(y, (len(y), 1))
+            y_min, y_max = self.find_min_max(y)
+            y_span = y_max - y_min
+
+            if exercise_4:
+                y = -abs(y - cri)
+            else:
+                if ("lower" not in list[i]) and ("push down" not in list[i]):
+                    y -= cri
+                else:
+                    y = cri - y
+
+            total_score += y / y_span
+
+        total_score = 1 + total_score / (len(list) - 1)
+        self.debug(total_score)
+
+        y = total_score * 100
+        x = np.arange(0, len(y))
+
+
+        self.axes.clear()
+        self.axes.set_title("Patient: " + self.cur_choice + "\n" + "overall score")
+        self.axes.plot(x, y, color=self.color_line[0])
+
+        y_min, y_max = self.find_min_max(y)
+        self.axes.set_ylim(y_min - 5, y_max + 5)
+
+        df_name = self.df[self.df['name'] == self.cur_choice]
+        x_name = np.array([x.split("-") for x in df_name['time']])
+        x_name = np.array([(x[1] + "/" + x[2]) for x in x_name])
+        prev_index = 0
+        for i in range(1, len(x_name)):
+            if x_name[prev_index] == x_name[i]:
+                x_name[i] = ""
+            else:
+                prev_index = i
+        self.axes.set_xticks(x)
+        self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
+        self.canvas.draw()
+
+
+
+    def get_one_score(self):
         list = np.array(self.lst.GetStrings())
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
 
@@ -582,6 +655,10 @@ class History_view(wx.Frame):
         item = self.lst.GetStringSelection()
         self.axes.clear()
         # self.figure.texts.clear()
+
+        if item == "overall score":
+            self.get_score_list()
+            return
 
         # try:
         cri = -1
