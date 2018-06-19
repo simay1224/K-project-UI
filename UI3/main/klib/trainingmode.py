@@ -44,6 +44,8 @@ class BodyGameRuntime(object):
         self._infoObject = pygame.display.Info()
         self._screen = pygame.display.set_mode((self._infoObject.current_w >> 1, self._infoObject.current_h >> 1),
                                                 pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
+        # self._screen = pygame.display.set_mode((960, 540),
+        #                                         pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
         pygame.display.set_caption("Lymph Coach - Training mode")
         try :
@@ -54,8 +56,8 @@ class BodyGameRuntime(object):
         if sys.platform == "win32":
             # Kinect runtime object, we want only color and body frames
             self._kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color |
-                                                           PyKinectV2.FrameSourceTypes_Body
-                                                           )
+                                                           PyKinectV2.FrameSourceTypes_Body)
+
         # back buffer surface for getting Kinect color frames, 32bit color, width and height equal to the Kinect color frame size
         self.default_h = self._infoObject.current_h
         self.default_w = self._infoObject.current_w
@@ -102,7 +104,8 @@ class BodyGameRuntime(object):
 
         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
-        self.ori = (int(self._screen.get_width()*self.kp.video_LB/1920.), int(self._screen.get_height()*0.5))  # origin of the color frame
+        self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
+        # self.ori = (int(self._screen.get_width()*self.kp.video_LB/1920.), int(self._screen.get_height()*0.5))  # origin of the color frame
         self.cntdown = 900
         self.io  = Dataoutput()
         self.skel = Skeleton()
@@ -286,7 +289,8 @@ class BodyGameRuntime(object):
             self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, tmode=True)
             self.kp.pre_scale = self.kp.scale
             surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*self.kp.vid_w_t/1920.), int(self.h*self.kp.vid_h_t/1080.)))
-            self.ori = (int(self._screen.get_width()/2-int(self.kp.vid_w_t/4.*self.kp.scale)), int(self._screen.get_height()*self.kp.video2_UB/1080.))
+            self.ori = (int(self._screen.get_width()/2-int(self.kp.vid_w_t/4.*self.kp.scale)),
+                        int(self._screen.get_height()*self.kp.video2_UB/1080.))
             self._screen.blit(surface_to_draw, self.ori)
 
             # update

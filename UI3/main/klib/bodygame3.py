@@ -151,6 +151,7 @@ class BodyGameRuntime(object):
             self.movie = movie.Movie(self.exeno)
         else:
             self.movie = movie.Movie(self.exeno, self.kp.vid_w, self.kp.vid_h)
+
         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
         self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
