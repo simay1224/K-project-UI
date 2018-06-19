@@ -594,6 +594,7 @@ class History_view(wx.Frame):
         y = total_score * 100
         x = np.arange(0, len(y))
         self.axes.plot(x, y, color=self.color_line[0])
+        self.axes.set_xticks(x)
         # self.debug(y)
 
         y_min, y_max = self.find_min_max(y)
@@ -607,7 +608,6 @@ class History_view(wx.Frame):
                 x_name[i] = ""
             else:
                 prev_index = i
-        self.axes.set_xticks(x)
         self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
         self.canvas.draw()
 
