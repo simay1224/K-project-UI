@@ -13,7 +13,7 @@ if sys.version_info >= (3, 0):
     import _pickle as cPickle
 else:
     import cPickle
-    
+
 import numpy as np
 # import class
 from ..klib import movie
@@ -44,6 +44,8 @@ class BodyGameRuntime(object):
         self._infoObject = pygame.display.Info()
         self._screen = pygame.display.set_mode((self._infoObject.current_w >> 1, self._infoObject.current_h >> 1),
                                                 pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
+        # self._screen = pygame.display.set_mode((960, 540),
+        #                                         pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
         pygame.display.set_caption("Lymph Coach - Training mode")
         try :
@@ -54,18 +56,22 @@ class BodyGameRuntime(object):
         if sys.platform == "win32":
             # Kinect runtime object, we want only color and body frames
             self._kinect = PyKinectRuntime.PyKinectRuntime(PyKinectV2.FrameSourceTypes_Color |
-                                                           PyKinectV2.FrameSourceTypes_Body
-                                                           )
+                                                           PyKinectV2.FrameSourceTypes_Body)
+
         # back buffer surface for getting Kinect color frames, 32bit color, width and height equal to the Kinect color frame size
         self.default_h = self._infoObject.current_h
         self.default_w = self._infoObject.current_w
-        self.h = self.default_h/2
-        self.w = self.default_w/2
+        self.h = self.default_h >> 1
+        self.w = self.default_w >> 1
 
         self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()
 
-        self.bkidx = 11
+        if sys.platform == "win32":
+            self.bkidx = 10
+        else:
+            self.bkidx = 11
+
         self.bklist = glob.glob(os.path.join('./data/imgs/bkimgs', '*.jpg'))
         self.readbackground()
         self.h_to_w = float(self.default_h) / self.default_w
@@ -82,7 +88,8 @@ class BodyGameRuntime(object):
         self.bkimg = cv2.resize(self.bkimg, (self._infoObject.current_w, self._infoObject.current_h))
 
         if sys.platform == "win32":
-            self.bkimg = np.dstack([cv2.resize(self.bkimg, (1920, 1080)), np.zeros([1080, 1920])]).astype(np.uint8)
+            # self.bkimg = np.dstack([cv2.resize(self.bkimg, (1920, 1080)), np.zeros([1080, 1920])]).astype(np.uint8)
+            self.bkimg = np.dstack([self.bkimg, 255 * np.ones([self._infoObject.current_h, self._infoObject.current_w])]).astype(np.uint8)
         else:
             self.bkimg = np.dstack([255 * np.ones([self._infoObject.current_h, self._infoObject.current_w]), self.bkimg[:, :, ::-1]]).astype(np.uint8)
 
@@ -93,11 +100,12 @@ class BodyGameRuntime(object):
         if self.kp.kinect:
             self.movie = movie.Movie(self.exeno)
         else:
-            self.movie = movie.Movie(self.exeno, False, 480, 272)
+            self.movie = movie.Movie(self.exeno, 480, 272)
 
         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
-        self.ori = (int(self._screen.get_width()*self.kp.video_LB/1920.), int(self._screen.get_height()*0.5))  # origin of the color frame
+        self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
+        # self.ori = (int(self._screen.get_width()*self.kp.video_LB/1920.), int(self._screen.get_height()*0.5))  # origin of the color frame
         self.cntdown = 900
         self.io  = Dataoutput()
         self.skel = Skeleton()
@@ -209,7 +217,7 @@ class BodyGameRuntime(object):
             # === Main event loop ===
             for event in pygame.event.get():  # User did something
                 if event.type == pygame.QUIT:  # If user clicked close
-                    self._done = True  # Flag that we are done so we exit this loop
+                    self.kp._done = True  # Flag that we are done so we exit this loop
                     if self.kp.kinect:
                         self.movie.stop()
                 elif event.type == pygame.VIDEORESIZE:  # window resized
@@ -281,7 +289,8 @@ class BodyGameRuntime(object):
             self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, tmode=True)
             self.kp.pre_scale = self.kp.scale
             surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*self.kp.vid_w_t/1920.), int(self.h*self.kp.vid_h_t/1080.)))
-            self.ori = (int(self._screen.get_width()/2-int(self.kp.vid_w_t/4.*self.kp.scale)), int(self._screen.get_height()*self.kp.video2_UB/1080.))
+            self.ori = (int(self._screen.get_width()/2-int(self.kp.vid_w_t/4.*self.kp.scale)),
+                        int(self._screen.get_height()*self.kp.video2_UB/1080.))
             self._screen.blit(surface_to_draw, self.ori)
 
             # update

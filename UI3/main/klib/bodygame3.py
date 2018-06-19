@@ -89,7 +89,12 @@ class BodyGameRuntime(object):
         self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  # kinect surface
         self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  #background surface
 
-        self.bkidx = 11
+
+        if sys.platform == "win32":
+            self.bkidx = 10
+        else:
+            self.bkidx = 11
+
         self.bklist = glob.glob(os.path.join('./data/imgs/bkimgs', '*.jpg'))
         self.readbackground()
         self.h_to_w = float(self.default_h) / self.default_w
@@ -123,7 +128,8 @@ class BodyGameRuntime(object):
         self.bkimg = cv2.resize(self.bkimg, (self._infoObject.current_w, self._infoObject.current_h))
 
         if sys.platform == "win32":
-            self.bkimg = np.dstack([cv2.resize(self.bkimg, (1920, 1080)), np.zeros([1080, 1920])]).astype(np.uint8)
+            # self.bkimg = np.dstack([cv2.resize(self.bkimg, (1920, 1080)), np.zeros([1080, 1920])]).astype(np.uint8)
+            self.bkimg = np.dstack([self.bkimg, 255 * np.ones([self._infoObject.current_h, self._infoObject.current_w])]).astype(np.uint8)
         else:
             self.bkimg = np.dstack([255 * np.ones([self._infoObject.current_h, self._infoObject.current_w]), self.bkimg[:, :, ::-1]]).astype(np.uint8)
 
@@ -145,6 +151,7 @@ class BodyGameRuntime(object):
             self.movie = movie.Movie(self.exeno)
         else:
             self.movie = movie.Movie(self.exeno, self.kp.vid_w, self.kp.vid_h)
+
         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
         self.ori = (int(self._screen.get_width()*(1-self.kp.ratio)), int(self._screen.get_height()*self.kp.ratio))  # origin of the color frame
@@ -591,9 +598,9 @@ class BodyGameRuntime(object):
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                                             'Overall evaluation:\n\n- '+self.errsums, 3)
                     self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                        '(Press "Space" to start next exercise.)', 0, (120, 830), fsize=60, color=self.kp.c_togo)
+                                        '(Press "Space" to start next exercise.)', 0, (100, 800), fsize=60, color=self.kp.c_togo)
                     self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                        'Next exercise will start in %s seconds.'% str(self.cntdown/30), 0, (120, 880) , fsize=60, color=self.kp.c_togo)
+                                        'Next exercise will start in %s seconds.'% str(self.cntdown/30), 0, (100, 880) , fsize=60, color=self.kp.c_togo)
                     self.cntdown -= 1
                     if self.cntdown == 0:
                         if self.exeno == 7:

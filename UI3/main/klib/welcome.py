@@ -8,6 +8,8 @@ from matplotlib.figure import Figure
 from collections import defaultdict
 import wx.lib.mixins.inspection as WIT
 
+import sys, math
+
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
@@ -16,87 +18,99 @@ from ..klib import bodygame3
 from ..klib import trainingmode
 from .historylog import Historylog
 
-class Info():
-    def __init__(self):
-        self.name   = 'jane doe'
-        self.age    = 'unknown'
-        self.gender = 'unknown'
+# class Info():
+#     def __init__(self):
+#         self.name   = 'jane doe'
+#         self.age    = '19'
+#         self.gender = 'female'
 
 class Welcome_win(wx.Frame):
     def __init__(self, info, parent, title):
         self.info = info
         self.game = None
 
+
+        self.width = 410
+        self.height = 500
+        self.sizer_w = 5
+        self.sizer_h = 5
+        super(Welcome_win, self).__init__(parent, title=title, size=(self.width, self.height))
+        self.panel = wx.Panel(self)
+
+        self.init_ui()
+
+    def init_ui(self):
         self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
 
-        super(Welcome_win, self).__init__(parent, title = title, size = (410, 460))
-        panel = wx.Panel(self)
 
         # sizers
         topSizer = wx.BoxSizer(wx.VERTICAL)
-        titleSizer = wx.GridBagSizer(5, 5)
-        sizer = wx.GridBagSizer(5, 5)
+        titleSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        lineSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
 
         # title
-        text = wx.StaticText(panel, label="LymphCoach")
+        text = wx.StaticText(self.panel, label="LymphCoach")
         text.SetFont(self.font_title)
         topSizer.Add(text, 0, wx.CENTER)
 
+        line = wx.StaticLine(self.panel)
+        lineSizer.Add(line, pos=(0, 0), span=(0, int(self.width/self.sizer_w / 2)), flag=wx.EXPAND|wx.BOTTOM)
 
         # Basic information
-        text11 = wx.StaticText(panel, label="Name:")
+        text11 = wx.StaticText(self.panel, label="Name:")
         text11.SetFont(self.font_field)
         titleSizer.Add(text11, pos=(1, 0))
 
-        text1 = wx.StaticText(panel, label=self.info.fname + " " + self.info.lname)
+        text1 = wx.StaticText(self.panel, label=self.info.fname + " " + self.info.lname)
         text1.SetFont(self.font)
         titleSizer.Add(text1, pos=(1, 1))
 
-        text21 = wx.StaticText(panel, label="Age:")
+        text21 = wx.StaticText(self.panel, label="Gender:")
         text21.SetFont(self.font_field)
         titleSizer.Add(text21, pos=(2, 0))
-        text2 = wx.StaticText(panel, label=self.info.age)
+        text2 = wx.StaticText(self.panel, label=self.info.gender)
         text2.SetFont(self.font)
         titleSizer.Add(text2, pos=(2, 1))
 
-        text31 = wx.StaticText(panel, label="Gender:")
+        text31 = wx.StaticText(self.panel, label="Age:")
         text31.SetFont(self.font_field)
         titleSizer.Add(text31, pos=(3, 0))
-        text3 = wx.StaticText(panel, label=self.info.gender)
+        text3 = wx.StaticText(self.panel, label=self.info.age)
         text3.SetFont(self.font)
         titleSizer.Add(text3, pos=(3, 1))
 
-
         button_size = (300, 50)
 
-        button1 = wx.Button(panel, size=button_size, label="Training")
+        button1 = wx.Button(self.panel, size=button_size, label="Instruction with Video")
         button1.SetFont(self.font)
-        button1.Bind(wx.EVT_BUTTON, self.open_trainingmode)
+        button1.Bind(wx.EVT_BUTTON, self.open_instruction)
         sizer.Add(button1, pos=(1, 1), span=(1, 0))
 
-        button2 = wx.Button(panel, size=button_size, label="Instructions")
+        button2 = wx.Button(self.panel, size=button_size, label="Training Mode")
         button2.SetFont(self.font)
-        button2.Bind(wx.EVT_BUTTON, self.open_instruction)
+        button2.Bind(wx.EVT_BUTTON, self.open_trainingmode)
         sizer.Add(button2, pos=(2, 1), span=(1, 0))
 
-        button3 = wx.Button(panel, size=button_size, label="Live Evaluation")
+        button3 = wx.Button(self.panel, size=button_size, label="Evaluation Mode")
         button3.SetFont(self.font)
         button3.Bind(wx.EVT_BUTTON, self.open_bodygame)
         sizer.Add(button3, pos=(3, 1), span=(1, 0))
 
-        button3 = wx.Button(panel, size=button_size, label="History Review")
+        button3 = wx.Button(self.panel, size=button_size, label="History Review")
         button3.SetFont(self.font)
         button3.Bind(wx.EVT_BUTTON, self.open_history)
         sizer.Add(button3, pos=(4, 1), span=(1, 0))
 
+        topSizer.Add(lineSizer, 0, wx.CENTER)
         topSizer.Add(titleSizer, 0, wx.CENTER)
         topSizer.Add(sizer, 0, wx.CENTER)
-        panel.SetSizer(topSizer)
+        self.panel.SetSizer(topSizer)
 
-        # panel.SetSizer(sizer)
-        # panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
+        # self.panel.SetSizer(sizer)
+        # self.panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Show(True)
 
     def open_bodygame(self, event):
@@ -104,8 +118,8 @@ class Welcome_win(wx.Frame):
         # myobject.Disable()
         self.game = bodygame3.BodyGameRuntime(self.info)
         self.game.run()
-        if self.game.kp._done:
-            self.Destroy()
+        # if self.game.kp._done:
+        #     self.Destroy()
 
     def open_instruction(self, event):
         instruct = Instrcution_win(None, 'Instruction')
@@ -137,14 +151,18 @@ class Instrcution_win(wx.Frame):
 
     def __init__(self, parent, title):
         self.init_text()
+
+        self.sizer_w = 5
+        self.sizer_h = 5
+
         super(Instrcution_win, self).__init__(parent, title=title, size=(950, 700))
 
-        panel = wx.Panel(self)
+        self.panel = wx.Panel(self)
         box = wx.BoxSizer(wx.HORIZONTAL)
         self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
-        # self.text = wx.TextCtrl(panel, size = (900,300), style = wx.TE_MULTILINE|wx.TE_READONLY)
-        self.player = MoviePanel(panel, -1)
-        self.text = wx.TextCtrl(panel, size=self.player.mc.GetBestSize(), style=wx.TE_MULTILINE|wx.TE_READONLY)
+        # self.text = wx.TextCtrl(self.panel, size = (900,300), style = wx.TE_MULTILINE|wx.TE_READONLY)
+        self.player = MoviePanel(self.panel, -1)
+        self.text = wx.TextCtrl(self.panel, size=self.player.mc.GetBestSize(), style=wx.TE_MULTILINE|wx.TE_READONLY)
         self.text.SetFont(self.font)
         # self.text.SetBackgroundColour((255, 255, 255))
         self.text.SetBackgroundColour((179, 236, 255))
@@ -153,12 +171,12 @@ class Instrcution_win(wx.Frame):
 
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.VERTICAL)
-        lst = wx.ListBox(panel, size = (250, self.player.mc.GetBestSize()[1] * 2), choices=languages, style=wx.LB_SINGLE)
+        lst = wx.ListBox(self.panel, size = (250, self.player.mc.GetBestSize()[1] * 2), choices=languages, style=wx.LB_SINGLE)
         lst.SetBackgroundColour((255, 255, 255))
-        button1 = wx.Button(panel, label="Close")
+        button1 = wx.Button(self.panel, label="Close")
         button1.Bind(wx.EVT_BUTTON, self.close)
 
-        button_print = wx.Button(panel, id=wx.ID_PRINT, label="")
+        button_print = wx.Button(self.panel, id=wx.ID_PRINT, label="")
         button_print.SetFocus()
         self.Bind(wx.EVT_BUTTON, self.OnBtnPrint, button_print)
 
@@ -166,7 +184,7 @@ class Instrcution_win(wx.Frame):
         box2.Add(button1, 1, wx.EXPAND)
         box3.Add(self.player, 0, wx.EXPAND)
 
-        text_sizer = wx.GridBagSizer(5, 5)
+        text_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         text_sizer.Add(button_print, (4, 4))
         text_sizer.Add(self.text, (0, 0), span=(5, 0))  # for .avi .mpg video files
 
@@ -176,8 +194,8 @@ class Instrcution_win(wx.Frame):
         box.Add(box2, 0,wx.EXPAND)
         box.Add(box3, 1, wx.EXPAND)
         # box.Add(button_print, 2, wx.RIGHT)
-        panel.SetSizer(box)
-        panel.Fit()
+        self.panel.SetSizer(box)
+        self.panel.Fit()
 
         self.Centre()
         self.Bind(wx.EVT_LISTBOX, self.onListBox, lst)
@@ -196,13 +214,13 @@ class Instrcution_win(wx.Frame):
 
         self.str['ins'][1] = '\n  '\
                              '\n1. Put your hands on the belly position.'\
-                             '\n2. Wait until the sign shows "start breath in/out."'\
+                             '\n2. Wait until the sign shows "start breathe in/out."'\
                              '\n3. Do deep breathing 4 times.'\
                              '\n4. Put down your hands.'
 
         self.str['ins'][2] = '\n  '\
                              '\n1. Raise your harms up and hold there.'\
-                             '\n2. Wait until the sign shows "start breath in/out."'\
+                             '\n2. Wait until the sign shows "start breathe in/out."'\
                              '\n3. Do deep breathing 4 times.' \
                              '\n4. Put down your arms.'
 
@@ -210,14 +228,14 @@ class Instrcution_win(wx.Frame):
                              '\n1. Raise your arms up.'\
                              '\n2. Lower your elbows, let shoulder-elbow-hand be a V-shape.'\
                              '\n3. Raise your arms up again.'\
-                             '\n4. Repeat this repetition 4 times.'\
+                             '\n4. Repeat this 4 times.'\
                              '\n5. Put down your arms.'
 
         self.str['ins'][4] = '\n  '\
                              '\n1. Raise your arms up till "T-pose."'\
                              '\n2. Move arms slowly to the chest.'\
                              '\n3. Back to "T-pose".'\
-                             '\n4. Repeat this repetition 4 times.'\
+                             '\n4. Repeat this 4 times.'\
                              '\n5. Put down your arms.'
 
         self.str['ins'][5] = '\n  '\
@@ -234,9 +252,9 @@ class Instrcution_win(wx.Frame):
                              '\n4. Put down your hands.'
 
         self.str['ins'][7] = '\n  '\
-                             '\n1. Raise and clasp your arms till the belly position.'\
+                             '\n1. Raise and clasp your hands to the belly position.'\
                              '\n2. Raise clasped hands toward to your forehead and keep elbows together.'\
-                             '\n3. Slide your heands to the back of your head and spread the elbows open wide.'\
+                             '\n3. Slide your hands to the back of your head and spread the elbows open wide.'\
                              '\n4. Back to the belly position.'\
                              '\n5. Repeat 4 times.'\
                              '\n6. Put down your arms.'
@@ -249,23 +267,23 @@ class Instrcution_win(wx.Frame):
                                 '\n2. When you breathe out, you also need to open your hands.'\
                                 '\n3. Breathe as deep as you can.'
         self.str['note'][3] = 'Tips :'\
-                                '\n1. When you raise up your arms, make sure that your hand, elbow and shoulder are straight.'\
-                                '\n2. When bending the elbow, hand-elbow-shoulder should be "V-shape" not "L-shape"'\
+                                '\n1. When you raise your arms, make sure that your hand, elbow, and shoulder are straight.'\
+                                '\n2. When you bend your elbow, hand - elbow - shoulder should be "V-shape" not "L-shape"'\
 
         self.str['note'][4] = 'Tips :'\
-                                '\n1. When doing "T-pose", make sure that your hand, elbow and shoulder are straight'\
-                                '\n2. When closing hands, make sure that your hand, and shoulder are in the same height.'\
+                                '\n1. When you do the "T-pose", make sure that your hand, elbow, and shoulder are straight'\
+                                '\n2. When you close your hands, make sure that your hand and shoulder are in the same height.'\
 
         self.str['note'][5] = 'Tips :'\
-                                '\n1. When bending the body, make sure that your hand, elbow and shoulder are straight.'\
+                                '\n1. When you bend your body, make sure that your hand, elbow, and shoulder are straight.'\
                                 '\n2. Keep your body staight'
 
         self.str['note'][6] = 'Tips :'\
-                                '\n1. Let your shoulders rotation movement as large as possible.'
+                                '\n1. Try to rotate your shoulders in a full circle'
 
         self.str['note'][7] = 'Tips :'\
-                                '\n1. When raising the arms to the forehead, keeping two elbows as close as possible.'\
-                                '\n2. When the hands is in the back of your head, spread the elnows open as wide as possible.'\
+                                '\n1. When you raise your arms to the forehead, keep two elbows as close as possible.'\
+                                '\n2. When your hands are in the back, spread the elbows open as wide as possible.'\
                                 '\n3. Keep your body staight.'
 
     def onListBox(self, event):
@@ -347,6 +365,9 @@ class MoviePanel(wx.Panel):
         #self.log = log
         wx.Panel.__init__(self, parent, -1, style=wx.TAB_TRAVERSAL|wx.CLIP_CHILDREN)
 
+        self.sizer_w = 5
+        self.sizer_h = 5
+
         # Create some controls
         self.mc = wx.media.MediaCtrl(self, size=(500,300), style=wx.SIMPLE_BORDER)
         playButton = wx.Button(self, -1, "Play")
@@ -363,7 +384,7 @@ class MoviePanel(wx.Panel):
         self.st_pos  = wx.StaticText(self, -1, size=(100, -1))
 
         # setup the button/label layout using a sizer
-        sizer = wx.GridBagSizer(5, 5)
+        sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         # sizer.Add(loadButton, (1,1))
         sizer.Add(playButton, (2, 4))
         sizer.Add(pauseButton, (3, 4))
@@ -392,15 +413,22 @@ class MoviePanel(wx.Panel):
 
 
 
-class History_view( wx.Frame ):
-    def __init__(self, parent, info = Info(), title = 'welcome'):
-        super(History_view, self).__init__(parent, title = title, size = (850, 520))
+class History_view(wx.Frame):
+    def __init__(self, parent, info, title='history log'):
+        self.width = 850
+        self.height = 520
+        self.sizer_w = 5
+        self.sizer_h = 5
+
+        super(History_view, self).__init__(parent, title=title, size=(self.width, self.height))
         self.info = info
-        self.no_hist_img = cv2.imread('./data/no_hist.jpg')
-        self.InitUI()
+        self.no_hist_img = cv2.imread('./data/imgs/others/no_hist.jpg')
+        self.init_ui()
+        self.color_correct = (0.41, 0.75, 0.07, 0.6)
+        self.color_line = ['#0096BF', '#005A73', '#BFA600', '#736400', '#ffae25', '#af7900', '#d957b4', '#75005b']
         self.Show()
 
-    def InitUI(self, path = './output/log.xlsx'):
+    def init_ui(self, path='./output/log2.xlsx'):
         self.font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)
         self.path = path
         try:
@@ -413,28 +441,60 @@ class History_view( wx.Frame ):
 
         self.panel = wx.Panel(self)
 
-        box1 = wx.BoxSizer(wx.VERTICAL)
+        box1 = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.HORIZONTAL)
 
-        info_text = 'Name: '+self.info.name.title()+'\nGender: '+self.info.gender.title()+'     Age: '+str(self.info.age)
-        info = wx.StaticText(self.panel, wx.ID_ANY, label = info_text)
+        if self.info.isPat:
+            info_text = 'Patient:' + \
+                        '\nName: ' + self.info.name.title() + \
+                        '\nGender: ' + self.info.gender.title() + \
+                        '\nAge: ' + str(self.info.age)
+        else:
+            info_text = 'Clinician:' + \
+                        '\nName: ' + self.info.name.title() + \
+                        '\nGender: ' + self.info.gender.title()
+
+        info = wx.StaticText(self.panel, wx.ID_ANY, label=info_text)
         info.SetFont(self.font)
-        box1.Add(info, 0, wx.EXPAND)
+        box1.Add(info, pos=(1, 2))
 
         ex_choices = log_xl.sheet_names
         self.choice = wx.Choice(self.panel, choices=ex_choices)
         self.choice.SetFont(self.font)
+        # default selection: exercise 1
+        self.choice.SetSelection(0)
         self.choice.Bind(wx.EVT_CHOICE, self.update_choice)
-        box1.Add(self.choice, 1, wx.EXPAND)
-        box2.Add(box1, 0)
+        box1.Add(self.choice, pos=(2, 2))
 
-        self.lst = wx.ListBox(self.panel, size = (330, 300), choices = [], style = wx.LB_SINGLE)
+        # provide list of patients to review
+        if self.info.isCli:
+            self.name = wx.Choice(self.panel, choices=[])
+            self.name.SetFont(self.font)
+            self.name.Bind(wx.EVT_CHOICE, self.update_name_cli)
+            box1.Add(self.name, pos=(3, 2))
+
+            # self.score = wx.StaticText(self.panel, wx.ID_ANY, label="Score: ")
+            # self.score.SetFont(self.font)
+            # box1.Add(self.score, pos=(4, 2))
+
+            line = wx.StaticLine(self.panel)
+            box1.Add(line, pos=(5, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
+
+        else:
+            # self.score = wx.StaticText(self.panel, wx.ID_ANY, label="Score: ")
+            # self.score.SetFont(self.font)
+            # box1.Add(self.score, pos=(3, 2))
+
+            line = wx.StaticLine(self.panel)
+            box1.Add(line, pos=(4, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
+
+        box2.Add(box1, 0)
+        self.lst = wx.ListBox(self.panel, size=(330, 300), choices=[], style=wx.LB_SINGLE)
         self.lst.SetFont(self.font)
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
         box2.Add(self.lst, 1, wx.EXPAND)
         box3.Add(box2, 0, wx.EXPAND)
-
 
         self.figure = Figure()
         self.axes = self.figure.add_subplot(111)
@@ -444,35 +504,187 @@ class History_view( wx.Frame ):
         self.panel.SetSizer(box3)
         self.panel.Fit()
 
-    def update_choice (self, event):
+        # default selection: exercise 1
+        self.update_choice(None)
+
+
+    def update_choice(self, event):
         cur_choice = self.choice.GetSelection()
-        self.df = pd.read_excel(self.path, sheetname=cur_choice)
+        self.df = pd.read_excel(self.path, sheet_name=cur_choice)
+        # self.df.fillna(0, inplace=True)
         self.lst.Clear()
         lst_choice = self.df.columns.values.tolist()
-        idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0]+1
+        idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0] + 1
         idx_2 = [i for i, elem in enumerate(lst_choice) if 'errmsg' in elem][0]
         self.lst.InsertItems(lst_choice[idx_1:idx_2], 0)
+        self.lst.InsertItems(["overall score"], 0)
+        if (self.info.isCli):
+            self.update_name_list_cli()
+
+    def update_name_list_cli(self):
+        df_unique_names = self.df['name'].unique()[1:]
+        self.name.Clear()
+        self.name.AppendItems(df_unique_names)
+        self.name.SetSelection(0)
+        self.cur_choice = self.name.GetStringSelection()
+
+    def update_name_cli(self, event):
+        self.cur_choice = self.name.GetStringSelection()
+        if self.lst.GetStringSelection() != '':
+            self.update_figure_cli()
 
     def update_figure(self, event):
+        if self.info.isPat:
+            self.update_figure_pat()
+        elif self.info.isCli:
+            self.update_figure_cli()
+
+    # helper function for debugging
+    def debug(self, arr):
+        print(arr, arr.shape, type(arr))
+
+    def get_score_list(self, name):
+        self.axes.clear()
+        self.axes.set_title("Patient: " + name + "\n" + "overall score")
+
+        # list of features
+        list = np.array(self.lst.GetStrings())
+        df_name = self.df[self.df['name'] == name]
+        df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
+
+        total_score = np.zeros((df_name.shape[0], 1))
+        no_ideal = True
+        exercise_4 = False
+
+        if self.choice.GetSelection() == 3:
+            # selection by index
+            exercise_4 = True
+
+        # get total score for each day
+        for i in range(1, len(list)):
+            y = np.array(df_name[list[i]])
+            # self.debug(y)
+            y = np.reshape(y, (len(y), 1))
+            y_min, y_max = self.find_min_max(y)
+            y_span = y_max - y_min
+
+            cri = -1
+            if df_ideal[list[i]].dtype == float:
+                cri = df_ideal[list[i]][0]
+                no_ideal = False
+            else:
+                cri = y_max - y_span * 0.1
+
+            if exercise_4:
+                y = -abs(y - cri)
+            else:
+                if ("lower" not in list[i]) and ("push down" not in list[i]):
+                    y = y - cri
+                else:
+                    y = cri - y
+
+            if (np.all(pd.isnull(y))):
+                continue
+            else:
+                total_score = total_score + y / y_span
+
+        total_score = 1 + total_score / (len(list) - 1)
+        # self.debug(total_score)
+
+        y = total_score * 100
+        x = np.arange(0, len(y))
+        self.axes.plot(x, y, color=self.color_line[0])
+        self.axes.set_xticks(x)
+        # self.debug(y)
+
+        y_min, y_max = self.find_min_max(y)
+        self.axes.set_ylim(y_min[0] - 5, y_max[0] + 5)
+
+        x_name = np.array([x.split("-") for x in df_name['time']])
+        x_name = np.array([(x[1] + "/" + x[2]) for x in x_name])
+        prev_index = 0
+        for i in range(1, len(x_name)):
+            if x_name[prev_index] == x_name[i]:
+                x_name[i] = ""
+            else:
+                prev_index = i
+        self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
+        self.canvas.draw()
+
+    # general drawing function
+    def draw_figure(self, name, item, df_name, df_ideal):
+        y = np.array(df_name[item])
+        x = np.arange(0, len(y))
+
+        self.axes.set_xticks(x)
+        self.axes.set_title("Patient: " + name + "\n" + item)
+        self.axes.plot(x, y, color=self.color_line[0])
+
+        y_min, y_max = self.find_min_max(y)
+        y_span = y_max - y_min
+
+        if df_ideal[item].dtype == float:
+            cri = df_ideal[item][0]
+        else:
+            cri = y_max - y_span * 0.1
+
+        self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
+        self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
+
+        x_name = np.array([a.split("-") for a in df_name['time']])
+        x_name = np.array([(a[1] + "/" + a[2]) for a in x_name])
+        prev_index = 0
+        for i in range(1, len(x_name)):
+            if x_name[prev_index] == x_name[i]:
+                x_name[i] = ""
+            else:
+                prev_index = i
+        self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
+        self.canvas.draw()
+
+
+    def update_figure_cli(self):
+        df_name = self.df[self.df['name'] == self.cur_choice]
+        df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
+        item = self.lst.GetStringSelection()
+        self.axes.clear()
+        # self.figure.texts.clear()
+
+        if item == "overall score":
+            self.get_score_list(self.cur_choice)
+            return
+
+        # try:
+        self.draw_figure(self.cur_choice, item, df_name, df_ideal)
+        # except:
+        #     self.axes.imshow(self.no_hist_img)
+        #     self.canvas.draw()
+
+
+    def update_figure_pat(self):
         df_name  = self.df[self.df['name'] == self.info.name]
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
         item = self.lst.GetStringSelection()
-        y = np.array(df_name[item])
-        x = np.arange(0, len(y), 1)
-        x_name = df_name['time'].tolist()
         self.axes.clear()
-        try:
-            self.axes.bar(x, y, color='g')
-            if df_ideal[item].dtype == float:
-                cri = df_ideal[item][0]
-                self.axes.axhline(cri, color='r', linestyle='-', linewidth=4)
-            else:
-                cri = 0
-            self.axes.set_title(item)
-            self.axes.set_xticks(x)
-            self.axes.set_ylim(0,max(np.max(y),cri)+10)
-            self.axes.set_xticklabels(x_name, rotation=25, fontsize=10)
-            self.canvas.draw()
-        except:
-            self.axes.imshow(self.no_hist_img)
-            self.canvas.draw()
+
+        if item == "overall score":
+            self.get_score_list(self.info.name)
+            return
+
+        # try:
+        self.draw_figure(self.info.name, item, df_name, df_ideal)
+        # except:
+        #     self.axes.imshow(self.no_hist_img)
+        #     self.canvas.draw()
+
+    def find_min_max(self, y):
+        y_min = sys.float_info.max
+        y_max = -sys.float_info.max
+        for i in range(0, y.shape[0]):
+            if (math.isnan(y[i])):
+                continue
+            if (y[i] < y_min):
+                y_min = y[i]
+            elif (y[i] > y_max):
+                y_max = y[i]
+        return (y_min, y_max)
