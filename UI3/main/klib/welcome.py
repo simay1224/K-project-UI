@@ -114,12 +114,8 @@ class Welcome_win(wx.Frame):
         self.Show(True)
 
     def open_bodygame(self, event):
-        # myobject = event.GetEventObject()
-        # myobject.Disable()
         self.game = bodygame3.BodyGameRuntime(self.info)
         self.game.run()
-        # if self.game.kp._done:
-        #     self.Destroy()
 
     def open_instruction(self, event):
         instruct = Instrcution_win(None, 'Instruction')
@@ -130,8 +126,6 @@ class Welcome_win(wx.Frame):
     def open_trainingmode(self, event):
         self.train = trainingmode.BodyGameRuntime()
         self.train.run()
-        # if self.train.kp._done:
-        #     self.Destroy()
 
     def OnEraseBackground(self, evt):
         """
