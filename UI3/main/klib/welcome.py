@@ -8,7 +8,7 @@ from matplotlib.figure import Figure
 from collections import defaultdict
 import wx.lib.mixins.inspection as WIT
 
-import sys, math
+import sys, math, os
 
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
@@ -285,7 +285,7 @@ class Instrcution_win(wx.Frame):
         ex = event.GetEventObject().GetSelection()+1
         self.text.AppendText(self.str['exe'][ex]+self.str['ins'][ex]+'\n\n')
         self.text.AppendText(self.str['note'][ex])
-        self.player.doLoadFile('./video/ex'+str(ex)+'.mpg')
+        self.player.doLoadFile(os.path.abspath('data/video/ex'+str(ex)+'.mpg'))
 
 
     def OnBtnPrint(self, event):
@@ -391,10 +391,8 @@ class MoviePanel(wx.Panel):
         if not self.mc.Load(path):
             wx.MessageBox("Unable to load %s: Unsupported format?" % path, "ERROR", wx.ICON_ERROR | wx.OK)
         else:
-            filename = './video/ex'+str(1)+'.mpg'
-            self.st_file.SetLabel('%s' % filename)
             self.GetSizer().Layout()
-            self.mc.Play()#ITS TO PROBLEM, WHY IT DOESNT PLAY HERE?#
+            # self.mc.Play()#ITS TO PROBLEM, WHY IT DOESNT PLAY HERE?#
 
     def onPlay(self, evt):
         self.mc.Play()

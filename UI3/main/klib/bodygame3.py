@@ -344,9 +344,126 @@ class BodyGameRuntime(object):
 
     # ############### run() ############### #
 
+
+    # ############### separate methods for run() ############### #
+
+    def process_pygame(self, wait_key_cnt):
+        # === key pressing ===
+        if(wait_key_cnt[0] < 3):
+            wait_key_cnt[0] += 1
+        if(pygame.key.get_focused() and wait_key_cnt[0] >= 3):
+            press = pygame.key.get_pressed()
+            self.press_event(press)
+            wait_key_cnt[0] = 0
+
+        # === Main event loop ===
+        for event in pygame.event.get():  # User did something
+            if event.type == pygame.QUIT:  # If user clicked close
+                self.kp._done = True  # Flag that we are done so we exit this loop
+                if self.kp.kinect:
+                    self.movie.stop()
+            elif event.type == pygame.VIDEORESIZE:  # window resized
+                self._screen = pygame.display.set_mode(event.dict['size'],
+                               pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
+
+    def find_closest_id(self):
+        closest_ID = -1
+        cdist = np.inf
+        for i in range(0, self._kinect.max_body_count):
+            body = self._bodies.bodies[i]
+            if not body.is_tracked:
+                continue
+            if body.joints[20].Position.z <= cdist:  # find the closest body
+                closest_ID = i
+                cdist = body.joints[20].Position.z
+        return closest_ID
+
+    def draw_human_model(self, joints, ax):
+        # === draw unify human model ===
+        if self.kp.model_draw:
+            modJoints = self.h_mod.human_mod_pts(joints, limb=False)
+            if not self.kp.model_frame:
+                self.fig = plt.figure(1)
+                ax = self.fig.add_subplot(111, projection='3d')
+                self.kp.model_frame = True
+            else:
+                plt.cla()
+            self.h_mod.draw_human_mod_pts(modJoints, ax)
+
+    def save_data(self, bddic, timestamp, jps, djps, jdic, Rel):
+        # === save data ===
+        bddic['timestamp'] = timestamp
+        bddic['jointspts'] = jps   # joints' coordinate in color space (2D)
+        bddic['depth_jointspts'] = djps  # joints' coordinate in depth space (2D)
+        bddic['joints'] = jdic  # joints' coordinate in camera space (3D)
+        bddic['vidclip'] = self.kp.clipNo
+        bddic['Rel'] = Rel
+        bddic['LHS'] = body.hand_left_state
+        bddic['RHS'] = body.hand_right_state
+
+    def process_analysis(self):
+        if self.ana.evalstr != '':
+            if 'well' in (self.ana.evalstr).lower():
+                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_well)
+                if len(self.evalhis) < min(self.ana.repcnt, 4):
+                    self.evalhis.append(True)
+            else:
+                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_err)
+                if len(self.evalhis) < min(self.ana.repcnt, 4):
+                    self.evalhis.append(False)
+
+    def process_finish_analysis(self):
+        if not self.kp.finish:
+            errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
+                    self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
+            self.errsums = '- '.join(set(self.ana.brth.errsum+self.ana.hs.errsum+self.ana.horzp.errsum +\
+                            self.ana.pushdp.errsum+self.ana.shld.errsum+self.ana.clsp.errsum +\
+                            self.ana.swing.errsum))
+            dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.horzp.do, self.ana.pushdp.do,\
+                      self.ana.shld.do, self.ana.clsp.do, self.ana.swing.do]
+            exelog = self.eval.run(self.exeno, self.ana)
+
+            self.eval.errmsg(errs, dolist)
+            self.eval.cmphist(self.log, self.info, self.exeno, self.kp.now, exelog)
+            self.log.writein(self.info, self.exeno, self.kp.now, exelog, errs)
+
+            print(self.ana.dtw.idxlist)
+            self.kp.finish = True
+            while len(self.evalhis) < 4:
+                self.evalhis.append(False)
+
+        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, \
+                            'Exercise ' + str(self.exeno) + ' is done', 2)
+        if self.errsums == '':
+            if len(self.evalhis) != 0:
+                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                    'Overall evaluation:\n\nPerfect !!', 3)
+        else:
+            self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                'Overall evaluation:\n\n- '+self.errsums, 3)
+
+        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                            '(Press "Space" to start next exercise.)', 0, (120, 830), fsize=60, color=self.kp.c_togo)
+        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                            'Next exercise will start in %s seconds.' % str(self.cntdown/30), 0, (120, 880) , fsize=60, color=self.kp.c_togo)
+
+        self.cntdown -= 1
+        if self.cntdown == 0:
+            if self.exeno == 7:
+                self.exeno = 1
+            else:
+                self.exeno += 1
+            print('Next exercise ..................')
+            self.reset()
+
+
+
     def run(self):
         # Removing key jitter
         wait_key_cnt = [3]
+
+        # s = pygame.image.tostring(self._screen, 'RGB')
+
         while not self.kp._done:
             self.process_pygame(wait_key_cnt)
             self.run_body_game()
@@ -555,115 +672,3 @@ class BodyGameRuntime(object):
         pygame.display.update()
         # limit frames per second
         self._clock.tick(fps)
-
-
-    # ############### separate methods for run() ############### #
-
-    def process_pygame(self, wait_key_cnt):
-        # === key pressing ===
-        if(wait_key_cnt[0] < 3):
-            wait_key_cnt[0] += 1
-        if(pygame.key.get_focused() and wait_key_cnt[0] >= 3):
-            press = pygame.key.get_pressed()
-            self.press_event(press)
-            wait_key_cnt[0] = 0
-
-        # === Main event loop ===
-        for event in pygame.event.get():  # User did something
-            if event.type == pygame.QUIT:  # If user clicked close
-                self.kp._done = True  # Flag that we are done so we exit this loop
-                if self.kp.kinect:
-                    self.movie.stop()
-            elif event.type == pygame.VIDEORESIZE:  # window resized
-                self._screen = pygame.display.set_mode(event.dict['size'],
-                               pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
-
-    def find_closest_id(self):
-        closest_ID = -1
-        cdist = np.inf
-        for i in range(0, self._kinect.max_body_count):
-            body = self._bodies.bodies[i]
-            if not body.is_tracked:
-                continue
-            if body.joints[20].Position.z <= cdist:  # find the closest body
-                closest_ID = i
-                cdist = body.joints[20].Position.z
-        return closest_ID
-
-    def draw_human_model(self, joints, ax):
-        # === draw unify human model ===
-        if self.kp.model_draw:
-            modJoints = self.h_mod.human_mod_pts(joints, limb=False)
-            if not self.kp.model_frame:
-                self.fig = plt.figure(1)
-                ax = self.fig.add_subplot(111, projection='3d')
-                self.kp.model_frame = True
-            else:
-                plt.cla()
-            self.h_mod.draw_human_mod_pts(modJoints, ax)
-
-    def save_data(self, bddic, timestamp, jps, djps, jdic, Rel):
-        # === save data ===
-        bddic['timestamp'] = timestamp
-        bddic['jointspts'] = jps   # joints' coordinate in color space (2D)
-        bddic['depth_jointspts'] = djps  # joints' coordinate in depth space (2D)
-        bddic['joints'] = jdic  # joints' coordinate in camera space (3D)
-        bddic['vidclip'] = self.kp.clipNo
-        bddic['Rel'] = Rel
-        bddic['LHS'] = body.hand_left_state
-        bddic['RHS'] = body.hand_right_state
-
-    def process_analysis(self):
-        if self.ana.evalstr != '':
-            if 'well' in (self.ana.evalstr).lower():
-                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_well)
-                if len(self.evalhis) < min(self.ana.repcnt, 4):
-                    self.evalhis.append(True)
-            else:
-                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_err)
-                if len(self.evalhis) < min(self.ana.repcnt, 4):
-                    self.evalhis.append(False)
-
-    def process_finish_analysis(self):
-        if not self.kp.finish:
-            errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
-                    self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
-            self.errsums = '- '.join(set(self.ana.brth.errsum+self.ana.hs.errsum+self.ana.horzp.errsum +\
-                            self.ana.pushdp.errsum+self.ana.shld.errsum+self.ana.clsp.errsum +\
-                            self.ana.swing.errsum))
-            dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.horzp.do, self.ana.pushdp.do,\
-                      self.ana.shld.do, self.ana.clsp.do, self.ana.swing.do]
-            exelog = self.eval.run(self.exeno, self.ana)
-
-            self.eval.errmsg(errs, dolist)
-            self.eval.cmphist(self.log, self.info, self.exeno, self.kp.now, exelog)
-            self.log.writein(self.info, self.exeno, self.kp.now, exelog, errs)
-
-            print(self.ana.dtw.idxlist)
-            self.kp.finish = True
-            while len(self.evalhis) < 4:
-                self.evalhis.append(False)
-
-        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, \
-                            'Exercise ' + str(self.exeno) + ' is done', 2)
-        if self.errsums == '':
-            if len(self.evalhis) != 0:
-                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                    'Overall evaluation:\n\nPerfect !!', 3)
-        else:
-            self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                'Overall evaluation:\n\n- '+self.errsums, 3)
-
-        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                            '(Press "Space" to start next exercise.)', 0, (120, 830), fsize=60, color=self.kp.c_togo)
-        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                            'Next exercise will start in %s seconds.' % str(self.cntdown/30), 0, (120, 880) , fsize=60, color=self.kp.c_togo)
-
-        self.cntdown -= 1
-        if self.cntdown == 0:
-            if self.exeno == 7:
-                self.exeno = 1
-            else:
-                self.exeno += 1
-            print('Next exercise ..................')
-            self.reset()
