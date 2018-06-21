@@ -24,11 +24,66 @@ from .historylog import Historylog
 #         self.age    = '19'
 #         self.gender = 'female'
 
+class ColorPanel(wx.Window):
+    def __init__(self, parent, color):
+        wx.Window.__init__(self, parent, -1, style = wx.SIMPLE_BORDER)
+        self.SetBackgroundColour(color)
+        if wx.Platform == '__WXGTK__':
+            self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
+
+class Welcome(wx.Treebook):
+    def __init__(self, info):
+        self.frame = wx.Frame(None, -1, "LymphCoach")
+        super(Welcome, self).__init__(self.frame, id=-1, style=wx.BK_DEFAULT)
+        self.info = info
+
+        instruct = Instrcution_win(None, 'Instruction')
+        history = History_view(None, self.info)
+        color = self.get_page()
+
+        instruct_page = wx.Panel(self, -1)
+        instruct_page.SetBackgroundColour("#ffffff")
+        instruct_page.win = instruct
+        self.bind_size(instruct_page, instruct_page.win)
+
+        history_page = wx.Panel(self, -1)
+        # history_page.win = history
+        # self.bind_size(history_page, history_page.win)
+
+
+        self.AddPage(instruct_page, "Instruction")
+        self.AddPage(history_page, "History Log")
+        self.AddPage(color, "test")
+
+        # wx.CallLater(100, self.AdjustSize)
+
+        self.frame.Show(True)
+
+    def bind_size(self, p, win):
+        def OnCPSize(evt, win=win):
+            win.SetPosition((0,0))
+            win.SetSize(evt.GetSize())
+        p.Bind(wx.EVT_SIZE, OnCPSize)
+
+    def get_page(self):
+        p = wx.Panel(self, -1)
+        win = ColorPanel(p, "#000000")
+        p.win = win
+        def OnCPSize(evt, win=win):
+            win.SetPosition((0,0))
+            win.SetSize(evt.GetSize())
+        p.Bind(wx.EVT_SIZE, OnCPSize)
+        return p
+
+    def AdjustSize(self):
+        self.PostSizeEvent()
+
+
+
 class Welcome_win(wx.Frame):
     def __init__(self, info, parent, title):
         self.info = info
         self.game = None
-
 
         self.width = 410
         self.height = 500
@@ -190,10 +245,10 @@ class Instrcution_win(wx.Frame):
         # box.Add(button_print, 2, wx.RIGHT)
         self.panel.SetSizer(box)
         self.panel.Fit()
-
-        self.Centre()
         self.Bind(wx.EVT_LISTBOX, self.onListBox, lst)
-        self.Show(True)
+
+        # self.Centre()
+        # self.Show(True)
 
 
     def init_text(self):
@@ -418,7 +473,7 @@ class History_view(wx.Frame):
         self.init_ui()
         self.color_correct = (0.41, 0.75, 0.07, 0.6)
         self.color_line = ['#0096BF', '#005A73', '#BFA600', '#736400', '#ffae25', '#af7900', '#d957b4', '#75005b']
-        self.Show()
+        # self.Show()
 
     def init_ui(self, path='./output/log2.xlsx'):
         self.font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)

@@ -15,10 +15,11 @@ def main():
 
     info = msgbox.Msgbox(None, title="Welcome")
     info._pass()
-    main_win = welcome.Welcome_win(info, parent=None, title='Menu')
+    # main_win = welcome.Welcome_win(info, parent=None, title='Menu')
+    main_win = welcome.Welcome(info)
     app.MainLoop()
 
-    return main_win.game
+    # return main_win.game
 
 if __name__ == '__main__':
     result = main()
