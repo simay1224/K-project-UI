@@ -33,26 +33,26 @@ class ColorPanel(wx.Window):
 
 class Welcome(wx.Treebook):
     def __init__(self, info):
-        self.frame = wx.Frame(None, -1, "LymphCoach")
-        super(Welcome, self).__init__(self.frame, id=-1, style=wx.BK_DEFAULT)
+        self.frame = wx.Frame(None, -1, "LymphCoach", size=wx.GetDisplaySize())
+        super(Welcome, self).__init__(self.frame, id=-1, style=wx.BK_DEFAULT, size=wx.GetDisplaySize())
         self.info = info
 
         instruct = Instrcution_win(None, 'Instruction')
         history = History_view(None, self.info)
         color = self.get_page()
 
-        instruct_page = wx.Panel(self, -1)
-        instruct_page.SetBackgroundColour("#ffffff")
-        instruct_page.win = instruct
-        self.bind_size(instruct_page, instruct_page.win)
+        # instruct_page = wx.Panel(self, -1, size=wx.GetDisplaySize())
+        # instruct_page.SetBackgroundColour("#ffffff")
+        # instruct_page.win = instruct
+        # self.bind_size(instruct_page, instruct_page.win)
+        #
+        # history_page = wx.Panel(self, -1, size=wx.GetDisplaySize())
+        # # history_page.win = history
+        # # self.bind_size(history_page, history_page.win)
 
-        history_page = wx.Panel(self, -1)
-        # history_page.win = history
-        # self.bind_size(history_page, history_page.win)
 
-
-        self.AddPage(instruct_page, "Instruction")
-        self.AddPage(history_page, "History Log")
+        self.AddPage(instruct, "Instruction")
+        self.AddPage(history, "History Log")
         self.AddPage(color, "test")
 
         # wx.CallLater(100, self.AdjustSize)
@@ -66,7 +66,7 @@ class Welcome(wx.Treebook):
         p.Bind(wx.EVT_SIZE, OnCPSize)
 
     def get_page(self):
-        p = wx.Panel(self, -1)
+        p = wx.Panel(self, -1, size=wx.GetDisplaySize())
         win = ColorPanel(p, "#000000")
         p.win = win
         def OnCPSize(evt, win=win):
