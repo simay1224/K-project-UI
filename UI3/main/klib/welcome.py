@@ -33,23 +33,14 @@ class ColorPanel(wx.Window):
 
 class Welcome(wx.Treebook):
     def __init__(self, info):
-        self.frame = wx.Frame(None, -1, "LymphCoach", size=wx.GetDisplaySize())
-        super(Welcome, self).__init__(self.frame, id=-1, style=wx.BK_DEFAULT, size=wx.GetDisplaySize())
+        self.size = (wx.GetDisplaySize()[0] - 100, wx.GetDisplaySize()[1] - 100)
+        self.frame = wx.Frame(None, -1, "LymphCoach", size=self.size)
+        super(Welcome, self).__init__(self.frame, id=-1, style=wx.BK_DEFAULT, size=self.size)
         self.info = info
 
-        instruct = Instrcution_win(None, 'Instruction')
-        history = History_view(None, self.info)
+        instruct = Instrcution_win(self.frame, 'Instruction')
+        history = History_view(self.frame, self.info)
         color = self.get_page()
-
-        # instruct_page = wx.Panel(self, -1, size=wx.GetDisplaySize())
-        # instruct_page.SetBackgroundColour("#ffffff")
-        # instruct_page.win = instruct
-        # self.bind_size(instruct_page, instruct_page.win)
-        #
-        # history_page = wx.Panel(self, -1, size=wx.GetDisplaySize())
-        # # history_page.win = history
-        # # self.bind_size(history_page, history_page.win)
-
 
         self.AddPage(instruct, "Instruction")
         self.AddPage(history, "History Log")
@@ -196,7 +187,7 @@ class Welcome_win(wx.Frame):
         dc.DrawBitmap(bmp, 0, 0)
 
 
-class Instrcution_win(wx.Frame):
+class Instrcution_win(wx.Panel):
 
     def __init__(self, parent, title):
         self.init_text()
@@ -204,7 +195,7 @@ class Instrcution_win(wx.Frame):
         self.sizer_w = 5
         self.sizer_h = 5
 
-        super(Instrcution_win, self).__init__(parent, title=title, size=(950, 700))
+        super(Instrcution_win, self).__init__(parent, size=(950, 700))
 
         self.panel = wx.Panel(self)
         box = wx.BoxSizer(wx.HORIZONTAL)
@@ -220,14 +211,17 @@ class Instrcution_win(wx.Frame):
 
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.VERTICAL)
-        lst = wx.ListBox(self.panel, size = (250, self.player.mc.GetBestSize()[1] * 2), choices=languages, style=wx.LB_SINGLE)
-        lst.SetBackgroundColour((255, 255, 255))
+
         button1 = wx.Button(self.panel, label="Close")
         button1.Bind(wx.EVT_BUTTON, self.close)
 
         button_print = wx.Button(self.panel, id=wx.ID_PRINT, label="")
         button_print.SetFocus()
         self.Bind(wx.EVT_BUTTON, self.OnBtnPrint, button_print)
+
+        lst = wx.ListBox(self.panel, size = (250, self.player.mc.GetBestSize()[1] * 2), choices=languages, style=wx.LB_SINGLE)
+        lst.SetBackgroundColour((255, 255, 255))
+        self.Bind(wx.EVT_LISTBOX, self.onListBox, lst)
 
         box2.Add(lst, 0, wx.EXPAND)
         box2.Add(button1, 1, wx.EXPAND)
@@ -245,7 +239,11 @@ class Instrcution_win(wx.Frame):
         # box.Add(button_print, 2, wx.RIGHT)
         self.panel.SetSizer(box)
         self.panel.Fit()
-        self.Bind(wx.EVT_LISTBOX, self.onListBox, lst)
+
+        lst.SetSelection(0)
+        self.text.AppendText(self.str['exe'][1]+self.str['ins'][1]+'\n\n')
+        self.text.AppendText(self.str['note'][1])
+        self.player.doLoadFile(os.path.abspath('data/video/ex'+str(1)+'.mpg'))
 
         # self.Centre()
         # self.Show(True)
@@ -460,14 +458,14 @@ class MoviePanel(wx.Panel):
 
 
 
-class History_view(wx.Frame):
+class History_view(wx.Panel):
     def __init__(self, parent, info, title='history log'):
         self.width = 850
         self.height = 520
         self.sizer_w = 5
         self.sizer_h = 5
 
-        super(History_view, self).__init__(parent, title=title, size=(self.width, self.height))
+        super(History_view, self).__init__(parent, size=(self.width, self.height))
         self.info = info
         self.no_hist_img = cv2.imread('./data/imgs/others/no_hist.jpg')
         self.init_ui()
@@ -663,31 +661,35 @@ class History_view(wx.Frame):
         y = np.array(df_name[item])
         x = np.arange(0, len(y))
 
-        self.axes.set_xticks(x)
-        self.axes.set_title("Patient: " + name + "\n" + item)
-        self.axes.plot(x, y, color=self.color_line[0])
+        try:
+            self.axes.set_xticks(x)
+            self.axes.set_title("Patient: " + name + "\n" + item)
+            self.axes.plot(x, y, color=self.color_line[0])
 
-        y_min, y_max = self.find_min_max(y)
-        y_span = y_max - y_min
+            y_min, y_max = self.find_min_max(y)
+            y_span = y_max - y_min
 
-        if df_ideal[item].dtype == float:
-            cri = df_ideal[item][0]
-        else:
-            cri = y_max - y_span * 0.1
-
-        self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
-        self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
-
-        x_name = np.array([a.split("-") for a in df_name['time']])
-        x_name = np.array([(a[1] + "/" + a[2]) for a in x_name])
-        prev_index = 0
-        for i in range(1, len(x_name)):
-            if x_name[prev_index] == x_name[i]:
-                x_name[i] = ""
+            if df_ideal[item].dtype == float:
+                cri = df_ideal[item][0]
             else:
-                prev_index = i
-        self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
-        self.canvas.draw()
+                cri = y_max - y_span * 0.1
+
+            self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
+            self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
+
+            x_name = np.array([a.split("-") for a in df_name['time']])
+            x_name = np.array([(a[1] + "/" + a[2]) for a in x_name])
+            prev_index = 0
+            for i in range(1, len(x_name)):
+                if x_name[prev_index] == x_name[i]:
+                    x_name[i] = ""
+                else:
+                    prev_index = i
+            self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
+            self.canvas.draw()
+        except:
+            self.axes.imshow(self.no_hist_img)
+            self.canvas.draw()
 
 
     def update_figure_cli(self):
@@ -701,11 +703,11 @@ class History_view(wx.Frame):
             self.get_score_list(self.cur_choice)
             return
 
-        # try:
-        self.draw_figure(self.cur_choice, item, df_name, df_ideal)
-        # except:
-        #     self.axes.imshow(self.no_hist_img)
-        #     self.canvas.draw()
+        try:
+            self.draw_figure(self.cur_choice, item, df_name, df_ideal)
+        except:
+            self.axes.imshow(self.no_hist_img)
+            self.canvas.draw()
 
 
     def update_figure_pat(self):
@@ -718,11 +720,11 @@ class History_view(wx.Frame):
             self.get_score_list(self.info.name)
             return
 
-        # try:
-        self.draw_figure(self.info.name, item, df_name, df_ideal)
-        # except:
-        #     self.axes.imshow(self.no_hist_img)
-        #     self.canvas.draw()
+        try:
+            self.draw_figure(self.info.name, item, df_name, df_ideal)
+        except:
+            self.axes.imshow(self.no_hist_img)
+            self.canvas.draw()
 
     def find_min_max(self, y):
         y_min = sys.float_info.max
