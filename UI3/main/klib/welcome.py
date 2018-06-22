@@ -18,56 +18,77 @@ from ..klib import bodygame3
 from ..klib import trainingmode
 from .historylog import Historylog
 
-# class Info():
-#     def __init__(self):
-#         self.name   = 'jane doe'
-#         self.age    = '19'
-#         self.gender = 'female'
 
-class ColorPanel(wx.Window):
-    def __init__(self, parent, color):
-        wx.Window.__init__(self, parent, -1, style = wx.SIMPLE_BORDER)
-        self.SetBackgroundColour(color)
-        if wx.Platform == '__WXGTK__':
-            self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
-
-class Welcome(wx.Treebook):
-    def __init__(self, info):
-        self.size = (wx.GetDisplaySize()[0] - 100, wx.GetDisplaySize()[1] - 100)
-        self.frame = wx.Frame(None, -1, "LymphCoach", size=self.size)
-        super(Welcome, self).__init__(self.frame, id=-1, style=wx.BK_DEFAULT, size=self.size)
+class Welcome(wx.Frame):
+    def __init__(self, info, parent=None, title="LymphCoach"):
         self.info = info
+        self.size = (wx.GetDisplaySize()[0] - 100, wx.GetDisplaySize()[1] - 100)
+        super(Welcome, self).__init__(parent, title=title, size=(self.size[0] - 100, self.size[1] - 100))
+        self.panel = wx.Panel(self)
+        self.init_ui()
 
-        instruct = Instrcution_win(self.frame, 'Instruction')
-        history = History_view(self.frame, self.info)
-        color = self.get_page()
+        self.modes = Modes(info, self.panel, self.size, (0, 150))
 
+        self.Show(True)
+
+    def init_ui(self):
+
+        self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
+
+        # sizers
+        self.sizer_w = 10
+        self.sizer_h = 10
+        topSizer = wx.BoxSizer(wx.VERTICAL)
+        titleSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        lineSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+
+        # title
+        text = wx.StaticText(self.panel, label="LymphCoach")
+        text.SetFont(self.font_title)
+        topSizer.Add(text, 0, wx.CENTER)
+
+        line = wx.StaticLine(self.panel)
+        lineSizer.Add(line, pos=(0, 0), span=(0, int(self.size[0]/self.sizer_w / 2)), flag=wx.EXPAND|wx.BOTTOM)
+
+        # Basic information
+        text11 = wx.StaticText(self.panel, label="Name:")
+        text11.SetFont(self.font_field)
+        titleSizer.Add(text11, pos=(1, 0))
+
+        text1 = wx.StaticText(self.panel, label=self.info.fname + " " + self.info.lname)
+        text1.SetFont(self.font)
+        titleSizer.Add(text1, pos=(1, 1))
+
+        text21 = wx.StaticText(self.panel, label="Gender:")
+        text21.SetFont(self.font_field)
+        titleSizer.Add(text21, pos=(1, 3))
+        text2 = wx.StaticText(self.panel, label=self.info.gender)
+        text2.SetFont(self.font)
+        titleSizer.Add(text2, pos=(1, 4))
+
+        text31 = wx.StaticText(self.panel, label="Age:")
+        text31.SetFont(self.font_field)
+        titleSizer.Add(text31, pos=(1, 6))
+        text3 = wx.StaticText(self.panel, label=self.info.age)
+        text3.SetFont(self.font)
+        titleSizer.Add(text3, pos=(1, 7))
+
+        topSizer.Add(lineSizer, 0, wx.CENTER)
+        topSizer.Add(titleSizer, 0, wx.CENTER)
+        self.panel.SetSizer(topSizer)
+
+
+class Modes(wx.Treebook):
+    def __init__(self, info, parent, size, pos):
+        super(Modes, self).__init__(parent, id=1, style=wx.BK_DEFAULT, size=size, pos=pos)
+
+        instruct = Instrcution_win(self)
+        history = History_view(self, info)
         self.AddPage(instruct, "Instruction")
         self.AddPage(history, "History Log")
-        self.AddPage(color, "test")
-
-        # wx.CallLater(100, self.AdjustSize)
-
-        self.frame.Show(True)
-
-    def bind_size(self, p, win):
-        def OnCPSize(evt, win=win):
-            win.SetPosition((0,0))
-            win.SetSize(evt.GetSize())
-        p.Bind(wx.EVT_SIZE, OnCPSize)
-
-    def get_page(self):
-        p = wx.Panel(self, -1, size=wx.GetDisplaySize())
-        win = ColorPanel(p, "#000000")
-        p.win = win
-        def OnCPSize(evt, win=win):
-            win.SetPosition((0,0))
-            win.SetSize(evt.GetSize())
-        p.Bind(wx.EVT_SIZE, OnCPSize)
-        return p
-
-    def AdjustSize(self):
-        self.PostSizeEvent()
 
 
 
@@ -84,6 +105,8 @@ class Welcome_win(wx.Frame):
         self.panel = wx.Panel(self)
 
         self.init_ui()
+
+        self.Show(True)
 
     def init_ui(self):
         self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
@@ -157,7 +180,6 @@ class Welcome_win(wx.Frame):
 
         # self.panel.SetSizer(sizer)
         # self.panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
-        self.Show(True)
 
     def open_bodygame(self, event):
         self.game = bodygame3.BodyGameRuntime(self.info)
@@ -189,7 +211,7 @@ class Welcome_win(wx.Frame):
 
 class Instrcution_win(wx.Panel):
 
-    def __init__(self, parent, title):
+    def __init__(self, parent, title="Instruction"):
         self.init_text()
 
         self.sizer_w = 5
