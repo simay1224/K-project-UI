@@ -31,15 +31,7 @@ class Welcome(wx.Frame):
 
         self.Show(True)
 
-        # game = bodygame3.BodyGameRuntime(self.info)
-        # game_screen = game.run_pygame()
-        # s = pygame.image.tostring(game_screen, 'RGB')  # Convert the surface to an RGB string
-        # img = wx.Image(960, 540, s)  # Load this string into a wx image
-        # bmp = wx.Bitmap(img)  # Get the image in bitmap form
-        #
-        # dc = wx.ClientDC(self)  # Device context for drawing the bitmap
-        # dc.DrawBitmap(bmp, 0, 0, False)  # Blit the bitmap image to the display
-        # del dc
+        # self.modes.game.run()
 
 
     def init_ui(self):
@@ -96,11 +88,24 @@ class Welcome(wx.Frame):
 class Modes(wx.Treebook):
     def __init__(self, parent, info, size, pos):
         super(Modes, self).__init__(parent, id=1, style=wx.BK_DEFAULT, size=size, pos=pos)
-        instruct = Instrcution_win(self, size)
-        history = History_view(self, info, size)
+        self.instruct = Instrcution_win(self, size)
+        self.history = History_view(self, info, size)
+        self.game = bodygame3.BodyGameRuntime(info)
 
-        self.AddPage(instruct, "Instruction")
-        self.AddPage(history, "History Log")
+        self.AddPage(self.instruct, "Instruction")
+        self.AddPage(self.history, "History Log")
+
+        game_screen = self.game.run_pygame()
+        s = pygame.image.tostring(game_screen, 'RGB')  # Convert the surface to an RGB string
+        img = wx.Image(960, 540, s)  # Load this string into a wx image
+        bmp = wx.Bitmap(img)  # Get the image in bitmap form
+        game_window = wx.StaticBitmap(self, -1, bmp)
+
+        self.AddPage(game_window, "Evaluation")
+
+        # dc = wx.ClientDC(self)  # Device context for drawing the bitmap
+        # dc.DrawBitmap(bmp, 0, 0, False)  # Blit the bitmap image to the display
+        # del dc
 
         # self.Show(True)
 
