@@ -23,13 +23,13 @@ class Welcome(wx.Frame):
     def __init__(self, info, parent=None, title="LymphCoach"):
         self.info = info
         self.size = (wx.GetDisplaySize()[0] - 100, wx.GetDisplaySize()[1] - 100)
-        super(Welcome, self).__init__(parent, title=title, size=(self.size[0] - 100, self.size[1] - 100))
+        super(Welcome, self).__init__(parent, title=title, size=self.size)
+
         self.panel = wx.Panel(self)
+        self.modes = Modes(self.panel, info, (self.size[0] - 100, self.size[1] - 100), (0, 150))
         self.init_ui()
 
-        self.modes = Modes(info, self.panel, self.size, (0, 150))
-
-        # self.Show(True)
+        self.Show(True)
 
         # game = bodygame3.BodyGameRuntime(self.info)
         # game_screen = game.run_pygame()
@@ -67,57 +67,42 @@ class Welcome(wx.Frame):
         # Basic information
         text11 = wx.StaticText(self.panel, label="Name:")
         text11.SetFont(self.font_field)
-        titleSizer.Add(text11, pos=(1, 0))
+        titleSizer.Add(text11, pos=(1, 0), span=(2, 0))
 
         text1 = wx.StaticText(self.panel, label=self.info.fname + " " + self.info.lname)
         text1.SetFont(self.font)
-        titleSizer.Add(text1, pos=(1, 1))
+        titleSizer.Add(text1, pos=(1, 1), span=(2, 0))
 
         text21 = wx.StaticText(self.panel, label="Gender:")
         text21.SetFont(self.font_field)
-        titleSizer.Add(text21, pos=(1, 3))
+        titleSizer.Add(text21, pos=(1, 3), span=(2, 0))
         text2 = wx.StaticText(self.panel, label=self.info.gender)
         text2.SetFont(self.font)
-        titleSizer.Add(text2, pos=(1, 4))
+        titleSizer.Add(text2, pos=(1, 4), span=(2, 0))
 
         text31 = wx.StaticText(self.panel, label="Age:")
         text31.SetFont(self.font_field)
-        titleSizer.Add(text31, pos=(1, 6))
+        titleSizer.Add(text31, pos=(1, 6), span=(2, 0))
         text3 = wx.StaticText(self.panel, label=self.info.age)
         text3.SetFont(self.font)
-        titleSizer.Add(text3, pos=(1, 7))
+        titleSizer.Add(text3, pos=(1, 7), span=(2, 0))
 
         topSizer.Add(lineSizer, 0, wx.CENTER)
         topSizer.Add(titleSizer, 0, wx.CENTER)
+        topSizer.Add(self.modes, 0, wx.CENTER)
         self.panel.SetSizer(topSizer)
 
 
 class Modes(wx.Treebook):
-    def __init__(self, info, parent, size, pos):
-        # self.frame = wx.Frame(None, -1, "LymphCoach", size=size)
-        # super(Modes, self).__init__(self.frame, id=1, style=wx.BK_DEFAULT, size=size, pos=pos)
-        #
-        # instruct = Instrcution_win(self.frame)
-        # history = History_view(self.frame, info)
-        # self.AddPage(instruct, "Instruction")
-        # self.AddPage(history, "History Log")
-        #
-        # self.frame.Show(True)
-
-        self.size = (wx.GetDisplaySize()[0] - 100, wx.GetDisplaySize()[1] - 100)
-        self.frame = wx.Frame(None, -1, "LymphCoach", size=self.size)
-        super(Modes, self).__init__(self.frame, id=-1, style=wx.BK_DEFAULT, size=self.size)
-        self.info = info
-
-        instruct = Instrcution_win(self.frame, 'Instruction')
-        history = History_view(self.frame, self.info)
+    def __init__(self, parent, info, size, pos):
+        super(Modes, self).__init__(parent, id=1, style=wx.BK_DEFAULT, size=size, pos=pos)
+        instruct = Instrcution_win(self, size)
+        history = History_view(self, info, size)
 
         self.AddPage(instruct, "Instruction")
         self.AddPage(history, "History Log")
 
-        # wx.CallLater(100, self.AdjustSize)
-
-        self.frame.Show(True)
+        # self.Show(True)
 
 
 
@@ -241,13 +226,13 @@ class Welcome_win(wx.Frame):
 
 class Instrcution_win(wx.Panel):
 
-    def __init__(self, parent, title="Instruction"):
+    def __init__(self, parent, size, title="Instruction"):
         self.init_text()
 
         self.sizer_w = 5
         self.sizer_h = 5
 
-        super(Instrcution_win, self).__init__(parent, size=(950, 700))
+        super(Instrcution_win, self).__init__(parent, size=size)
 
         self.panel = wx.Panel(self)
         box = wx.BoxSizer(wx.HORIZONTAL)
@@ -511,13 +496,14 @@ class MoviePanel(wx.Panel):
 
 
 class History_view(wx.Panel):
-    def __init__(self, parent, info, title='history log'):
-        self.width = 850
-        self.height = 520
+    def __init__(self, parent, info, size, title="History Log"):
+        # self.width = 850
+        # self.height = 520
+        self.size = size
         self.sizer_w = 5
         self.sizer_h = 5
 
-        super(History_view, self).__init__(parent, size=(self.width, self.height))
+        super(History_view, self).__init__(parent, size=self.size)
         self.info = info
         self.no_hist_img = cv2.imread('./data/imgs/others/no_hist.jpg')
         self.init_ui()
@@ -564,6 +550,8 @@ class History_view(wx.Panel):
         self.choice.Bind(wx.EVT_CHOICE, self.update_choice)
         box1.Add(self.choice, pos=(2, 2))
 
+        list_width = 330
+
         # provide list of patients to review
         if self.info.isCli:
             self.name = wx.Choice(self.panel, choices=[])
@@ -576,7 +564,7 @@ class History_view(wx.Panel):
             # box1.Add(self.score, pos=(4, 2))
 
             line = wx.StaticLine(self.panel)
-            box1.Add(line, pos=(5, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
+            box1.Add(line, pos=(5, 0), span=(0, int(list_width / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
 
         else:
             # self.score = wx.StaticText(self.panel, wx.ID_ANY, label="Score: ")
@@ -584,10 +572,10 @@ class History_view(wx.Panel):
             # box1.Add(self.score, pos=(3, 2))
 
             line = wx.StaticLine(self.panel)
-            box1.Add(line, pos=(4, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
+            box1.Add(line, pos=(4, 0), span=(0, int(list_width / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
 
         box2.Add(box1, 0)
-        self.lst = wx.ListBox(self.panel, size=(330, 300), choices=[], style=wx.LB_SINGLE)
+        self.lst = wx.ListBox(self.panel, size=(list_width, self.size[1] - 160), choices=[], style=wx.LB_SINGLE)
         self.lst.SetFont(self.font)
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
         box2.Add(self.lst, 1, wx.EXPAND)
