@@ -8,7 +8,7 @@ from matplotlib.figure import Figure
 from collections import defaultdict
 import wx.lib.mixins.inspection as WIT
 
-import sys, math, os
+import sys, math, os, pygame
 
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
@@ -29,7 +29,18 @@ class Welcome(wx.Frame):
 
         self.modes = Modes(info, self.panel, self.size, (0, 150))
 
-        self.Show(True)
+        # self.Show(True)
+
+        # game = bodygame3.BodyGameRuntime(self.info)
+        # game_screen = game.run_pygame()
+        # s = pygame.image.tostring(game_screen, 'RGB')  # Convert the surface to an RGB string
+        # img = wx.Image(960, 540, s)  # Load this string into a wx image
+        # bmp = wx.Bitmap(img)  # Get the image in bitmap form
+        #
+        # dc = wx.ClientDC(self)  # Device context for drawing the bitmap
+        # dc.DrawBitmap(bmp, 0, 0, False)  # Blit the bitmap image to the display
+        # del dc
+
 
     def init_ui(self):
 
@@ -83,15 +94,34 @@ class Welcome(wx.Frame):
 
 class Modes(wx.Treebook):
     def __init__(self, info, parent, size, pos):
-        super(Modes, self).__init__(parent, id=1, style=wx.BK_DEFAULT, size=size, pos=pos)
+        # self.frame = wx.Frame(None, -1, "LymphCoach", size=size)
+        # super(Modes, self).__init__(self.frame, id=1, style=wx.BK_DEFAULT, size=size, pos=pos)
+        #
+        # instruct = Instrcution_win(self.frame)
+        # history = History_view(self.frame, info)
+        # self.AddPage(instruct, "Instruction")
+        # self.AddPage(history, "History Log")
+        #
+        # self.frame.Show(True)
 
-        instruct = Instrcution_win(self)
-        history = History_view(self, info)
+        self.size = (wx.GetDisplaySize()[0] - 100, wx.GetDisplaySize()[1] - 100)
+        self.frame = wx.Frame(None, -1, "LymphCoach", size=self.size)
+        super(Modes, self).__init__(self.frame, id=-1, style=wx.BK_DEFAULT, size=self.size)
+        self.info = info
+
+        instruct = Instrcution_win(self.frame, 'Instruction')
+        history = History_view(self.frame, self.info)
+
         self.AddPage(instruct, "Instruction")
         self.AddPage(history, "History Log")
 
+        # wx.CallLater(100, self.AdjustSize)
+
+        self.frame.Show(True)
 
 
+
+# old version of welcome panel
 class Welcome_win(wx.Frame):
     def __init__(self, info, parent, title):
         self.info = info

@@ -342,7 +342,6 @@ class BodyGameRuntime(object):
         if press[pygame.K_p]:
             pdb.set_trace()
 
-    # ############### run() ############### #
 
 
     # ############### separate methods for run() ############### #
@@ -457,13 +456,17 @@ class BodyGameRuntime(object):
             self.reset()
 
 
+# ############### run() ############### #
+
+    def run_pygame(self):
+        self.run_body_game()
+        return self._screen
 
     def run(self):
         # Removing key jitter
         wait_key_cnt = [3]
 
-        # s = pygame.image.tostring(self._screen, 'RGB')
-
+        # main loop
         while not self.kp._done:
             self.process_pygame(wait_key_cnt)
             self.run_body_game()
