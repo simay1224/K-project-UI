@@ -65,22 +65,25 @@ class Welcome_win(wx.Frame):
         titleSizer.Add(text11, pos=(1, 0))
 
         text1 = wx.StaticText(self.panel, label=self.info.fname + " " + self.info.lname)
+        if self.info.isCli:
+            text1 = wx.StaticText(self.panel, label=self.info.fcname + " " + self.info.lcname)
         text1.SetFont(self.font)
         titleSizer.Add(text1, pos=(1, 1))
 
-        text21 = wx.StaticText(self.panel, label="Gender:")
-        text21.SetFont(self.font_field)
-        titleSizer.Add(text21, pos=(2, 0))
-        text2 = wx.StaticText(self.panel, label=self.info.gender)
-        text2.SetFont(self.font)
-        titleSizer.Add(text2, pos=(2, 1))
+        if self.info.isPat:
+            text21 = wx.StaticText(self.panel, label="Gender:")
+            text21.SetFont(self.font_field)
+            titleSizer.Add(text21, pos=(2, 0))
+            text2 = wx.StaticText(self.panel, label=self.info.gender)
+            text2.SetFont(self.font)
+            titleSizer.Add(text2, pos=(2, 1))
 
-        text31 = wx.StaticText(self.panel, label="Age:")
-        text31.SetFont(self.font_field)
-        titleSizer.Add(text31, pos=(3, 0))
-        text3 = wx.StaticText(self.panel, label=self.info.age)
-        text3.SetFont(self.font)
-        titleSizer.Add(text3, pos=(3, 1))
+            text31 = wx.StaticText(self.panel, label="Age:")
+            text31.SetFont(self.font_field)
+            titleSizer.Add(text31, pos=(3, 0))
+            text3 = wx.StaticText(self.panel, label=str(self.info.age))
+            text3.SetFont(self.font)
+            titleSizer.Add(text3, pos=(3, 1))
 
         button_size = (300, 50)
 
