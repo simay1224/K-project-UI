@@ -29,7 +29,6 @@ class Welcome_win(wx.Frame):
         self.info = info
         self.game = None
 
-
         self.width = 410
         self.height = 500
         self.sizer_w = 5

@@ -23,7 +23,6 @@ class Msgbox(wx.Frame):
 
         self.fname = ''
         self.lname = ''
-        self.name = ''
         self.age = ''
         self.num = ''
         self.gender = ''
@@ -118,7 +117,7 @@ class Msgbox(wx.Frame):
         self.tcc2 = wx.TextCtrl(self.panel)
         clinSizer.Add(self.tcc2, pos=(3, 1), flag=wx.EXPAND)
 
-        text3 = wx.StaticText(self.panel, label="Permission #\n(112233)")
+        text3 = wx.StaticText(self.panel, label="Access #\n(112233)")
         text3.SetFont(self.font)
         clinSizer.Add(text3, pos=(4, 0), flag=wx.LEFT)
 
@@ -227,11 +226,9 @@ class Msgbox(wx.Frame):
             dlg.Destroy()
 
         else:
-            self.name = '%s %s' % (self.fname.lower(), self.lname.lower())
-            message = 'Is the following infomation correct?\nPatient:\n\tName: %s\n\tAge: %s\n\tGender: %s' %(self.fname+' '+self.lname, self.age, self.gender)
+            message = 'Is the following infomation correct?\nPatient:\n\tName: %s\n\tAge: %s\n\tGender: %s' % (self.fname+' '+self.lname, self.age, self.gender)
             if self.isCli:
-                message = 'Is the following infomation correct?\nClinician:\n\tName: %s' %(self.fcname+' '+self.lcname)
-                self.name = '%s %s' % (self.fcname.lower(), self.lcname.lower())
+                message = 'Is the following infomation correct?\nClinician:\n\tName: %s' % (self.fcname+' '+self.lcname)
             dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
             result = dlg.ShowModal() == wx.ID_YES
             if result:
@@ -243,7 +240,8 @@ class Msgbox(wx.Frame):
     def cancel(self, event):
         self.fname = 'Jane'
         self.lname = 'Doe'
-        self.name = '%s %s' %(self.fname.lower(), self.lname.lower())
+        self.isPat = True
+        self.isCli = False
         self.age = '19'
         self.gender = 'Female'
         message = 'Do you want to use following information?\nName: %s\nAge: %s\nGender: %s' %(self.fname+' '+self.lname, self.age, self.gender)
@@ -253,7 +251,8 @@ class Msgbox(wx.Frame):
         dlg.Destroy()
         if result:
             self.Destroy()
-        self.reset()
+        else:
+            self.reset()
 
     def reset(self):
         self.fname = ''
@@ -277,7 +276,8 @@ class Msgbox(wx.Frame):
     def _pass(self):
         self.fname = 'Jane'
         self.lname = 'Doe'
-        self.name = '%s %s' % (self.fname.lower(), self.lname.lower())
+        self.fcname = 'Jane'
+        self.lcname = 'Doe'
         self.age = '19'
         self.gender = 'Female'
         self.isPat = False
