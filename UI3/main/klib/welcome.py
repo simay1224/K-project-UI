@@ -592,6 +592,7 @@ class History_view(wx.Frame):
         # self.debug(y)
 
         y_min, y_max = self.find_min_max(y)
+        # print(y_min, y_max)
         self.axes.set_ylim(y_min[0] - 5, y_max[0] + 5)
 
         x_name = np.array([x.split("-") for x in df_name['time']])

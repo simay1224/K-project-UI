@@ -23,6 +23,7 @@ class Msgbox(wx.Frame):
 
         self.fname = ''
         self.lname = ''
+        self.name = ''
         self.age = ''
         self.num = ''
         self.gender = ''
@@ -176,6 +177,10 @@ class Msgbox(wx.Frame):
         self.isCli = True if (len(self.fcname) != 0 or len(self.lcname) != 0 or self.num != '') else False
         self.isPat = True if (len(self.fname) != 0 or len(self.lname) != 0 or self.age != '') else False
 
+        self.name = (self.fname + ' ' + self.lname).lower()
+        if self.isCli:
+            self.name = (self.fcname + ' ' + self.lcname).lower()
+
         error = ''
         error_flag = False
 
@@ -231,6 +236,7 @@ class Msgbox(wx.Frame):
                 message = 'Is the following infomation correct?\nClinician:\n\tName: %s' % (self.fcname+' '+self.lcname)
             dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
             result = dlg.ShowModal() == wx.ID_YES
+
             if result:
                 dlg.Destroy()
                 self.Destroy()
@@ -250,6 +256,7 @@ class Msgbox(wx.Frame):
 
         dlg.Destroy()
         if result:
+            self.name = (self.fname + ' ' + self.lname).lower()
             self.Destroy()
         else:
             self.reset()
