@@ -285,6 +285,7 @@ class Msgbox(wx.Frame):
         self.lname = 'Doe'
         self.fcname = 'Jane'
         self.lcname = 'Doe'
+        self.name = (self.fname + ' ' + self.lname).lower()
         self.age = '19'
         self.gender = 'Female'
         self.isPat = False

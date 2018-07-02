@@ -9,8 +9,8 @@ def main():
     app = wx.App()
 
     info = msgbox.Msgbox(None, title="Welcome")
-    app.MainLoop()
-    # info._pass()
+    # app.MainLoop()
+    info._pass()
 
     main_win = welcome.Welcome_win(info, parent=None, title='Menu')
     app.MainLoop()

@@ -63,8 +63,9 @@ class Welcome_win(wx.Frame):
         text11.SetFont(self.font_field)
         titleSizer.Add(text11, pos=(1, 0))
 
-        text1 = wx.StaticText(self.panel, label=self.info.fname + " " + self.info.lname)
-        if self.info.isCli:
+        if self.info.isPat:
+            text1 = wx.StaticText(self.panel, label=self.info.fname + " " + self.info.lname)
+        elif self.info.isCli:
             text1 = wx.StaticText(self.panel, label=self.info.fcname + " " + self.info.lcname)
         text1.SetFont(self.font)
         titleSizer.Add(text1, pos=(1, 1))
@@ -287,7 +288,10 @@ class Instrcution_win(wx.Frame):
         ex = event.GetEventObject().GetSelection()+1
         self.text.AppendText(self.str['exe'][ex]+self.str['ins'][ex]+'\n\n')
         self.text.AppendText(self.str['note'][ex])
-        self.player.doLoadFile(os.path.abspath('data/video/ex'+str(ex)+'.mpg'))
+        if ex == 5:
+            self.player.doLoadFile(os.path.abspath('data/video/ex'+str(ex)+'.mpg'))
+        else:
+            self.player.doLoadFile(os.path.abspath('data/video/tr'+str(ex)+'.mp4'))
 
 
     def OnBtnPrint(self, event):
