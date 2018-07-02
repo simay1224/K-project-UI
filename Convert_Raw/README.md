@@ -1,6 +1,6 @@
 # Data conversion
 
-After data capture from NYU X,  we will get 3 kind of data. They are XXXX.h5, XXXXX.pkl (correspond with kinect) and XXXX.csv( correspond with motion camera)
+After data capture from NYU X,  we will get 3 kind of data. They are XXXX.h5, XXXXX.pkl (correspond with kinect) and XXXX.csv(correspond with motion camera)
 
 ## For XXXX.csv
 
