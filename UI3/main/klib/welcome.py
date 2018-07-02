@@ -8,7 +8,7 @@ from matplotlib.figure import Figure
 from collections import defaultdict
 import wx.lib.mixins.inspection as WIT
 
-import sys, math
+import sys, math, os
 
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
@@ -28,7 +28,6 @@ class Welcome_win(wx.Frame):
     def __init__(self, info, parent, title):
         self.info = info
         self.game = None
-
 
         self.width = 410
         self.height = 500
@@ -64,23 +63,27 @@ class Welcome_win(wx.Frame):
         text11.SetFont(self.font_field)
         titleSizer.Add(text11, pos=(1, 0))
 
-        text1 = wx.StaticText(self.panel, label=self.info.fname + " " + self.info.lname)
+        if self.info.isPat:
+            text1 = wx.StaticText(self.panel, label=self.info.fname + " " + self.info.lname)
+        elif self.info.isCli:
+            text1 = wx.StaticText(self.panel, label=self.info.fcname + " " + self.info.lcname)
         text1.SetFont(self.font)
         titleSizer.Add(text1, pos=(1, 1))
 
-        text21 = wx.StaticText(self.panel, label="Gender:")
-        text21.SetFont(self.font_field)
-        titleSizer.Add(text21, pos=(2, 0))
-        text2 = wx.StaticText(self.panel, label=self.info.gender)
-        text2.SetFont(self.font)
-        titleSizer.Add(text2, pos=(2, 1))
+        if self.info.isPat:
+            text21 = wx.StaticText(self.panel, label="Gender:")
+            text21.SetFont(self.font_field)
+            titleSizer.Add(text21, pos=(2, 0))
+            text2 = wx.StaticText(self.panel, label=self.info.gender)
+            text2.SetFont(self.font)
+            titleSizer.Add(text2, pos=(2, 1))
 
-        text31 = wx.StaticText(self.panel, label="Age:")
-        text31.SetFont(self.font_field)
-        titleSizer.Add(text31, pos=(3, 0))
-        text3 = wx.StaticText(self.panel, label=self.info.age)
-        text3.SetFont(self.font)
-        titleSizer.Add(text3, pos=(3, 1))
+            text31 = wx.StaticText(self.panel, label="Age:")
+            text31.SetFont(self.font_field)
+            titleSizer.Add(text31, pos=(3, 0))
+            text3 = wx.StaticText(self.panel, label=str(self.info.age))
+            text3.SetFont(self.font)
+            titleSizer.Add(text3, pos=(3, 1))
 
         button_size = (300, 50)
 
@@ -114,12 +117,8 @@ class Welcome_win(wx.Frame):
         self.Show(True)
 
     def open_bodygame(self, event):
-        # myobject = event.GetEventObject()
-        # myobject.Disable()
         self.game = bodygame3.BodyGameRuntime(self.info)
         self.game.run()
-        # if self.game.kp._done:
-        #     self.Destroy()
 
     def open_instruction(self, event):
         instruct = Instrcution_win(None, 'Instruction')
@@ -130,8 +129,6 @@ class Welcome_win(wx.Frame):
     def open_trainingmode(self, event):
         self.train = trainingmode.BodyGameRuntime()
         self.train.run()
-        # if self.train.kp._done:
-        #     self.Destroy()
 
     def OnEraseBackground(self, evt):
         """
@@ -291,7 +288,10 @@ class Instrcution_win(wx.Frame):
         ex = event.GetEventObject().GetSelection()+1
         self.text.AppendText(self.str['exe'][ex]+self.str['ins'][ex]+'\n\n')
         self.text.AppendText(self.str['note'][ex])
-        self.player.doLoadFile('./video/ex'+str(ex)+'.mpg')
+        if ex == 5:
+            self.player.doLoadFile(os.path.abspath('data/video/ex'+str(ex)+'.mpg'))
+        else:
+            self.player.doLoadFile(os.path.abspath('data/video/tr'+str(ex)+'.mp4'))
 
 
     def OnBtnPrint(self, event):
@@ -397,10 +397,8 @@ class MoviePanel(wx.Panel):
         if not self.mc.Load(path):
             wx.MessageBox("Unable to load %s: Unsupported format?" % path, "ERROR", wx.ICON_ERROR | wx.OK)
         else:
-            filename = './video/ex'+str(1)+'.mpg'
-            self.st_file.SetLabel('%s' % filename)
             self.GetSizer().Layout()
-            self.mc.Play()#ITS TO PROBLEM, WHY IT DOESNT PLAY HERE?#
+            # self.mc.Play()#ITS TO PROBLEM, WHY IT DOESNT PLAY HERE?#
 
     def onPlay(self, evt):
         self.mc.Play()
@@ -598,6 +596,7 @@ class History_view(wx.Frame):
         # self.debug(y)
 
         y_min, y_max = self.find_min_max(y)
+        # print(y_min, y_max)
         self.axes.set_ylim(y_min[0] - 5, y_max[0] + 5)
 
         x_name = np.array([x.split("-") for x in df_name['time']])

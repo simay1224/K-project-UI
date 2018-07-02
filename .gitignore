@@ -155,8 +155,10 @@ $RECYCLE.BIN/
 *.dll
 *.jpg
 *.numbers
+*.psd
 
-!requirement.txt
+!req.txt
 !UI3/output/log2.xlsx
+!UI3/data/imgs/others/logo.png
 test/
 .vscode/

@@ -23,8 +23,8 @@ class Historylog(object):
         common = ["name", "age", "gender", "time"]
         backup = ["errmsg"]
         # exercise recoding feature
-        brth  = ["mindepth", "maxdepth", "avgdepth"]  # breathing exercise feature
-        hs    = ["sync_rate"]                         # hand exercise feature => hand breath sync rate
+        brth  = ["Min depth", "Max depth", "Average depth"]  # breathing exercise feature
+        hs    = ["Sync rate"]                         # hand exercise feature => hand breath sync rate
         shld  = ["Max rotation depth", "Min rotation depth"]
         clsp  = ["Max hold time", "Min hold time", "average hold time"]
         swing = ["Max right bending angle", "Min right bending angle",
@@ -33,22 +33,22 @@ class Historylog(object):
                  '2nd lower right elbow angle', '2nd straight right elbow angle',
                  '3rd lower right elbow angle', '3rd straight right elbow angle',
                  '4th lower right elbow angle', '4th straight right elbow angle',
-                 'average right hand push down angle', 'average right hand straight angle',
+                 'Average right hand push down angle', 'Average right hand straight angle',
                  '1st lower left elbow angle', '1st straight left elbow angle',
                  '2nd lower left elbow angle', '2nd straight left elbow angle',
                  '3rd lower left elbow angle', '3rd straight left elbow angle',
                  '4th lower left elbow angle', '4th straight left elbow angle',
-                 'average left hand push down angle', 'average left hand straight angle']
+                 'Average left hand push down angle', 'Average left hand straight angle']
         exer4 = ['1st right hand angle (H-close)', '1st right hand angle (T-pose)',
                  '2nd right hand angle (H-close)', '2nd right hand angle (T-pose)',
                  '3rd right hand angle (H-close)', '3rd right hand angle (T-pose)',
                  '4th right hand angle (H-close)', '4th right hand angle (T-pose)',
-                 'average right hand angle (H-close)', 'average right hand angle (T-pose)',
+                 'Average right hand angle (H-close)', 'Average right hand angle (T-pose)',
                  '1st left hand angle (H-close)', '1st left hand angle (T-pose)',
                  '2nd left hand angle (H-close)', '2nd left hand angle (T-pose)',
                  '3rd left hand angle (H-close)', '3rd left hand angle (T-pose)',
                  '4th left hand angle (H-close)', '4th left hand angle (T-pose)',
-                 'average left hand angle (H-close)', 'average left hand angle (T-pose)']
+                 'Average left hand angle (H-close)', 'Average left hand angle (T-pose)']
         # ideal value
         icommon = ['$IDEAL VALUE$', 'NaN', 'NaN','NaN']
         ibrth = ['bigger is better', 'bigger is better', 'bigger is better']
