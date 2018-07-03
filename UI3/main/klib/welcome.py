@@ -28,14 +28,16 @@ class Welcome(wx.Frame):
         self.panel = wx.Panel(self)
         self.modes = Modes(self.panel, info, (self.size[0] - 100, self.size[1] - 100), (0, 150))
         self.init_ui()
+        self.Bind(wx.EVT_CHAR, self.OnKeyChar)
 
         self.Show(True)
-
         # self.modes.game.run()
 
 
-    def init_ui(self):
+    def OnKeyChar(self, event):
+        print("Keychar: %c" % event.GetUnicodeKey())
 
+    def init_ui(self):
         self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
@@ -88,26 +90,58 @@ class Welcome(wx.Frame):
 class Modes(wx.Treebook):
     def __init__(self, parent, info, size, pos):
         super(Modes, self).__init__(parent, id=1, style=wx.BK_DEFAULT, size=size, pos=pos)
-        self.instruct = Instrcution_win(self, size)
-        self.history = History_view(self, info, size)
-        self.game = bodygame3.BodyGameRuntime(info)
 
+        self.instruct = Instrcution_win(self, size)
         self.AddPage(self.instruct, "Instruction")
+
+        self.history = History_view(self, info, size)
         self.AddPage(self.history, "History Log")
 
+        self.game = bodygame3.BodyGameRuntime(info)
         game_screen = self.game.run_pygame()
         s = pygame.image.tostring(game_screen, 'RGB')  # Convert the surface to an RGB string
         img = wx.Image(960, 540, s)  # Load this string into a wx image
         bmp = wx.Bitmap(img)  # Get the image in bitmap form
         game_window = wx.StaticBitmap(self, -1, bmp)
-
         self.AddPage(game_window, "Evaluation")
 
-        # dc = wx.ClientDC(self)  # Device context for drawing the bitmap
-        # dc.DrawBitmap(bmp, 0, 0, False)  # Blit the bitmap image to the display
-        # del dc
+        # finished loading the new page
+        self.Bind(wx.EVT_TREEBOOK_PAGE_CHANGED, self.OnPageChanged)
+        self.Bind(wx.EVT_TREEBOOK_PAGE_CHANGING, self.OnPageChanging)
 
-        # self.Show(True)
+        self.SetFocus()
+
+
+    def OnPageChanged(self, event):
+        old = event.GetOldSelection()
+        new = event.GetSelection()
+        sel = self.GetSelection()
+        print('OnPageChanged, old: %d, new: %d, sel: %d\n' % (old, new, sel))
+        if sel == 2:
+            self.handle_eval()
+        event.Skip()
+
+    def OnPageChanging(self, event):
+        old = event.GetOldSelection()
+        new = event.GetSelection()
+        sel = self.GetSelection()
+        print('OnPageChanging, old: %d, new: %d, sel: %d\n' % (old, new, sel))
+        if old == 2:
+            self.close_eval()
+        event.Skip()
+
+    def handle_eval(self):
+        # self.game = bodygame3.BodyGameRuntime(info)
+        # game_screen = self.game.run_pygame()
+        # s = pygame.image.tostring(game_screen, 'RGB')  # Convert the surface to an RGB string
+        # img = wx.Image(960, 540, s)  # Load this string into a wx image
+        # bmp = wx.Bitmap(img)  # Get the image in bitmap form
+        # game_window = wx.StaticBitmap(self, -1, bmp)
+        # self.AddPage(game_window, "Evaluation")
+        print("handle")
+
+    def close_eval(self):
+        print("close")
 
 
 
