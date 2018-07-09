@@ -6,3 +6,6 @@ inflect == 0.3.1
 openpyxl == 2.5.3
 wxpython == 4.0.1
 xlrd == 1.1.0
+
+pymongo == 3.6.1
+mongoengine == 0.15.0

@@ -3,6 +3,7 @@
 Created on Sun Feb 26 16:13:39 2017
 
 @author: medialab
+@usage: data = cPickle.load(file(__processed_filename__,'rb'))
 """
 from Mocam2Kinect import *
 from Human_mod import *
@@ -11,8 +12,8 @@ import cPickle
 import numpy as np
 import glob,os,win32com.client,pdb
 
-src_path = 'C:\Users\luoyu\Github\K-project-UI\Data_Conversion\data\\'
-dst_path = 'C:\Users\luoyu\Github\K-project-UI\Data_Conversion\processed\\'
+src_path = os.path.dirname(os.path.abspath(__file__)) + '\\data\\'
+dst_path = os.path.dirname(os.path.abspath(__file__)) + '\\processed\\'
 
 jidx = [0, 1, 2, 3, 4, 5, 6, 8, 9 ,10, 20]
 
@@ -52,6 +53,5 @@ def process_single_file(infile):
     name  = infile.split('\\')[-1].split('.pkl')
     fname = dst_path + name[0] + '_unified.pkl'
     cPickle.dump(J,file(fname,'wb'))
-
 
 process_single_file(src_path + os.listdir(src_path)[0])
