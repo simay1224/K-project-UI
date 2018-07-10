@@ -1,6 +1,6 @@
 import pygame
 from main.klib import msgbox
-from main.klib import welcome
+from main.klib import home
 
 import wx, pdb
 
@@ -8,11 +8,11 @@ def main():
     info = None
     app = wx.App()
 
-    info = msgbox.Msgbox(None, title="Welcome")
+    info = msgbox.Msgbox()
     # app.MainLoop()
     info._pass()
 
-    main_win = welcome.Welcome_win(info, parent=None, title='Menu')
+    main_win = home.Welcome_win(info)
     app.MainLoop()
 
     return main_win.game

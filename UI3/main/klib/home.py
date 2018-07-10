@@ -21,11 +21,11 @@ from .historylog import Historylog
 # class Info():
 #     def __init__(self):
 #         self.name   = 'jane doe'
-#         self.age    = '19'
+#         self.id    = '19'
 #         self.gender = 'female'
 
 class Welcome_win(wx.Frame):
-    def __init__(self, info, parent, title):
+    def __init__(self, info, parent=None, title="Home"):
         self.info = info
         self.game = None
 
@@ -78,10 +78,10 @@ class Welcome_win(wx.Frame):
             text2.SetFont(self.font)
             titleSizer.Add(text2, pos=(2, 1))
 
-            text31 = wx.StaticText(self.panel, label="Age:")
+            text31 = wx.StaticText(self.panel, label="ID:")
             text31.SetFont(self.font_field)
             titleSizer.Add(text31, pos=(3, 0))
-            text3 = wx.StaticText(self.panel, label=str(self.info.age))
+            text3 = wx.StaticText(self.panel, label=str(self.info.id))
             text3.SetFont(self.font)
             titleSizer.Add(text3, pos=(3, 1))
 
@@ -152,14 +152,15 @@ class Instrcution_win(wx.Frame):
         self.sizer_w = 5
         self.sizer_h = 5
 
-        super(Instrcution_win, self).__init__(parent, title=title, size=(950, 700))
+        super(Instrcution_win, self).__init__(parent, title=title, size=(1000, 650))
 
         self.panel = wx.Panel(self)
         box = wx.BoxSizer(wx.HORIZONTAL)
-        self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font = wx.Font(17, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         # self.text = wx.TextCtrl(self.panel, size = (900,300), style = wx.TE_MULTILINE|wx.TE_READONLY)
-        self.player = MoviePanel(self.panel, -1)
-        self.text = wx.TextCtrl(self.panel, size=self.player.mc.GetBestSize(), style=wx.TE_MULTILINE|wx.TE_READONLY)
+        self.player = MoviePanel(self.panel, (640, 360))
+
+        self.text = wx.TextCtrl(self.panel, size=(self.player.mc.GetBestSize()[0], self.player.mc.GetBestSize()[1]/2), style=wx.TE_MULTILINE|wx.TE_READONLY)
         self.text.SetFont(self.font)
         # self.text.SetBackgroundColour((255, 255, 255))
         self.text.SetBackgroundColour((179, 236, 255))
@@ -168,9 +169,9 @@ class Instrcution_win(wx.Frame):
 
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.VERTICAL)
-        lst = wx.ListBox(self.panel, size = (250, self.player.mc.GetBestSize()[1] * 2), choices=languages, style=wx.LB_SINGLE)
+        lst = wx.ListBox(self.panel, size=(240, self.player.mc.GetBestSize()[1] / 2 * 3), choices=languages, style=wx.LB_SINGLE)
         lst.SetBackgroundColour((255, 255, 255))
-        button1 = wx.Button(self.panel, label="Close")
+        button1 = wx.Button(self.panel, label="Home")
         button1.Bind(wx.EVT_BUTTON, self.close)
 
         button_print = wx.Button(self.panel, id=wx.ID_PRINT, label="")
@@ -210,7 +211,7 @@ class Instrcution_win(wx.Frame):
         self.str['exe'][7] = 'Exercise 7 : Clasp and Spread'
 
         self.str['ins'][1] = '\n  '\
-                             '\n1. Put your hands on the belly position.'\
+                             '\n1. Put your hands on the abdomen.'\
                              '\n2. Wait until the sign shows "start breathe in/out."'\
                              '\n3. Do deep breathing 4 times.'\
                              '\n4. Put down your hands.'
@@ -243,16 +244,16 @@ class Instrcution_win(wx.Frame):
                              '\n5. Put down your arms.'
 
         self.str['ins'][6] = '\n  '\
-                             '\n1. Put your hands on the belly position.'\
+                             '\n1. Put your hands on the abdomen.'\
                              '\n2. Rotate you shoulder.'\
                              '\n3. Repeat 4 times.'\
                              '\n4. Put down your hands.'
 
         self.str['ins'][7] = '\n  '\
-                             '\n1. Raise and clasp your hands to the belly position.'\
+                             '\n1. Raise and clasp your hands to the abdomen.'\
                              '\n2. Raise clasped hands toward to your forehead and keep elbows together.'\
                              '\n3. Slide your hands to the back of your head and spread the elbows open wide.'\
-                             '\n4. Back to the belly position.'\
+                             '\n4. Back to the abdomen.'\
                              '\n5. Repeat 4 times.'\
                              '\n6. Put down your arms.'
 
@@ -361,15 +362,15 @@ class Instrcution_win(wx.Frame):
 
 
 class MoviePanel(wx.Panel):
-    def __init__(self, parent, id):
+    def __init__(self, parent, size, id=-1):
         #self.log = log
-        wx.Panel.__init__(self, parent, -1, style=wx.TAB_TRAVERSAL|wx.CLIP_CHILDREN)
+        wx.Panel.__init__(self, parent, id, style=wx.TAB_TRAVERSAL|wx.CLIP_CHILDREN)
 
         self.sizer_w = 5
         self.sizer_h = 5
 
         # Create some controls
-        self.mc = wx.media.MediaCtrl(self, size=(500,300), style=wx.SIMPLE_BORDER)
+        self.mc = wx.media.MediaCtrl(self, size=size, style=wx.SIMPLE_BORDER)
         playButton = wx.Button(self, -1, "Play")
         self.Bind(wx.EVT_BUTTON, self.onPlay, playButton)
 
@@ -447,7 +448,7 @@ class History_view(wx.Frame):
             info_text = 'Patient:' + \
                         '\nName: ' + self.info.name.title() + \
                         '\nGender: ' + self.info.gender.title() + \
-                        '\nAge: ' + str(self.info.age)
+                        '\nID: ' + str(self.info.id)
         else:
             info_text = 'Clinician:' + \
                         '\nName: ' + self.info.name.title() + \

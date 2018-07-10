@@ -2,7 +2,7 @@ import wx, pdb, sys
 
 class Msgbox(wx.Frame):
 
-    def __init__(self, parent, title):
+    def __init__(self, parent=None, title="Info"):
         self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_field = wx.Font(30, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_button = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
@@ -24,7 +24,7 @@ class Msgbox(wx.Frame):
         self.fname = ''
         self.lname = ''
         self.name = ''
-        self.age = ''
+        self.id = ''
         self.num = ''
         self.gender = ''
         self.isCli = False
@@ -76,8 +76,8 @@ class Msgbox(wx.Frame):
         self.tc2 = wx.TextCtrl(self.panel)
         patiSizer.Add(self.tc2, pos=(3, 1), flag=wx.EXPAND)
 
-        # Age
-        text3 = wx.StaticText(self.panel, label="Age")
+        # ID
+        text3 = wx.StaticText(self.panel, label="ID")
         text3.SetFont(self.font)
         patiSizer.Add(text3, pos=(4, 0), flag=wx.LEFT)
 
@@ -157,9 +157,9 @@ class Msgbox(wx.Frame):
         # -------------- Patient -------------- #
         self.fname = self.tc1.GetValue()
         self.lname = self.tc2.GetValue()
-        self.age = self.tc3.GetValue()
-        if (self.age != ''):
-            self.age = int(self.age)
+        self.id = self.tc3.GetValue()
+        if (self.id != ''):
+            self.id = int(self.id)
 
         if self.rb_female.GetValue():
             self.gender = 'Female'
@@ -175,7 +175,7 @@ class Msgbox(wx.Frame):
             self.num = int(self.num)
 
         self.isCli = True if (len(self.fcname) != 0 or len(self.lcname) != 0 or self.num != '') else False
-        self.isPat = True if (len(self.fname) != 0 or len(self.lname) != 0 or self.age != '') else False
+        self.isPat = True if (len(self.fname) != 0 or len(self.lname) != 0 or self.id != '') else False
 
         self.name = (self.fname + ' ' + self.lname).lower()
         if self.isCli:
@@ -193,18 +193,18 @@ class Msgbox(wx.Frame):
                 if len(self.lname) == 0 or len(self.fname) == 0:
                     error += 'please enter your name\n'
                     error_flag = True
-                if self.age != '':
-                    if type(self.age) == int:
-                        if 0 < self.age < 150:
-                            pass
-                        else:
-                            error += 'age out of range\n'
-                            error_flag = True
-                    elif self.age != 'unknown' and type(self.age) != int:
-                        error += 'age should be an integer\n'
+                if self.id != '':
+                    # if type(self.id) == int:
+                    #     if 0 < self.id < 150:
+                    #         pass
+                    #     else:
+                    #         error += 'id out of range\n'
+                    #         error_flag = True
+                    if self.id != 'unknown' and type(self.id) != int:
+                        error += 'id should be an integer\n'
                         error_flag = True
                 else:
-                    error += 'please enter your age\n'
+                    error += 'please enter your id\n'
                     error_flag = True
 
                 if (not self.rb_female.GetValue()) and (not self.rb_male.GetValue()) :
@@ -216,7 +216,7 @@ class Msgbox(wx.Frame):
                     error_flag = True
                 if self.num != '':
                     if type(self.num) != int:
-                        error += 'age should be an integer\n'
+                        error += 'id should be an integer\n'
                         error_flag = True
                     if self.num != 112233:
                         error += 'permission number is not correct\n'
@@ -231,7 +231,7 @@ class Msgbox(wx.Frame):
             dlg.Destroy()
 
         else:
-            message = 'Is the following infomation correct?\nPatient:\n\tName: %s\n\tAge: %s\n\tGender: %s' % (self.fname+' '+self.lname, self.age, self.gender)
+            message = 'Is the following infomation correct?\nPatient:\n\tName: %s\n\tID: %s\n\tGender: %s' % (self.fname+' '+self.lname, self.id, self.gender)
             if self.isCli:
                 message = 'Is the following infomation correct?\nClinician:\n\tName: %s' % (self.fcname+' '+self.lcname)
             dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
@@ -248,9 +248,9 @@ class Msgbox(wx.Frame):
         self.lname = 'Doe'
         self.isPat = True
         self.isCli = False
-        self.age = '19'
+        self.id = '19'
         self.gender = 'Female'
-        message = 'Do you want to use following information?\nName: %s\nAge: %s\nGender: %s' %(self.fname+' '+self.lname, self.age, self.gender)
+        message = 'Do you want to use following information?\nName: %s\nID: %s\nGender: %s' %(self.fname+' '+self.lname, self.id, self.gender)
         dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
         result = dlg.ShowModal() == wx.ID_YES
 
@@ -266,7 +266,7 @@ class Msgbox(wx.Frame):
         self.lname = ''
         self.fcname = ''
         self.lcname = ''
-        self.age = ''
+        self.id = ''
         self.num = ''
         self.gender = ''
         self.isCli = False
@@ -286,7 +286,7 @@ class Msgbox(wx.Frame):
         self.fcname = 'Jane'
         self.lcname = 'Doe'
         self.name = (self.fname + ' ' + self.lname).lower()
-        self.age = '19'
+        self.id = '19'
         self.gender = 'Female'
-        self.isPat = False
-        self.isCli = True
+        self.isPat = True
+        self.isCli = False
