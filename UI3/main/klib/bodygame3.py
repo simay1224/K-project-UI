@@ -378,7 +378,7 @@ class BodyGameRuntime(object):
                 cdist = body.joints[20].Position.z
         return closest_ID
 
-    def draw_human_model(self, joints, ax):
+    def draw_human_model(self, joints):
         # === draw unify human model ===
         if self.kp.model_draw:
             modJoints = self.h_mod.human_mod_pts(joints, limb=False)
@@ -390,7 +390,7 @@ class BodyGameRuntime(object):
                 plt.cla()
             self.h_mod.draw_human_mod_pts(modJoints, ax)
 
-    def save_data(self, bddic, timestamp, jps, djps, jdic, Rel):
+    def save_data(self, bddic, timestamp, jps, djps, jdic, Rel, body):
         # === save data ===
         bddic['timestamp'] = timestamp
         bddic['jointspts'] = jps   # joints' coordinate in color space (2D)
@@ -486,6 +486,7 @@ class BodyGameRuntime(object):
     def run_body_game(self):
         bddic = {}
         jdic = {}
+        timestamp = 0
 
         # initialize background frame
         self.draw_color_frame(self.bkimg, self.bk_frame_surface)
@@ -588,9 +589,9 @@ class BodyGameRuntime(object):
                         self.process_finish_analysis()
 
                     # draw skel
-                    self.skel.draw_body(joints, jps, SKELETON_COLORS[i], self._frame_surface, 8)
-                    self.draw_human_model(joints, ax)
-                    self.save_data(bddic, timestamp, jps, djps, jdic, Rel)
+                    self.skel.draw_body(joints, jps, SKELETON_COLORS[closest_ID], self._frame_surface, 8)
+                    self.draw_human_model(joints)
+                    self.save_data(bddic, timestamp, jps, djps, jdic, Rel, body)
 
                 self.kp.framecnt += 1  # frame no
             else:

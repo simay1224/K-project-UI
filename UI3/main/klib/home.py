@@ -427,7 +427,7 @@ class History_view(wx.Frame):
         self.color_line = ['#0096BF', '#005A73', '#BFA600', '#736400', '#ffae25', '#af7900', '#d957b4', '#75005b']
         self.Show()
 
-    def init_ui(self, path='./output/log2.xlsx'):
+    def init_ui(self, path='./output/log.xlsx'):
         self.font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)
         self.path = path
         try:
