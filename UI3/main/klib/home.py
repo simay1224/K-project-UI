@@ -29,8 +29,18 @@ class Welcome_win(wx.Frame):
         self.info = info
         self.game = None
 
-        self.width = 410
-        self.height = 500
+        self.windows = True
+        if sys.platform == "darwin":
+            self.windows = False
+        if not self.windows:
+            self.width = 750
+            self.height = 500
+        else:
+            self.width = 750
+            self.height = 550
+
+        # self.width = 410
+        # self.height = 500
         self.sizer_w = 5
         self.sizer_h = 5
         super(Welcome_win, self).__init__(parent, title=title, size=(self.width, self.height))
@@ -418,6 +428,7 @@ class History_view(wx.Frame):
         self.height = 520
         self.sizer_w = 5
         self.sizer_h = 5
+        self.sub_width = 260
 
         super(History_view, self).__init__(parent, title=title, size=(self.width, self.height))
         self.info = info
@@ -478,7 +489,7 @@ class History_view(wx.Frame):
             # box1.Add(self.score, pos=(4, 2))
 
             line = wx.StaticLine(self.panel)
-            box1.Add(line, pos=(5, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
+            box1.Add(line, pos=(5, 0), span=(0, int(self.sub_width / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
 
         else:
             # self.score = wx.StaticText(self.panel, wx.ID_ANY, label="Score: ")
@@ -486,13 +497,17 @@ class History_view(wx.Frame):
             # box1.Add(self.score, pos=(3, 2))
 
             line = wx.StaticLine(self.panel)
-            box1.Add(line, pos=(4, 0), span=(0, int(330 / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
+            box1.Add(line, pos=(4, 0), span=(0, int(self.sub_width / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
+
+        button1 = wx.Button(self.panel, label="Home")
+        button1.Bind(wx.EVT_BUTTON, self.close)
 
         box2.Add(box1, 0)
-        self.lst = wx.ListBox(self.panel, size=(330, 300), choices=[], style=wx.LB_SINGLE)
+        self.lst = wx.ListBox(self.panel, size=(self.sub_width, 300), choices=[], style=wx.LB_SINGLE)
         self.lst.SetFont(self.font)
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
         box2.Add(self.lst, 1, wx.EXPAND)
+        box2.Add(button1, 1, wx.EXPAND)
         box3.Add(box2, 0, wx.EXPAND)
 
         self.figure = Figure()
@@ -506,6 +521,8 @@ class History_view(wx.Frame):
         # default selection: exercise 1
         self.update_choice(None)
 
+    def close(self, event):
+        self.Destroy()
 
     def update_choice(self, event):
         cur_choice = self.choice.GetSelection()

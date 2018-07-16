@@ -58,9 +58,9 @@ class Historylog(object):
         iswing = [90, 'bigger is better', 90, 'bigger is better']
         iexer3 = [10, 180, 10, 180, 10, 180, 10, 180, 10, 180,
                     10, 180, 10, 180, 10, 180, 10, 180, 10, 180]
-        iexer4 = [90]*20  
-        ibackup = []   
-        ibackup = []     
+        iexer4 = [90]*20
+        ibackup = []
+        ibackup = []
         # cols title for different exercise sheets
         self.colname = {}
         self.colname[1] = common + brth + backup
@@ -79,8 +79,8 @@ class Historylog(object):
         self.icol[4] = icommon + iexer4 + ibackup
         self.icol[5] = icommon + iswing + ibackup
         self.icol[6] = icommon + ishld + ibackup
-        self.icol[7] = icommon + iclsp + ibackup        
-    
+        self.icol[7] = icommon + iclsp + ibackup
+
     def newlog(self, sheetnum=7):
         """ if there is not log.xlsx exist, create one with sheetnum sheets
             sheetnum depends on howmany exercise we have
@@ -103,7 +103,7 @@ class Historylog(object):
             book = load_workbook(self.excelPath)
             sheet = book['exercise %s' %i]
             sheet.append(self.icol[i])
-            book.save(self.excelPath)    
+            book.save(self.excelPath)
 
     def addsheet(self, num=1):
         """ adding num new sheet
@@ -115,14 +115,14 @@ class Historylog(object):
             sheetnum = len(book.worksheets)
             dataframe.to_excel(excelWriter, 'exercise %s' %sheetnum+1, index=None)
         excelWriter.save()
-        excelWriter.close()        
+        excelWriter.close()
 
     def writein(self, userinfo, exeno, time, data=[], errmsgs=[]):
         """ write the user record in to log file
             userinfo : the infomation user input in the initial msgbox
             exeno : exercise number
             data : list-like object, which contains vary results depend on the exercise type
-            time :  
+            time :
         """
         if not os.path.isfile(self.excelPath):
             self.newlog()
@@ -130,6 +130,6 @@ class Historylog(object):
         book = load_workbook(self.excelPath)
         sheet = book['exercise %s' %exeno]
         date = '-'.join(map(str,[time.year,time.month,time.day,time.hour,time.minute]))
-        userrecord = [userinfo.name, 'unknown', userinfo.gender, date] + data + errmsg
+        userrecord = [userinfo.name, userinfo.gender, date] + data + errmsg
         sheet.append(userrecord)
         book.save(self.excelPath)
