@@ -20,6 +20,9 @@ class Msgbox(wx.Frame):
         self.sizer_h = 10
 
         super(Msgbox, self).__init__(parent, title=title, size=(self.width, self.height), style=wx.DEFAULT_FRAME_STYLE | wx.RESIZE_BORDER)
+        isz = (16, 16)
+        ico = wx.Icon('./data/imgs/others/logo.png', wx.BITMAP_TYPE_PNG, isz[0], isz[1])
+        self.SetIcon(ico)
 
         self.fname = ''
         self.lname = ''

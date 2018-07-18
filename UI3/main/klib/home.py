@@ -44,6 +44,10 @@ class Welcome_win(wx.Frame):
         self.sizer_w = 5
         self.sizer_h = 5
         super(Welcome_win, self).__init__(parent, title=title, size=(self.width, self.height))
+        isz = (16, 16)
+        ico = wx.Icon('./data/imgs/others/logo.png', wx.BITMAP_TYPE_PNG, isz[0], isz[1])
+        self.SetIcon(ico)
+        
         self.panel = wx.Panel(self)
 
         self.init_ui()
@@ -159,28 +163,37 @@ class Instrcution_win(wx.Frame):
     def __init__(self, parent, title):
         self.init_text()
 
+        self.player_width = 640
+        self.player_height = 360
+
+        self.width = 1200
+        self.height = self.player_height * 1.5 + 45
+
         self.sizer_w = 5
         self.sizer_h = 5
 
-        super(Instrcution_win, self).__init__(parent, title=title, size=(1000, 650))
+        super(Instrcution_win, self).__init__(parent, title=title, size=(self.width, self.height))
+        isz = (16, 16)
+        ico = wx.Icon('./data/imgs/others/logo.png', wx.BITMAP_TYPE_PNG, isz[0], isz[1])
+        self.SetIcon(ico)
 
         self.panel = wx.Panel(self)
         box = wx.BoxSizer(wx.HORIZONTAL)
-        self.font = wx.Font(17, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
-        # self.text = wx.TextCtrl(self.panel, size = (900,300), style = wx.TE_MULTILINE|wx.TE_READONLY)
-        self.player = MoviePanel(self.panel, (640, 360))
-
-        self.text = wx.TextCtrl(self.panel, size=(self.player.mc.GetBestSize()[0], self.player.mc.GetBestSize()[1]/2), style=wx.TE_MULTILINE|wx.TE_READONLY)
-        self.text.SetFont(self.font)
-        # self.text.SetBackgroundColour((255, 255, 255))
-        self.text.SetBackgroundColour((179, 236, 255))
-        languages = [self.str['exe'][1], self.str['exe'][2], self.str['exe'][3], self.str['exe'][4],\
-                     self.str['exe'][5], self.str['exe'][6], self.str['exe'][7]]
-
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.VERTICAL)
-        lst = wx.ListBox(self.panel, size=(240, self.player.mc.GetBestSize()[1] / 2 * 3), choices=languages, style=wx.LB_SINGLE)
-        lst.SetBackgroundColour((255, 255, 255))
+
+        self.font = wx.Font(17, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.player = MoviePanel(self.panel, (self.player_width, self.player_height))
+
+        self.text = wx.TextCtrl(self.panel, size=(self.player_width, self.player_height/2), style=wx.TE_MULTILINE|wx.TE_READONLY)
+        self.text.SetFont(self.font)
+        self.text.SetBackgroundColour((255, 255, 255))
+        # self.text.SetBackgroundColour((179, 236, 255))
+
+        exer = [self.str['exe'][i] for i in range(1, 8)]
+        lst = wx.ListBox(self.panel, size=(240, self.height - 25 - 45), choices=exer, style=wx.LB_SINGLE)
+        lst.SetBackgroundColour((230, 230, 230))
+        
         button1 = wx.Button(self.panel, label="Home")
         button1.Bind(wx.EVT_BUTTON, self.close)
 
@@ -188,13 +201,13 @@ class Instrcution_win(wx.Frame):
         button_print.SetFocus()
         self.Bind(wx.EVT_BUTTON, self.OnBtnPrint, button_print)
 
+        box2.Add(button1, 0, wx.EXPAND)
         box2.Add(lst, 0, wx.EXPAND)
-        box2.Add(button1, 1, wx.EXPAND)
         box3.Add(self.player, 0, wx.EXPAND)
 
         text_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
-        text_sizer.Add(button_print, (4, 4))
-        text_sizer.Add(self.text, (0, 0), span=(5, 0))  # for .avi .mpg video files
+        text_sizer.Add(button_print, (0, 4))
+        text_sizer.Add(self.text, (0, 0), span=(4, 0))  # for .avi .mpg video files
 
         # box3.Add(self.text, 0, wx.LEFT)
         box3.Add(text_sizer, 0, wx.LEFT)
@@ -425,12 +438,16 @@ class MoviePanel(wx.Panel):
 class History_view(wx.Frame):
     def __init__(self, parent, info, title='history log'):
         self.width = 850
-        self.height = 520
+        self.height = 550
         self.sizer_w = 5
         self.sizer_h = 5
         self.sub_width = 260
 
         super(History_view, self).__init__(parent, title=title, size=(self.width, self.height))
+        isz = (16, 16)
+        ico = wx.Icon('./data/imgs/others/logo.png', wx.BITMAP_TYPE_PNG, isz[0], isz[1])
+        self.SetIcon(ico)
+        
         self.info = info
         self.no_hist_img = cv2.imread('./data/imgs/others/no_hist.jpg')
         self.init_ui()
@@ -502,12 +519,12 @@ class History_view(wx.Frame):
         button1 = wx.Button(self.panel, label="Home")
         button1.Bind(wx.EVT_BUTTON, self.close)
 
+        box2.Add(button1, 0, wx.EXPAND)
         box2.Add(box1, 0)
         self.lst = wx.ListBox(self.panel, size=(self.sub_width, 300), choices=[], style=wx.LB_SINGLE)
         self.lst.SetFont(self.font)
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
-        box2.Add(self.lst, 1, wx.EXPAND)
-        box2.Add(button1, 1, wx.EXPAND)
+        box2.Add(self.lst, 0, wx.EXPAND)
         box3.Add(box2, 0, wx.EXPAND)
 
         self.figure = Figure()

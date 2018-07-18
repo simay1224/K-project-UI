@@ -49,7 +49,7 @@ class BodyGameRuntime(object):
 
         pygame.display.set_caption("Lymph Coach - Training mode")
         try :
-            pygame.display.set_icon(pygame.image.load('./data/imgs/others/icon.png'))
+            pygame.display.set_icon(pygame.image.load('./data/imgs/others/logo.png'))
         except:
             pass
 
