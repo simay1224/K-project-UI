@@ -159,7 +159,6 @@ $RECYCLE.BIN/
 *.mp4
 
 !req.txt
-!UI3/output/log.xlsx
 !UI3/data/imgs/others/logo.png
 ref/
 .vscode/

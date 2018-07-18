@@ -41,14 +41,14 @@ fps = 30
 bkimg = np.zeros([1080, 1920])
 # username = 'Andy_'  # user name
 
-# colors for drawing different bodies
-SKELETON_COLORS = [pygame.color.THECOLORS["red"],
-                   pygame.color.THECOLORS["blue"],
-                   pygame.color.THECOLORS["green"],
-                   pygame.color.THECOLORS["orange"],
-                   pygame.color.THECOLORS["purple"],
-                   pygame.color.THECOLORS["yellow"],
-                   pygame.color.THECOLORS["violet"]]
+# # colors for drawing different bodies
+# SKELETON_COLORS = [pygame.color.THECOLORS["red"],
+#                    pygame.color.THECOLORS["blue"],
+#                    pygame.color.THECOLORS["green"],
+#                    pygame.color.THECOLORS["orange"],
+#                    pygame.color.THECOLORS["purple"],
+#                    pygame.color.THECOLORS["yellow"],
+#                    pygame.color.THECOLORS["violet"]]
 # GPR
 limbidx = np.array([4, 5, 6, 8, 9, 10, 20])
 
@@ -522,7 +522,7 @@ class BodyGameRuntime(object):
 
                     # === fingers detection ===
                     if self.kp.handmode:  # finger detect and draw
-                        self.fextr.run(frame, bkimg, body, bddic, jps, SKELETON_COLORS[i], self._frame_surface)
+                        self.fextr.run(frame, bkimg, body, bddic, jps, pygame.color.THECOLORS["yellow"], self._frame_surface)
 
                     # === joint reliability ===
                     Rel, Relary = self.rel.run(jdic)
@@ -530,8 +530,6 @@ class BodyGameRuntime(object):
                     # self.skel.draw_Rel_joints(jps, Rel, self._frame_surface)
 
                     # === dtw analyze & denoising process ===
-                    self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                        self.exeinst.str['name'][self.exeno], 1)# 1 is location
                     if not self.ana._done:
                         # Modified joint array (change struture from pykinect to np)
                         modJary = self.h_mod.human_mod_pts(joints, False)  # modJary is 11*3 array
@@ -577,7 +575,6 @@ class BodyGameRuntime(object):
                         # self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                         #                     self.ana.hs.htext(body.hand_left_state, body.hand_right_state), 4 ,\
                         #                     (255, 130, 45, 255))
-                        self.process_analysis()
 
                         if self.ana.evalstr != '':
                             # How long the evaluation show up
@@ -585,11 +582,9 @@ class BodyGameRuntime(object):
                             if self.fcnt > 60:
                                 self.ana.evalstr = ''
                                 self.fcnt  = 0
-                    else:
-                        self.process_finish_analysis()
 
                     # draw skel
-                    self.skel.draw_body(joints, jps, SKELETON_COLORS[closest_ID], self._frame_surface, 8)
+                    self.skel.draw_body(joints, jps, pygame.color.THECOLORS["yellow"], self._frame_surface, 8)
                     self.draw_human_model(joints)
                     self.save_data(bddic, timestamp, jps, djps, jdic, Rel, body)
 
@@ -599,23 +594,22 @@ class BodyGameRuntime(object):
 
         # if self.kp.kinect == False:
         else:
-            self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                self.exeinst.str['name'][self.exeno], 1)# 1 is location
             if not self.ana._done:
                 # === analyze ===
                 # reconJ, body, dframe, djps: all from kinect
-                self.ana.run(self.exeno, None, self.bk_frame_surface,\
-                             self.eval, self.kp, None, None, None)
-                self.process_analysis()
-            else:
-                self.process_finish_analysis()
-
+                self.ana.run(self.exeno, None, self.bk_frame_surface, self.eval, self.kp, None, None, None)
             self.kp.framecnt += 1  # frame no
             self.io.typetext(self._frame_surface, 'kinect does not connect!!', (20, 100))
 
+        # draw text
+        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                        self.exeinst.str['name'][self.exeno], 1)# 1 is location
+        if not self.ana._done:
+            self.process_analysis()
+        else:
+            self.process_finish_analysis()
 
         # drawing surfaces
-
         if self.kp.vid_rcd:  # video recoding text
             self.io.typetext(self._frame_surface, 'Video Recording', (1580, 20), (255, 0, 0))
             # self.cimgs.create_dataset('img_'+repr(self.kp.fno).zfill(4), data = frame)

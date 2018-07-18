@@ -166,7 +166,7 @@ class Instrcution_win(wx.Frame):
         self.player_width = 640
         self.player_height = 360
 
-        self.width = 1200
+        self.width = 1100
         self.height = self.player_height * 1.5 + 45
 
         self.sizer_w = 5
@@ -182,7 +182,7 @@ class Instrcution_win(wx.Frame):
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.VERTICAL)
 
-        self.font = wx.Font(17, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.player = MoviePanel(self.panel, (self.player_width, self.player_height))
 
         self.text = wx.TextCtrl(self.panel, size=(self.player_width, self.player_height/2), style=wx.TE_MULTILINE|wx.TE_READONLY)
@@ -438,7 +438,7 @@ class MoviePanel(wx.Panel):
 class History_view(wx.Frame):
     def __init__(self, parent, info, title='history log'):
         self.width = 850
-        self.height = 550
+        self.height = 500
         self.sizer_w = 5
         self.sizer_h = 5
         self.sub_width = 260
