@@ -1,3 +1,4 @@
+ # coding: utf-8
 import wx
 import cv2
 import numpy as np
@@ -20,26 +21,20 @@ from ..klib import bodygame3
 from ..klib import trainingmode
 from .historylog import Historylog
 
-# class Info():
-#     def __init__(self):
-#         self.name   = 'jane doe'
-#         self.id    = '19'
-#         self.gender = 'female'
-
 class Welcome_win(wx.Frame):
     def __init__(self, info, parent=None, title="Home"):
         self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
         self.font_text = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
-        self.font_text_title = wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_text_title = wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD, False, 'Arial')
         self.info = info
         self.game = None
 
         self.width, self.height = wx.GetDisplaySize()
         self.height -= 100
-        self.sizer_w = 5
-        self.sizer_h = 5
+        self.sizer_w = 10
+        self.sizer_h = 10
 
         super(Welcome_win, self).__init__(parent, title=title, size=(self.width, self.height),  style=wx.DEFAULT_FRAME_STYLE | wx.RESIZE_BORDER)
         isz = (16, 16)
@@ -53,6 +48,7 @@ class Welcome_win(wx.Frame):
         self.panel = wx.Panel(self)
 
         # sizers
+        combine = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         topSizer = wx.BoxSizer(wx.VERTICAL)
         titleSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         lineSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
@@ -64,12 +60,6 @@ class Welcome_win(wx.Frame):
         # title
         text = wx.StaticText(self.panel, label="LymphCoach")
         text.SetFont(self.font_title)
-        text11 = wx.StaticText(self.panel, label="")
-        text12 = wx.StaticText(self.panel, label="")
-        text13 = wx.StaticText(self.panel, label="")
-        topSizer.Add(text11, 0, wx.CENTER)
-        topSizer.Add(text12, 0, wx.CENTER)
-        topSizer.Add(text13, 0, wx.CENTER)
         topSizer.Add(text, 0, wx.CENTER)
 
         line = wx.StaticLine(self.panel)
@@ -103,10 +93,10 @@ class Welcome_win(wx.Frame):
         button4.SetFont(self.font)
         button4.Bind(wx.EVT_BUTTON, self.open_history)
 
-        buttonSizer.Add(button1, pos=(1, 1), span=(1, 0))
-        buttonSizer.Add(button2, pos=(2, 1), span=(1, 0))
-        buttonSizer.Add(button3, pos=(3, 1), span=(1, 0))
-        buttonSizer.Add(button4, pos=(4, 1), span=(1, 0))
+        buttonSizer.Add(button1, pos=(1, 0))
+        buttonSizer.Add(button2, pos=(2, 0))
+        buttonSizer.Add(button3, pos=(3, 0))
+        buttonSizer.Add(button4, pos=(4, 0))
         menuSizer.Add(menu_title, 0, wx.CENTER)
         menuSizer.Add(buttonSizer, 0, wx.CENTER)
 
@@ -154,16 +144,15 @@ class Welcome_win(wx.Frame):
         dailySizer.Add(sentence_title, pos=(0, 0))
         dailySizer.Add(sentence, pos=(2, 0))
 
-        infoSizer.Add(menuSizer, pos=(1, 0), span=(0, 0), flag=wx.LEFT)
-        infoSizer.Add(dailySizer, pos=(1, 4), span=(0, 0), flag=wx.LEFT)
+        infoSizer.Add(menuSizer, pos=(1, 0))
+        infoSizer.Add(dailySizer, pos=(1, 4))
 
         topSizer.Add(lineSizer, 0, wx.CENTER)
         topSizer.Add(titleSizer, 0, wx.CENTER)
         topSizer.Add(infoSizer, 0, wx.CENTER)
-        self.panel.SetSizer(topSizer)
+        combine.Add(topSizer, pos=(5, 0))
+        self.panel.SetSizer(combine)
 
-        # self.panel.SetSizer(sizer)
-        # self.panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
 
     def open_bodygame(self, event):
         self.game = bodygame3.BodyGameRuntime(self.info)

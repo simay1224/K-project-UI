@@ -4,7 +4,7 @@ class Msgbox(wx.Frame):
 
     def __init__(self, parent=None, title="Info"):
         self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
-        self.font_field = wx.Font(30, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_field =  wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD, False, 'Arial')
         self.font_button = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
 
@@ -34,6 +34,7 @@ class Msgbox(wx.Frame):
     def InitUI(self):
         self.panel = wx.Panel(self)
 
+        combine = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         topSizer = wx.BoxSizer(wx.VERTICAL)
         titleSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         lineSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
@@ -45,12 +46,6 @@ class Msgbox(wx.Frame):
         # title
         text = wx.StaticText(self.panel, label="LymphCoach")
         text.SetFont(self.font_title)
-        text11 = wx.StaticText(self.panel, label="")
-        text12 = wx.StaticText(self.panel, label="")
-        text13 = wx.StaticText(self.panel, label="")
-        topSizer.Add(text11, 0, wx.CENTER)
-        topSizer.Add(text12, 0, wx.CENTER)
-        topSizer.Add(text13, 0, wx.CENTER)
         topSizer.Add(text, 0, wx.CENTER)
 
         line = wx.StaticLine(self.panel)
@@ -150,7 +145,8 @@ class Msgbox(wx.Frame):
         topSizer.Add(lineSizer, 0, wx.CENTER)
         topSizer.Add(infoSizer, 0, wx.CENTER)
         topSizer.Add(sizer, 0, wx.CENTER)
-        self.panel.SetSizer(topSizer)
+        combine.Add(topSizer, pos=(5, 0))
+        self.panel.SetSizer(combine)
 
     def ok(self, event):
         # -------------- Patient -------------- #
