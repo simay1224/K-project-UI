@@ -9,6 +9,8 @@ from collections import defaultdict
 import wx.lib.mixins.inspection as WIT
 
 import sys, math, os
+import random
+from datetime import datetime
 
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
@@ -29,7 +31,8 @@ class Welcome_win(wx.Frame):
         self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
-
+        self.font_text = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_text_title = wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.info = info
         self.game = None
 
@@ -53,7 +56,8 @@ class Welcome_win(wx.Frame):
         topSizer = wx.BoxSizer(wx.VERTICAL)
         titleSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         lineSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
-        menuSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        buttonSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        menuSizer = wx.BoxSizer(wx.VERTICAL)
         dailySizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         infoSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
 
@@ -72,35 +76,86 @@ class Welcome_win(wx.Frame):
         lineSizer.Add(line, pos=(0, 0), span=(2, int(self.width/self.sizer_w/2)), flag=wx.EXPAND|wx.BOTTOM)
 
         if self.info.isPat:
-            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fname + '!')
+            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fname + '! How\'s your day!')
         elif self.info.isCli:
-            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fcname + '!')
+            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fcname + '! How\'s your day!')
         text1.SetFont(self.font)
         titleSizer.Add(text1, pos=(1, 0))
 
         button_size = (300, 50)
 
+        menu_title = wx.StaticText(self.panel, label="Menu")
+        menu_title.SetFont(self.font_text_title)
+
         button1 = wx.Button(self.panel, size=button_size, label="Instruction with Video")
         button1.SetFont(self.font)
         button1.Bind(wx.EVT_BUTTON, self.open_instruction)
-        menuSizer.Add(button1, pos=(1, 1), span=(1, 0))
 
         button2 = wx.Button(self.panel, size=button_size, label="Training Mode")
         button2.SetFont(self.font)
         button2.Bind(wx.EVT_BUTTON, self.open_trainingmode)
-        menuSizer.Add(button2, pos=(2, 1), span=(1, 0))
 
         button3 = wx.Button(self.panel, size=button_size, label="Evaluation Mode")
         button3.SetFont(self.font)
         button3.Bind(wx.EVT_BUTTON, self.open_bodygame)
-        menuSizer.Add(button3, pos=(3, 1), span=(1, 0))
 
-        button3 = wx.Button(self.panel, size=button_size, label="History Review")
-        button3.SetFont(self.font)
-        button3.Bind(wx.EVT_BUTTON, self.open_history)
-        menuSizer.Add(button3, pos=(4, 1), span=(1, 0))
+        button4 = wx.Button(self.panel, size=button_size, label="History Review")
+        button4.SetFont(self.font)
+        button4.Bind(wx.EVT_BUTTON, self.open_history)
+
+        buttonSizer.Add(button1, pos=(1, 1), span=(1, 0))
+        buttonSizer.Add(button2, pos=(2, 1), span=(1, 0))
+        buttonSizer.Add(button3, pos=(3, 1), span=(1, 0))
+        buttonSizer.Add(button4, pos=(4, 1), span=(1, 0))
+        menuSizer.Add(menu_title, 0, wx.CENTER)
+        menuSizer.Add(buttonSizer, 0, wx.CENTER)
+
+
+        # http://optimallymph.org/en/login?destination=lymphedema
+        self.sentences = ["I like the exercises!!! After I finished learning the exercises by following the videos, my pain and soreness were much better.",
+                            "Videos are very helpful in teaching how to do the exercises. It is nice that I can go back and watch it again & again. I am glad that patients can have it at home. I love the contents & hope patients can get it sooner. I enjoyed the videos a lot.",
+                            "I love the videos that show the anatomy & fluid flow & deep breathing. I also love the lymphatic system video.",
+                            "The videos of how to perform the lymphatic exercises were very easy to follow.",
+                            "Videos are excellent-you could do as you watched.",
+                            "Love the avatar videos. You can follow the videos and do the exercises.",
+                            "It was helpful to have an animated model of the exercises, rather than a sheet with merely pictures of the exercises.",
+                            "I love to follow the daily videos to do the exercises.",
+                            "It made me realize that I can manage the loss of strength in my right arm and may be able to manage the numbness and tingling.  I will be able to help myself.",
+                            "Being on this study allowed me to do something for myself, really take care of myself and focus on being healthy.",
+                            "It helped me realize that I had excess fluid.  My arms got lighter each time I did the exercises.  My arms began to feel less heavy.  It noticed it in my clothes as well.",
+                            "It help me to understand more about all my symptoms, and how to manage them with the exercises.",
+                            "This is a very easy study and the videos helped to complete the exercise.",
+                            "I can repeat & review particular sections whenever and wherever I want.",
+                            "I like the fact that I can go to the site at any time even when I travel.",
+                            "The [lymphatic] exercise were easy and could be completed anywhere.  According to my measurements there was a decrease in fluid. That was good news.",
+                            "The exercises were easy to do and remember. If I noticed my arm was more stiff than usual, I would do the exercises more and they helped.",
+                            "It is not about whether I can do it (self-care) or I feel I can do it. The breathing and pumping exercises (daily lymphatic exercise) are easily to do and I feel better after doing them. So, I do it every day.",
+                            "I personally feel the exercise helped with the pain.",
+                            "The exercises made my arm feel a lot better.",
+                            "The exercise really helped increase my range of motion and was effective for decreasing my pain. I do the exercises every day.",
+                            "The exercises definitely helped reduce pain and increase mobility.",
+                            "The [lymphatic] exercise really helped increase my range of motion and was effective for decreasing my pain. I do the exercises every day.",
+                            "The [lymphatic] exercise made my arm feel a lot better.",
+                            "Being aware of lymphedema risk and informed about it helped me tremendously. I didn’t know what lymphedema was... I felt more in control rather than just hoping I would not get lymphedema. I was doing something to prevent it. It gave me a sense of empowerment.",
+                            "The best thing I have done for myself was to participate in The-Optimal-Lymph-Flow program. I only had 1 node removed. I thought that I am fine. During the radiation, I had slight swelling in my arm and I started religiously doing the breathing and pumping exercises. It worked and now I am doing the exercises every day because I feel good after doing the exercises. Without the program, I probably would be like my friend who has a huge arm now.",
+                            "I truly believe that participating in The-Optimal-Lymph-Flow program has been the pillar of strength for me following my mastectomy and lymph node dissection. The program enabled me to feel armed with knowledge and preventive measures to keep me from getting lymphedema.",
+                            "It is a simple program and awareness of the result is also motivating.",
+                            "I was very pleased that I could reduce my risk with very simple techniques (breathing, pumping, & walking).",
+                            "The pumping & breathing are something I can do. I can do more and feel better.",
+                            "Wonderful to have been aware before surgery of the exercises and get into the habit of doing them. After surgery, I didn’t have to review the direction and just began to do what I had been doing already.",
+                            "I am doing the right exercise (breathing and pumping) on the daily basis. I feel good and I feel that I owe it to myself.",
+                            "Being aware of factors that contribute to developing lymphedema and specific measures to alleviate symptoms has been instrumental in reducing any swelling. I have experienced and have motivated/aware of making choice to reduce my risk."]
+
+        sentence_title = wx.StaticText(self.panel, label="Daily Empowerment")
+        sentence_title.SetFont(self.font_text_title)
+        random.seed(datetime.now())
+        sentence = wx.StaticText(self.panel, label=self.sentences[random.randrange(len(self.sentences))], size=(500, 300))
+        sentence.SetFont(self.font_text)
+        dailySizer.Add(sentence_title, pos=(0, 0))
+        dailySizer.Add(sentence, pos=(2, 0))
 
         infoSizer.Add(menuSizer, pos=(1, 0), span=(0, 0), flag=wx.LEFT)
+        infoSizer.Add(dailySizer, pos=(1, 4), span=(0, 0), flag=wx.LEFT)
 
         topSizer.Add(lineSizer, 0, wx.CENTER)
         topSizer.Add(titleSizer, 0, wx.CENTER)
@@ -118,7 +173,7 @@ class Welcome_win(wx.Frame):
         instruct = Instrcution_win(None, 'Instruction')
 
     def open_history(self, event):
-        history  = History_view(None, self.info)
+        history = History_view(None, self.info)
 
     def open_trainingmode(self, event):
         self.train = trainingmode.BodyGameRuntime()
