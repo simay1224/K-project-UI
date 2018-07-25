@@ -9,13 +9,13 @@ def main():
     app = wx.App()
 
     info = msgbox.Msgbox()
-    # app.MainLoop()
-    info._pass()
-
-    main_win = home.Welcome_win(info)
     app.MainLoop()
+    # info._pass()
 
-    return main_win.game
+    # main_win = home.Welcome_win(info)
+    # app.MainLoop()
+
+    # return main_win.game
 
 if __name__ == '__main__':
     result = main()

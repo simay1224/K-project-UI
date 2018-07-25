@@ -7,15 +7,9 @@ class Msgbox(wx.Frame):
         self.font_field = wx.Font(30, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_button = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
-        self.windows = True
-        if sys.platform == "darwin":
-            self.windows = False
-        if not self.windows:
-            self.width = 750
-            self.height = 500
-        else:
-            self.width = 750
-            self.height = 550
+
+        self.width, self.height = wx.GetDisplaySize()
+        self.height -= 100
         self.sizer_w = 10
         self.sizer_h = 10
 
@@ -125,6 +119,10 @@ class Msgbox(wx.Frame):
         text3.SetFont(self.font)
         clinSizer.Add(text3, pos=(4, 0), flag=wx.LEFT)
 
+        text4 = wx.StaticText(self.panel, label="Only for Clinician Access");
+        text4.SetFont(self.font_button)
+        clinSizer.Add(text4, pos=(5, 0), flag=wx.LEFT)
+
         self.tcc3 = wx.TextCtrl(self.panel)
         clinSizer.Add(self.tcc3, pos=(4, 1), flag=wx.EXPAND)
 
@@ -161,8 +159,6 @@ class Msgbox(wx.Frame):
         self.fname = self.tc1.GetValue()
         self.lname = self.tc2.GetValue()
         self.id = self.tc3.GetValue()
-        if (self.id != ''):
-            self.id = int(self.id)
 
         if self.rb_female.GetValue():
             self.gender = 'Female'
@@ -175,47 +171,50 @@ class Msgbox(wx.Frame):
         self.lcname = self.tcc2.GetValue()
         self.num = self.tcc3.GetValue()
         if (self.num != ''):
-            self.num = int(self.num)
+            try:
+                self.num = int(self.num)
+            except:
+                pass
 
-        self.isCli = True if (len(self.fcname) != 0 or len(self.lcname) != 0 or self.num != '') else False
-        self.isPat = True if (len(self.fname) != 0 or len(self.lname) != 0 or self.id != '') else False
+        self.cliInfo = True if (len(self.fcname) != 0 or len(self.lcname) != 0) else False
+        self.patInfo = True if (len(self.fname) != 0 or len(self.lname) != 0 or self.id != '') else False
+        self.cliNum = True if (self.num != '') else False
 
-        self.name = (self.fname + ' ' + self.lname).lower()
-        if self.isCli:
-            self.name = (self.fcname + ' ' + self.lcname).lower()
+        self.isCli = True if ((self.cliInfo or self.cliNum) and (not self.patInfo)) else False
+        self.isPat = True if (self.patInfo and (not self.cliNum)) else False
+
+        # print(self.cliInfo, self.patInfo, self.cliNum, self.isCli, self.isPat)
+
+        # self.isCli = True if (len(self.fcname) != 0 or len(self.lcname) != 0 or self.num != '') else False
+        # self.isPat = True if (len(self.fname) != 0 or len(self.lname) != 0 or self.id != '') else False
 
         error = ''
         error_flag = False
 
-        # xor to check input
-        if not self.isCli ^ self.isPat:
-            error += 'please confirm your identity as (patient or clinician)'
+        if self.isCli and self.isPat:
+            error += 'please only enter necessary information'
+            error_flag = True
+        elif (not self.isCli) and (not self.isPat):
+            error += 'please enter information to verify your identity'
             error_flag = True
         else:
             if self.isPat:
                 if len(self.lname) == 0 or len(self.fname) == 0:
-                    error += 'please enter your name\n'
+                    error += 'please complete your name\n'
                     error_flag = True
-                if self.id != '':
-                    # if type(self.id) == int:
-                    #     if 0 < self.id < 150:
-                    #         pass
-                    #     else:
-                    #         error += 'id out of range\n'
-                    #         error_flag = True
-                    if self.id != 'unknown' and type(self.id) != int:
-                        error += 'id should be an integer\n'
-                        error_flag = True
-                else:
+                # id could be non-integer
+                if self.id == '':
                     error += 'please enter your id\n'
                     error_flag = True
-
-                if (not self.rb_female.GetValue()) and (not self.rb_male.GetValue()) :
-                    error += 'please choose your gender'
+                if (not self.rb_female.GetValue()) and (not self.rb_male.GetValue()):
+                    error += 'please choose your gender\n'
+                    error_flag = True
+                if len(self.fcname) == 0 or len(self.lcname) == 0:
+                    error += 'please enter your clinician\'s name\n'
                     error_flag = True
             else:
                 if len(self.fcname) == 0 or len(self.lcname) == 0:
-                    error += 'please enter your name\n'
+                    error += 'please complete your name\n'
                     error_flag = True
                 if self.num != '':
                     if type(self.num) != int:
@@ -227,6 +226,10 @@ class Msgbox(wx.Frame):
                 else:
                     error += 'please enter permission number\n'
                     error_flag = True
+
+        self.name = (self.fname + ' ' + self.lname).lower()
+        if self.isCli:
+            self.name = (self.fcname + ' ' + self.lcname).lower()
 
         if error_flag:
             dlg = wx.MessageDialog(self.panel, error,'', wx.YES_NO | wx.ICON_ERROR)

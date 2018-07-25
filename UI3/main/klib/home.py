@@ -29,25 +29,18 @@ class Welcome_win(wx.Frame):
         self.info = info
         self.game = None
 
-        self.windows = True
-        if sys.platform == "darwin":
-            self.windows = False
-        if not self.windows:
-            self.width = 750
-            self.height = 500
-        else:
-            self.width = 750
-            self.height = 550
-
+        self.width, self.height = wx.GetDisplaySize()
+        self.height -= 100
         # self.width = 410
         # self.height = 500
+
         self.sizer_w = 5
         self.sizer_h = 5
         super(Welcome_win, self).__init__(parent, title=title, size=(self.width, self.height))
         isz = (16, 16)
         ico = wx.Icon('./data/imgs/others/logo.png', wx.BITMAP_TYPE_PNG, isz[0], isz[1])
         self.SetIcon(ico)
-        
+
         self.panel = wx.Panel(self)
 
         self.init_ui()
@@ -166,8 +159,10 @@ class Instrcution_win(wx.Frame):
         self.player_width = 640
         self.player_height = 360
 
-        self.width = 1100
-        self.height = self.player_height * 1.5 + 45
+        self.width, self.height = wx.GetDisplaySize()
+        self.height -= 20
+        # self.width = 1100
+        # self.height = self.player_height * 1.5 + 45
 
         self.sizer_w = 5
         self.sizer_h = 5
@@ -193,7 +188,7 @@ class Instrcution_win(wx.Frame):
         exer = [self.str['exe'][i] for i in range(1, 8)]
         lst = wx.ListBox(self.panel, size=(240, self.height - 25 - 45), choices=exer, style=wx.LB_SINGLE)
         lst.SetBackgroundColour((230, 230, 230))
-        
+
         button1 = wx.Button(self.panel, label="Home")
         button1.Bind(wx.EVT_BUTTON, self.close)
 
@@ -437,8 +432,11 @@ class MoviePanel(wx.Panel):
 
 class History_view(wx.Frame):
     def __init__(self, parent, info, title='history log'):
-        self.width = 850
-        self.height = 500
+
+        self.width, self.height = wx.GetDisplaySize()
+        self.height -= 20
+        # self.width = 850
+        # self.height = 500
         self.sizer_w = 5
         self.sizer_h = 5
         self.sub_width = 260
@@ -447,7 +445,7 @@ class History_view(wx.Frame):
         isz = (16, 16)
         ico = wx.Icon('./data/imgs/others/logo.png', wx.BITMAP_TYPE_PNG, isz[0], isz[1])
         self.SetIcon(ico)
-        
+
         self.info = info
         self.no_hist_img = cv2.imread('./data/imgs/others/no_hist.jpg')
         self.init_ui()
@@ -523,6 +521,7 @@ class History_view(wx.Frame):
         box2.Add(box1, 0)
         self.lst = wx.ListBox(self.panel, size=(self.sub_width, 300), choices=[], style=wx.LB_SINGLE)
         self.lst.SetFont(self.font)
+        self.lst.SetBackgroundColour((230, 230, 230))
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
         box2.Add(self.lst, 0, wx.EXPAND)
         box3.Add(box2, 0, wx.EXPAND)
