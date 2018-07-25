@@ -32,7 +32,6 @@ class Msgbox(wx.Frame):
         self.Show()
 
     def InitUI(self):
-
         self.panel = wx.Panel(self)
 
         topSizer = wx.BoxSizer(wx.VERTICAL)
@@ -50,7 +49,7 @@ class Msgbox(wx.Frame):
         topSizer.Add(text, 0, wx.CENTER, border=0)
 
         line = wx.StaticLine(self.panel)
-        lineSizer.Add(line, pos=(0, 0), span=(0, int(self.width/self.sizer_w / 2)), flag=wx.EXPAND|wx.BOTTOM)
+        lineSizer.Add(line, pos=(0, 0), span=(2, int(self.width/self.sizer_w/2)), flag=wx.EXPAND|wx.BOTTOM)
 
         # -------------- Patient -------------- #
 
@@ -93,7 +92,6 @@ class Msgbox(wx.Frame):
         boxsizer.Add(self.rb_male)
         patiSizer.Add(boxsizer, pos=(5, 0), span=(0, 3), flag=wx.EXPAND)
 
-
         # -------------- Clinician -------------- #
 
         clinician = wx.StaticText(self.panel, label="Clinician")
@@ -129,30 +127,25 @@ class Msgbox(wx.Frame):
         # -------------- General -------------- #
 
         button1 = wx.Button(self.panel, size=(200, 50), label="Ok")
-        sizer.Add(button1, pos=(0, 0), span=(0, 0), flag=wx.LEFT, border=10)
+        sizer.Add(button1, pos=(1, 0), span=(0, 0), flag=wx.LEFT, border=10)
         button1.SetFont(self.font_button)
         button1.Bind(wx.EVT_BUTTON, self.ok)
 
         button2 = wx.Button(self.panel, size=(200, 50), label="Cancel")
-        sizer.Add(button2, pos=(0, 3), span=(0, 0), flag=wx.RIGHT, border=10)
+        sizer.Add(button2, pos=(1, 5), span=(0, 0), flag=wx.RIGHT, border=10)
         button2.SetFont(self.font_button)
         button2.Bind(wx.EVT_BUTTON, self.cancel)
 
-        # sizer.AddGrowableCol(1)
-
         infoSizer.Add(patiSizer, pos=(1, 0), span=(0, 0), flag=wx.LEFT)
         line = wx.StaticLine(self.panel, -1, size=(1, self.height / 5), style=wx.LI_VERTICAL)
-        infoSizer.Add(line, pos=(1, 1), span=(1, 0), flag=wx.EXPAND)
-        infoSizer.Add(clinSizer, pos=(1, 2), span=(0, 0), flag=wx.RIGHT)
+        infoSizer.Add(line, pos=(1, 2), span=(1, 0), flag=wx.EXPAND)
+        infoSizer.Add(clinSizer, pos=(1, 4), span=(0, 0), flag=wx.RIGHT)
 
         topSizer.Add(titleSizer, 0, wx.CENTER)
         topSizer.Add(lineSizer, 0, wx.CENTER)
         topSizer.Add(infoSizer, 0, wx.CENTER)
         topSizer.Add(sizer, 0, wx.CENTER)
         self.panel.SetSizer(topSizer)
-
-        # self.panel.SetSizer(sizer)
-        # self.panel.SetBackgroundColour((170, 0, 255))
 
     def ok(self, event):
         # -------------- Patient -------------- #
@@ -182,11 +175,6 @@ class Msgbox(wx.Frame):
 
         self.isCli = True if ((self.cliInfo or self.cliNum) and (not self.patInfo)) else False
         self.isPat = True if (self.patInfo and (not self.cliNum)) else False
-
-        # print(self.cliInfo, self.patInfo, self.cliNum, self.isCli, self.isPat)
-
-        # self.isCli = True if (len(self.fcname) != 0 or len(self.lcname) != 0 or self.num != '') else False
-        # self.isPat = True if (len(self.fname) != 0 or len(self.lname) != 0 or self.id != '') else False
 
         error = ''
         error_flag = False
@@ -227,10 +215,6 @@ class Msgbox(wx.Frame):
                     error += 'please enter permission number\n'
                     error_flag = True
 
-        self.name = (self.fname + ' ' + self.lname).lower()
-        if self.isCli:
-            self.name = (self.fcname + ' ' + self.lcname).lower()
-
         if error_flag:
             dlg = wx.MessageDialog(self.panel, error,'', wx.YES_NO | wx.ICON_ERROR)
             result = dlg.ShowModal() == wx.ID_YES
@@ -244,6 +228,9 @@ class Msgbox(wx.Frame):
             result = dlg.ShowModal() == wx.ID_YES
 
             if result:
+                self.name = (self.fname + ' ' + self.lname).lower()
+                if self.isCli:
+                    self.name = (self.fcname + ' ' + self.lcname).lower()
                 dlg.Destroy()
                 self.Destroy()
             else:
@@ -252,9 +239,11 @@ class Msgbox(wx.Frame):
     def cancel(self, event):
         self.fname = 'Jane'
         self.lname = 'Doe'
+        self.fcname = 'CliDefault'
+        self.lcname = 'CliDefault'
         self.isPat = True
         self.isCli = False
-        self.id = '19'
+        self.id = '190008'
         self.gender = 'Female'
         message = 'Do you want to use following information?\nName: %s\nID: %s\nGender: %s' %(self.fname+' '+self.lname, self.id, self.gender)
         dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
@@ -289,10 +278,10 @@ class Msgbox(wx.Frame):
     def _pass(self):
         self.fname = 'Jane'
         self.lname = 'Doe'
-        self.fcname = 'Jane'
-        self.lcname = 'Doe'
+        self.fcname = 'CliDefault'
+        self.lcname = 'CliDefault'
         self.name = (self.fname + ' ' + self.lname).lower()
-        self.id = '19'
+        self.id = '190008'
         self.gender = 'Female'
         self.isPat = True
         self.isCli = False

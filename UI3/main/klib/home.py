@@ -65,32 +65,32 @@ class Welcome_win(wx.Frame):
         line = wx.StaticLine(self.panel)
         lineSizer.Add(line, pos=(0, 0), span=(0, int(self.width/self.sizer_w / 2)), flag=wx.EXPAND|wx.BOTTOM)
 
-        # Basic information
-        text11 = wx.StaticText(self.panel, label="Name:")
-        text11.SetFont(self.font_field)
-        titleSizer.Add(text11, pos=(1, 0))
+        # # Basic information
+        # text11 = wx.StaticText(self.panel, label="Name:")
+        # text11.SetFont(self.font_field)
+        # titleSizer.Add(text11, pos=(1, 0))
 
         if self.info.isPat:
-            text1 = wx.StaticText(self.panel, label=self.info.fname + " " + self.info.lname)
+            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fname + '!')
         elif self.info.isCli:
-            text1 = wx.StaticText(self.panel, label=self.info.fcname + " " + self.info.lcname)
+            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fcname + '!')
         text1.SetFont(self.font)
         titleSizer.Add(text1, pos=(1, 1))
 
-        if self.info.isPat:
-            text21 = wx.StaticText(self.panel, label="Gender:")
-            text21.SetFont(self.font_field)
-            titleSizer.Add(text21, pos=(2, 0))
-            text2 = wx.StaticText(self.panel, label=self.info.gender)
-            text2.SetFont(self.font)
-            titleSizer.Add(text2, pos=(2, 1))
-
-            text31 = wx.StaticText(self.panel, label="ID:")
-            text31.SetFont(self.font_field)
-            titleSizer.Add(text31, pos=(3, 0))
-            text3 = wx.StaticText(self.panel, label=str(self.info.id))
-            text3.SetFont(self.font)
-            titleSizer.Add(text3, pos=(3, 1))
+        # if self.info.isPat:
+        #     text21 = wx.StaticText(self.panel, label="Gender:")
+        #     text21.SetFont(self.font_field)
+        #     titleSizer.Add(text21, pos=(2, 0))
+        #     text2 = wx.StaticText(self.panel, label=self.info.gender)
+        #     text2.SetFont(self.font)
+        #     titleSizer.Add(text2, pos=(2, 1))
+        #
+        #     text31 = wx.StaticText(self.panel, label="ID:")
+        #     text31.SetFont(self.font_field)
+        #     titleSizer.Add(text31, pos=(3, 0))
+        #     text3 = wx.StaticText(self.panel, label=str(self.info.id))
+        #     text3.SetFont(self.font)
+        #     titleSizer.Add(text3, pos=(3, 1))
 
         button_size = (300, 50)
 
