@@ -150,7 +150,7 @@ class Welcome_win(wx.Frame):
         topSizer.Add(lineSizer, 0, wx.CENTER)
         topSizer.Add(titleSizer, 0, wx.CENTER)
         topSizer.Add(infoSizer, 0, wx.CENTER)
-        combine.Add(topSizer, pos=(5, 0))
+        combine.Add(topSizer, pos=(2, 0))
         self.panel.SetSizer(combine)
 
 
@@ -187,11 +187,15 @@ class Instrcution_win(wx.Frame):
     def __init__(self, parent, title):
         self.init_text()
 
-        self.player_width = 640
-        self.player_height = 360
+
 
         self.width, self.height = wx.GetDisplaySize()
-        self.height -= 20
+        self.height -= 100
+
+        ratio = self.height / 600.0
+        self.player_width = 640 * ratio
+        self.player_height = 360 * ratio
+        print(self.player_width, self.player_height)
         # self.width = 1100
         # self.height = self.player_height * 1.5 + 45
 
@@ -217,7 +221,7 @@ class Instrcution_win(wx.Frame):
         # self.text.SetBackgroundColour((179, 236, 255))
 
         exer = [self.str['exe'][i] for i in range(1, 8)]
-        lst = wx.ListBox(self.panel, size=(240, self.height - 25 - 45), choices=exer, style=wx.LB_SINGLE)
+        lst = wx.ListBox(self.panel, size=(300, self.height - 25 - 45), choices=exer, style=wx.LB_SINGLE)
         lst.SetBackgroundColour((230, 230, 230))
 
         button1 = wx.Button(self.panel, label="Home")
@@ -227,8 +231,8 @@ class Instrcution_win(wx.Frame):
         button_print.SetFocus()
         self.Bind(wx.EVT_BUTTON, self.OnBtnPrint, button_print)
 
-        box2.Add(button1, 0, wx.EXPAND)
         box2.Add(lst, 0, wx.EXPAND)
+        box2.Add(button1, 0, wx.EXPAND)
         box3.Add(self.player, 0, wx.EXPAND)
 
         text_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
@@ -534,27 +538,19 @@ class History_view(wx.Frame):
             # self.score.SetFont(self.font)
             # box1.Add(self.score, pos=(4, 2))
 
-            line = wx.StaticLine(self.panel)
-            box1.Add(line, pos=(5, 0), span=(0, int(self.sub_width / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
-
-        else:
-            # self.score = wx.StaticText(self.panel, wx.ID_ANY, label="Score: ")
-            # self.score.SetFont(self.font)
-            # box1.Add(self.score, pos=(3, 2))
-
-            line = wx.StaticLine(self.panel)
-            box1.Add(line, pos=(4, 0), span=(0, int(self.sub_width / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
+        line = wx.StaticLine(self.panel)
+        box1.Add(line, pos=(5, 0), span=(0, int(self.sub_width / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
 
         button1 = wx.Button(self.panel, label="Home")
         button1.Bind(wx.EVT_BUTTON, self.close)
 
-        box2.Add(button1, 0, wx.EXPAND)
         box2.Add(box1, 0)
-        self.lst = wx.ListBox(self.panel, size=(self.sub_width, 300), choices=[], style=wx.LB_SINGLE)
+        self.lst = wx.ListBox(self.panel, size=(self.sub_width, self.height - 300), choices=[], style=wx.LB_SINGLE)
         self.lst.SetFont(self.font)
         self.lst.SetBackgroundColour((230, 230, 230))
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
         box2.Add(self.lst, 0, wx.EXPAND)
+        box2.Add(button1, 0, wx.EXPAND)
         box3.Add(box2, 0, wx.EXPAND)
 
         self.figure = Figure()

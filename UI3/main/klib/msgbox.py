@@ -145,7 +145,7 @@ class Msgbox(wx.Frame):
         topSizer.Add(lineSizer, 0, wx.CENTER)
         topSizer.Add(infoSizer, 0, wx.CENTER)
         topSizer.Add(sizer, 0, wx.CENTER)
-        combine.Add(topSizer, pos=(5, 0))
+        combine.Add(topSizer, pos=(3, 0))
         self.panel.SetSizer(combine)
 
     def ok(self, event):
