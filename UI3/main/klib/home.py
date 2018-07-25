@@ -26,102 +26,89 @@ from .historylog import Historylog
 
 class Welcome_win(wx.Frame):
     def __init__(self, info, parent=None, title="Home"):
+        self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
+
         self.info = info
         self.game = None
 
         self.width, self.height = wx.GetDisplaySize()
         self.height -= 100
-        # self.width = 410
-        # self.height = 500
-
         self.sizer_w = 5
         self.sizer_h = 5
-        super(Welcome_win, self).__init__(parent, title=title, size=(self.width, self.height))
+
+        super(Welcome_win, self).__init__(parent, title=title, size=(self.width, self.height),  style=wx.DEFAULT_FRAME_STYLE | wx.RESIZE_BORDER)
         isz = (16, 16)
         ico = wx.Icon('./data/imgs/others/logo.png', wx.BITMAP_TYPE_PNG, isz[0], isz[1])
         self.SetIcon(ico)
 
+        self.InitUI()
+        self.Show()
+
+    def InitUI(self):
         self.panel = wx.Panel(self)
-
-        self.init_ui()
-
-    def init_ui(self):
-        self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
-        self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
-        self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
-
 
         # sizers
         topSizer = wx.BoxSizer(wx.VERTICAL)
         titleSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         lineSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
-        sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        menuSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        dailySizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        infoSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
 
         # title
         text = wx.StaticText(self.panel, label="LymphCoach")
         text.SetFont(self.font_title)
+        text11 = wx.StaticText(self.panel, label="")
+        text12 = wx.StaticText(self.panel, label="")
+        text13 = wx.StaticText(self.panel, label="")
+        topSizer.Add(text11, 0, wx.CENTER)
+        topSizer.Add(text12, 0, wx.CENTER)
+        topSizer.Add(text13, 0, wx.CENTER)
         topSizer.Add(text, 0, wx.CENTER)
 
         line = wx.StaticLine(self.panel)
-        lineSizer.Add(line, pos=(0, 0), span=(0, int(self.width/self.sizer_w / 2)), flag=wx.EXPAND|wx.BOTTOM)
-
-        # # Basic information
-        # text11 = wx.StaticText(self.panel, label="Name:")
-        # text11.SetFont(self.font_field)
-        # titleSizer.Add(text11, pos=(1, 0))
+        lineSizer.Add(line, pos=(0, 0), span=(2, int(self.width/self.sizer_w/2)), flag=wx.EXPAND|wx.BOTTOM)
 
         if self.info.isPat:
             text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fname + '!')
         elif self.info.isCli:
             text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fcname + '!')
         text1.SetFont(self.font)
-        titleSizer.Add(text1, pos=(1, 1))
-
-        # if self.info.isPat:
-        #     text21 = wx.StaticText(self.panel, label="Gender:")
-        #     text21.SetFont(self.font_field)
-        #     titleSizer.Add(text21, pos=(2, 0))
-        #     text2 = wx.StaticText(self.panel, label=self.info.gender)
-        #     text2.SetFont(self.font)
-        #     titleSizer.Add(text2, pos=(2, 1))
-        #
-        #     text31 = wx.StaticText(self.panel, label="ID:")
-        #     text31.SetFont(self.font_field)
-        #     titleSizer.Add(text31, pos=(3, 0))
-        #     text3 = wx.StaticText(self.panel, label=str(self.info.id))
-        #     text3.SetFont(self.font)
-        #     titleSizer.Add(text3, pos=(3, 1))
+        titleSizer.Add(text1, pos=(1, 0))
 
         button_size = (300, 50)
 
         button1 = wx.Button(self.panel, size=button_size, label="Instruction with Video")
         button1.SetFont(self.font)
         button1.Bind(wx.EVT_BUTTON, self.open_instruction)
-        sizer.Add(button1, pos=(1, 1), span=(1, 0))
+        menuSizer.Add(button1, pos=(1, 1), span=(1, 0))
 
         button2 = wx.Button(self.panel, size=button_size, label="Training Mode")
         button2.SetFont(self.font)
         button2.Bind(wx.EVT_BUTTON, self.open_trainingmode)
-        sizer.Add(button2, pos=(2, 1), span=(1, 0))
+        menuSizer.Add(button2, pos=(2, 1), span=(1, 0))
 
         button3 = wx.Button(self.panel, size=button_size, label="Evaluation Mode")
         button3.SetFont(self.font)
         button3.Bind(wx.EVT_BUTTON, self.open_bodygame)
-        sizer.Add(button3, pos=(3, 1), span=(1, 0))
+        menuSizer.Add(button3, pos=(3, 1), span=(1, 0))
 
         button3 = wx.Button(self.panel, size=button_size, label="History Review")
         button3.SetFont(self.font)
         button3.Bind(wx.EVT_BUTTON, self.open_history)
-        sizer.Add(button3, pos=(4, 1), span=(1, 0))
+        menuSizer.Add(button3, pos=(4, 1), span=(1, 0))
+
+        infoSizer.Add(menuSizer, pos=(1, 0), span=(0, 0), flag=wx.LEFT)
 
         topSizer.Add(lineSizer, 0, wx.CENTER)
         topSizer.Add(titleSizer, 0, wx.CENTER)
-        topSizer.Add(sizer, 0, wx.CENTER)
+        topSizer.Add(infoSizer, 0, wx.CENTER)
         self.panel.SetSizer(topSizer)
 
         # self.panel.SetSizer(sizer)
         # self.panel.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
-        self.Show(True)
 
     def open_bodygame(self, event):
         self.game = bodygame3.BodyGameRuntime(self.info)

@@ -45,8 +45,13 @@ class Msgbox(wx.Frame):
         # title
         text = wx.StaticText(self.panel, label="LymphCoach")
         text.SetFont(self.font_title)
-        # titleSizer.Add(text, pos=(0, 0), border=0)
-        topSizer.Add(text, 0, wx.CENTER, border=0)
+        text11 = wx.StaticText(self.panel, label="")
+        text12 = wx.StaticText(self.panel, label="")
+        text13 = wx.StaticText(self.panel, label="")
+        topSizer.Add(text11, 0, wx.CENTER)
+        topSizer.Add(text12, 0, wx.CENTER)
+        topSizer.Add(text13, 0, wx.CENTER)
+        topSizer.Add(text, 0, wx.CENTER)
 
         line = wx.StaticLine(self.panel)
         lineSizer.Add(line, pos=(0, 0), span=(2, int(self.width/self.sizer_w/2)), flag=wx.EXPAND|wx.BOTTOM)
