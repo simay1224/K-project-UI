@@ -97,13 +97,13 @@ class BodyGameRuntime(object):
     # Read global background
     def readbackground(self):
         self.bkimg = cv2.imread(self.bklist[self.bkidx])
-        self.bkimg = cv2.resize(self.bkimg, (self._infoObject.current_w, self._infoObject.current_h))
+        self.bkimg = cv2.resize(self.bkimg, (self.width, self.height))
 
         if sys.platform == "win32":
             # self.bkimg = np.dstack([cv2.resize(self.bkimg, (self.width, self.height)), np.zeros([self.height, self.width])]).astype(np.uint8)
-            self.bkimg = np.dstack([self.bkimg, 255 * np.ones([self._infoObject.current_h, self._infoObject.current_w])]).astype(np.uint8)
+            self.bkimg = np.dstack([self.bkimg, 255 * np.ones([self.height, self.width])]).astype(np.uint8)
         else:
-            self.bkimg = np.dstack([255 * np.ones([self._infoObject.current_h, self._infoObject.current_w]), self.bkimg[:, :, ::-1]]).astype(np.uint8)
+            self.bkimg = np.dstack([255 * np.ones([self.height, self.width]), self.bkimg[:, :, ::-1]]).astype(np.uint8)
 
     def init_param(self, clean=False):
         try:

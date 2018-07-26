@@ -195,7 +195,6 @@ class Instrcution_win(wx.Frame):
         ratio = self.height / 600.0
         self.player_width = 640 * ratio
         self.player_height = 360 * ratio
-        print(self.player_width, self.player_height)
         # self.width = 1100
         # self.height = self.player_height * 1.5 + 45
 
@@ -220,10 +219,6 @@ class Instrcution_win(wx.Frame):
         self.text.SetBackgroundColour((255, 255, 255))
         # self.text.SetBackgroundColour((179, 236, 255))
 
-        exer = [self.str['exe'][i] for i in range(1, 8)]
-        lst = wx.ListBox(self.panel, size=(300, self.height - 25 - 45), choices=exer, style=wx.LB_SINGLE)
-        lst.SetBackgroundColour((230, 230, 230))
-
         button1 = wx.Button(self.panel, label="Home")
         button1.Bind(wx.EVT_BUTTON, self.close)
 
@@ -231,6 +226,10 @@ class Instrcution_win(wx.Frame):
         button_print.SetFocus()
         self.Bind(wx.EVT_BUTTON, self.OnBtnPrint, button_print)
 
+        exer = [self.str['exe'][i] for i in range(1, 8)]
+        lst = wx.ListBox(self.panel, size=(300, self.height - 25 - 45), choices=exer, style=wx.LB_SINGLE)
+        lst.SetBackgroundColour((230, 230, 230))
+        
         box2.Add(lst, 0, wx.EXPAND)
         box2.Add(button1, 0, wx.EXPAND)
         box3.Add(self.player, 0, wx.EXPAND)
@@ -424,38 +423,48 @@ class MoviePanel(wx.Panel):
 
         # Create some controls
         self.mc = wx.media.MediaCtrl(self, size=size, style=wx.SIMPLE_BORDER)
-        playButton = wx.Button(self, -1, "Play")
-        self.Bind(wx.EVT_BUTTON, self.onPlay, playButton)
+        self.playButton = wx.Button(self, -1, "Play")
+        self.Bind(wx.EVT_BUTTON, self.onPlay, self.playButton)
 
-        pauseButton = wx.Button(self, -1, "Pause")
-        self.Bind(wx.EVT_BUTTON, self.onPause, pauseButton)
+        self.pauseButton = wx.Button(self, -1, "Pause")
+        self.Bind(wx.EVT_BUTTON, self.onPause, self.pauseButton)
 
-        stopButton = wx.Button(self, -1, "Stop")
-        self.Bind(wx.EVT_BUTTON, self.onStop, stopButton)
-        # self.st_file = wx.StaticText(self, -1, ".mid .mp3 .wav .au .avi .mpg", size=(200,-1))
-        self.st_size = wx.StaticText(self, -1, size=(100, -1))
-        self.st_len  = wx.StaticText(self, -1, size=(100, -1))
-        self.st_pos  = wx.StaticText(self, -1, size=(100, -1))
+        self.stopButton = wx.Button(self, -1, "Stop")
+        self.Bind(wx.EVT_BUTTON, self.onStop, self.stopButton)
+
+        self.slider = wx.Slider(self, -1, 0, 0, 10)
+        self.slider.SetMinSize((100, -1))
+        self.Bind(wx.EVT_SLIDER, self.OnSeek, self.slider)
 
         # setup the button/label layout using a sizer
         sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         # sizer.Add(loadButton, (1,1))
-        sizer.Add(playButton, (2, 4))
-        sizer.Add(pauseButton, (3, 4))
-        sizer.Add(stopButton, (4, 4))
-        sizer.Add(self.mc, (0, 0), span=(5, 0))  # for .avi .mpg video files
+        sizer.Add(self.playButton, (2, 4))
+        sizer.Add(self.pauseButton, (3, 4))
+        sizer.Add(self.stopButton, (4, 4))
+        sizer.Add(self.slider, (5, 4))
+        sizer.Add(self.mc, (0, 0), span=(6, 0))  # for .avi .mpg video files
         self.SetSizer(sizer)
+
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.OnTimer)
+        self.timer.Start(100)
 
 
     def doLoadFile(self, path):
         if not self.mc.Load(path):
             wx.MessageBox("Unable to load %s: Unsupported format?" % path, "ERROR", wx.ICON_ERROR | wx.OK)
+            self.playButton.Disable()
         else:
             self.GetSizer().Layout()
+            self.slider.SetRange(0, self.mc.Length())
+            self.playButton.Enable()
             # self.mc.Play()#ITS TO PROBLEM, WHY IT DOESNT PLAY HERE?#
 
     def onPlay(self, evt):
         self.mc.Play()
+        self.GetSizer().Layout()
+        self.slider.SetRange(0, self.mc.Length())
 
     def onPause(self, evt):
         self.mc.Pause()
@@ -463,7 +472,18 @@ class MoviePanel(wx.Panel):
     def onStop(self, evt):
         self.mc.Stop()
 
+    def OnSeek(self, evt):
+        offset = self.slider.GetValue()
+        self.mc.Seek(offset)
 
+    def OnTimer(self, evt):
+        offset = self.mc.Tell()
+        # update value of slider
+        self.slider.SetValue(offset)
+
+    def ShutdownDemo(self):
+        self.timer.Stop()
+        del self.timer
 
 class History_view(wx.Frame):
     def __init__(self, parent, info, title='history log'):
