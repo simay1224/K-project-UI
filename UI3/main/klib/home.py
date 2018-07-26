@@ -187,11 +187,8 @@ class Instrcution_win(wx.Frame):
     def __init__(self, parent, title):
         self.init_text()
 
-
-
         self.width, self.height = wx.GetDisplaySize()
         self.height -= 100
-
         ratio = self.height / 600.0
         self.player_width = 640 * ratio
         self.player_height = 360 * ratio
@@ -205,7 +202,10 @@ class Instrcution_win(wx.Frame):
         isz = (16, 16)
         ico = wx.Icon('./data/imgs/others/logo.png', wx.BITMAP_TYPE_PNG, isz[0], isz[1])
         self.SetIcon(ico)
+        self.init_ui()
+        self.Show()
 
+    def init_ui(self):
         self.panel = wx.Panel(self)
         box = wx.BoxSizer(wx.HORIZONTAL)
         box2 = wx.BoxSizer(wx.VERTICAL)
@@ -227,10 +227,11 @@ class Instrcution_win(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnBtnPrint, button_print)
 
         exer = [self.str['exe'][i] for i in range(1, 8)]
-        lst = wx.ListBox(self.panel, size=(300, self.height - 25 - 45), choices=exer, style=wx.LB_SINGLE)
-        lst.SetBackgroundColour((230, 230, 230))
-        
-        box2.Add(lst, 0, wx.EXPAND)
+        self.lst = wx.ListBox(self.panel, size=(300, self.height - 25 - 45), choices=exer, style=wx.LB_SINGLE)
+        self.lst.SetBackgroundColour((230, 230, 230))
+        self.lst.SetSelection(0)
+
+        box2.Add(self.lst, 0, wx.EXPAND)
         box2.Add(button1, 0, wx.EXPAND)
         box3.Add(self.player, 0, wx.EXPAND)
 
@@ -248,8 +249,10 @@ class Instrcution_win(wx.Frame):
         self.panel.Fit()
 
         self.Centre()
-        self.Bind(wx.EVT_LISTBOX, self.onListBox, lst)
-        self.Show(True)
+        self.Bind(wx.EVT_LISTBOX, self.onListBox, self.lst)
+
+        # default selection: exercise 1
+        self.onListBox(None)
 
 
     def init_text(self):
@@ -338,7 +341,7 @@ class Instrcution_win(wx.Frame):
 
     def onListBox(self, event):
         self.text.Clear()
-        ex = event.GetEventObject().GetSelection()+1
+        ex = self.lst.GetSelection()+1
         self.text.AppendText(self.str['exe'][ex]+self.str['ins'][ex]+'\n\n')
         self.text.AppendText(self.str['note'][ex])
         if ex == 5:
