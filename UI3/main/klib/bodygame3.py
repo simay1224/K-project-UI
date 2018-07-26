@@ -8,7 +8,6 @@ if sys.platform == "win32":
     from .pykinect2.PyKinectV2 import *
     from .pykinect2 import PyKinectRuntime
 
-
 # https://askubuntu.com/questions/742782/how-to-install-cpickle-on-python-3-4
 if sys.version_info >= (3, 0):
     import _pickle as cPickle
@@ -38,63 +37,25 @@ from .handstatus  import Hand_status
 from .historylog  import Historylog
 
 fps = 30
-bkimg = np.zeros([1080, 1920])
-# username = 'Andy_'  # user name
-
-# # colors for drawing different bodies
-# SKELETON_COLORS = [pygame.color.THECOLORS["red"],
-#                    pygame.color.THECOLORS["blue"],
-#                    pygame.color.THECOLORS["green"],
-#                    pygame.color.THECOLORS["orange"],
-#                    pygame.color.THECOLORS["purple"],
-#                    pygame.color.THECOLORS["yellow"],
-#                    pygame.color.THECOLORS["violet"]]
-# GPR
 limbidx = np.array([4, 5, 6, 8, 9, 10, 20])
 
 class BodyGameRuntime(object):
 
     def __init__(self, info):
-        global bkimg
         pygame.init()
         # Used to manage how fast the screen updates
         self._clock = pygame.time.Clock()
         # Set the width and height of the screen [width, height]
         self._infoObject = pygame.display.Info()
-        # self._screen = pygame.display.set_mode((self._infoObject.current_w >> 1, self._infoObject.current_h >> 1),
-        #                                         pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
-        self._screen = pygame.display.set_mode((960, 540),
-                                                pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
+        self.width = self._infoObject.current_w
+        self.height = self._infoObject.current_h
 
-        pygame.display.set_caption("LymphCoach")
-        try :
-            pygame.display.set_icon(pygame.image.load('./data/imgs/others/logo.png'))
-        except:
-            pass
+        self._screen = pygame.display.set_mode((self.width, self.height), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
-        if sys.platform == "win32":
-            # kinect runtime object, we want only color and body frames
-            self._kinect = PyKinectRuntime.PyKinectRuntime\
-                           (PyKinectV2.FrameSourceTypes_Color | PyKinectV2.FrameSourceTypes_Body |
-                            PyKinectV2.FrameSourceTypes_Depth | PyKinectV2.FrameSourceTypes_BodyIndex)
-
-        # back buffer surface for getting kinect color frames, 32bit color, width and height equal to the kinect color frame size
-        self.default_h = self._infoObject.current_h
-        self.default_w = self._infoObject.current_w
-        self.h = self.default_h >> 1
-        self.w = self.default_w >> 1
-
-        self._frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  # kinect surface
-        self.bk_frame_surface = pygame.Surface((self.default_w, self.default_h), 0, 32).convert()  #background surface
-
-        if sys.platform == "win32":
-            self.bkidx = 10
-        else:
-            self.bkidx = 11
-
+        self._frame_surface = pygame.Surface((self.width, self.height), 0, 32).convert()  # kinect surface
+        self.bk_frame_surface = pygame.Surface((self.width, self.height), 0, 32).convert()  #background surface
         self.bklist = glob.glob(os.path.join('./data/imgs/bkimgs', '*.jpg'))
-        self.readbackground()
-        self.h_to_w = float(self.default_h) / self.default_w
+        self.h_to_w = float(self.height) / self.width
         # here we will store skeleton data
         self._bodies = None
         # User information
@@ -103,20 +64,36 @@ class BodyGameRuntime(object):
         self.errimg = pygame.image.load("./data/imgs/emoji/err2.png").convert_alpha()
         self.corimg = pygame.image.load("./data/imgs/emoji/right.png").convert_alpha()
         self.wellimg = pygame.image.load("./data/imgs/emoji/excellent.png").convert_alpha()
-        time.sleep(5)
+        # time.sleep(5)
+        pygame.display.set_caption("LymphCoach")
+        try :
+            pygame.display.set_icon(pygame.image.load('./data/imgs/others/logo.png'))
+        except:
+            pass
 
-        if sys.platform == "win32":
+        self.exeno = 3  # exercise number
+        self.init_param()
+
+        if self.kp.kinect:
+            # kinect runtime object, we want only color and body frames
+            self._kinect = PyKinectRuntime.PyKinectRuntime\
+                           (PyKinectV2.FrameSourceTypes_Color | PyKinectV2.FrameSourceTypes_Body |
+                            PyKinectV2.FrameSourceTypes_Depth | PyKinectV2.FrameSourceTypes_BodyIndex)
             # Extract bk image of scene
             if self._kinect.has_new_color_frame():
-                frame = self._kinect.get_last_color_frame().reshape([1080, 1920, 4])[:, :, :3]
+                frame = self._kinect.get_last_color_frame().reshape([self.height, self.width, 4])[:, :, :3]
                 bkimg = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
                 print ('Extract bg .....')
             else:
                 print ('Failed to extract .....')
 
-        self.exeno = 3  # exercise number
-        # Parameters needed to update for each exercise
-        self.__param_init__()
+            self.bkidx = 10
+        else:
+            self.bkidx = 11
+
+        self.readbackground()
+
+
 
     # Read global background
     def readbackground(self):
@@ -124,12 +101,12 @@ class BodyGameRuntime(object):
         self.bkimg = cv2.resize(self.bkimg, (self._infoObject.current_w, self._infoObject.current_h))
 
         if sys.platform == "win32":
-            # self.bkimg = np.dstack([cv2.resize(self.bkimg, (1920, 1080)), np.zeros([1080, 1920])]).astype(np.uint8)
+            # self.bkimg = np.dstack([cv2.resize(self.bkimg, (self.width, self.height)), np.zeros([self.height, self.width])]).astype(np.uint8)
             self.bkimg = np.dstack([self.bkimg, 255 * np.ones([self._infoObject.current_h, self._infoObject.current_w])]).astype(np.uint8)
         else:
             self.bkimg = np.dstack([255 * np.ones([self._infoObject.current_h, self._infoObject.current_w]), self.bkimg[:, :, ::-1]]).astype(np.uint8)
 
-    def __param_init__(self, clean=False):
+    def init_param(self, clean=False):
         try:
             self.dataset.close()
             print('Save h5py ....')
@@ -153,9 +130,9 @@ class BodyGameRuntime(object):
         self.kp.ini_scale = self.kp.scale
 
         # scene type
-        self.ori = (int(self._screen.get_width()*self.kp.video_LB/1920.), int(self._screen.get_height()*self.kp.video1_UB/1080.))
+        self.ori = (int(self._screen.get_width()*self.kp.video_LB*1.0/self.width), int(self._screen.get_height()*self.kp.video1_UB*1.0/self.height))
         if self.kp.scene_type == 2:
-            self.ori = (int(self._screen.get_width()*self.kp.video_LB/1920.), int(self._screen.get_height()*self.kp.video2_UB/1080.))
+            self.ori = (int(self._screen.get_width()*self.kp.video_LB*1.0/self.width), int(self._screen.get_height()*self.kp.video2_UB*1.0/self.height))
 
         # Frame count
         self.fcnt = 0
@@ -192,7 +169,7 @@ class BodyGameRuntime(object):
         if self.kp.kinect:
             self.movie.stop(True)
             del self.movie
-        self.__param_init__(clean)
+        self.init_param(clean)
 
     def press_event(self, press):
         """ According to the button which is pressed by the user
@@ -497,7 +474,7 @@ class BodyGameRuntime(object):
             if self._kinect.has_new_color_frame():
                 frame = self._kinect.get_last_color_frame()
                 self.draw_color_frame(frame, self._frame_surface)
-                frame = frame.reshape(1080, 1920, 4)[:, :, :3]
+                frame = frame.reshape(self.height, self.width, 4)[:, :, :3]
             if self._kinect.has_new_body_frame():
                 self._bodies = self._kinect.get_last_body_frame()
                 timestamp = datetime.datetime.now()
@@ -625,15 +602,6 @@ class BodyGameRuntime(object):
         bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
         self._screen.blit(bksurface_to_draw, (0, 0))
 
-
-        # if display window size change
-        h_scale = 1. * self._screen.get_height()/self.h
-        w_scale = 1. * self._screen.get_width()/self.w
-        scale = w_scale if (h_scale > w_scale) else h_scale
-        self.w = self.w * scale
-        self.h = self.h * scale
-        self.kp.scale = self.kp.scale * scale
-
         # draw avatar
         if not self.ana._done:
             # if self.kp.kinect:
@@ -645,20 +613,20 @@ class BodyGameRuntime(object):
             self._screen.blit(bksurface_to_draw, (0, 0))
 
         # emoji
-        emoji_size = min(int(self._screen.get_width()*130./1920), int(self._screen.get_height()*130./1080))
+        emoji_size = min(int(self._screen.get_width()*130./self.width), int(self._screen.get_height()*130./self.height))
         emoji_err = pygame.transform.scale(self.errimg, (int(emoji_size*0.8), int(emoji_size*0.8)))
         emoji_cor = pygame.transform.scale(self.corimg, (emoji_size, emoji_size))
         emoji_well = pygame.transform.scale(self.wellimg, (emoji_size*2, emoji_size*2))
 
         for eidx, res in enumerate(self.evalhis):
             if res:
-                self._screen.blit(emoji_cor, (int((145+eidx*220)*self._screen.get_width()/1920.), int(self._screen.get_height()*940./1080)))
+                self._screen.blit(emoji_cor, (int((145+eidx*220)*self._screen.get_width()*1.0/self.width), int(self._screen.get_height()*940./self.height)))
             else:
-                self._screen.blit(emoji_err, (int((145+eidx*220)*self._screen.get_width()/1920.), int(self._screen.get_height()*940./1080)))
+                self._screen.blit(emoji_err, (int((145+eidx*220)*self._screen.get_width()*1.0/self.width), int(self._screen.get_height()*940./self.height)))
         if len(self.evalhis) == 4 and (not False in self.evalhis) and self.ana._done and self.errsums == '':
-            self._screen.blit(emoji_well, (int(420*self._screen.get_width()/1920.), int(self._screen.get_height()*580./1080)))
+            self._screen.blit(emoji_well, (int(420*self._screen.get_width()*1.0/self.width), int(self._screen.get_height()*580./self.height)))
 
-        surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.w*self.kp.vid_w/1920.), int(self.h*self.kp.vid_h/1080.)))
+        surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.width*self.kp.vid_w*1.0/self.width), int(self.height*self.kp.vid_h*1.0/self.height)))
         self._screen.blit(surface_to_draw, self.ori)
 
         # update

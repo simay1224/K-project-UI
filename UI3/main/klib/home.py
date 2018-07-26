@@ -41,10 +41,10 @@ class Welcome_win(wx.Frame):
         ico = wx.Icon('./data/imgs/others/logo.png', wx.BITMAP_TYPE_PNG, isz[0], isz[1])
         self.SetIcon(ico)
 
-        self.InitUI()
+        self.init_ui()
         self.Show()
 
-    def InitUI(self):
+    def init_ui(self):
         self.panel = wx.Panel(self)
 
         # sizers
@@ -81,9 +81,9 @@ class Welcome_win(wx.Frame):
         button1.SetFont(self.font)
         button1.Bind(wx.EVT_BUTTON, self.open_instruction)
 
-        button2 = wx.Button(self.panel, size=button_size, label="Training Mode")
-        button2.SetFont(self.font)
-        button2.Bind(wx.EVT_BUTTON, self.open_trainingmode)
+        # button2 = wx.Button(self.panel, size=button_size, label="Training Mode")
+        # button2.SetFont(self.font)
+        # button2.Bind(wx.EVT_BUTTON, self.open_trainingmode)
 
         button3 = wx.Button(self.panel, size=button_size, label="Evaluation Mode")
         button3.SetFont(self.font)
@@ -94,9 +94,9 @@ class Welcome_win(wx.Frame):
         button4.Bind(wx.EVT_BUTTON, self.open_history)
 
         buttonSizer.Add(button1, pos=(1, 0))
-        buttonSizer.Add(button2, pos=(2, 0))
-        buttonSizer.Add(button3, pos=(3, 0))
-        buttonSizer.Add(button4, pos=(4, 0))
+        # buttonSizer.Add(button2, pos=(2, 0))
+        buttonSizer.Add(button3, pos=(2, 0))
+        buttonSizer.Add(button4, pos=(3, 0))
         menuSizer.Add(menu_title, 0, wx.CENTER)
         menuSizer.Add(buttonSizer, 0, wx.CENTER)
 

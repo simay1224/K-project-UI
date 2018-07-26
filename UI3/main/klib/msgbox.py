@@ -27,11 +27,11 @@ class Msgbox(wx.Frame):
         self.isCli = False
         self.isPat = False
 
-        self.InitUI()
+        self.init_ui()
         self.Centre()
         self.Show()
 
-    def InitUI(self):
+    def init_ui(self):
         self.panel = wx.Panel(self)
 
         combine = wx.GridBagSizer(self.sizer_w, self.sizer_h)
