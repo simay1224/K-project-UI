@@ -49,14 +49,13 @@ class BodyGameRuntime(object):
         self._infoObject = pygame.display.Info()
         self.width = self._infoObject.current_w
         self.height = self._infoObject.current_h
-        self.w = float(self.width)
-        self.h = float(self.height)
 
         self._screen = pygame.display.set_mode((self.width, self.height), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
         self._frame_surface = pygame.Surface((self.width, self.height), 0, 32).convert()  # kinect surface
         self.bk_frame_surface = pygame.Surface((self.width, self.height), 0, 32).convert()  #background surface
         self.bklist = glob.glob(os.path.join('./data/imgs/bkimgs', '*.jpg'))
+        self.h_to_w = float(self.height) / self.width
         # here we will store skeleton data
         self._bodies = None
         # User information
@@ -82,6 +81,8 @@ class BodyGameRuntime(object):
                             PyKinectV2.FrameSourceTypes_Depth | PyKinectV2.FrameSourceTypes_BodyIndex)
             # Extract bk image of scene
             if self._kinect.has_new_color_frame():
+                frame = self._kinect.get_last_color_frame().reshape([self.height, self.width, 4])[:, :, :3]
+                bkimg = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
                 print ('Extract bg .....')
             else:
                 print ('Failed to extract .....')
@@ -602,7 +603,6 @@ class BodyGameRuntime(object):
         bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
         self._screen.blit(bksurface_to_draw, (0, 0))
 
-
         # if display window size change
         # the scale is based on a 1920 * 1080 monitor
         w_scale = self._screen.get_width()/1920.
@@ -614,7 +614,7 @@ class BodyGameRuntime(object):
         # draw avatar
         if not self.ana._done:
             # if self.kp.kinect:
-            self.movie.draw(self._screen, self.kp.scale * scale, self.kp.pre_scale, self.kp.scene_type)
+            self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
             self.kp.pre_scale = self.kp.scale
         else:
             self.exeinst.show_list(self.bk_frame_surface, self.exeno)
