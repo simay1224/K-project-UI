@@ -128,7 +128,7 @@ class BodyGameRuntime(object):
         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
 
-            # scene type
+        # scene type
         if self.kp.scene_type == 2:
             self.ori = (int(self._screen.get_width()*self.kp.video_LB/1920.), int(self._screen.get_height()*self.kp.video2_UB/1080.))
         else:
@@ -604,8 +604,9 @@ class BodyGameRuntime(object):
 
 
         # if display window size change
-        w_scale = self._screen.get_width()/self.w
-        h_scale = self._screen.get_height()/self.h
+        # the scale is based on a 1920 * 1080 monitor
+        w_scale = self._screen.get_width()/1920.
+        h_scale = self._screen.get_height()/1080.
         scale = h_scale
         if h_scale > w_scale:
             scale = w_scale
@@ -634,6 +635,7 @@ class BodyGameRuntime(object):
         if len(self.evalhis) == 4 and (not False in self.evalhis) and self.ana._done and self.errsums == '':
             self._screen.blit(emoji_well, (420, 580))
 
+        # scene type
         if self.kp.scene_type == 2:
             self.ori = (int(self.kp.video_LB*w_scale), int(self.kp.video2_UB*h_scale))
         else:
