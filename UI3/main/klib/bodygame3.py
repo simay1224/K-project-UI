@@ -49,13 +49,14 @@ class BodyGameRuntime(object):
         self._infoObject = pygame.display.Info()
         self.width = self._infoObject.current_w
         self.height = self._infoObject.current_h
+        self.w = float(self.width)
+        self.h = float(self.height)
 
         self._screen = pygame.display.set_mode((self.width, self.height), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
         self._frame_surface = pygame.Surface((self.width, self.height), 0, 32).convert()  # kinect surface
         self.bk_frame_surface = pygame.Surface((self.width, self.height), 0, 32).convert()  #background surface
         self.bklist = glob.glob(os.path.join('./data/imgs/bkimgs', '*.jpg'))
-        self.h_to_w = float(self.height) / self.width
         # here we will store skeleton data
         self._bodies = None
         # User information
@@ -81,8 +82,6 @@ class BodyGameRuntime(object):
                             PyKinectV2.FrameSourceTypes_Depth | PyKinectV2.FrameSourceTypes_BodyIndex)
             # Extract bk image of scene
             if self._kinect.has_new_color_frame():
-                frame = self._kinect.get_last_color_frame().reshape([self.height, self.width, 4])[:, :, :3]
-                bkimg = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
                 print ('Extract bg .....')
             else:
                 print ('Failed to extract .....')
@@ -129,10 +128,11 @@ class BodyGameRuntime(object):
         self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
 
-        # scene type
-        self.ori = (int(self._screen.get_width()*self.kp.video_LB*1.0/self.width), int(self._screen.get_height()*self.kp.video1_UB*1.0/self.height))
+            # scene type
         if self.kp.scene_type == 2:
-            self.ori = (int(self._screen.get_width()*self.kp.video_LB*1.0/self.width), int(self._screen.get_height()*self.kp.video2_UB*1.0/self.height))
+            self.ori = (int(self._screen.get_width()*self.kp.video_LB/1920.), int(self._screen.get_height()*self.kp.video2_UB/1080.))
+        else:
+            self.ori = (int(self._screen.get_width()*self.kp.video_LB/1920.), int(self._screen.get_height()*self.kp.video1_UB/1080.))
 
         # Frame count
         self.fcnt = 0
@@ -602,10 +602,18 @@ class BodyGameRuntime(object):
         bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
         self._screen.blit(bksurface_to_draw, (0, 0))
 
+
+        # if display window size change
+        w_scale = self._screen.get_width()/self.w
+        h_scale = self._screen.get_height()/self.h
+        scale = h_scale
+        if h_scale > w_scale:
+            scale = w_scale
+
         # draw avatar
         if not self.ana._done:
             # if self.kp.kinect:
-            self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
+            self.movie.draw(self._screen, self.kp.scale * scale, self.kp.pre_scale, self.kp.scene_type)
             self.kp.pre_scale = self.kp.scale
         else:
             self.exeinst.show_list(self.bk_frame_surface, self.exeno)
@@ -620,13 +628,18 @@ class BodyGameRuntime(object):
 
         for eidx, res in enumerate(self.evalhis):
             if res:
-                self._screen.blit(emoji_cor, (int((145+eidx*220)*self._screen.get_width()*1.0/self.width), int(self._screen.get_height()*940./self.height)))
+                self._screen.blit(emoji_cor, (int(145+eidx*220), 940))
             else:
-                self._screen.blit(emoji_err, (int((145+eidx*220)*self._screen.get_width()*1.0/self.width), int(self._screen.get_height()*940./self.height)))
+                self._screen.blit(emoji_err, (int(145+eidx*220), 940))
         if len(self.evalhis) == 4 and (not False in self.evalhis) and self.ana._done and self.errsums == '':
-            self._screen.blit(emoji_well, (int(420*self._screen.get_width()*1.0/self.width), int(self._screen.get_height()*580./self.height)))
+            self._screen.blit(emoji_well, (420, 580))
 
-        surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.width*self.kp.vid_w*1.0/self.width), int(self.height*self.kp.vid_h*1.0/self.height)))
+        if self.kp.scene_type == 2:
+            self.ori = (int(self.kp.video_LB*w_scale), int(self.kp.video2_UB*h_scale))
+        else:
+            self.ori = (int(self.kp.video_LB*w_scale), int(self.kp.video1_UB*h_scale))
+
+        surface_to_draw = pygame.transform.scale(self._frame_surface, (int(self.kp.vid_w*scale), int(self.kp.vid_h*scale)))
         self._screen.blit(surface_to_draw, self.ori)
 
         # update
