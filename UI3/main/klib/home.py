@@ -188,10 +188,10 @@ class Instrcution_win(wx.Frame):
         self.init_text()
 
         self.width, self.height = wx.GetDisplaySize()
-        self.height -= 100
         ratio = self.height / 600.0
         self.player_width = 640 * ratio
         self.player_height = 360 * ratio
+        self.height -= 100
         # self.width = 1100
         # self.height = self.player_height * 1.5 + 45
 
@@ -227,7 +227,7 @@ class Instrcution_win(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self.OnBtnPrint, button_print)
 
         exer = [self.str['exe'][i] for i in range(1, 8)]
-        self.lst = wx.ListBox(self.panel, size=(300, self.height - 25 - 45), choices=exer, style=wx.LB_SINGLE)
+        self.lst = wx.ListBox(self.panel, size=(350, self.height - 25 - 45), choices=exer, style=wx.LB_SINGLE)
         self.lst.SetBackgroundColour((230, 230, 230))
         self.lst.SetSelection(0)
 
