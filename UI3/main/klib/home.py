@@ -700,7 +700,10 @@ class History_view(wx.Frame):
 
         self.axes.set_xticks(x)
         self.axes.set_title("Patient: " + name + "\n" + item)
-        self.axes.plot(x, y, color=self.color_line[0])
+        if (y.size == 1):
+            self.axes.plot(x, y, marker='o', markersize=3, color="red")
+        else:
+            self.axes.plot(x, y, color=self.color_line[0])
 
         y_min, y_max = self.find_min_max(y)
         y_span = y_max - y_min
@@ -770,4 +773,7 @@ class History_view(wx.Frame):
                 y_min = y[i]
             elif (y[i] > y_max):
                 y_max = y[i]
+        if (y.size == 1):
+            y_min = y[0]
+            y_max = y[0]
         return (y_min, y_max)

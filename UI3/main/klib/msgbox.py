@@ -82,7 +82,7 @@ class Msgbox(wx.Frame):
 
         sb = wx.StaticBox(self.panel, label="Please Select Your Gender")
         sb.SetFont(self.font)
-        self.rb_female = wx.RadioButton(self.panel, label="Female")
+        self.rb_female = wx.RadioButton(self.panel, label="Female", style=wx.RB_GROUP)
         self.rb_female.SetFont(self.font)
         self.rb_male = wx.RadioButton(self.panel, label="Male")
         self.rb_male.SetFont(self.font)
@@ -126,7 +126,7 @@ class Msgbox(wx.Frame):
 
         # -------------- General -------------- #
 
-        self.button_pat = wx.RadioButton(self.panel, label="Patient Login")
+        self.button_pat = wx.RadioButton(self.panel, label="Patient Login", style=wx.RB_GROUP)
         self.button_pat.SetFont(self.font)
         self.button_cli = wx.RadioButton(self.panel, label="Clinician Login")
         self.button_cli.SetFont(self.font)
