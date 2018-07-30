@@ -488,13 +488,12 @@ class MoviePanel(wx.Panel):
         self.timer.Stop()
         del self.timer
 
+
 class History_view(wx.Frame):
     def __init__(self, parent, info, title='history log'):
 
         self.width, self.height = wx.GetDisplaySize()
-        self.height -= 20
-        # self.width = 850
-        # self.height = 500
+        self.height -= 100
         self.sizer_w = 5
         self.sizer_h = 5
         self.sub_width = 260
@@ -568,7 +567,7 @@ class History_view(wx.Frame):
         button1.Bind(wx.EVT_BUTTON, self.close)
 
         box2.Add(box1, 0)
-        self.lst = wx.ListBox(self.panel, size=(self.sub_width, self.height - 300), choices=[], style=wx.LB_SINGLE)
+        self.lst = wx.ListBox(self.panel, size=(self.sub_width, self.height - 230), choices=[], style=wx.LB_SINGLE)
         self.lst.SetFont(self.font)
         self.lst.SetBackgroundColour((230, 230, 230))
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
@@ -599,7 +598,7 @@ class History_view(wx.Frame):
         idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0] + 1
         idx_2 = [i for i, elem in enumerate(lst_choice) if 'errmsg' in elem][0]
         self.lst.InsertItems(lst_choice[idx_1:idx_2], 0)
-        self.lst.InsertItems(["overall score"], 0)
+        self.lst.InsertItems(["Overall score"], 0)
         if (self.info.isCli):
             self.update_name_list_cli()
 
@@ -627,7 +626,7 @@ class History_view(wx.Frame):
 
     def get_score_list(self, name):
         self.axes.clear()
-        self.axes.set_title("Patient: " + name + "\n" + "overall score")
+        self.axes.set_title("Patient: " + name + "\n" + "Overall score")
 
         # list of features
         list = np.array(self.lst.GetStrings())
@@ -733,7 +732,7 @@ class History_view(wx.Frame):
         self.axes.clear()
         # self.figure.texts.clear()
 
-        if item == "overall score":
+        if item == "Overall score":
             self.get_score_list(self.cur_choice)
             return
 
@@ -750,7 +749,7 @@ class History_view(wx.Frame):
         item = self.lst.GetStringSelection()
         self.axes.clear()
 
-        if item == "overall score":
+        if item == "Overall score":
             self.get_score_list(self.info.name)
             return
 

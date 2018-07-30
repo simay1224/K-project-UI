@@ -126,13 +126,21 @@ class Msgbox(wx.Frame):
 
         # -------------- General -------------- #
 
+        self.button_pat = wx.RadioButton(self.panel, label="Patient Login")
+        self.button_pat.SetFont(self.font)
+        self.button_cli = wx.RadioButton(self.panel, label="Clinician Login")
+        self.button_cli.SetFont(self.font)
+
+        sizer.Add(self.button_pat, pos=(1, 1), span=(0, 0), flag=wx.LEFT, border=10)
+        sizer.Add(self.button_cli, pos=(1, 4), span=(0, 0), flag=wx.LEFT, border=10)
+
         button1 = wx.Button(self.panel, size=(200, 50), label="Ok")
-        sizer.Add(button1, pos=(1, 0), span=(0, 0), flag=wx.LEFT, border=10)
+        sizer.Add(button1, pos=(2, 0), span=(0, 0), flag=wx.LEFT, border=10)
         button1.SetFont(self.font_button)
         button1.Bind(wx.EVT_BUTTON, self.ok)
 
         button2 = wx.Button(self.panel, size=(200, 50), label="Cancel")
-        sizer.Add(button2, pos=(1, 5), span=(0, 0), flag=wx.RIGHT, border=10)
+        sizer.Add(button2, pos=(2, 5), span=(0, 0), flag=wx.RIGHT, border=10)
         button2.SetFont(self.font_button)
         button2.Bind(wx.EVT_BUTTON, self.cancel)
 
@@ -145,7 +153,7 @@ class Msgbox(wx.Frame):
         topSizer.Add(lineSizer, 0, wx.CENTER)
         topSizer.Add(infoSizer, 0, wx.CENTER)
         topSizer.Add(sizer, 0, wx.CENTER)
-        combine.Add(topSizer, pos=(3, 0))
+        combine.Add(topSizer, pos=(2, 0))
         self.panel.SetSizer(combine)
 
     def ok(self, event):
@@ -169,13 +177,22 @@ class Msgbox(wx.Frame):
                 self.num = int(self.num)
             except:
                 pass
+        # -------------- General -------------- #
+        if self.button_pat.GetValue():
+            self.isPat = True
+        else:
+            self.isPat = False
+        if self.button_cli.GetValue():
+            self.isCli = True
+        else:
+            self.isCli = False
 
-        self.cliInfo = True if (len(self.fcname) != 0 or len(self.lcname) != 0) else False
-        self.patInfo = True if (len(self.fname) != 0 or len(self.lname) != 0 or self.id != '') else False
-        self.cliNum = True if (self.num != '') else False
-
-        self.isCli = True if ((self.cliInfo or self.cliNum) and (not self.patInfo)) else False
-        self.isPat = True if (self.patInfo and (not self.cliNum)) else False
+        # self.cliInfo = True if (len(self.fcname) != 0 or len(self.lcname) != 0) else False
+        # self.patInfo = True if (len(self.fname) != 0 or len(self.lname) != 0 or self.id != '') else False
+        # self.cliNum = True if (self.num != '') else False
+        #
+        # self.isCli = True if ((self.cliInfo or self.cliNum) and (not self.patInfo)) else False
+        # self.isPat = True if (self.patInfo and (not self.cliNum)) else False
 
         error = ''
         error_flag = False
@@ -188,32 +205,34 @@ class Msgbox(wx.Frame):
             error_flag = True
         else:
             if self.isPat:
+                error += 'Patient Log in:\n'
                 if len(self.lname) == 0 or len(self.fname) == 0:
-                    error += 'please complete your name\n'
+                    error += '\tplease complete your name\n'
                     error_flag = True
                 # id could be non-integer
                 if self.id == '':
-                    error += 'please enter your id\n'
+                    error += '\tplease enter your id\n'
                     error_flag = True
                 if (not self.rb_female.GetValue()) and (not self.rb_male.GetValue()):
-                    error += 'please choose your gender\n'
+                    error += '\tplease choose your gender\n'
                     error_flag = True
                 if len(self.fcname) == 0 or len(self.lcname) == 0:
-                    error += 'please enter your clinician\'s name\n'
+                    error += '\tplease enter your clinician\'s name\n'
                     error_flag = True
             else:
+                error += 'Clinician Log in:\n'
                 if len(self.fcname) == 0 or len(self.lcname) == 0:
-                    error += 'please complete your name\n'
+                    error += '\tplease complete your name\n'
                     error_flag = True
                 if self.num != '':
                     if type(self.num) != int:
-                        error += 'id should be an integer\n'
+                        error += '\tid should be an integer\n'
                         error_flag = True
                     if self.num != 112233:
-                        error += 'permission number is not correct\n'
+                        error += '\tpermission number is not correct\n'
                         error_flag = True
                 else:
-                    error += 'please enter permission number\n'
+                    error += '\tplease enter permission number\n'
                     error_flag = True
 
         if error_flag:
@@ -225,7 +244,7 @@ class Msgbox(wx.Frame):
             message = 'Is the following infomation correct?\nPatient:\n\tName: %s\n\tID: %s\n\tGender: %s' % (self.fname+' '+self.lname, self.id, self.gender)
             if self.isCli:
                 message = 'Is the following infomation correct?\nClinician:\n\tName: %s' % (self.fcname+' '+self.lcname)
-            dlg = wx.MessageDialog(self.panel, message,'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
+            dlg = wx.MessageDialog(self.panel, message, 'Double check the infomation', wx.YES_NO | wx.ICON_INFORMATION)
             result = dlg.ShowModal() == wx.ID_YES
 
             if result:
@@ -275,6 +294,8 @@ class Msgbox(wx.Frame):
         self.tcc3.SetValue('')
         self.rb_female.SetValue(False)
         self.rb_male.SetValue(False)
+        self.button_pat.SetValue(False)
+        self.button_cli.SetValue(False)
 
     def _pass(self):
         self.fname = 'Jane'
