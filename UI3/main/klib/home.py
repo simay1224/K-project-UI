@@ -531,7 +531,7 @@ class History_view(wx.Frame):
             info_text = 'Patient:' + \
                         '\nName: ' + self.info.name.title() + \
                         '\nGender: ' + self.info.gender.title() + \
-                        '\nID: ' + str(self.info.id)
+                        '\nID: ' + self.info.id
         else:
             info_text = 'Clinician:' + \
                         '\nName: ' + self.info.name.title() + \
@@ -744,7 +744,8 @@ class History_view(wx.Frame):
 
 
     def update_figure_pat(self):
-        df_name  = self.df[self.df['name'] == self.info.name]
+        df_name = self.df[self.df['name'] == self.info.name]
+        # df_id = self.df[self.df['id'] == self.info.id]
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
         item = self.lst.GetStringSelection()
         self.axes.clear()

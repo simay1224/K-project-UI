@@ -117,9 +117,9 @@ class Historylog(object):
         excelWriter.save()
         excelWriter.close()
 
-    def writein(self, userinfo, exeno, time, data=[], errmsgs=[]):
+    def writein(self, info, exeno, time, data=[], errmsgs=[]):
         """ write the user record in to log file
-            userinfo : the infomation user input in the initial msgbox
+            info : the infomation user input in the initial msgbox
             exeno : exercise number
             data : list-like object, which contains vary results depend on the exercise type
             time :
@@ -130,6 +130,6 @@ class Historylog(object):
         book = load_workbook(self.excelPath)
         sheet = book['exercise %s' %exeno]
         date = '-'.join(map(str,[time.year,time.month,time.day,time.hour,time.minute]))
-        userrecord = [userinfo.name, userinfo.gender, date] + data + errmsg
+        userrecord = [info.name, info.id, info.gender, date] + data + errmsg
         sheet.append(userrecord)
         book.save(self.excelPath)

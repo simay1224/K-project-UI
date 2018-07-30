@@ -160,6 +160,7 @@ class Msgbox(wx.Frame):
         # -------------- Patient -------------- #
         self.fname = self.tc1.GetValue()
         self.lname = self.tc2.GetValue()
+        # id could involve chars
         self.id = self.tc3.GetValue()
 
         if self.rb_female.GetValue():
