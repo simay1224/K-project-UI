@@ -736,14 +736,18 @@ class History_view(wx.Frame):
         # self.figure.texts.clear()
 
         if item == "Overall score":
-            self.get_score_list(self.cur_choice)
+            try:
+                self.get_score_list(self.cur_choice)
+            except:
+                self.axes.imshow(self.no_hist_img)
+                self.canvas.draw()
             return
 
-        # try:
-        self.draw_figure(self.cur_choice, item, df_name, df_ideal)
-        # except:
-        #     self.axes.imshow(self.no_hist_img)
-        #     self.canvas.draw()
+        try:
+            self.draw_figure(self.cur_choice, item, df_name, df_ideal)
+        except:
+            self.axes.imshow(self.no_hist_img)
+            self.canvas.draw()
 
 
     def update_figure_pat(self):
@@ -754,14 +758,18 @@ class History_view(wx.Frame):
         self.axes.clear()
 
         if item == "Overall score":
-            self.get_score_list(self.info.name)
+            try:
+                self.get_score_list(self.info.name)
+            except:
+                self.axes.imshow(self.no_hist_img)
+                self.canvas.draw()
             return
 
-        # try:
-        self.draw_figure(self.info.name, item, df_name, df_ideal)
-        # except:
-        #     self.axes.imshow(self.no_hist_img)
-        #     self.canvas.draw()
+        try:
+            self.draw_figure(self.info.name, item, df_name, df_ideal)
+        except:
+            self.axes.imshow(self.no_hist_img)
+            self.canvas.draw()
 
     def find_min_max(self, y):
         y_min = sys.float_info.max

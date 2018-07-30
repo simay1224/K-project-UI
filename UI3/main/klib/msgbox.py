@@ -299,12 +299,15 @@ class Msgbox(wx.Frame):
         self.button_cli.SetValue(False)
 
     def _pass(self):
-        self.fname = 'Jane'
-        self.lname = 'Doe'
+        # self.fname = 'Jane'
+        # self.lname = 'Doe'
+        self.fname = 'test'
+        self.lname = 'test'
         self.fcname = 'CliDefault'
         self.lcname = 'CliDefault'
         self.name = (self.fname + ' ' + self.lname).lower()
-        self.id = '190008'
+        # self.id = '190008'
+        self.id = '11201'
         self.gender = 'Female'
         self.isPat = True
         self.isCli = False
