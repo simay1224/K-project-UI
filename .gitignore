@@ -156,9 +156,9 @@ $RECYCLE.BIN/
 *.jpg
 *.numbers
 *.psd
+*.mp4
 
 !req.txt
-!UI3/output/log2.xlsx
 !UI3/data/imgs/others/logo.png
-test/
+ref/
 .vscode/
