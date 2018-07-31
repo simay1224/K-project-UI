@@ -635,10 +635,11 @@ class BodyGameRuntime(object):
         emoji_well = pygame.transform.scale(self.wellimg, (emoji_size*2, emoji_size*2))
 
         for eidx, res in enumerate(self.evalhis):
+            pos_h = 940. / 1080 * self._infoObject.current_h - 70
             if res:
-                self._screen.blit(emoji_cor, (int(145+eidx*220), 940))
+                self._screen.blit(emoji_cor, (int(145+eidx*220), pos_h))
             else:
-                self._screen.blit(emoji_err, (int(145+eidx*220), 940))
+                self._screen.blit(emoji_err, (int(145+eidx*220), pos_h))
         if len(self.evalhis) == 4 and (not False in self.evalhis) and self.ana._done and self.errsums == '':
             self._screen.blit(emoji_well, (420, 580))
 
