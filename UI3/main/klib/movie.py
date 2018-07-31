@@ -57,13 +57,13 @@ class Movie(object):
         "Draw current frame to the surface"
 
         if not tmode:
-            if scale/pre_scale != 1:
+            if scale != pre_scale:
                 self.mscreen = pygame.transform.scale(self.mscreen, (int(self.kp.vid_w/2.*scale), int(self.kp.vid_h/2.*scale)))
                 if self.kp.kinect:
                     self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.kp.vid_w/2.*scale), int(self.kp.vid_h/2.*scale)))
             surface.blit(self.mscreen, self.position(surface.get_width(), surface.get_height(), scale, Type))
         else:
-            if scale/pre_scale != 1:
+            if scale != pre_scale:
                 self.mscreen = pygame.transform.scale(self.mscreen, (int(self.kp.vid_w_t/2.*scale), int(self.kp.vid_h_t/2.*scale)))
                 if self.kp.kinect:
                     self._movie.set_display(self.mscreen, pygame.Rect(0, 0, int(self.kp.vid_w_t/2.*scale), int(self.kp.vid_h_t/2.*scale)))

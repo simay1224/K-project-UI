@@ -47,9 +47,11 @@ class BodyGameRuntime(object):
         self._clock = pygame.time.Clock()
         # Set the width and height of the screen [width, height]
         self._infoObject = pygame.display.Info()
-        self.width = self._infoObject.current_w
-        self.height = self._infoObject.current_h
-
+        # self.width = self._infoObject.current_w
+        # self.height = self._infoObject.current_h
+        self.width = 1920
+        self.height = 1080
+        # print(self.width, self.height)
         self._screen = pygame.display.set_mode((self.width, self.height), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
         self._frame_surface = pygame.Surface((self.width, self.height), 0, 32).convert()  # kinect surface
@@ -126,7 +128,7 @@ class BodyGameRuntime(object):
         else:
             self.movie = movie.Movie(self.exeno, self.kp.vid_w, self.kp.vid_h)
 
-        self.kp.scale = self.movie.ini_resize(self._screen.get_width(), self._screen.get_height(), self.kp.ratio)
+        self.kp.scale = self.movie.ini_resize(self._infoObject.current_w, self._infoObject.current_h, self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
 
         # scene type
@@ -153,18 +155,6 @@ class BodyGameRuntime(object):
         self.fextr = Finger_extract()
         self.exeinst = Exeinst() # exercise intruction
         self.log = Historylog()
-
-    def draw_color_frame(self, frame, target_surface):
-        target_surface.lock()
-
-        if self.kp.kinect:
-            address = self._kinect.surface_as_array(target_surface.get_buffer())
-            ctypes.memmove(address, frame.ctypes.data, frame.size)
-            del address
-        else:
-            address = target_surface._pixels_address
-            ctypes.memmove(address, frame.ctypes.data, frame.size)
-        target_surface.unlock()
 
     def reset(self, clean=False):
         if self.kp.kinect:
@@ -435,6 +425,19 @@ class BodyGameRuntime(object):
             self.reset()
 
 
+    def draw_color_frame(self, frame, target_surface):
+        target_surface.lock()
+
+        if self.kp.kinect:
+            address = self._kinect.surface_as_array(target_surface.get_buffer())
+            ctypes.memmove(address, frame.ctypes.data, frame.size)
+            del address
+        else:
+            address = target_surface._pixels_address
+            ctypes.memmove(address, frame.ctypes.data, frame.size)
+
+        target_surface.unlock()
+
 
     def run(self):
         # Removing key jitter
@@ -616,6 +619,10 @@ class BodyGameRuntime(object):
             # if self.kp.kinect:
             self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
             self.kp.pre_scale = self.kp.scale
+                
+            # if scale != self.kp.scale:
+            #     self.kp.pre_scale = self.kp.scale
+            #     self.kp.scale = scale
         else:
             self.exeinst.show_list(self.bk_frame_surface, self.exeno)
             bksurface_to_draw = pygame.transform.scale(self.bk_frame_surface, (self._screen.get_width(), self._screen.get_height()))
