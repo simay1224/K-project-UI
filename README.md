@@ -1,6 +1,4 @@
-# K_project-UI
-
-This fork is for redesigning the UI for K_project system
+# K_project
 
 ### Installation
 
@@ -20,8 +18,21 @@ $ conda install -c menpo opencv
 If you are using pip for installing packages:
 
 Several dependent packages (not all) are documented in ```req.txt```, so to help you install those packages:
+
 ```shell
 $ pip install -r req.txt
+```
+
+---
+
+The data & video are provided elsewhere
+
+
+### [Syncing with upstream](https://help.github.com/articles/syncing-a-fork/)
+
+```shell
+$ git fetch upstream
+$ git merge upstream/master
 ```
 
 
@@ -46,7 +57,7 @@ welcome (4 modes)
 
 #### Notes for using ipython
 
-To run the system in ipython:
+To run the system in ipython (2):
 
 ```
 %run [filename]

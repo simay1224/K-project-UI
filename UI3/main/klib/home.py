@@ -700,6 +700,10 @@ class History_view(wx.Frame):
 
         self.axes.set_xticks(x)
         self.axes.set_title("Patient: " + name + "\n" + item)
+
+        if (y.size == 0):
+            raise ValueError('No data presented')
+
         if (y.size == 1):
             self.axes.plot(x, y, marker='o', markersize=3, color="red")
         else:
@@ -733,42 +737,30 @@ class History_view(wx.Frame):
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
         item = self.lst.GetStringSelection()
         self.axes.clear()
-        # self.figure.texts.clear()
-
-        if item == "Overall score":
-            try:
-                self.get_score_list(self.cur_choice)
-            except:
-                self.axes.imshow(self.no_hist_img)
-                self.canvas.draw()
-            return
 
         try:
-            self.draw_figure(self.cur_choice, item, df_name, df_ideal)
+            if item == "Overall score":
+                self.get_score_list(self.cur_choice)
+            else:
+                self.draw_figure(self.cur_choice, item, df_name, df_ideal)
         except:
-            self.axes.imshow(self.no_hist_img)
+            self.axes.imshow(self.no_hist_img, aspect='auto')
             self.canvas.draw()
 
 
     def update_figure_pat(self):
         df_name = self.df[self.df['name'] == self.info.name]
-        # df_id = self.df[self.df['id'] == self.info.id]
         df_ideal = self.df[self.df['name'] == '$IDEAL VALUE$']
         item = self.lst.GetStringSelection()
         self.axes.clear()
 
-        if item == "Overall score":
-            try:
-                self.get_score_list(self.info.name)
-            except:
-                self.axes.imshow(self.no_hist_img)
-                self.canvas.draw()
-            return
-
         try:
-            self.draw_figure(self.info.name, item, df_name, df_ideal)
+            if item == "Overall score":
+                self.get_score_list(self.cur_choice)
+            else:
+                self.draw_figure(self.info.name, item, df_name, df_ideal)
         except:
-            self.axes.imshow(self.no_hist_img)
+            self.axes.imshow(self.no_hist_img, aspect='auto')
             self.canvas.draw()
 
     def find_min_max(self, y):
