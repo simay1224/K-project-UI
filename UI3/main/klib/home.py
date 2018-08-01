@@ -610,7 +610,7 @@ class History_view(wx.Frame):
         self.cur_choice = self.name.GetStringSelection()
 
     def update_name_cli(self, event):
-        self.cur_choice = self.name.GetStringSelection()
+        self.cur_choice = self.lst.GetStringSelection()
         if self.lst.GetStringSelection() != '':
             self.update_figure_cli()
 
@@ -644,6 +644,10 @@ class History_view(wx.Frame):
         # get total score for each day
         for i in range(1, len(list)):
             y = np.array(df_name[list[i]])
+            
+            if (y.size == 0 or y.size == 1):
+                raise ValueError('No data to be processed')
+
             # self.debug(y)
             y = np.reshape(y, (len(y), 1))
             y_min, y_max = self.find_min_max(y)
@@ -677,9 +681,8 @@ class History_view(wx.Frame):
         self.axes.plot(x, y, color=self.color_line[0])
         self.axes.set_xticks(x)
         # self.debug(y)
-
+        
         y_min, y_max = self.find_min_max(y)
-        # print(y_min, y_max)
         self.axes.set_ylim(y_min[0] - 5, y_max[0] + 5)
 
         x_name = np.array([x.split("-") for x in df_name['time']])
@@ -702,9 +705,8 @@ class History_view(wx.Frame):
         self.axes.set_title("Patient: " + name + "\n" + item)
 
         if (y.size == 0):
-            raise ValueError('No data presented')
-
-        if (y.size == 1):
+            raise ValueError('No data to be processed')
+        elif (y.size == 1):
             self.axes.plot(x, y, marker='o', markersize=3, color="red")
         else:
             self.axes.plot(x, y, color=self.color_line[0])
@@ -754,14 +756,14 @@ class History_view(wx.Frame):
         item = self.lst.GetStringSelection()
         self.axes.clear()
 
-        try:
-            if item == "Overall score":
-                self.get_score_list(self.cur_choice)
-            else:
-                self.draw_figure(self.info.name, item, df_name, df_ideal)
-        except:
-            self.axes.imshow(self.no_hist_img, aspect='auto')
-            self.canvas.draw()
+        # try:
+        if item == "Overall score":
+            self.get_score_list(self.info.name)
+        else:
+            self.draw_figure(self.info.name, item, df_name, df_ideal)
+        # except:
+        #     self.axes.imshow(self.no_hist_img, aspect='auto')
+        #     self.canvas.draw()
 
     def find_min_max(self, y):
         y_min = sys.float_info.max
@@ -771,7 +773,7 @@ class History_view(wx.Frame):
                 continue
             if (y[i] < y_min):
                 y_min = y[i]
-            elif (y[i] > y_max):
+            if (y[i] > y_max):
                 y_max = y[i]
         if (y.size == 1):
             y_min = y[0]
