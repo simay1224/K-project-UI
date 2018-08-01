@@ -19,6 +19,14 @@ class Historylog(object):
     def __init__(self):
         self.excelPath = "./output/log.xlsx"
         self.order = [0,1,2,2,3,4,5]
+        self.exercises = ["",
+                            "1. Muscle Tighting Deep Breathing",
+                            "2. Over The Head Pumping",
+                            "3. Push Down Pumping",
+                            "4. Horizontal Pumping",
+                            "5. Reach to the Sky",
+                            "6. Shoulder Rolls",
+                            "7. Clasp and Spread"]
         # record feature
         common = ["name", "age", "gender", "time"]
         backup = ["errmsg"]
@@ -128,7 +136,7 @@ class Historylog(object):
             self.newlog()
         errmsg = errmsgs[self.order[exeno-1]]
         book = load_workbook(self.excelPath)
-        sheet = book['exercise %s' %exeno]
+        sheet = book[self.exercises[exeno]]
         date = '-'.join(map(str,[time.year,time.month,time.day,time.hour,time.minute]))
         userrecord = [info.name, info.id, info.gender, date] + data + errmsg
         sheet.append(userrecord)

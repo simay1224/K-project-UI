@@ -496,7 +496,7 @@ class History_view(wx.Frame):
         self.height -= 100
         self.sizer_w = 5
         self.sizer_h = 5
-        self.sub_width = 260
+        self.sub_width = 330
 
         super(History_view, self).__init__(parent, title=title, size=(self.width, self.height))
         isz = (16, 16)
