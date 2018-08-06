@@ -217,16 +217,16 @@ class Dynamic_time_warping(object):
                             if self.Lcangle[-1] < 80 or self.Rcangle[-1] < 80:
                                 self.evalstr = 'Please keep your arms horizontally.\n'
                                 self.eval = 'Please keep your arms horizontally.\n'
-                                self.err.append('At the '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, arms are not horizontal.\n')
-                                self.errsum.append('Hands is not horizontal.\n')
+                                self.err.append('At the '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, arms are not horizontal.')
+                                self.errsum.append('Hands is not horizontal.')
                         elif self.gt_idx == 4:  # T-pose
                             self.Ltangle.append(min(self.joint_angle(reconJ)[:2]))
                             self.Rtangle.append(min(self.joint_angle(reconJ, idx=[8, 9, 10])[:2]))
                             if self.Ltangle[-1] < 80 or self.Rtangle[-1] < 80:
-                                self.evalstr = 'Please keep your arms horizontally.\n'
-                                self.eval = 'Please keep your arms horizontally.\n'
-                                self.err.append('At the '+self.cnvt.ordinal(self.idxlist.count(3)+1)+ ' time try, arms are not horizontal.\n')
-                                self.errsum.append('Arms are not horizontal.\n')
+                                self.evalstr = 'Please keep your arms horizontally.'
+                                self.eval = 'Please keep your arms horizontally.'
+                                self.err.append('At the '+self.cnvt.ordinal(self.idxlist.count(3)+1)+ ' time try, arms are not horizontal.')
+                                self.errsum.append('Arms are not horizontal.')
                     elif exeno == 3:  # exercise 3
                         if self.gt_idx == 3:  # arms push down
                             self.Lcangle.append(self.joint_angle(reconJ)[2])
@@ -234,16 +234,16 @@ class Dynamic_time_warping(object):
                             if self.Lcangle[-1] > 50 or self.Rcangle[-1] > 50:
                                 self.evalstr = 'Please put your arms lower.\n'
                                 self.eval = 'Please put your arms lower.\n'
-                                self.err.append('At the '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, arms are not lower enough.\n')
-                                self.errsum.append('Arms are not lower enough.\n')
+                                self.err.append('At the '+self.cnvt.ordinal(self.idxlist.count(4)+1)+ ' time try, arms are not lower enough.')
+                                self.errsum.append('Arms are not lower enough.')
                         elif self.gt_idx == 4:  # arms raise up
                             self.Ltangle.append(np.mean(self.joint_angle(reconJ)[::2]))
                             self.Rtangle.append(np.mean(self.joint_angle(reconJ, idx=[8, 9, 10])[::2]))
                             if self.Ltangle[-1] < 160 or self.Rtangle[-1] < 160:
                                 self.evalstr = 'Please straighten your arms.\n'
                                 self.eval = 'Please straighten your arms.\n'
-                                self.err.append('At the '+self.cnvt.ordinal(self.idxlist.count(3)+1)+ ' time try, arms are not straight.\n')
-                                self.errsum.append('Arms are not straight.\n')
+                                self.err.append('At the '+self.cnvt.ordinal(self.idxlist.count(3)+1)+ ' time try, arms are not straight.')
+                                self.errsum.append('Arms are not straight.')
 
                     if self.eval == '':
                         self.evalstr = 'Subsequence done: Well done.'

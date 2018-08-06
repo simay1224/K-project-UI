@@ -74,8 +74,8 @@ class Clasp_spread(object):
                         self.evalstr = 'Elbows should be behind your head far enough\n'
                         self.eval += 'Elbows should be behind your head far enough\n'
                         self.err.append('At the '+self.cnvt.ordinal(self.cnt)+ \
-                                        ' time spread is not good. Elbows should be behind your head far enough\n')
-                        self.errsum.append('Elbows should be behind your head far enough\n')
+                                        ' time spread is not good. Elbows should be behind your head far enough')
+                        self.errsum.append('Elbows should be behind your head far enough')
                     self.elbowstus['spread'] = True
 
                 if self.eval == '':
@@ -94,8 +94,8 @@ class Clasp_spread(object):
             if not self.elbowstus['clasp']:
                 self.evalstr = 'When you raise your arms, elbows should be close to each other.\n'
                 self.eval = 'When you raise your arms, elbows should be close to each other.\n'
-                self.err.append('At the '+self.cnvt.ordinal(self.cnt)+ ' time, clasp is not good\n')
-                self.errsum.append('Elbows should be close to each other.\n')
+                self.err.append('At the '+self.cnvt.ordinal(self.cnt)+ ' time, clasp is not good')
+                self.errsum.append('Elbows should be close to each other.')
                 self.elbowstus['clasp'] = True
 
             if self.eval == '':

@@ -50,14 +50,17 @@ class Pushdp(object):
         return np.array([acos(costheta_ampit), acos(costheta_elbow), acos(costheta_sew)])*180/np.pi
 
     def run(self, joints, stus):
+        if self.cnt >= 4:
+            return
+
         wrist_y = joints[19]
         if stus == 'up':
             if self.cflag:
                 self.cflag = False
                 if self.cnt > 0:
                     if self.Lcangle[self.cnt] > 50 or self.Rcangle[self.cnt] >50:
-                        self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not lower enough.')
-                        self.errsum.append('Arms are not lower enough.')
+                        self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not pulled low enough.')
+                        self.errsum.append('Arms are not pulled low enough.')
             if self.Max_wrist_y < wrist_y:
                 self.Max_wrist_y = wrist_y
                 if self.cnt < 4:

@@ -129,7 +129,7 @@ class Analysis(object):
         if torso_z-joints[self.kpm.Neck_z] > th and torso_z-joints[self.kpm.Head_z] > th:
             if 'Well done.' in self.evalstr:
                 self.evalstr = self.evalstr.replace('Well done.', '')
-            self.evalstr += 'please stand straight.\n'
+            self.evalstr += 'please stand straight.'
 
     def run(self, exeno, reconJ, surface, evalinst, kp, body, dmap=[], djps=[]):
         """ analysis main function
@@ -167,7 +167,7 @@ class Analysis(object):
                             self._done = True
                             if self.brth.cnt < 4:
                                 self.brth.err.append('Did not do enough repetition.')
-                                self.brth.errsum.append('Did not do enough repetition.\n')
+                                self.brth.errsum.append('Did not do enough repetition.')
                             print('================= exer END ======================')
                 # self.eval_common(surface, exeno, kp)
                 # === eval string update ===
@@ -177,11 +177,11 @@ class Analysis(object):
                 # === eval information ===
                 if self.brth.cnt > 4:
                     evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2 ,color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2 ,color=self.c_err)
                     self.brth.err.append('Only need to do 4 times')
-                    self.brth.errsum.append('Only need to do 4 times\n')
+                    self.brth.errsum.append('Only need to do 4 times')
                 elif self.brth.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_handdown)
+                    evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, color=self.c_handdown)
                 else:
                     if self.brth.brth_out_flag:
                         evalinst.blit_text(surface, exeno, kp, 'Breathe out', 2, color=self.c_normal)
@@ -216,17 +216,17 @@ class Analysis(object):
                 # === eval information ===
                 if self.brth.cnt > 4:
                     evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, True, color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, True, color=self.c_err)
                     self.brth.err.append('Only need to do 4 times.')
-                    self.brth.errsum.append('Only need to do 4 times.\n')
+                    self.brth.errsum.append('Only need to do 4 times.')
                 elif self.brth.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, True, color=self.c_handdown)
+                    evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, True, color=self.c_handdown)
                 else:
                     if stus == 'upnotstraight':
                         evalinst.blit_text(surface, exeno, kp, 'Straighten your arms.', 2, True, color=self.c_err)
                         self.brth.err.append('Arms are not straight at %s repetition.'
                                               % self.cnvt.ordinal(self.brth.cnt+1))
-                        self.brth.errsum.append('Arms are not straight when breathing.\n')
+                        self.brth.errsum.append('Arms are not straight when breathing.')
                     else:
                         if not self.brth.brth_out_flag:
                             evalinst.blit_text(surface, exeno, kp, 'Breathe in and close your hands.', 2, True, color=self.c_normal)
@@ -244,7 +244,7 @@ class Analysis(object):
                         self._done = True
                         if self.brth.cnt < 4:
                             self.brth.err.append('Did not do enough repetition.')
-                            self.brth.errsum.append('Did not do enough repetition.\n')
+                            self.brth.errsum.append('Did not do enough repetition.')
                         print('================= exer END ======================')
                 else:
                     evalinst.blit_text(surface, exeno, kp, 'Please raise yours arms.', 2, color=self.c_normal)
@@ -259,7 +259,7 @@ class Analysis(object):
                     self._done = True
                     if self.pushdp.cnt  < 4:
                         self.pushdp.err.append('Did not do enough repetition.')
-                        self.pushdp.errsum.append('Did not do enough repetition.\n')
+                        self.pushdp.errsum.append('Did not do enough repetition.')
                     print('================= exer END ======================')
                 else:
                     evalinst.blit_text(surface, exeno, kp, 'Please raise yours arms.', 2, color=self.c_normal)
@@ -274,14 +274,14 @@ class Analysis(object):
                     self.pushdp.evalstr = ''
                 if self.pushdp.cnt > 4:
                     evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, color=self.c_err)
                     self.pushdp.err.append('Only need to do 4 times.')
-                    self.pushdp.errsum.append('Only need to do 4 times.\n')
+                    self.pushdp.errsum.append('Only need to do 4 times.')
                 elif self.pushdp.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_handdown)
+                    evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, color=self.c_handdown)
                 else:
                     if stus == 'up':
-                        evalinst.blit_text(surface, exeno, kp, 'Put down you arms', 2, color=self.c_normal)
+                        evalinst.blit_text(surface, exeno, kp, 'Pull down you arms', 2, color=self.c_normal)
                     elif stus == 'upnotstraight':
                         evalinst.blit_text(surface, exeno, kp, 'Please straighten your arms', 2, color=self.c_err)
                     elif stus == 'vshape':
@@ -304,7 +304,7 @@ class Analysis(object):
                     self._done = True
                     if self.horzp.cnt  < 4:
                         self.horzp.err.append('Did not do enough repetition.')
-                        self.horzp.errsum.append('Did not do enough repetition.\n')
+                        self.horzp.errsum.append('Did not do enough repetition.')
                     print('================= exer END ======================')
                 else:
                     evalinst.blit_text(surface, exeno, kp, 'Please raise yours arms.', 2, color=self.c_normal)
@@ -314,18 +314,18 @@ class Analysis(object):
                     self.horzp.evalstr = ''
                 if self.horzp.cnt > 4:
                     evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, color=self.c_err)
                     self.horzp.err.append('Only need to do 4 times.')
-                    self.horzp.errsum.append('Only need to do 4 times.\n')
+                    self.horzp.errsum.append('Only need to do 4 times.')
                 elif self.horzp.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_handdown)
+                    evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, color=self.c_handdown)
                 else:
                     if stus == None and self.repcnt < 4 :
                         evalinst.blit_text(surface, exeno, kp, 'Please keep your arms horizontally.', 2, color=self.c_err)
-                        self.horzp.evalstr = 'Please keep your arms horizontally.\n'
-                        self.horzp.eval = 'Please keep your arms horizontally.\n'
+                        # self.horzp.evalstr = 'Please keep your arms horizontally.'
+                        # self.horzp.eval = 'Please keep your arms horizontally.'
                         self.horzp.err.append('The '+self.cnvt.ordinal(self.repcnt+1)+ ' time try, arms are not horizontal.')
-                        self.horzp.errsum.append('Arms are not horizontal.\n')
+                        self.horzp.errsum.append('Arms are not horizontal.')
                     elif self.horzp.state == 'T-pose':
                         evalinst.blit_text(surface, exeno, kp, 'Close your arms to your chest', 2, color=self.c_normal)
                     elif self.horzp.state == 'chest':
@@ -349,7 +349,7 @@ class Analysis(object):
                         self._done = True
                         if (self.swing.cnt >>1) < 4:
                             self.swing.err.append('Did not do enough repetition.')
-                            self.swing.errsum.append('Did not do enough repetition.\n')
+                            self.swing.errsum.append('Did not do enough repetition.')
                         print('================= exer END ======================')
                     self.cnt += 1
             # === eval string update ===
@@ -359,11 +359,11 @@ class Analysis(object):
             # === eval information ===
             if self.swing.cnt/2 > 4:
                 evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
-                evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_err)
+                evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, color=self.c_err)
                 self.swing.err.append('Only need to do 4 times')
-                self.swing.errsum.append('Only need to do 4 times.\n')
+                self.swing.errsum.append('Only need to do 4 times.')
             elif self.swing.cnt/2 == 4:
-                evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_handdown)
+                evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, color=self.c_handdown)
             else:
                 if self.swing.bend_left:
                     evalinst.blit_text(surface, exeno, kp, 'Bend to your left', 2, color=self.c_normal)
@@ -387,7 +387,7 @@ class Analysis(object):
                             self._done = True
                             if self.shld.cnt < 4:
                                 self.shld.err.append('Did not do enough repetition.')
-                                self.shld.errsum.append('Did not do enough repetition.\n')
+                                self.shld.errsum.append('Did not do enough repetition.')
                             print('================= exer END ======================')
                         self.cnt += 1
                 # === eval string update ===
@@ -397,11 +397,11 @@ class Analysis(object):
                 # === eval information ===
                 if self.shld.cnt > 4:
                     evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, color=self.c_err)
                     self.shld.err.append('Only need to do 4 times')
-                    self.shld.errsum.append('Only need to do 4 times\n')
+                    self.shld.errsum.append('Only need to do 4 times')
                 elif self.shld.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_handdown)
+                    evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, color=self.c_handdown)
                 else:
                     evalinst.blit_text(surface, exeno, kp, 'Start rotating your shoulders', 2, color=self.c_normal)
                     evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.shld.cnt)), 4, color=self.c_togo)
@@ -422,7 +422,7 @@ class Analysis(object):
                             self._done = True
                             if self.clsp.cnt < 4:
                                 self.clsp.err.append('Did not do enough repetition.')
-                                self.clsp.errsum.append('Did not do enough repetition.\n')
+                                self.clsp.errsum.append('Did not do enough repetition.')
                             print('================= exer END ======================')
                         self.cnt += 1
                 else:
@@ -436,11 +436,11 @@ class Analysis(object):
                 # === eval information ===
                 if self.clsp.cnt > 4:
                     evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, color=self.c_err)
                     self.clsp.err.append('Only need to do 4 times')
-                    self.clsp.errsum.append('Only need to do 4 times\n')
+                    self.clsp.errsum.append('Only need to do 4 times')
                 elif self.clsp.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_handdown)
+                    evalinst.blit_text(surface, exeno, kp, 'Pull down your arms', 2, color=self.c_handdown)
                 else:
                     if self.clsp.mode == 'clasp':
                         evalinst.blit_text(surface, exeno, kp, 'Start to clasp', 2, color=self.c_normal)
