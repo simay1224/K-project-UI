@@ -160,5 +160,7 @@ $RECYCLE.BIN/
 
 !req.txt
 !UI3/data/imgs/others/logo.png
+!UI3/data/imgs/emoji/right2.png
+!UI3/data/imgs/emoji/err2.png
 ref/
 .vscode/
