@@ -64,7 +64,7 @@ class BodyGameRuntime(object):
         self.info = info
         # Emoji
         self.errimg = pygame.image.load("./data/imgs/emoji/err2.png").convert_alpha()
-        self.corimg = pygame.image.load("./data/imgs/emoji/right.png").convert_alpha()
+        self.corimg = pygame.image.load("./data/imgs/emoji/right2.png").convert_alpha()
         self.wellimg = pygame.image.load("./data/imgs/emoji/excellent.png").convert_alpha()
         # time.sleep(5)
         pygame.display.set_caption("LymphCoach")
@@ -412,9 +412,9 @@ class BodyGameRuntime(object):
 
 
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                            'Next exercise will start in %s seconds.' % str(self.cntdown/30), 0, (120, 830) , fsize=60, color=self.kp.c_togo)
+                            'Next exercise will start in %s seconds.' % str(self.cntdown/30), 0, (120, 830) , fsize=50, color=self.kp.c_togo)
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                            'Or press "Space" to start next exercise.', 0, (120, 880), fsize=60, color=self.kp.c_togo)
+                            'Or press "Space" to start next exercise.', 0, (120, 870), fsize=50, color=self.kp.c_togo)
 
         self.cntdown -= 1
         if self.cntdown == 0:
@@ -630,19 +630,22 @@ class BodyGameRuntime(object):
             self._screen.blit(bksurface_to_draw, (0, 0))
 
         # emoji
-        emoji_size = min(int(self._screen.get_width()*130./self.width), int(self._screen.get_height()*130./self.height))
-        emoji_err = pygame.transform.scale(self.errimg, (int(emoji_size*0.8), int(emoji_size*0.8)))
+        emoji_size = min(int(self._screen.get_width()*120./self.width), int(self._screen.get_height()*120./self.height))
+        # emoji_err = pygame.transform.scale(self.errimg, (int(emoji_size*0.8), int(emoji_size*0.8)))
+        emoji_err = pygame.transform.scale(self.errimg, (emoji_size, emoji_size))
         emoji_cor = pygame.transform.scale(self.corimg, (emoji_size, emoji_size))
         emoji_well = pygame.transform.scale(self.wellimg, (emoji_size*2, emoji_size*2))
 
+
+        pos_h = 940. / 1080 * self._infoObject.current_h - 70
         for eidx, res in enumerate(self.evalhis):
-            pos_h = 940. / 1080 * self._infoObject.current_h - 70
+            pos_w = 120 + eidx*(emoji_size + 20)
             if res:
-                self._screen.blit(emoji_cor, (int(145+eidx*220), pos_h))
+                self._screen.blit(emoji_cor, (pos_w, pos_h))
             else:
-                self._screen.blit(emoji_err, (int(145+eidx*220), pos_h))
-        if len(self.evalhis) == 4 and (not False in self.evalhis) and self.ana._done and self.errsums == '':
-            self._screen.blit(emoji_well, (420, 580))
+                self._screen.blit(emoji_err, (pos_w, pos_h))
+        # if len(self.evalhis) == 4 and (not False in self.evalhis) and self.ana._done and self.errsums == '':
+        #     self._screen.blit(emoji_well, (420, 580))
 
         # scene type
         if self.kp.scene_type == 2:
