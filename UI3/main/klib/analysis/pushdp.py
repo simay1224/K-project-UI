@@ -55,8 +55,8 @@ class Pushdp(object):
                 self.cflag = False
                 if self.cnt > 0:
                     if self.Lcangle[self.cnt] > 50 or self.Rcangle[self.cnt] >50:
-                        self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms is not lower enough.')
-                        self.errsum.append('Hands is not lower enough.')
+                        self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not lower enough.')
+                        self.errsum.append('Arms are not lower enough.')
             if self.Max_wrist_y < wrist_y:
                 self.Max_wrist_y = wrist_y
                 if self.cnt < 4:
@@ -76,8 +76,8 @@ class Pushdp(object):
             if self.tflag:
                 self.tflag = False
                 if self.Ltangle[self.cnt] < 160 or self.Rtangle[self.cnt] < 160:
-                    self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms is not straight.')
-                    self.errsum.append('Hands is not straight.')
+                    self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not straight.')
+                    self.errsum.append('Arms are not straight.')
             if self.Min_wrist_y > wrist_y:
                 self.Min_wrist_y = wrist_y
                 if self.cnt < 4:

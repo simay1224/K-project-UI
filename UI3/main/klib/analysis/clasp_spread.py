@@ -71,11 +71,11 @@ class Clasp_spread(object):
                 print ('count: %s' %self.cnt)
                 if not self.elbowstus['spread']:
                     if self.spread_time < spread_th:
-                        self.evalstr = 'Elbows should put behind your head long enough!!\n'
-                        self.eval += 'Elbows should put behind your head long enough!!\n'
-                        self.err.append('The '+self.cnvt.ordinal(self.cnt)+ \
-                                        ' time spread is not good. elbows should behind your head long enough!!')
-                        self.errsum.append('Elbows should behind your head long enough.\n')
+                        self.evalstr = 'Elbows should be behind your head far enough\n'
+                        self.eval += 'Elbows should be behind your head far enough\n'
+                        self.err.append('At the '+self.cnvt.ordinal(self.cnt)+ \
+                                        ' time spread is not good. Elbows should be behind your head far enough\n')
+                        self.errsum.append('Elbows should be behind your head far enough\n')
                     self.elbowstus['spread'] = True
 
                 if self.eval == '':
@@ -92,10 +92,10 @@ class Clasp_spread(object):
         if self.spread_cnt == self.hold:
             self.elbowstus['spread'] = False
             if not self.elbowstus['clasp']:
-                self.evalstr = 'When raising the arms, elbows should close to each other.\n'
-                self.eval = 'When raising the arms, elbows should close to each other.\n'
-                self.err.append('The '+self.cnvt.ordinal(self.cnt)+ ' time clasp is not good. Not clasp !!')
-                self.errsum.append('Elbows should close to each other.\n')
+                self.evalstr = 'When you raise your arms, elbows should be close to each other.\n'
+                self.eval = 'When you raise your arms, elbows should be close to each other.\n'
+                self.err.append('At the '+self.cnvt.ordinal(self.cnt)+ ' time, clasp is not good\n')
+                self.errsum.append('Elbows should be close to each other.\n')
                 self.elbowstus['clasp'] = True
 
             if self.eval == '':

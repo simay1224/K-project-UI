@@ -240,7 +240,7 @@ class Breath_status(object):
                 if np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1]) < 30:
                     self.evalstr = 'Please breathe deeper.\n'
                     self.eval = 'Please breathe deeper.\n'
-                    self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, is not deep enough.')
+                    self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, is not deep enough.\n')
                     self.errsum.append('Breathing is not deep enough.\n')
         self.max_len = self.max_ary.shape[0]
         self.min_len = self.min_ary.shape[0]

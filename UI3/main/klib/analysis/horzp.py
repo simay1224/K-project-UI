@@ -52,8 +52,8 @@ class Horzp(object):
                     if self.Lcangle[self.cnt] < 80 or self.Rcangle[self.cnt] < 80:
                         self.evalstr = 'Please keep your arms horizontally.\n'
                         self.eval = 'Please keep your arms horizontally.\n'
-                        self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms is not horizontal.')
-                        self.errsum.append('Hands is not horizontal.')
+                        self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not horizontal.')
+                        self.errsum.append('Arms are not horizontal.')
             if self.Max_dist < dist:
                 self.Max_dist = dist
                 if self.cnt < 4:
@@ -76,8 +76,8 @@ class Horzp(object):
                 if self.Ltangle[self.cnt] < 80 or self.Rtangle[self.cnt] < 80:
                     self.evalstr = 'Please keep your arms horizontally.\n'
                     self.eval = 'Please keep your arms horizontally.\n'
-                    self.err.append('The '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms is not horizontal.')
-                    self.errsum.append('Hands is not horizontal.')
+                    self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not horizontal.\n')
+                    self.errsum.append('Arms are not horizontal.')
             if self.Min_dist > dist:
                 self.Min_dist = dist
                 if self.cnt < 4:

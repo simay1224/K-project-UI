@@ -118,12 +118,12 @@ class Swing(object):
         else:
             res = np.mean(angle_lsit[-rng:])
         if res < th:
-            if not 'Make your '+ lr +' arm straight.' in self.evalstr:
-                self.evalstr += 'Make your '+ lr +' arm straight.\n'
+            if not 'Make your '+ lr +' arms straight.' in self.evalstr:
+                self.evalstr += 'Make your '+ lr +' arms straight.\n'
                 if lr not in self.eval:
-                    self.eval += 'Make your '+ lr +' arm straight.\n'
-            self.err.append(lr+' arm is not straight in '+self.cnvt.ordinal(int(self.cnt/2)+1)+' time bending.')
-            self.errsum.append('Hand is not straight.')
+                    self.eval += 'Make your '+ lr +' arms straight.\n'
+            self.err.append(lr+' arms are not straight at the '+self.cnvt.ordinal(int(self.cnt/2)+1)+' time bending.')
+            self.errsum.append('Arms are not straight.')
 
     def init_angle(self):
         """ initialize torso angle
