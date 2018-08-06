@@ -45,6 +45,8 @@ class Horzp(object):
         return acos(costheta_ampit)*180/np.pi
 
     def run(self, joints):
+        if self.cnt >= 4:
+            return
         dist = abs(joints[18]-joints[27])
         if dist > 700:
             if self.cflag:
@@ -77,7 +79,7 @@ class Horzp(object):
                 if self.Ltangle[self.cnt] < 80 or self.Rtangle[self.cnt] < 80:
                     self.evalstr = 'Please keep your arms horizontally.\n'
                     self.eval = 'Please keep your arms horizontally.\n'
-                    self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not horizontal.\n')
+                    self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not horizontal.')
                     self.errsum.append('Arms are not horizontal.')
             if self.Min_dist > dist:
                 self.Min_dist = dist

@@ -112,8 +112,8 @@ class Hand_status(object):
             else:
                 string = 'left hand'
             for i in res:
-                self.err.append(string+' did not open at '+str(i+1)+' time\n')
-                self.errsum.append('Your hand did not open appropriately\n')
+                self.err.append(string+' did not open at '+str(i+1)+' time')
+                self.errsum.append('Your hand did not open appropriately')
             print('hand open '+str(max(len(lh_open), len(rh_open)))+' times,')
         else:
             print('hand open '+str(len(lh_open))+' times')
@@ -127,8 +127,8 @@ class Hand_status(object):
             else:
                 string = 'left hand'
             for i in res:
-                self.err.append(string+' did not close at '+str(i+1)+' time\n')
-                self.errsum.append('Your hand did not close appropriately\n')
+                self.err.append(string+' did not close at '+str(i+1)+' time')
+                self.errsum.append('Your hand did not close appropriately')
             print('hand close '+str(max(len(lh_close), len(rh_close)))+' times,')
         else:
             print('hand close '+str(len(lh_close))+ ' times\n')

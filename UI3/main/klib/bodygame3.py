@@ -384,7 +384,7 @@ class BodyGameRuntime(object):
         if not self.kp.finish:
             errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
                     self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
-            self.errsums = '- '.join(set(self.ana.brth.errsum+self.ana.hs.errsum+self.ana.horzp.errsum +\
+            self.errsums = '\n- '.join(set(self.ana.brth.errsum+self.ana.hs.errsum+self.ana.horzp.errsum +\
                             self.ana.pushdp.errsum+self.ana.shld.errsum+self.ana.clsp.errsum +\
                             self.ana.swing.errsum))
             dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.horzp.do, self.ana.pushdp.do,\
@@ -408,13 +408,13 @@ class BodyGameRuntime(object):
                                     'Overall evaluation:\n\nPerfect !!', 3)
         else:
             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                'Overall evaluation:\n'+self.errsums, 3)
+                                'Overall evaluation:\n\n- '+self.errsums, 3)
 
 
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                             'Next exercise will start in %s seconds.' % str(self.cntdown/30), 0, (120, 830) , fsize=60, color=self.kp.c_togo)
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                            'Press "Space" to start next exercise directly.', 0, (120, 880), fsize=60, color=self.kp.c_togo)
+                            'Or press "Space" to start next exercise.', 0, (120, 880), fsize=60, color=self.kp.c_togo)
 
         self.cntdown -= 1
         if self.cntdown == 0:
