@@ -217,8 +217,8 @@ class Analysis(object):
                 if self.brth.cnt > 4:
                     evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
                     evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, True, color=self.c_err)
-                    self.brth.err.append('Only need to do 4 times')
-                    self.brth.errsum.append('Only need to do 4 times')
+                    self.brth.err.append('Only need to do 4 times.')
+                    self.brth.errsum.append('Only need to do 4 times.\n')
                 elif self.brth.cnt == 4:
                     evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, True, color=self.c_handdown)
                 else:
@@ -275,8 +275,8 @@ class Analysis(object):
                 if self.pushdp.cnt > 4:
                     evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
                     evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_err)
-                    self.pushdp.err.append('Only need to do 4 times')
-                    self.pushdp.errsum.append('Only need to do 4 times\n')
+                    self.pushdp.err.append('Only need to do 4 times.')
+                    self.pushdp.errsum.append('Only need to do 4 times.\n')
                 elif self.pushdp.cnt == 4:
                     evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_handdown)
                 else:
@@ -315,8 +315,8 @@ class Analysis(object):
                 if self.horzp.cnt > 4:
                     evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 times', 3, color=self.c_err)
                     evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_err)
-                    self.horzp.err.append('Only need to do 4 times')
-                    self.horzp.errsum.append('Only need to do 4 times\n')
+                    self.horzp.err.append('Only need to do 4 times.')
+                    self.horzp.errsum.append('Only need to do 4 times.\n')
                 elif self.horzp.cnt == 4:
                     evalinst.blit_text(surface, exeno, kp, 'Put down your arms', 2, color=self.c_handdown)
                 else:
@@ -325,7 +325,7 @@ class Analysis(object):
                         self.horzp.evalstr = 'Please keep your arms horizontally.\n'
                         self.horzp.eval = 'Please keep your arms horizontally.\n'
                         self.horzp.err.append('The '+self.cnvt.ordinal(self.repcnt+1)+ ' time try, arms are not horizontal.')
-                        self.horzp.errsum.append('Arms are not horizontal.')
+                        self.horzp.errsum.append('Arms are not horizontal.\n')
                     elif self.horzp.state == 'T-pose':
                         evalinst.blit_text(surface, exeno, kp, 'Close your arms to your chest', 2, color=self.c_normal)
                     elif self.horzp.state == 'chest':

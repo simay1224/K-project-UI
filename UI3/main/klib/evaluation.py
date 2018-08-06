@@ -16,6 +16,15 @@ class Evaluation(object):
         self.kp = Kparam()
         self.font_size = 80
 
+        self.exercises = ["",
+                    "1. Muscle Tighting Deep Breathing",
+                    "2. Over The Head Pumping",
+                    "3. Push Down Pumping",
+                    "4. Horizontal Pumping",
+                    "5. Reach to the Sky",
+                    "6. Shoulder Rolls",
+                    "7. Clasp and Spread"]
+
     def joint_angle(self, joints, idx=[0, 1, 2], offset=0):
         """ finding the angle between 3 joints.
             default joints are left shld, elbow, wrist.
@@ -141,7 +150,7 @@ class Evaluation(object):
             print(str0)
             if os.path.isfile(log.excelPath):
                 name = userinfo.name
-                df = pd.read_excel(log.excelPath, sheet_name='exercise %s' %exeno)
+                df = pd.read_excel(log.excelPath, sheet_name=self.exercises[exeno])
                 cols = log.colname[exeno][4:-1]  # donot neet common & errmsg info
                 roi = df[df['name'] == name]  # rows of interest
                 def_val = df[df['name'] == '$IDEAL VALUE$']

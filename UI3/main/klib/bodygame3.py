@@ -408,12 +408,13 @@ class BodyGameRuntime(object):
                                     'Overall evaluation:\n\nPerfect !!', 3)
         else:
             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                'Overall evaluation:\n\n- '+self.errsums, 3)
+                                'Overall evaluation:\n'+self.errsums, 3)
+
 
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                            '(Press "Space" to start next exercise.)', 0, (120, 830), fsize=60, color=self.kp.c_togo)
+                            'Next exercise will start in %s seconds.' % str(self.cntdown/30), 0, (120, 830) , fsize=60, color=self.kp.c_togo)
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                            'Next exercise will start in %s seconds.' % str(self.cntdown/30), 0, (120, 880) , fsize=60, color=self.kp.c_togo)
+                            'Press "Space" to start next exercise directly.', 0, (120, 880), fsize=60, color=self.kp.c_togo)
 
         self.cntdown -= 1
         if self.cntdown == 0:
