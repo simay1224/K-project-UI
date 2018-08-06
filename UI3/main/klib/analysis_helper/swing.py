@@ -1,7 +1,8 @@
+from ..initial_param.kinect_para import Kinect_para
+
 import numpy as np
 from math import acos
 from scipy.signal import argrelextrema
-from .initial_param.kinect_para import Kinect_para
 from scipy.ndimage.filters import gaussian_filter1d as gf
 import inflect,pdb
 

@@ -1,12 +1,13 @@
+from ..w_fastdtw import fastdtw
+from ..dataoutput import Dataoutput
+
 from scipy.spatial.distance import _validate_vector
 from scipy.ndimage.filters import gaussian_filter1d as gf
 from scipy.ndimage.filters import gaussian_filter as gf_2D
 from scipy.linalg import norm
 from collections import defaultdict
-from ..klib.w_fastdtw import fastdtw
 import numpy as np
 from scipy.signal import argrelextrema
-from ..klib.dataoutput import Dataoutput
 from math import acos
 import inflect
 import pdb

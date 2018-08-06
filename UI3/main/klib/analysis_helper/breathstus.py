@@ -2,7 +2,7 @@ import numpy as np
 from scipy.signal import argrelextrema
 from scipy.ndimage.filters import gaussian_filter as gf_2D
 from scipy.ndimage.filters import gaussian_filter1d as gf
-from .initial_param.kinect_para import Kinect_para
+from ..initial_param.kinect_para import Kinect_para
 import inflect
 import pdb
 

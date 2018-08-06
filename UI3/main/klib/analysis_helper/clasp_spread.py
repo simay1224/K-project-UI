@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter1d as gf
 import inflect
-from .initial_param.kinect_para import Kinect_para
+from ..initial_param.kinect_para import Kinect_para
 
 class Clasp_spread(object):
     """
