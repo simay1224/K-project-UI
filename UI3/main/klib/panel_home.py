@@ -30,6 +30,7 @@ class Welcome_win(wx.Frame):
         self.font_text_title = wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD, False, 'Arial')
         self.info = info
         self.game = None
+        self.path = './output/log.xlsx'
 
         self.width, self.height = wx.GetDisplaySize()
         self.height -= 100
@@ -54,7 +55,6 @@ class Welcome_win(wx.Frame):
         lineSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         buttonSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         menuSizer = wx.BoxSizer(wx.VERTICAL)
-        dailySizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         infoSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
 
         # title
@@ -100,6 +100,45 @@ class Welcome_win(wx.Frame):
         menuSizer.Add(menu_title, 0, wx.CENTER)
         menuSizer.Add(buttonSizer, 0, wx.CENTER)
 
+        dailySizer = self.setupDaily()
+        infoSizer.Add(menuSizer, pos=(1, 0))
+        infoSizer.Add(dailySizer, pos=(1, 4))
+
+        topSizer.Add(lineSizer, 0, wx.CENTER)
+        topSizer.Add(titleSizer, 0, wx.CENTER)
+        topSizer.Add(infoSizer, 0, wx.CENTER)
+        combine.Add(topSizer, pos=(2, 0))
+        self.panel.SetSizer(combine)
+
+    def open_bodygame(self, event):
+        self.game = bodygame3.BodyGameRuntime(self.info)
+        self.game.run()
+
+    def open_instruction(self, event):
+        instruct = Instrcution_win(None, 'Instruction')
+
+    def open_history(self, event):
+        history = History_view(None, self.info, self.path)
+
+    def open_trainingmode(self, event):
+        self.train = trainingmode.BodyGameRuntime()
+        self.train.run()
+
+    def OnEraseBackground(self, evt):
+        """
+        Add a picture to the background
+        """
+        dc = evt.GetDC()
+        if not dc:
+            dc = wx.ClientDC(self)
+            rect = self.GetUpdateRegion().GetBox()
+            dc.SetClippingRect(rect)
+        dc.Clear()
+        bmp = wx.Bitmap("./data/bkimgs/BUMfk9.jpg")
+        dc.DrawBitmap(bmp, 0, 0)
+
+    def setupDaily(self):
+        dailySizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
 
         # http://optimallymph.org/en/login?destination=lymphedema
         self.sentences = ["I like the exercises!!! After I finished learning the exercises by following the videos, my pain and soreness were much better.",
@@ -144,42 +183,16 @@ class Welcome_win(wx.Frame):
         dailySizer.Add(sentence_title, pos=(0, 0))
         dailySizer.Add(sentence, pos=(2, 0))
 
-        infoSizer.Add(menuSizer, pos=(1, 0))
-        infoSizer.Add(dailySizer, pos=(1, 4))
+        self.dailyStreak()
 
-        topSizer.Add(lineSizer, 0, wx.CENTER)
-        topSizer.Add(titleSizer, 0, wx.CENTER)
-        topSizer.Add(infoSizer, 0, wx.CENTER)
-        combine.Add(topSizer, pos=(2, 0))
-        self.panel.SetSizer(combine)
+        return dailySizer
 
-
-    def open_bodygame(self, event):
-        self.game = bodygame3.BodyGameRuntime(self.info)
-        self.game.run()
-
-    def open_instruction(self, event):
-        instruct = Instrcution_win(None, 'Instruction')
-
-    def open_history(self, event):
-        history = History_view(None, self.info)
-
-    def open_trainingmode(self, event):
-        self.train = trainingmode.BodyGameRuntime()
-        self.train.run()
-
-    def OnEraseBackground(self, evt):
-        """
-        Add a picture to the background
-        """
-        dc = evt.GetDC()
-        if not dc:
-            dc = wx.ClientDC(self)
-            rect = self.GetUpdateRegion().GetBox()
-            dc.SetClippingRect(rect)
-        dc.Clear()
-        bmp = wx.Bitmap("./data/bkimgs/BUMfk9.jpg")
-        dc.DrawBitmap(bmp, 0, 0)
+    def dailyStreak(self):
+        sheets = pd.read_excel(self.path, sheet_name=None)
+        for (key, val) in sheets.items():
+            # get 'time' column from each sheet
+            time = np.array(val[val['name'] == self.info.name]['time'])
+            unique_time = np.unique([i.split('-')[:-2] for i in time], axis=0)
 
 
 class Instrcution_win(wx.Frame):
@@ -490,7 +503,7 @@ class MoviePanel(wx.Panel):
 
 
 class History_view(wx.Frame):
-    def __init__(self, parent, info, title='history log'):
+    def __init__(self, parent, info, path, title='history log'):
 
         self.width, self.height = wx.GetDisplaySize()
         self.height -= 100
@@ -504,22 +517,22 @@ class History_view(wx.Frame):
         self.SetIcon(ico)
 
         self.info = info
+        self.path = path
         self.no_hist_img = cv2.imread('./data/imgs/others/no_hist.jpg')
         self.init_ui()
         self.color_correct = (0.41, 0.75, 0.07, 0.6)
         self.color_line = ['#0096BF', '#005A73', '#BFA600', '#736400', '#ffae25', '#af7900', '#d957b4', '#75005b']
         self.Show()
 
-    def init_ui(self, path='./output/log.xlsx'):
+    def init_ui(self):
         self.font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)
-        self.path = path
         try:
-            log_xl = pd.ExcelFile(path)
+            log_xl = pd.ExcelFile(self.path)
         except:
             print('log file do not exist, creating a new one')
             hist = Historylog()
             hist.newlog()
-            log_xl = pd.ExcelFile(path)
+            log_xl = pd.ExcelFile(self.path)
 
         self.panel = wx.Panel(self)
 
@@ -595,9 +608,14 @@ class History_view(wx.Frame):
         # self.df.fillna(0, inplace=True)
         self.lst.Clear()
         lst_choice = self.df.columns.values.tolist()
-        idx_1 = [i for i, elem in enumerate(lst_choice) if 'time' in elem][0] + 1
-        idx_2 = [i for i, elem in enumerate(lst_choice) if 'errmsg' in elem][0]
-        self.lst.InsertItems(lst_choice[idx_1:idx_2], 0)
+        index_1 = -1
+        index_2 = -1
+        for (i, elem) in enumerate(lst_choice):
+            if index_1 == -1 and 'time' in elem:
+                index_1 = i
+            if index_2 == -1 and 'errmsg' in elem:
+                index_2 = i
+        self.lst.InsertItems(lst_choice[index_1+1:index_2], 0)
         self.lst.InsertItems(["Overall score"], 0)
         if (self.info.isCli):
             self.update_name_list_cli()
@@ -644,7 +662,6 @@ class History_view(wx.Frame):
         # get total score for each day
         for i in range(1, len(list)):
             y = np.array(df_name[list[i]])
-            
             if (y.size == 0 or y.size == 1):
                 raise ValueError('No data to be processed')
 
@@ -681,7 +698,7 @@ class History_view(wx.Frame):
         self.axes.plot(x, y, color=self.color_line[0])
         self.axes.set_xticks(x)
         # self.debug(y)
-        
+
         y_min, y_max = self.find_min_max(y)
         self.axes.set_ylim(y_min[0] - 5, y_max[0] + 5)
 

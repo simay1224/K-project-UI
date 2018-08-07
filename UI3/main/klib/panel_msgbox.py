@@ -249,8 +249,9 @@ class Msgbox(wx.Frame):
             result = dlg.ShowModal() == wx.ID_YES
 
             if result:
-                self.name = (self.fname + ' ' + self.lname).lower()
-                if self.isCli:
+                if (self.isPat):
+                    self.name = (self.fname + ' ' + self.lname).lower()
+                if (self.isCli):
                     self.name = (self.fcname + ' ' + self.lcname).lower()
                 dlg.Destroy()
                 self.Destroy()

@@ -33,8 +33,8 @@ from .human_model import Human_model
 from .skeleton    import Skeleton
 from .fextract    import Finger_extract
 from .instruction import Exeinst
-from .handstatus  import Hand_status
 from .historylog  import Historylog
+from .analysis_helper.handstatus  import Hand_status
 
 fps = 30
 limbidx = np.array([4, 5, 6, 8, 9, 10, 20])
@@ -620,7 +620,7 @@ class BodyGameRuntime(object):
             # if self.kp.kinect:
             self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
             self.kp.pre_scale = self.kp.scale
-                
+
             # if scale != self.kp.scale:
             #     self.kp.pre_scale = self.kp.scale
             #     self.kp.scale = scale
