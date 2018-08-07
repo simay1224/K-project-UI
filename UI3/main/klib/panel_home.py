@@ -5,13 +5,13 @@ import numpy as np
 import pandas as pd
 import wx.media
 import matplotlib
+import collections
 from matplotlib.figure import Figure
-from collections import defaultdict
 import wx.lib.mixins.inspection as WIT
 
 import sys, math, os
 import random
-from datetime import datetime
+import datetime
 
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
@@ -177,7 +177,7 @@ class Welcome_win(wx.Frame):
 
         sentence_title = wx.StaticText(self.panel, label="Daily Empowerment")
         sentence_title.SetFont(self.font_text_title)
-        random.seed(datetime.now())
+        random.seed(datetime.datetime.now())
         sentence = wx.StaticText(self.panel, label=self.sentences[random.randrange(len(self.sentences))], size=(500, 300))
         sentence.SetFont(self.font_text)
         dailySizer.Add(sentence_title, pos=(0, 0))
@@ -188,11 +188,43 @@ class Welcome_win(wx.Frame):
         return dailySizer
 
     def dailyStreak(self):
+        # a week from current date to be displayed
+        pre = datetime.datetime.now() + datetime.timedelta(-7)
+        cur = datetime.datetime.now()
+        cur_dict = {}
+        while (pre <= cur):
+            cur_dict[pre.strftime('%Y%m%d')] = 0
+            pre += datetime.timedelta(1)
+        print("week", cur_dict)
+
         sheets = pd.read_excel(self.path, sheet_name=None)
+        # dictionary that stores time & number of finished exercises
+        sheet_dict = {}
         for (key, val) in sheets.items():
             # get 'time' column from each sheet
             time = np.array(val[val['name'] == self.info.name]['time'])
-            unique_time = np.unique([i.split('-')[:-2] for i in time], axis=0)
+            time = np.unique([i.split('-')[:-2] for i in time], axis=0)
+            unique_time = []
+            for i in range(len(time)):
+                concat = ''
+                for j in time[i]:
+                    if (len(j)) == 1:
+                        j = '0' + j
+                    concat += j
+                unique_time.append(int(concat))
+            for i in range(len(unique_time)):
+                if (unique_time[i] in sheet_dict):
+                    sheet_dict[unique_time[i]] += 1
+                else:
+                    sheet_dict[unique_time[i]] = 1
+        sheet_dict = collections.OrderedDict(sorted(sheet_dict.items()))
+
+        print("history", sheet_dict)
+
+        
+
+
+
 
 
 class Instrcution_win(wx.Frame):
@@ -269,7 +301,7 @@ class Instrcution_win(wx.Frame):
 
 
     def init_text(self):
-        self.str = defaultdict(dict)
+        self.str = collections.defaultdict(dict)
         self.str['exe'][1] = 'Exercise 1 : Muscle Tighting Deep Breathing'
         self.str['exe'][2] = 'Exercise 2 : Over The Head Pumping'
         self.str['exe'][3] = 'Exercise 3 : Push Down Pumping'
