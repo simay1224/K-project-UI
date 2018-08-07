@@ -189,13 +189,12 @@ class Welcome_win(wx.Frame):
 
     def dailyStreak(self):
         # a week from current date to be displayed
-        pre = datetime.datetime.now() + datetime.timedelta(-7)
-        cur = datetime.datetime.now()
+        pre = datetime.datetime.strptime(datetime.datetime.now().strftime('%Y-%m-%d'), '%Y-%m-%d') + datetime.timedelta(-7)
+        cur = pre + datetime.timedelta(7)
         cur_dict = {}
         while (pre <= cur):
-            cur_dict[pre.strftime('%Y%m%d')] = 0
+            cur_dict[pre] = 0
             pre += datetime.timedelta(1)
-        print("week", cur_dict)
 
         sheets = pd.read_excel(self.path, sheet_name=None)
         # dictionary that stores time & number of finished exercises
@@ -208,24 +207,36 @@ class Welcome_win(wx.Frame):
             for i in range(len(time)):
                 concat = ''
                 for j in time[i]:
-                    if (len(j)) == 1:
-                        j = '0' + j
-                    concat += j
-                unique_time.append(int(concat))
+                    concat += j + '-'
+                unique_time.append(datetime.datetime.strptime(concat, '%Y-%m-%d-'))
             for i in range(len(unique_time)):
                 if (unique_time[i] in sheet_dict):
                     sheet_dict[unique_time[i]] += 1
                 else:
                     sheet_dict[unique_time[i]] = 1
-        sheet_dict = collections.OrderedDict(sorted(sheet_dict.items()))
+        sheet_dict = list(collections.OrderedDict(sorted(sheet_dict.items())).items())
 
-        print("history", sheet_dict)
+        # currently: streak: finish at least 1 exercise (instead of finish all 7)
+        history_max = 1
+        for i in range(0, len(sheet_dict)-1):
+            if (sheet_dict[i][0] in cur_dict):
+                cur_dict[sheet_dict[i][0]] = 1
 
-        
+            if ((sheet_dict[i+1][0] - sheet_dict[i][0]).days == 1):
+                temp_max = 2
+                i += 1
+                while (i < len(sheet_dict)-1):
+                    if ((sheet_dict[i+1][0] - sheet_dict[i][0]).days == 1):
+                        temp_max += 1
+                        i += 1
+                    else:
+                        break
+                if (temp_max > history_max):
+                    history_max = temp_max
+        if (sheet_dict[-1][0] in cur_dict):
+            cur_dict[sheet_dict[-1][0]] = 1
 
-
-
-
+        print(cur_dict)
 
 class Instrcution_win(wx.Frame):
 
