@@ -8,6 +8,7 @@ import matplotlib
 import collections
 from matplotlib.figure import Figure
 import wx.lib.mixins.inspection as WIT
+import wx.lib.calendar
 
 import sys, math, os
 import random
@@ -184,6 +185,8 @@ class Welcome_win(wx.Frame):
         dailySizer.Add(sentence, pos=(2, 0))
 
         self.dailyStreak()
+        self.initCalendar()
+        dailySizer.Add(self.calend, pos=(3, 0))
 
         return dailySizer
 
@@ -237,6 +240,68 @@ class Welcome_win(wx.Frame):
             cur_dict[sheet_dict[-1][0]] = 1
 
         print(cur_dict)
+
+    def initCalendar(self):
+        self.calend = wx.lib.calendar.Calendar(self, size=(200, 180))
+        start_month = self.calend.GetMonth()
+        start_year = self.calend.GetYear()
+        # month list from DateTime module
+
+        monthlist = self.GetMonthList()
+
+        self.date = wx.ComboBox(self, -1, "",
+                               (100, 20), (90, -1),
+                               monthlist, wx.CB_DROPDOWN)
+
+        self.date.SetSelection(start_month-1)
+
+        # set start month and year
+
+        self.calend.SetMonth(start_month)
+        self.calend.SetYear(start_year)
+
+        # set attributes of calendar
+
+        self.calend.hide_title = True
+        self.calend.HideGrid()
+        self.calend.SetWeekColor('WHITE', 'BLACK')
+        self.ResetDisplay()
+
+    def ResetDisplay(self):
+        month = self.calend.GetMonth()
+        test_days ={0: [],
+                    1: [3, 7, 9, 21],
+                    2: [2, 10, 4, 9],
+                    3: [4, 20, 29],
+                    4: [1, 12, 22],
+                    5: [2, 10, 15],
+                    6: [4, 8, 17],
+                    7: [6, 7, 8],
+                    8: [5, 10, 20],
+                    9: [1, 2, 5, 29],
+                   10: [2, 4, 6, 22],
+                   11: [6, 9, 12, 28, 29],
+                   12: [8, 9, 10, 11, 20] }
+
+        try:
+            set_days = test_days[month]
+        except:
+            set_days = [1, 5, 12]
+
+        self.calend.AddSelect([4, 11], 'BLUE', 'WHITE')
+        self.calend.SetSelDay(set_days)
+        self.calend.Refresh()
+
+    def GetMonthList(self):
+        monthlist = []
+        for i in range(13):
+            name = wx.lib.calendar.Month[i]
+
+            if name != None:
+                monthlist.append(name)
+        print(monthlist)
+        return monthlist
+
 
 class Instrcution_win(wx.Frame):
 
