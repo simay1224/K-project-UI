@@ -80,8 +80,8 @@ class Pushdp(object):
             if self.tflag:
                 self.tflag = False
                 if self.Ltangle[self.cnt] < 160 or self.Rtangle[self.cnt] < 160:
-                    self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not straight.')
-                    self.errsum.append('Arms are not straight.')
+                    self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, please keep your arms straight.')
+                    self.errsum.append('Please keep your arms straight.')
             if self.Min_wrist_y > wrist_y:
                 self.Min_wrist_y = wrist_y
                 if self.cnt < 4:

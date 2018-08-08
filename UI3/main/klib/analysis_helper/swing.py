@@ -123,8 +123,8 @@ class Swing(object):
                 self.evalstr += 'Make your '+ lr +' arms straight.\n'
                 if lr not in self.eval:
                     self.eval += 'Make your '+ lr +' arms straight.\n'
-            self.err.append(lr+' arms are not straight at the '+self.cnvt.ordinal(int(self.cnt/2)+1)+' time bending.')
-            self.errsum.append('Arms are not straight.')
+            self.err.append('Please keep your' + lr +' arms straight at the '+self.cnvt.ordinal(int(self.cnt/2)+1)+' time bending.')
+            self.errsum.append('Please keep your arms straight.')
 
     def init_angle(self):
         """ initialize torso angle

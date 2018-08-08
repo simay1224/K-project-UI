@@ -110,8 +110,8 @@ class Shld_state(object):
             self.evalstr = 'Rotate deeper !!\n'
             self.eval = 'Rotate deeper !!\n'
             self.ngcnt += 1
-            self.err.append('At the '+self.cnvt.ordinal(self.ngcnt+self.cnt)+ 'time try, rotation is not deep enough.')
-            self.errsum.append('Rotation is not deep enough.')
+            self.err.append('At the '+self.cnvt.ordinal(self.ngcnt+self.cnt)+ 'time try, roll your shoulders widely.')
+            self.errsum.append('Roll your shoulders widely.')
             self.type = 0
         else:
             self.evalstr = ''

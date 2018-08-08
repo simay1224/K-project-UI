@@ -113,7 +113,7 @@ class Hand_status(object):
                 string = 'left hand'
             for i in res:
                 self.err.append(string+' did not open at '+str(i+1)+' time')
-                self.errsum.append('Your hand did not open appropriately')
+                self.errsum.append('Your fingers need to open widely')
             print('hand open '+str(max(len(lh_open), len(rh_open)))+' times,')
         else:
             print('hand open '+str(len(lh_open))+' times')
