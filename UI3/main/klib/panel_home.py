@@ -179,29 +179,34 @@ class Welcome_win(wx.Frame):
         sentence_title = wx.StaticText(self.panel, label="Daily Empowerment")
         sentence_title.SetFont(self.font_text_title)
         random.seed(datetime.datetime.now())
-        sentence = wx.StaticText(self.panel, label=self.sentences[random.randrange(len(self.sentences))], size=(500, 300))
-        sentence.SetFont(self.font_text)
-        dailySizer.Add(sentence_title, pos=(0, 0))
-        dailySizer.Add(sentence, pos=(2, 0))
+        randoms = random.sample(range(len(self.sentences)), 6)
+        sentence = ''
+        for i in randoms:
+            if (len(sentence) < 230):
+                sentence += self.sentences[i] + '\n\n'
+            else:
+                break
+
+        sentence_text = wx.StaticText(self.panel, label=sentence, size=(500, 300))
+        sentence_text.SetFont(self.font_text)
+        dailySizer.Add(sentence_title, pos=(0, 3))
+        dailySizer.Add(sentence_text, pos=(2, 3))
 
         self.dailyStreak()
         self.initCalendar()
-        dailySizer.Add(self.calend, pos=(3, 0))
+        calendar_title = wx.StaticText(self.panel, label="Current Streak")
+        calendar_title.SetFont(self.font_text_title)
+        dailySizer.Add(calendar_title, pos=(0, 0))
+        dailySizer.Add(self.date, pos=(1, 0))
+        dailySizer.Add(self.calend, pos=(2, 0))
 
         return dailySizer
 
-    def dailyStreak(self):
-        # a week from current date to be displayed
-        pre = datetime.datetime.strptime(datetime.datetime.now().strftime('%Y-%m-%d'), '%Y-%m-%d') + datetime.timedelta(-7)
-        cur = pre + datetime.timedelta(7)
-        cur_dict = {}
-        while (pre <= cur):
-            cur_dict[pre] = 0
-            pre += datetime.timedelta(1)
 
+    def dailyStreak(self):
         sheets = pd.read_excel(self.path, sheet_name=None)
         # dictionary that stores time & number of finished exercises
-        sheet_dict = {}
+        self.sheet_dict = {}
         for (key, val) in sheets.items():
             # get 'time' column from each sheet
             time = np.array(val[val['name'] == self.info.name]['time'])
@@ -213,94 +218,81 @@ class Welcome_win(wx.Frame):
                     concat += j + '-'
                 unique_time.append(datetime.datetime.strptime(concat, '%Y-%m-%d-'))
             for i in range(len(unique_time)):
-                if (unique_time[i] in sheet_dict):
-                    sheet_dict[unique_time[i]] += 1
+                if (unique_time[i] in self.sheet_dict):
+                    self.sheet_dict[unique_time[i]] += 1
                 else:
-                    sheet_dict[unique_time[i]] = 1
-        sheet_dict = list(collections.OrderedDict(sorted(sheet_dict.items())).items())
+                    self.sheet_dict[unique_time[i]] = 1
+        self.sheet_dict = list(collections.OrderedDict(sorted(self.sheet_dict.items())).items())
 
         # currently: streak: finish at least 1 exercise (instead of finish all 7)
         history_max = 1
-        for i in range(0, len(sheet_dict)-1):
-            if (sheet_dict[i][0] in cur_dict):
-                cur_dict[sheet_dict[i][0]] = 1
-
-            if ((sheet_dict[i+1][0] - sheet_dict[i][0]).days == 1):
+        for i in range(0, len(self.sheet_dict)-1):
+            if ((self.sheet_dict[i+1][0] - self.sheet_dict[i][0]).days == 1):
                 temp_max = 2
                 i += 1
-                while (i < len(sheet_dict)-1):
-                    if ((sheet_dict[i+1][0] - sheet_dict[i][0]).days == 1):
+                while (i < len(self.sheet_dict)-1):
+                    if ((self.sheet_dict[i+1][0] - self.sheet_dict[i][0]).days == 1):
                         temp_max += 1
                         i += 1
                     else:
                         break
                 if (temp_max > history_max):
                     history_max = temp_max
-        if (sheet_dict[-1][0] in cur_dict):
-            cur_dict[sheet_dict[-1][0]] = 1
+        return history_max
 
-        print(cur_dict)
+
+    def recentStreak(self):
+        # a week from current date to be displayed
+        pre = datetime.datetime.strptime(datetime.datetime.now().strftime('%Y-%m-%d'), '%Y-%m-%d') + datetime.timedelta(-7)
+        cur = pre + datetime.timedelta(7)
+        cur_dict = {}
+        while (pre <= cur):
+            cur_dict[pre] = 0
+            pre += datetime.timedelta(1)
+
+        for i in range(len(self.sheet_dict)):
+            if (self.sheet_dict[i][0] in cur_dict):
+                cur_dict[self.sheet_dict[i][0]] = 1
+
 
     def initCalendar(self):
-        self.calend = wx.lib.calendar.Calendar(self, size=(200, 180))
+        self.calend_days = {i: [] for i in range(1, 13)}
+        for i in range(len(self.sheet_dict)):
+            self.calend_days[self.sheet_dict[i][0].month].append(self.sheet_dict[i][0].day)
+
+        self.calend = wx.lib.calendar.Calendar(self.panel, size=(250, 200))
         start_month = self.calend.GetMonth()
         start_year = self.calend.GetYear()
-        # month list from DateTime module
-
-        monthlist = self.GetMonthList()
-
-        self.date = wx.ComboBox(self, -1, "",
-                               (100, 20), (90, -1),
-                               monthlist, wx.CB_DROPDOWN)
-
-        self.date.SetSelection(start_month-1)
-
-        # set start month and year
-
         self.calend.SetMonth(start_month)
         self.calend.SetYear(start_year)
 
-        # set attributes of calendar
+        self.calend_select = self.calend_days[start_month]
+        self.calend.AddSelect(self.calend_select, 'WHITE', wx.Colour(0, 90, 106, 255))
+        self.calend.Refresh()
 
-        self.calend.hide_title = True
+        month = [wx.lib.calendar.Month[i] for i in range(1, 13)]
+        self.date = wx.ComboBox(self.panel, size=(90, -1), choices=month)
+        self.date.SetSelection(start_month-1)
+        self.Bind(wx.EVT_COMBOBOX, self.selectDate, self.date)
+
+        # self.calend.hide_title = True
         self.calend.HideGrid()
-        self.calend.SetWeekColor('WHITE', 'BLACK')
+        self.calend.SetWeekColor('BLACK', 'WHITE')
+        self.ResetDisplay()
+
+    def selectDate(self, event):
+        monthval = self.date.FindString(event.GetString())
+        self.calend.SetMonth(monthval+1)
         self.ResetDisplay()
 
     def ResetDisplay(self):
-        month = self.calend.GetMonth()
-        test_days ={0: [],
-                    1: [3, 7, 9, 21],
-                    2: [2, 10, 4, 9],
-                    3: [4, 20, 29],
-                    4: [1, 12, 22],
-                    5: [2, 10, 15],
-                    6: [4, 8, 17],
-                    7: [6, 7, 8],
-                    8: [5, 10, 20],
-                    9: [1, 2, 5, 29],
-                   10: [2, 4, 6, 22],
-                   11: [6, 9, 12, 28, 29],
-                   12: [8, 9, 10, 11, 20] }
-
-        try:
-            set_days = test_days[month]
-        except:
-            set_days = [1, 5, 12]
-
-        self.calend.AddSelect([4, 11], 'BLUE', 'WHITE')
-        self.calend.SetSelDay(set_days)
+        # reset highlighted color
+        self.calend.AddSelect(self.calend_select, 'BLACK', 'WHITE')
+        set_days = self.calend_days[self.calend.GetMonth()]
+        self.calend.AddSelect(set_days, 'WHITE', wx.Colour(0, 90, 106, 255))
         self.calend.Refresh()
 
-    def GetMonthList(self):
-        monthlist = []
-        for i in range(13):
-            name = wx.lib.calendar.Month[i]
-
-            if name != None:
-                monthlist.append(name)
-        print(monthlist)
-        return monthlist
+        self.calend_select = set_days
 
 
 class Instrcution_win(wx.Frame):

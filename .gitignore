@@ -159,6 +159,7 @@ $RECYCLE.BIN/
 *.mp4
 
 !req.txt
+!UI3/output/log.xlsx
 !UI3/data/imgs/others/logo.png
 !UI3/data/imgs/emoji/right2.png
 !UI3/data/imgs/emoji/err2.png
