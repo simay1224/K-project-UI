@@ -51,27 +51,27 @@ class Welcome_win(wx.Frame):
 
         # sizers
         combine = wx.GridBagSizer(self.sizer_w, self.sizer_h)
-        topSizer = wx.BoxSizer(wx.VERTICAL)
-        titleSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
-        lineSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
-        buttonSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
-        menuSizer = wx.BoxSizer(wx.VERTICAL)
-        infoSizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        top_sizer = wx.BoxSizer(wx.VERTICAL)
+        title_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        line_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        button_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        menu_sizer = wx.BoxSizer(wx.VERTICAL)
+        info_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
 
         # title
         text = wx.StaticText(self.panel, label="LymphCoach")
         text.SetFont(self.font_title)
-        topSizer.Add(text, 0, wx.CENTER)
+        top_sizer.Add(text, 0, wx.CENTER)
 
         line = wx.StaticLine(self.panel)
-        lineSizer.Add(line, pos=(0, 0), span=(2, int(self.width/self.sizer_w/2)), flag=wx.EXPAND|wx.BOTTOM)
+        line_sizer.Add(line, pos=(0, 0), span=(2, int(self.width/self.sizer_w/2)), flag=wx.EXPAND|wx.BOTTOM)
 
         if self.info.isPat:
             text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fname + '! How\'s your day!')
         elif self.info.isCli:
             text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fcname + '! How\'s your day!')
         text1.SetFont(self.font)
-        titleSizer.Add(text1, pos=(1, 0))
+        title_sizer.Add(text1, pos=(1, 0))
 
         button_size = (300, 50)
 
@@ -94,21 +94,23 @@ class Welcome_win(wx.Frame):
         button4.SetFont(self.font)
         button4.Bind(wx.EVT_BUTTON, self.open_history)
 
-        buttonSizer.Add(button1, pos=(1, 0))
-        # buttonSizer.Add(button2, pos=(2, 0))
-        buttonSizer.Add(button3, pos=(2, 0))
-        buttonSizer.Add(button4, pos=(3, 0))
-        menuSizer.Add(menu_title, 0, wx.CENTER)
-        menuSizer.Add(buttonSizer, 0, wx.CENTER)
+        button_sizer.Add(button1, pos=(1, 0))
+        # button_sizer.Add(button2, pos=(2, 0))
+        button_sizer.Add(button3, pos=(2, 0))
+        button_sizer.Add(button4, pos=(3, 0))
+        menu_sizer.Add(menu_title, 0, wx.CENTER)
+        menu_sizer.Add(button_sizer, 0, wx.CENTER)
 
-        dailySizer = self.setupDaily()
-        infoSizer.Add(menuSizer, pos=(1, 0))
-        infoSizer.Add(dailySizer, pos=(1, 4))
+        calendar_sizer = self.setupCalend()
+        sentence_sizer = self.setupSentence()
+        info_sizer.Add(menu_sizer, pos=(1, 0))
+        info_sizer.Add(calendar_sizer, pos=(1, 2))
+        info_sizer.Add(sentence_sizer, pos=(1, 4))
 
-        topSizer.Add(lineSizer, 0, wx.CENTER)
-        topSizer.Add(titleSizer, 0, wx.CENTER)
-        topSizer.Add(infoSizer, 0, wx.CENTER)
-        combine.Add(topSizer, pos=(2, 0))
+        top_sizer.Add(line_sizer, 0, wx.CENTER)
+        top_sizer.Add(title_sizer, 0, wx.CENTER)
+        top_sizer.Add(info_sizer, 0, wx.CENTER)
+        combine.Add(top_sizer, pos=(2, 0))
         self.panel.SetSizer(combine)
 
     def open_bodygame(self, event):
@@ -138,8 +140,8 @@ class Welcome_win(wx.Frame):
         bmp = wx.Bitmap("./data/bkimgs/BUMfk9.jpg")
         dc.DrawBitmap(bmp, 0, 0)
 
-    def setupDaily(self):
-        dailySizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+    def setupSentence(self):
+        sentence_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
 
         # http://optimallymph.org/en/login?destination=lymphedema
         self.sentences = ["I like the exercises!!! After I finished learning the exercises by following the videos, my pain and soreness were much better.",
@@ -176,31 +178,45 @@ class Welcome_win(wx.Frame):
                             "I am doing the right exercise (breathing and pumping) on the daily basis. I feel good and I feel that I owe it to myself.",
                             "Being aware of factors that contribute to developing lymphedema and specific measures to alleviate symptoms has been instrumental in reducing any swelling. I have experienced and have motivated/aware of making choice to reduce my risk."]
 
+
         sentence_title = wx.StaticText(self.panel, label="Daily Empowerment")
         sentence_title.SetFont(self.font_text_title)
+        sentence_sizer.Add(sentence_title, pos=(0, 0))
+
         random.seed(datetime.datetime.now())
         randoms = random.sample(range(len(self.sentences)), 6)
         sentence = ''
         for i in randoms:
-            if (len(sentence) < 230):
+            if (len(sentence) < 350):
                 sentence += self.sentences[i] + '\n\n'
             else:
                 break
 
         sentence_text = wx.StaticText(self.panel, label=sentence, size=(500, 300))
         sentence_text.SetFont(self.font_text)
-        dailySizer.Add(sentence_title, pos=(0, 3))
-        dailySizer.Add(sentence_text, pos=(2, 3))
 
-        self.dailyStreak()
-        self.initCalendar()
+        sentence_sizer.Add(sentence_text, pos=(2, 0))
+        return sentence_sizer
+
+
+    def setupCalend(self):
+        calend_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+
         calendar_title = wx.StaticText(self.panel, label="Current Streak")
         calendar_title.SetFont(self.font_text_title)
-        dailySizer.Add(calendar_title, pos=(0, 0))
-        dailySizer.Add(self.date, pos=(1, 0))
-        dailySizer.Add(self.calend, pos=(2, 0))
+        calend_sizer.Add(calendar_title, pos=(0, 0))
 
-        return dailySizer
+        history_max, cur_streak = self.dailyStreak()
+        streak_text = wx.StaticText(self.panel, label="Current Streak: %d\nHistorical best: %d" % (cur_streak, history_max))
+        streak_text.SetFont(self.font_text)
+        calend_sizer.Add(streak_text, pos=(2, 0))
+
+        self.initCalend()
+
+        calend_sizer.Add(self.date, pos=(3, 0))
+        calend_sizer.Add(self.calend, pos=(4, 0))
+
+        return calend_sizer
 
 
     def dailyStreak(self):
@@ -225,7 +241,7 @@ class Welcome_win(wx.Frame):
         self.sheet_dict = list(collections.OrderedDict(sorted(self.sheet_dict.items())).items())
 
         # currently: streak: finish at least 1 exercise (instead of finish all 7)
-        history_max = 1
+        history_max = []
         for i in range(0, len(self.sheet_dict)-1):
             if ((self.sheet_dict[i+1][0] - self.sheet_dict[i][0]).days == 1):
                 temp_max = 2
@@ -236,10 +252,14 @@ class Welcome_win(wx.Frame):
                         i += 1
                     else:
                         break
-                if (temp_max > history_max):
-                    history_max = temp_max
-        return history_max
+                history_max.append(temp_max)
+            else:
+                history_max.append(1)
 
+        if (self.sheet_dict[-1][0] == datetime.datetime.strptime(datetime.datetime.now().strftime('%Y-%m-%d'), '%Y-%m-%d')):
+            return (max(history_max), history_max[-1])
+        else:
+            return (max(history_max), 0)
 
     def recentStreak(self):
         # a week from current date to be displayed
@@ -255,7 +275,7 @@ class Welcome_win(wx.Frame):
                 cur_dict[self.sheet_dict[i][0]] = 1
 
 
-    def initCalendar(self):
+    def initCalend(self):
         self.calend_days = {i: [] for i in range(1, 13)}
         for i in range(len(self.sheet_dict)):
             self.calend_days[self.sheet_dict[i][0].month].append(self.sheet_dict[i][0].day)
@@ -268,6 +288,7 @@ class Welcome_win(wx.Frame):
 
         self.calend_select = self.calend_days[start_month]
         self.calend.AddSelect(self.calend_select, 'WHITE', wx.Colour(0, 90, 106, 255))
+        self.calend.SetSelDay([self.calend.GetDay()])
         self.calend.Refresh()
 
         month = [wx.lib.calendar.Month[i] for i in range(1, 13)]
@@ -283,6 +304,12 @@ class Welcome_win(wx.Frame):
     def selectDate(self, event):
         monthval = self.date.FindString(event.GetString())
         self.calend.SetMonth(monthval+1)
+
+        if ((monthval+1) == datetime.datetime.now().month):
+            self.calend.SetSelDay([self.calend.GetDay()])
+        else:
+            self.calend.SetSelDay([])
+
         self.ResetDisplay()
 
     def ResetDisplay(self):
