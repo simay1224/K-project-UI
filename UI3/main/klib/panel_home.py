@@ -872,6 +872,7 @@ class History_view(wx.Frame):
             else:
                 texts[ranges[i]] = ['Moderate', self.font, 30.]
 
+        texts = collections.OrderedDict(sorted(texts.items(), reverse=True))
         i = 0
         for first, second in texts.items():
             self.axes.text(1, first, second[0], fontdict=second[1])
