@@ -104,8 +104,11 @@ class Welcome_win(wx.Frame):
         calendar_sizer = self.setupCalend()
         sentence_sizer = self.setupSentence()
         info_sizer.Add(menu_sizer, pos=(1, 0))
-        info_sizer.Add(calendar_sizer, pos=(1, 2))
-        info_sizer.Add(sentence_sizer, pos=(1, 4))
+
+        newline = wx.StaticLine(self.panel)
+        info_sizer.Add(newline, pos=(1, 2), span=(2, 2), flag=wx.EXPAND)
+        info_sizer.Add(calendar_sizer, pos=(1, 5))
+        info_sizer.Add(sentence_sizer, pos=(1, 7))
 
         top_sizer.Add(line_sizer, 0, wx.CENTER)
         top_sizer.Add(title_sizer, 0, wx.CENTER)
@@ -645,10 +648,21 @@ class History_view(wx.Frame):
 
         self.info = info
         self.path = path
+        self.label = {
+            1: 'depth (mm)',
+            2: 'depth (mm)',
+            3: 'angle (degree)',
+            4: 'angle (degree)',
+            5: 'angle (degree)',
+            6: 'depth (mm)',
+            7: 'time (s)',
+        }
         self.no_hist_img = cv2.imread('./data/imgs/others/no_hist.jpg')
         self.init_ui()
         self.color_correct = (0.41, 0.75, 0.07, 0.6)
-        self.color_line = ['#0096BF', '#005A73', '#BFA600', '#736400', '#ffae25', '#af7900', '#d957b4', '#75005b']
+        # self.color_line = ['#0096BF', '#005A73', '#BFA600', '#736400', '#ffae25', '#af7900', '#d957b4', '#75005b']
+        self.color_line = [(174./255, 1, 0, 0.6), (139./255, 204./255, 0, 0.6), (87./255, 127./255, 0, 0.6), (99./255, 127./255, 38./255, 0.6)]
+        self.font = {'family': 'serif', 'color':  '#000000', 'weight': 'normal', 'size': 10}
         self.Show()
 
     def init_ui(self):
@@ -822,12 +836,16 @@ class History_view(wx.Frame):
 
         y = total_score * 100
         x = np.arange(0, len(y))
-        self.axes.plot(x, y, color=self.color_line[0])
+        self.axes.plot(x, y, marker='o', markersize=5, color='#0096BF')
+        # self.axes.plot(x, y, color=self.color_line[0])
         self.axes.set_xticks(x)
         # self.debug(y)
 
+        self.axes.set_ylabel('score (0, 100)')
+        self.axes.set_xlabel('date (mm/dd)')
+
         y_min, y_max = self.find_min_max(y)
-        self.axes.set_ylim(y_min[0] - 5, y_max[0] + 5)
+        self.axes.set_ylim(0, 110)
 
         x_name = np.array([x.split("-") for x in df_name['time']])
         x_name = np.array([(x[1] + "/" + x[2]) for x in x_name])
@@ -838,6 +856,28 @@ class History_view(wx.Frame):
             else:
                 prev_index = i
         self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
+
+        ranges = []
+        for i in range(4):
+            cur = 100 - 100 * i * 0.25
+            ranges.append(cur)
+        texts = {}
+        for i in range(len(ranges)):
+            if (i == 0):
+                texts[ranges[i]] = ['Outstanding', self.font, 10.]
+            elif (i == 1):
+                texts[ranges[i]] = ['Excellent', self.font, 30.]
+            elif (i ==2):
+                texts[ranges[i]] = ['Good', self.font, 30.]
+            else:
+                texts[ranges[i]] = ['Moderate', self.font, 30.]
+
+        i = 0
+        for first, second in texts.items():
+            self.axes.text(1, first, second[0], fontdict=second[1])
+            self.axes.axhline(first, color=self.color_line[i], linestyle='-', linewidth=10)
+            i += 1
+
         self.canvas.draw()
 
     # general drawing function
@@ -851,9 +891,9 @@ class History_view(wx.Frame):
         if (y.size == 0):
             raise ValueError('No data to be processed')
         elif (y.size == 1):
-            self.axes.plot(x, y, marker='o', markersize=3, color="red")
+            self.axes.plot(x, y, marker='o', markersize=5, color="red")
         else:
-            self.axes.plot(x, y, color=self.color_line[0])
+            self.axes.plot(x, y, marker='o', markersize=5, color='#0096BF')
 
         y_min, y_max = self.find_min_max(y)
         y_span = y_max - y_min
@@ -863,7 +903,11 @@ class History_view(wx.Frame):
         else:
             cri = y_max - y_span * 0.1
 
-        self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
+        reverse = False
+        if ((df_ideal[item].dtype == float) and (abs(y_min - df_ideal[item][0]) < abs(y_max - df_ideal[item][0]))):
+            reverse = True
+
+        # self.axes.axhline(cri, color=self.color_correct, linestyle='-', linewidth=30)
         self.axes.set_ylim(min(y_min, cri) - 10, max(y_max, cri) + 10)
 
         x_name = np.array([a.split("-") for a in df_name['time']])
@@ -875,6 +919,37 @@ class History_view(wx.Frame):
             else:
                 prev_index = i
         self.axes.set_xticklabels(x_name, rotation=20, fontsize=6)
+
+        self.axes.set_ylabel(self.label[self.choice.GetSelection()+1])
+        self.axes.set_xlabel('date (mm/dd)')
+
+        ranges = []
+        for i in range(4):
+            cur = cri - y_span * i * 0.25
+            if reverse:
+                cur = cri + y_span * i * 0.25
+            ranges.append(cur)
+
+        texts = {}
+        for i in range(len(ranges)):
+            if (i == 0):
+                texts[ranges[i]] = ['Outstanding', self.font, 10.]
+            elif (i == 1):
+                texts[ranges[i]] = ['Excellent', self.font, 30.]
+            elif (i ==2):
+                texts[ranges[i]] = ['Good', self.font, 30.]
+            else:
+                texts[ranges[i]] = ['Moderate', self.font, 30.]
+
+        if not reverse:
+            texts = list(collections.OrderedDict(sorted(texts.items(), reverse=True)).items())
+        else:
+            texts = list(collections.OrderedDict(sorted(texts.items())).items())
+
+        for i in range(len(texts)):
+            self.axes.text(1, texts[i][0], texts[i][1][0], fontdict=texts[i][1][1])
+            self.axes.axhline(texts[i][0], color=self.color_line[i], linestyle='-', linewidth=10)
+
         self.canvas.draw()
 
 
