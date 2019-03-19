@@ -201,6 +201,14 @@ class Welcome_win(wx.Frame):
         sentence_sizer.Add(sentence_text, pos=(2, 0))
         return sentence_sizer
 
+    def checkUser(self):
+        sheets = pd.read_excel(self.path, sheet_name=None)
+        # dictionary that stores time & number of finished exercises
+        for (key, val) in sheets.items():
+            if ((val['name'] == self.info.name).any()):
+                return True
+        return False
+
 
     def setupCalend(self):
         calend_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
@@ -226,6 +234,10 @@ class Welcome_win(wx.Frame):
         sheets = pd.read_excel(self.path, sheet_name=None)
         # dictionary that stores time & number of finished exercises
         self.sheet_dict = {}
+
+        if not self.checkUser():
+            return 0, 0
+
         for (key, val) in sheets.items():
             # get 'time' column from each sheet
             time = np.array(val[val['name'] == self.info.name]['time'])
