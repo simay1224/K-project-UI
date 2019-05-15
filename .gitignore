@@ -140,11 +140,9 @@ $RECYCLE.BIN/
 
 # data file
 *.pkl
-*.h5
 *.csv
 *.zip
 *.rar
-*.jpg
 *.png
 *.mpg
 *.exe
