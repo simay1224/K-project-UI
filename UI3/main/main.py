@@ -7,9 +7,11 @@ import wx, pdb
 def main():
     info = None
     app = wx.App()
+    print 'Creating message box...'
     info = panel_msgbox.Msgbox()
     app.MainLoop()
-
+    print 'Creating the welcome window...'
     main_win = panel_home.Welcome_win(info)
+    print 'Finish welcome windows'
     app.MainLoop()
     return main_win.game

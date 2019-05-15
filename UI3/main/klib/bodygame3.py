@@ -97,6 +97,7 @@ class BodyGameRuntime(object):
 
 
 
+
     # Read global background
     def readbackground(self):
         self.bkimg = cv2.imread(self.bklist[self.bkidx])
@@ -204,7 +205,8 @@ class BodyGameRuntime(object):
                     self.dataset = h5py.File(self.kp.dstr+'.h5', 'r')
                     # img group
                     self.imgs = self.dataset.create_group('imgs')
-    #                self.cimgs = self.imgs.create_group('cimgs')
+                    self.joints = self.dataset.create_group('joints')
+                    self.cimgs = self.imgs.create_group('cimgs')
                     self.dimgs = self.imgs.create_group('dimgs')
                     self.bdimgs = self.imgs.create_group('bdimgs')
                 print('recording .....')
@@ -501,7 +503,7 @@ class BodyGameRuntime(object):
                         jdic[ii] = joints[ii]
                     jps = self._kinect.body_joints_to_color_space(joints)  # joint points in color domain
                     djps = self._kinect.body_joints_to_depth_space(joints)  # joint points in depth domain
-
+                    # pdb.set_trace()
                     # === fingers detection ===
                     if self.kp.handmode:  # finger detect and draw
                         self.fextr.run(frame, bkimg, body, bddic, jps, pygame.color.THECOLORS["yellow"], self._frame_surface)
@@ -567,7 +569,7 @@ class BodyGameRuntime(object):
 
                     # draw skel
                     self.skel.draw_body(joints, jps, pygame.color.THECOLORS["yellow"], self._frame_surface, 8)
-                    self.draw_human_model(joints)
+                    # self.draw_human_model(joints) # ZP thinks it is useless
                     self.save_data(bddic, timestamp, jps, djps, jdic, Rel, body)
 
                 self.kp.framecnt += 1  # frame no
@@ -594,9 +596,12 @@ class BodyGameRuntime(object):
         # drawing surfaces
         if self.kp.vid_rcd:  # video recoding text
             self.io.typetext(self._frame_surface, 'Video Recording', (1580, 20), (255, 0, 0))
-            # self.cimgs.create_dataset('img_'+repr(self.kp.fno).zfill(4), data = frame)
+            self.cimgs.create_dataset('img_'+repr(self.kp.fno).zfill(4), data = frame)
             self.bdimgs.create_dataset('bd_' + repr(self.kp.fno).zfill(4), data=np.dstack((bodyidx, bodyidx, bodyidx)))
             self.dimgs.create_dataset('d_' + repr(self.kp.fno).zfill(4), data=np.dstack((dframe, dframe, dframe)))
+            if 'joints' in locals():
+                pdb.set_trace()
+                self.joints.create_dataset('joints_'+repr(self.kp.fno).zfill(4), data=joints)
             self.kp.fno += 1
             self.kp.bdjoints.append(bddic)
 

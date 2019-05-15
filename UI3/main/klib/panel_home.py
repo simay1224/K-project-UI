@@ -9,6 +9,7 @@ import collections
 from matplotlib.figure import Figure
 import wx.lib.mixins.inspection as WIT
 import wx.lib.calendar
+import traceback
 
 import sys, math, os
 import random
@@ -45,6 +46,7 @@ class Welcome_win(wx.Frame):
 
         self.init_ui()
         self.Show()
+        print 'Finished initializing welcome window...'
 
     def init_ui(self):
         self.panel = wx.Panel(self)
@@ -234,7 +236,7 @@ class Welcome_win(wx.Frame):
         sheets = pd.read_excel(self.path, sheet_name=None)
         # dictionary that stores time & number of finished exercises
         self.sheet_dict = {}
-
+        print "checkUser: ", self.checkUser()
         if not self.checkUser():
             return 0, 0
 
