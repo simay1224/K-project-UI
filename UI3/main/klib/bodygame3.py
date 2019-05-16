@@ -119,6 +119,21 @@ class BodyGameRuntime(object):
         except:
             pass
 
+        self.joints_name = [PyKinectV2.JointType_Head,
+                            PyKinectV2.JointType_Neck,
+                            PyKinectV2.JointType_SpineShoulder,
+                            PyKinectV2.JointType_SpineMid,
+                            PyKinectV2.JointType_SpineBase,
+                            PyKinectV2.JointType_ShoulderRight,
+                            PyKinectV2.JointType_ElbowRight,
+                            PyKinectV2.JointType_WristRight,
+                            PyKinectV2.JointType_ShoulderLeft,
+                            PyKinectV2.JointType_ElbowLeft,
+                            PyKinectV2.JointType_WristLeft,
+                            PyKinectV2.JointType_HipRight,
+                            PyKinectV2.JointType_HipLeft
+                            ]
+                            
         self.fig = None
         # Predefined param
         self.kp = Kparam(self.exeno, self.info.name)
@@ -205,7 +220,8 @@ class BodyGameRuntime(object):
                     self.dataset = h5py.File(self.kp.dstr+'.h5', 'r')
                     # img group
                     self.imgs = self.dataset.create_group('imgs')
-                    self.joints = self.dataset.create_group('joints')
+                    self.color_joints = self.dataset.create_group('color_joints')
+                    self.depth_joints = self.dataset.create_group('depth_joints')
                     self.cimgs = self.imgs.create_group('cimgs')
                     self.dimgs = self.imgs.create_group('dimgs')
                     self.bdimgs = self.imgs.create_group('bdimgs')
@@ -479,6 +495,7 @@ class BodyGameRuntime(object):
             # self.bk_frame_surface.fill(255,50,50)
             # === extract data from kinect ===
             if self._kinect.has_new_color_frame():
+                print 'Got new frame!'
                 frame = self._kinect.get_last_color_frame()
                 self.draw_color_frame(frame, self._frame_surface)
                 frame = frame.reshape(self.height, self.width, 4)[:, :, :3]
@@ -595,13 +612,23 @@ class BodyGameRuntime(object):
 
         # drawing surfaces
         if self.kp.vid_rcd:  # video recoding text
+            print 'Recording ', self.kp.fno
             self.io.typetext(self._frame_surface, 'Video Recording', (1580, 20), (255, 0, 0))
-            self.cimgs.create_dataset('img_'+repr(self.kp.fno).zfill(4), data = frame)
+            # pdb.set_trace()
+            if 'frame' in locals():
+                self.cimgs.create_dataset('img_'+repr(self.kp.fno).zfill(4), data = frame)
+            else:
+                print 'Color frames unfound... frame number:', self.kp.fno
             self.bdimgs.create_dataset('bd_' + repr(self.kp.fno).zfill(4), data=np.dstack((bodyidx, bodyidx, bodyidx)))
             self.dimgs.create_dataset('d_' + repr(self.kp.fno).zfill(4), data=np.dstack((dframe, dframe, dframe)))
             if 'joints' in locals():
-                pdb.set_trace()
-                self.joints.create_dataset('joints_'+repr(self.kp.fno).zfill(4), data=joints)
+                # pdb.set_trace() 
+                colorspace_joint = [[jps[i].x, jps[i].y] for i in self.joints_name]
+                depthspace_joint = [[djps[i].x, djps[i].y] for i in self.joints_name]
+                self.color_joints.create_dataset('c_joints_'+repr(self.kp.fno).zfill(4), data=colorspace_joint)
+                self.depth_joints.create_dataset('d_joints_'+repr(self.kp.fno).zfill(4), data=depthspace_joint)
+            else:
+                print 'Joints unfound! frame number:', self.kp.fno
             self.kp.fno += 1
             self.kp.bdjoints.append(bddic)
 
