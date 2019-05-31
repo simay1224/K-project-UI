@@ -17,7 +17,7 @@ class Evaluation(object):
         self.font_size = 80
 
         self.exercises = ["",
-                    "1. Muscle Tighting Deep Breathing",
+                    "1. Muscle Tighting Deep Breathi",
                     "2. Over The Head Pumping",
                     "3. Push Down Pumping",
                     "4. Horizontal Pumping",
@@ -248,6 +248,10 @@ class Evaluation(object):
         if region != 0:
             (x, y) = self.position(surface, region)
             x_ori, y_ori = x, y
+            word_surface = self.font.render(word, 0, color)
+            word_width, word_height = word_surface.get_size()
+            if region==3:
+                y += word_height
         else:  # customize position
             (x, y) = pos
             x_ori, y_ori = x, y

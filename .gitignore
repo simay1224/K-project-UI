@@ -146,6 +146,7 @@ $RECYCLE.BIN/
 *.png
 *.mpg
 *.exe
+*.h5
 
 *.txt
 *.xlsx

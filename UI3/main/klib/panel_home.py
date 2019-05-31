@@ -90,7 +90,8 @@ class Welcome_win(wx.Frame):
 
         button3 = wx.Button(self.panel, size=button_size, label="Evaluation Mode")
         button3.SetFont(self.font)
-        button3.Bind(wx.EVT_BUTTON, self.open_bodygame)
+        # button3.Bind(wx.EVT_BUTTON, self.open_bodygame)
+        button3.Bind(wx.EVT_BUTTON, self.open_evaluation)
 
         button4 = wx.Button(self.panel, size=button_size, label="History Review")
         button4.SetFont(self.font)
@@ -121,6 +122,9 @@ class Welcome_win(wx.Frame):
     def open_bodygame(self, event):
         self.game = bodygame3.BodyGameRuntime(self.info)
         self.game.run()
+
+    def open_evaluation(self, event):
+        evaluation = Evaluation_win(self.info, None, 'Evaluation')
 
     def open_instruction(self, event):
         instruct = Instrcution_win(None, 'Instruction')
@@ -242,8 +246,13 @@ class Welcome_win(wx.Frame):
 
         for (key, val) in sheets.items():
             # get 'time' column from each sheet
+            # import pdb
+            # pdb.set_trace()
             time = np.array(val[val['name'] == self.info.name]['time'])
+            if (len(time) == 0):
+                continue
             time = np.unique([i.split('-')[:-2] for i in time], axis=0)
+            
             unique_time = []
             for i in range(len(time)):
                 concat = ''
@@ -272,6 +281,8 @@ class Welcome_win(wx.Frame):
                 history_max.append(temp_max)
             else:
                 history_max.append(1)
+        if (len(history_max) == 0):
+            history_max.append(1)
 
         if (self.sheet_dict[-1][0] == datetime.datetime.strptime(datetime.datetime.now().strftime('%Y-%m-%d'), '%Y-%m-%d')):
             return (max(history_max), history_max[-1])
@@ -338,7 +349,152 @@ class Welcome_win(wx.Frame):
 
         self.calend_select = set_days
 
+class Evaluation_win(wx.Frame):
 
+    def __init__(self, info, parent, title):
+        self.font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_field = wx.Font(12, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
+        self.font_text = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font_text_title = wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD, False, 'Arial')
+        self.info = info
+        self.width, self.height = wx.GetDisplaySize()
+        self.height -= 100
+        self.width -= 140
+        self.sizer_w = 10
+        self.sizer_h = 10
+
+        super(Evaluation_win, self).__init__(parent, title=title, size=(self.width, self.height),  style=wx.DEFAULT_FRAME_STYLE | wx.RESIZE_BORDER)
+        isz = (16, 16)
+        ico = wx.Icon('./data/imgs/others/logo.png', wx.BITMAP_TYPE_PNG, isz[0], isz[1])
+        self.SetIcon(ico)
+
+        self.init_ui()
+        self.Show()
+        print 'Finished initializing evaluation window...'
+
+    def init_ui(self):
+        self.panel = wx.Panel(self)
+        # sizers
+        combine = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        top_sizer = wx.BoxSizer(wx.VERTICAL)
+        title_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        line_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        button_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        menu_sizer = wx.BoxSizer(wx.VERTICAL)
+        info_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+
+        # title
+        text = wx.StaticText(self.panel, label="LymphCoach Exercises Selection")
+        text.SetFont(self.font_title)
+        top_sizer.Add(text, 0, wx.CENTER)
+
+        line = wx.StaticLine(self.panel)
+        line_sizer.Add(line, pos=(0, 0), span=(2, int(self.width/self.sizer_w/2)), flag=wx.EXPAND|wx.BOTTOM)
+
+        if self.info.isPat:
+            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fname + '! How\'s your day!')
+        elif self.info.isCli:
+            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fcname + '! How\'s your day!')
+        text1.SetFont(self.font)
+        title_sizer.Add(text1, pos=(1, 0))
+
+        button_size = (500, 50)
+
+        menu_title = wx.StaticText(self.panel, label="Exercises")
+        menu_title.SetFont(self.font_text_title)
+
+        button1 = wx.Button(self.panel, size=button_size, label="Exercise 1 : Muscle Tighting Deep Breathing")
+        button1.SetFont(self.font)
+        button1.Bind(wx.EVT_BUTTON, self.open_exercise_1)
+
+        button2 = wx.Button(self.panel, size=button_size, label="Exercise 2 : Over The Head Pumping")
+        button2.SetFont(self.font)
+        button2.Bind(wx.EVT_BUTTON, self.open_exercise_2)
+
+        button3 = wx.Button(self.panel, size=button_size, label="Exercise 3 : Push Down Pumping")
+        button3.SetFont(self.font)
+        button3.Bind(wx.EVT_BUTTON, self.open_exercise_3)
+
+        button4 = wx.Button(self.panel, size=button_size, label="Exercise 4 : Horizontal Pumping")
+        button4.SetFont(self.font)
+        button4.Bind(wx.EVT_BUTTON, self.open_exercise_4)
+
+        button5 = wx.Button(self.panel, size=button_size, label="Exercise 5 : Shoulder Rolls")
+        button5.SetFont(self.font)
+        button5.Bind(wx.EVT_BUTTON, self.open_exercise_6)
+
+        button6 = wx.Button(self.panel, size=button_size, label="Exercise 6 : Clasp and Spread")
+        button6.SetFont(self.font)
+        button6.Bind(wx.EVT_BUTTON, self.open_exercise_7)
+
+
+ 
+        button_sizer.Add(button1, pos=(1, 0))
+        button_sizer.Add(button2, pos=(2, 0))
+        button_sizer.Add(button3, pos=(3, 0))
+        button_sizer.Add(button4, pos=(4, 0))
+        button_sizer.Add(button5, pos=(5, 0))
+        button_sizer.Add(button6, pos=(6, 0))
+
+        menu_sizer.Add(menu_title, 0, wx.CENTER)
+        menu_sizer.Add(button_sizer, 0, wx.CENTER)
+
+        # calendar_sizer = self.setupCalend()
+        # sentence_sizer = self.setupSentence()   
+        info_sizer.Add(menu_sizer, pos=(1, 0))
+
+        # newline = wx.StaticLine(self.panel)
+        # info_sizer.Add(newline, pos=(1, 2), span=(2, 2), flag=wx.EXPAND)
+  
+
+        top_sizer.Add(line_sizer, 0, wx.CENTER)
+        top_sizer.Add(title_sizer, 0, wx.CENTER)
+        top_sizer.Add(info_sizer, 0, wx.CENTER)
+        combine.Add(top_sizer, pos=(2, 0))
+        self.panel.SetSizer(combine)
+        print ('Finishing initializing UI for Evaluation.')
+
+
+    def open_bodygame(self, exe_num, recording):
+        self.game = bodygame3.BodyGameRuntime(self.info, exe_num, recording)
+        self.game.run()
+
+    def open_exercise_1(self, event):
+        if_record = self.check_recording(event)
+        self.open_bodygame(exe_num=1, recording = if_record)
+
+    def open_exercise_2(self, event):
+        if_record = self.check_recording(event)
+        self.open_bodygame(exe_num=2, recording = if_record)
+
+    def open_exercise_3(self, event):
+        if_record = self.check_recording(event)
+        self.open_bodygame(exe_num=3, recording = if_record)
+
+    def open_exercise_4(self, event):
+        if_record = self.check_recording(event)
+        self.open_bodygame(exe_num=4, recording = if_record)
+
+    def open_exercise_5(self, event):
+        if_record = self.check_recording(event)
+        self.open_bodygame(exe_num=5, recording = if_record)
+
+    def open_exercise_6(self, event):
+        if_record = self.check_recording(event)
+        self.open_bodygame(exe_num=6, recording = if_record)
+
+    def open_exercise_7(self, event):
+        if_record = self.check_recording(event)
+        self.open_bodygame(exe_num=7, recording = if_record)
+
+    def check_recording(self, event):
+        message = 'Do you want to record the following exercise? The exercise will start after selection.'
+        dlg = wx.MessageDialog(self.panel, message,'Recording', wx.YES_NO | wx.ICON_INFORMATION)
+        result = dlg.ShowModal() == wx.ID_YES
+        dlg.Destroy()
+        return result
+        
 class Instrcution_win(wx.Frame):
 
     def __init__(self, parent, title):
@@ -383,8 +539,8 @@ class Instrcution_win(wx.Frame):
         button_print.SetFocus()
         self.Bind(wx.EVT_BUTTON, self.OnBtnPrint, button_print)
 
-        exer = [self.str['exe'][i] for i in range(1, 8)]
-        self.lst = wx.ListBox(self.panel, size=(350, self.height - 25 - 45), choices=exer, style=wx.LB_SINGLE)
+        exer = [self.str['exe'][i] for i in range(1, 7)]
+        self.lst = wx.ListBox(self.panel, size=(350, self.height+100 - 25 - 45), choices=exer, style=wx.LB_SINGLE)
         self.lst.SetBackgroundColour((230, 230, 230))
         self.lst.SetSelection(0)
 
@@ -418,9 +574,9 @@ class Instrcution_win(wx.Frame):
         self.str['exe'][2] = 'Exercise 2 : Over The Head Pumping'
         self.str['exe'][3] = 'Exercise 3 : Push Down Pumping'
         self.str['exe'][4] = 'Exercise 4 : Horizontal Pumping'
-        self.str['exe'][5] = 'Exercise 5 : Reach to the Sky'
-        self.str['exe'][6] = 'Exercise 6 : Shoulder Rolls'
-        self.str['exe'][7] = 'Exercise 7 : Clasp and Spread'
+        # self.str['exe'][5] = 'Exercise 5 : Reach to the Sky'
+        self.str['exe'][5] = 'Exercise 5 : Shoulder Rolls'
+        self.str['exe'][6] = 'Exercise 6 : Clasp and Spread'
 
         self.str['ins'][1] = '\n  '\
                              '\n1. Put your hands on the abdomen.'\
@@ -448,20 +604,20 @@ class Instrcution_win(wx.Frame):
                              '\n4. Repeat this 4 times.'\
                              '\n5. Put down your arms.'
 
-        self.str['ins'][5] = '\n  '\
-                             '\n1. Raise your arms up  as high as possible and clasp.'\
-                             '\n2. Bend your body to the left.'\
-                             '\n3. Bend your body to the right.'\
-                             '\n4. Repeat 4 times.'\
-                             '\n5. Put down your arms.'
+        # self.str['ins'][5] = '\n  '\
+        #                      '\n1. Raise your arms up  as high as possible and clasp.'\
+        #                      '\n2. Bend your body to the left.'\
+        #                      '\n3. Bend your body to the right.'\
+        #                      '\n4. Repeat 4 times.'\
+        #                      '\n5. Put down your arms.'
 
-        self.str['ins'][6] = '\n  '\
+        self.str['ins'][5] = '\n  '\
                              '\n1. Put your hands on the abdomen.'\
                              '\n2. Rotate you shoulder.'\
                              '\n3. Repeat 4 times.'\
                              '\n4. Put down your hands.'
 
-        self.str['ins'][7] = '\n  '\
+        self.str['ins'][6] = '\n  '\
                              '\n1. Raise and clasp your hands to the abdomen.'\
                              '\n2. Raise clasped hands toward to your forehead and keep elbows together.'\
                              '\n3. Slide your hands to the back of your head and spread the elbows open wide.'\
@@ -484,14 +640,14 @@ class Instrcution_win(wx.Frame):
                                 '\n1. When you do the "T-pose", make sure that your hand, elbow, and shoulder are straight'\
                                 '\n2. When you close your hands, make sure that your hand and shoulder are in the same height.'\
 
-        self.str['note'][5] = 'Tips :'\
-                                '\n1. When you bend your body, make sure that your hand, elbow, and shoulder are straight.'\
-                                '\n2. Keep your body staight'
+        # self.str['note'][5] = 'Tips :'\
+        #                         '\n1. When you bend your body, make sure that your hand, elbow, and shoulder are straight.'\
+        #                         '\n2. Keep your body staight'
 
-        self.str['note'][6] = 'Tips :'\
+        self.str['note'][5] = 'Tips :'\
                                 '\n1. Try to rotate your shoulders in a full circle'
 
-        self.str['note'][7] = 'Tips :'\
+        self.str['note'][6] = 'Tips :'\
                                 '\n1. When you raise your arms to the forehead, keep two elbows as close as possible.'\
                                 '\n2. When your hands are in the back, spread the elbows open as wide as possible.'\
                                 '\n3. Keep your body staight.'
@@ -501,7 +657,8 @@ class Instrcution_win(wx.Frame):
         ex = self.lst.GetSelection()+1
         self.text.AppendText(self.str['exe'][ex]+self.str['ins'][ex]+'\n\n')
         self.text.AppendText(self.str['note'][ex])
-        if ex == 5:
+        # if ex == 5:
+        if False:
             self.player.doLoadFile(os.path.abspath('data/video/ex'+str(ex)+'.mpg'))
         else:
             self.player.doLoadFile(os.path.abspath('data/video/tr'+str(ex)+'.mp4'))
@@ -583,13 +740,13 @@ class MoviePanel(wx.Panel):
 
         # Create some controls
         self.mc = wx.media.MediaCtrl(self, size=size, style=wx.SIMPLE_BORDER)
-        self.playButton = wx.Button(self, -1, "Play")
+        self.playButton = wx.Button(self, -1, "Play", size=(100,40))
         self.Bind(wx.EVT_BUTTON, self.onPlay, self.playButton)
 
-        self.pauseButton = wx.Button(self, -1, "Pause")
+        self.pauseButton = wx.Button(self, -1, "Pause", size=(100,40))
         self.Bind(wx.EVT_BUTTON, self.onPause, self.pauseButton)
 
-        self.stopButton = wx.Button(self, -1, "Stop")
+        self.stopButton = wx.Button(self, -1, "Stop", size=(100,40))
         self.Bind(wx.EVT_BUTTON, self.onStop, self.stopButton)
 
         self.slider = wx.Slider(self, -1, 0, 0, 10)

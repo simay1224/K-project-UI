@@ -41,7 +41,7 @@ limbidx = np.array([4, 5, 6, 8, 9, 10, 20])
 
 class BodyGameRuntime(object):
 
-    def __init__(self, info):
+    def __init__(self, info, exe_num=3, if_recording=False):
         pygame.init()
         # Used to manage how fast the screen updates
         self._clock = pygame.time.Clock()
@@ -73,7 +73,7 @@ class BodyGameRuntime(object):
         except:
             pass
 
-        self.exeno = 3  # exercise number
+        self.exeno = exe_num  # exercise number
         self.init_param()
 
         if self.kp.kinect:
@@ -94,6 +94,8 @@ class BodyGameRuntime(object):
             self.bkidx = 11
 
         self.readbackground()
+
+        self.if_recording = if_recording
 
 
 
@@ -186,11 +188,14 @@ class BodyGameRuntime(object):
             self.kp._done = True
             if self.kp.kinect:
                 self.movie.stop()
+            pygame.quit()
 
         if press[pygame.K_q]:
             self.kp._done = True
             if self.kp.kinect:
                 self.movie.stop()
+            pygame.quit()
+
 
         if press[pygame.K_h]:  # use 'h' to open, 'ctrl+h' to close finger detection
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
@@ -348,6 +353,8 @@ class BodyGameRuntime(object):
                 self.kp._done = True  # Flag that we are done so we exit this loop
                 if self.kp.kinect:
                     self.movie.stop()
+                pygame.quit()
+                
             elif event.type == pygame.VIDEORESIZE:  # window resized
                 self._screen = pygame.display.set_mode(event.dict['size'],
                                pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
@@ -428,11 +435,11 @@ class BodyGameRuntime(object):
             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                                 'Overall evaluation:\n\n- '+self.errsums, 3)
 
-
+# the main menu after each exercise
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                            'Next exercise will start in %s seconds.' % str(self.cntdown/30), 0, (120, 830) , fsize=50, color=self.kp.c_togo)
+                            'Next exercise will start in %s seconds.' % str(self.cntdown/30), 0, (120, 800) , fsize=50, color=self.kp.c_togo)
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                            'Or press "Space" to start next exercise.', 0, (120, 870), fsize=50, color=self.kp.c_togo)
+                            'Or press "Space" to start next exercise \nOr press ESC to Quit.', 0, (120, 840), fsize=50, color=self.kp.c_togo)
 
         self.cntdown -= 1
         if self.cntdown == 0:

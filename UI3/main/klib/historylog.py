@@ -20,7 +20,7 @@ class Historylog(object):
         self.excelPath = "./output/log.xlsx"
         self.order = [0,1,2,2,3,4,5]
         self.exercises = ["",
-                            "1. Muscle Tighting Deep Breathing",
+                            "1. Muscle Tighting Deep Breathi",
                             "2. Over The Head Pumping",
                             "3. Push Down Pumping",
                             "4. Horizontal Pumping",
@@ -34,7 +34,7 @@ class Historylog(object):
         brth  = ["Min depth (in mm)", "Max depth (in mm)", "Average depth (in mm)"]  # breathing exercise feature
         hs    = ["Sync rate"]                         # hand exercise feature => hand breath sync rate
         shld  = ["Max shoulder depth (in mm)", "Min shoulder depth (in mm)"]
-        clsp  = ["Max hold time", "Min hold time", "average hold time"]
+        clsp  = ["Max hold time", "Min hold time", "Average hold time"]
         swing = ["Max right bending angle", "Min right bending angle",
                  "Max left bending angle", "Min left bending angle"]
         exer3 = ['1st lower right elbow angle', '1st straight right elbow angle',
