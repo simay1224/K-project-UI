@@ -21,9 +21,17 @@ class Evaluation(object):
                     "2. Over The Head Pumping",
                     "3. Push Down Pumping",
                     "4. Horizontal Pumping",
-                    "5. Reach to the Sky",
-                    "6. Shoulder Rolls",
-                    "7. Clasp and Spread"]
+                    "5. Shoulder Rolls",
+                    "6. Clasp and Spread"]
+        #remove the reach to the sky.
+        #self.exercises = ["",
+        #            "1. Muscle Tighting Deep Breathi",
+        #            "2. Over The Head Pumping",
+        #            "3. Push Down Pumping",
+        #            "4. Horizontal Pumping",
+        #            "5. Reach to the Sky",
+        #            "6. Shoulder Rolls",
+        #            "7. Clasp and Spread"]
 
     def joint_angle(self, joints, idx=[0, 1, 2], offset=0):
         """ finding the angle between 3 joints.
@@ -105,6 +113,8 @@ class Evaluation(object):
                     np.mean(ana.brth.brth_diff)]
         elif exeno == 2:
             self.breath_hand_plot(ana, exeno)
+            if len(ana.brth.brth_diff) == 0:
+                return ['','','', '']
             return [min(ana.brth.brth_diff), max(ana.brth.brth_diff),
                     np.mean(ana.brth.brth_diff), ana.brth.sync_rate]
         elif exeno == 3:
@@ -119,15 +129,21 @@ class Evaluation(object):
             langle = np.vstack([ana.horzp.Lcangle, ana.horzp.Ltangle]).T.flatten().tolist()
             rangle = np.vstack([ana.horzp.Rcangle, ana.horzp.Rtangle]).T.flatten().tolist()
             return rangle + [np.mean(rangle[::2]), np.mean(rangle[1::2])]+ langle + [np.mean(langle[::2]), np.mean(langle[1::2])]
+        #   hiding exercise 5, reach to sky
+        #elif exeno == 5:
+        #    max_right = np.abs(ana.swing.angle_ini - np.min(ana.swing.min_ary[1:, 1]))
+        #    min_right = np.abs(ana.swing.angle_ini - np.max(ana.swing.min_ary[1:, 1]))
+        #    max_left  = np.abs(ana.swing.angle_ini - np.max(ana.swing.max_ary[1:, 1]))
+        #    min_left  = np.abs(ana.swing.angle_ini - np.min(ana.swing.max_ary[1:, 1]))
+        #    return [max_right, min_right, max_left, min_left]
+        #elif exeno == 6:
         elif exeno == 5:
-            max_right = np.abs(ana.swing.angle_ini - np.min(ana.swing.min_ary[1:, 1]))
-            min_right = np.abs(ana.swing.angle_ini - np.max(ana.swing.min_ary[1:, 1]))
-            max_left  = np.abs(ana.swing.angle_ini - np.max(ana.swing.max_ary[1:, 1]))
-            min_left  = np.abs(ana.swing.angle_ini - np.min(ana.swing.max_ary[1:, 1]))
-            return [max_right, min_right, max_left, min_left]
+            if len(ana.shld.dep_diff) == 0:
+                return ['','']    
+            #return [max(ana.shld.dep_diff).astype(float), min(ana.shld.dep_diff).astype(float)]  #gives attribute error
+            return [float(max(ana.shld.dep_diff)), float(min(ana.shld.dep_diff))]
+        #elif exeno == 7:
         elif exeno == 6:
-            return [max(ana.shld.dep_diff).astype(float), min(ana.shld.dep_diff).astype(float)]
-        elif exeno == 7:
             max_hold  = np.max(ana.clsp.holdtime)
             min_hold  = np.min(ana.clsp.holdtime)
             mean_hold = np.mean(ana.clsp.holdtime)
@@ -139,10 +155,13 @@ class Evaluation(object):
         """  compare user's latest data with its historical data
         """
         if not all(x == '' for x in data):
-            if not os.path.isfile('./output/compare.txt'):
-                text_file = open("./output/compare.txt", "w")
+            #compare_file = './output/compare.txt'
+            #hiding exercise reach to sky
+            compare_file = './output/compare_without_exercise5_reach_to_sky.txt'
+            if not os.path.isfile(compare_file):
+                text_file = open(compare_file, "w")
             else:
-                text_file = open("./output/compare.txt", "a")
+                text_file = open(compare_file, "a")
             date = '-'.join(map(str,[time.year,time.month,time.day,time.hour,time.minute]))
             str0 = '\n%10s: %s\n%10s: %s\n%10s: %s\n'% ('Exercise', exeno, 'Username', userinfo.name, 'Date', date)
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import ctypes, os, datetime, glob
 import pygame, sys, copy
+import win32gui, win32con
 
 if sys.platform == "win32":
     import h5py
@@ -52,7 +53,12 @@ class BodyGameRuntime(object):
         self.width = 1920
         self.height = 1080
         # print(self.width, self.height)
-        self._screen = pygame.display.set_mode((self.width, self.height), pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
+        #self._screen = pygame.display.set_mode((self.width, self.height),  pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32) #ORIGINAL ONE
+        self._screen = pygame.display.set_mode((0,0),  pygame.FULLSCREEN, 32)
+        #self._screen = pygame.display.set_mode((self.width, self.height),  pygame.HWSURFACE | pygame.DOUBLEBUF  | pygame.RESIZABLE, 32)
+        #background color:
+        self.background_color = (230,230,230)
+        self._screen.fill(self.background_color)
 
         self._frame_surface = pygame.Surface((self.width, self.height), 0, 32).convert()  # kinect surface
         self.bk_frame_surface = pygame.Surface((self.width, self.height), 0, 32).convert()  #background surface
@@ -141,10 +147,20 @@ class BodyGameRuntime(object):
         self.kp = Kparam(self.exeno, self.info.name)
 
         # Avator with exeno
-        if self.kp.kinect:
-            self.movie = movie.Movie(self.exeno)
+        #skip the 5th movie, whuc==ich is reach to the sky
+        if self.exeno ==5:
+            movie_no =6
+        elif self.exeno == 6:
+            movie_no =7
         else:
-            self.movie = movie.Movie(self.exeno, self.kp.vid_w, self.kp.vid_h)
+            movie_no = self.exeno
+
+        if self.kp.kinect:
+            #self.movie = movie.Movie(self.exeno)
+            self.movie = movie.Movie(movie_no)
+        else:
+            #self.movie = movie.Movie(self.exeno, self.kp.vid_w, self.kp.vid_h)
+            self.movie = movie.Movie(movie_no, self.kp.vid_w, self.kp.vid_h)
 
         self.kp.scale = self.movie.ini_resize(self._infoObject.current_w, self._infoObject.current_h, self.kp.ratio)
         self.kp.ini_scale = self.kp.scale
@@ -311,20 +327,26 @@ class BodyGameRuntime(object):
             print('====  Doing exercise 4 ====')
             self.reset()
         if press[pygame.K_5]:  # use '5' to change to execise 5
+            #we are skipping 5 so exeno =5 would go to exercise 6 in the backend
             self.exeno = 5
+
             print('====  Doing exercise 5 ====')
             self.reset()
         if press[pygame.K_6]:  # use '6' to change to execise 6
             self.exeno = 6
             print('====  Doing exercise 6 ====')
             self.reset()
-        if press[pygame.K_7]:  # use '7' to change to execise 7
-            self.exeno = 7
-            print('====  Doing exercise 7 ====')
-            self.reset()
+
+        #if press[pygame.K_7]:  # use '7' to change to execise 7
+         #   self.exeno = 7
+          #  print('====  Doing exercise 7 ====')
+           # self.reset()
+
         if press[pygame.K_SPACE]:
-            if self.exeno == 7:
+            #if self.exeno == 7:
+            if self.exeno == 6:
                 self.exeno = 1
+            
             else:
                 self.exeno += 1
             print('Next exercise ..................')
@@ -395,15 +417,21 @@ class BodyGameRuntime(object):
         bddic['RHS'] = body.hand_right_state
 
     def process_analysis(self):
+        print("\n\nprocess analysis:")
+        print(self.ana.evalstr)
         if self.ana.evalstr != '':
             if 'well' in (self.ana.evalstr).lower():
+                print("does it say well done?")
                 self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_well)
                 if len(self.evalhis) < min(self.ana.repcnt, 4):
                     self.evalhis.append(True)
             else:
+                print("no it does not")
                 self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_err)
                 if len(self.evalhis) < min(self.ana.repcnt, 4):
                     self.evalhis.append(False)
+        print(self.ana.repcnt)
+        print(self.evalhis)
 
     def process_finish_analysis(self):
         if not self.kp.finish:
@@ -430,21 +458,22 @@ class BodyGameRuntime(object):
         if self.errsums == '':
             if len(self.evalhis) != 0:
                 self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                    'Overall evaluation:\n\nPerfect !!', 3)
+                                    'Overall evaluation:\n\nPerfect !!', 3, color=self.kp.c_togo)
         else:
             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                'Overall evaluation:\n\n- '+self.errsums, 3)
+                                'Overall evaluation:\n\n- '+self.errsums, 3, color=self.kp.c_togo)
 
 # the main menu after each exercise
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                            'Next exercise will start in %s seconds.' % str(self.cntdown/30), 0, (120, 800) , fsize=50, color=self.kp.c_togo)
+                            'Next exercise will start in %s seconds.' % str(self.cntdown/30), 0, (120, 800) ,color=self.kp.c_guide, fsize=50) # the color was color=self.kp.c_togo
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                            'Or press "Space" to start next exercise \nOr press ESC to Quit.', 0, (120, 840), fsize=50, color=self.kp.c_togo)
+                            'Or press "Space" to start next exercise \nOr press ESC to Quit.', 0, (120, 840),color=self.kp.c_guide, fsize=50) # the color was color=self.kp.c_togo
 
         self.cntdown -= 1
         if self.cntdown == 0:
-            if self.exeno == 7:
+            if self.exeno == 6:
                 self.exeno = 1
+
             else:
                 self.exeno += 1
             print('Next exercise ..................')
@@ -671,14 +700,16 @@ class BodyGameRuntime(object):
         # emoji
         emoji_size = min(int(self._screen.get_width()*120./self.width), int(self._screen.get_height()*120./self.height))
         # emoji_err = pygame.transform.scale(self.errimg, (int(emoji_size*0.8), int(emoji_size*0.8)))
-        emoji_err = pygame.transform.scale(self.errimg, (emoji_size, emoji_size))
-        emoji_cor = pygame.transform.scale(self.corimg, (emoji_size, emoji_size))
+        emoji_err = pygame.transform.scale(self.errimg, (emoji_size, emoji_size/2))  # drop the height by 2
+        emoji_cor = pygame.transform.scale(self.corimg, (emoji_size, emoji_size/2))  # drop the height by 2
         emoji_well = pygame.transform.scale(self.wellimg, (emoji_size*2, emoji_size*2))
 
 
-        pos_h = 940. / 1080 * self._infoObject.current_h - 70
+        #pos_h = 940. / 1080 * self._infoObject.current_h - 70 
+        pos_h = 940. / 1080 * self._infoObject.current_h - 70 + emoji_size/2 # minus makes it up, plus makes it down
         for eidx, res in enumerate(self.evalhis):
             pos_w = 120 + eidx*(emoji_size + 20)
+            
             if res:
                 self._screen.blit(emoji_cor, (pos_w, pos_h))
             else:
@@ -699,5 +730,9 @@ class BodyGameRuntime(object):
         surface_to_draw = None
         bksurface_to_draw = None
         pygame.display.update()
+        #maximize teh window
+        #hwnd = win32gui.GetForegroundWindow()
+        #win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
+
         # limit frames per second
         self._clock.tick(fps)

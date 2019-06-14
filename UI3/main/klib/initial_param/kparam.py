@@ -34,12 +34,12 @@ class Kparam(object):
         # color
         # instruction part
         self.c_inst = (0, 90, 115, 255)
-        self.c_tips = (19, 144, 178, 0)
+        self.c_tips = (106, 57, 0, 0) #was (19, 144, 178, 0)
         # eval part
-        self.c_guide     = (0, 90, 115, 255)
-        self.c_eval_well = (19, 144, 178, 0)
-        self.c_eval_err  = (230, 115, 0, 255)
-        self.c_togo      = (255, 20, 100, 255)
+        self.c_guide     = (0, 90, 106, 255)  #was (0, 90, 115, 255)
+        self.c_eval_well = (106, 57, 0, 0)  # was (19, 144, 178, 0)
+        self.c_eval_err  = (106, 4, 0, 255) #was (230, 115, 0, 255)
+        self.c_togo      = (106, 4, 10, 255) # was (255, 20, 100, 255), now iti smaroon
         # style
         self.s_normal = 'montserrat'
         self.s_emp = 'montserrat'
@@ -72,8 +72,8 @@ class Kparam(object):
         self.video2_UB = 560  # video2 upper bound
         # eval sections
         self.eval_sec1 = 110
-        self.eval_sec2 = 330
-        self.eval_sec3 = 455
+        self.eval_sec2 = 330 -50# was 330
+        self.eval_sec3 = 455 - 50 #was 330
         self.eval_sec4 = 835
         self.eval_sec5 = 900
         self.eval_sec6 = 1080

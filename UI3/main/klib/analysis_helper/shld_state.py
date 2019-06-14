@@ -38,7 +38,7 @@ class Shld_state(object):
         """
         return np.where(bdimg[:shld[1], shld[0]] != bdidx)[0][::-1][0]+1
 
-    def findminmax(self, data, rng=50, start=0, ignore=10, dtype='height'):
+    def findminmax(self, data, rng=50, start=0, ignore=10, dtype='height'): # original value: rng=50
         """ find local min & max.
         """
         foo = argrelextrema(gf(data, 5), np.less_equal, order=rng)[0]
@@ -54,7 +54,8 @@ class Shld_state(object):
             vallvalue = gf(data, 5)[vall]
             return [peak, vall, peakvalue, vallvalue]
 
-    def chkdepth(self, peak, vall, th=20):
+    def chkdepth(self, peak, vall, th=5):
+        #changed treshold to get a better result, original value was 20
         """ check the depth change in this cycle
             if too small => shlder up-and-down.
         """
@@ -63,22 +64,66 @@ class Shld_state(object):
         else:
             return False
 
+    def chk_height(self, peak, vall, th=5):
+        #changed treshold to get a better result, original value was 20
+        """ check the depth change in this cycle
+            if too small => shlder up-and-down.
+        """
+        if (peak[0]-vall[0]) > th:
+            return True
+        else:
+            return False
+
+
     def findcycle(self, y, z, trig=0):
         """ check the shlder motion sequence to find out whrther
             the user finish one cycle.
         """
-        if (max(len(y[0]), len(y[1]), len(z[0]), len(z[1])) \
-            - min(len(y[0]), len(y[1]), len(z[0]), len(z[1]))) > 1:
-            return 0
-        num = (len(y[0])+len(y[1])+len(z[0])+len(z[1])-1)/4
-        if num > 0:
-            chk = self.chkdepth(z[2], z[3])
-            if chk:
-                return 1  # shlder roll
+        y_dif =  max(len(y[0]), len(y[1])) -  min(len(y[0]), len(y[1]))
+        z_dif =  max(len(z[0]), len(z[1])) -  min(len(z[0]), len(z[1]))
+        if min ( y_dif , z_dif )>1:
+            print("minimum difference greater than 1, returns 0")
+            return 0 # shlder roll fail
+        #if y[0] and y[1]:
+        #    height_check = self.chk_height(y[0], y[1])
+        #    if height_check:
+        if y[0].size != 0 and y[1].size !=0: #theres at least up and down movement
+            if z[2].size != 0 and z[3].size != 0 : 
+                depth_chk = self.chkdepth(z[2], z[3]) # was self.chkdepth(z[2], z[3])
+                if depth_chk:
+                    print("returns 1")
+                    self.eval = ''
+                    return 1 # shlder roll sucess
+                else:
+                    print("returns 2")
+                    return 2 # up-and-down
+            elif max(len(z[0]), len(z[1])) -  min(len(z[0]), len(z[1])) > 1: #two peaks or two valls happen
+                print("returns 1 because two peaks or valls")
+                self.eval = ''
+                return 1 # shlder roll sucess
             else:
-                return 2  # up-and-down
+                print("returns 2")
+                return 2 # up-and-down
+
         else:
-            return 0  # not a cycle
+            print("returns 0")
+            return 0  #shoulder roll fail
+
+        #if (max(len(y[0]), len(y[1]), len(z[0]), len(z[1])) \
+        #    - min(len(y[0]), len(y[1]), len(z[0]), len(z[1]))) > 1:
+        #    return 0
+        #num = (len(y[0])+len(y[1])+len(z[0])+len(z[1])-1)/4
+        #if num > 0:
+        #    chk = self.chkdepth(z[2], z[3])
+        #    if chk:
+        #        print("returns 1")
+        #        return 1  # shlder roll sucess
+        #    else:
+        #         print("returns 2")
+        #         return 2  # up-and-down
+        #else:
+        #    print("returns zero")
+        #    return 0  # not a cycle
 
     def statechk(self, ylist, dlist):
         """ check shoulder is 1. rotate 2. up and down.
@@ -96,7 +141,8 @@ class Shld_state(object):
         self.type = self.findcycle(y, z)
 
         if self.type == 1:
-            self.dep_diff.append(z[2][0]-z[3][0])
+            if z[2].size != 0 and z[3].size != 0:
+                self.dep_diff.append(z[2][0]-z[3][0])
             self.cnt += self.type  # cycle number
             if self.eval == '':
                 self.evalstr = 'Repitition done: Well done.'
@@ -105,7 +151,8 @@ class Shld_state(object):
                 self.eval = ''
             self.type = 0
         elif self.type == 2:
-            self.dep_diff.append(z[2][0]-z[3][0])
+            if z[2].size != 0 and z[3].size != 0:
+                self.dep_diff.append(z[2][0]-z[3][0])
             # print('simple up and down')
             self.evalstr = 'Rotate deeper !!\n'
             self.eval = 'Rotate deeper !!\n'
@@ -115,6 +162,11 @@ class Shld_state(object):
             self.type = 0
         else:
             self.evalstr = ''
+        #if not self.dep_diff:
+            #we have to append dep_diff anyway, ebcause it gives error
+         #   self.dep_diff.append(0)
+        print("dep_diff:")
+        print(self.dep_diff)
 
     def run(self, depth, joints):
         self.do = True
@@ -127,5 +179,7 @@ class Shld_state(object):
         # self.rylist.append(rshld[1])
         # self.rdlist.append(depth[rshld[1], rshld[0]])
         if (self.fcnt >= 50) and (self.fcnt%20 == 0):
+            print("lylist= ", self.lylist)
+            print("ldlist = ", self.ldlist)
             self.statechk(self.lylist, self.ldlist)
             #self.statechk(rylist, rdlist)

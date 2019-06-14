@@ -32,10 +32,12 @@ class Welcome_win(wx.Frame):
         self.font_text_title = wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD, False, 'Arial')
         self.info = info
         self.game = None
-        self.path = './output/log.xlsx'
+        #self.path = './output/log.xlsx'
+        #changing the path in order to hide the exercise5: reach to sky
+        self.path = './output/log_without_exercise5_reach_to_sky.xlsx'
 
         self.width, self.height = wx.GetDisplaySize()
-        self.height -= 100
+        #self.height = 100
         self.sizer_w = 10
         self.sizer_h = 10
 
@@ -46,6 +48,7 @@ class Welcome_win(wx.Frame):
 
         self.init_ui()
         self.Show()
+        self.Maximize(True)
         print 'Finished initializing welcome window...'
 
     def init_ui(self):
@@ -97,12 +100,20 @@ class Welcome_win(wx.Frame):
         button4.SetFont(self.font)
         button4.Bind(wx.EVT_BUTTON, self.open_history)
 
+        button_exit = wx.Button(self.panel, size=button_size, label="Exit")
+        button_exit.SetFont(self.font)
+        button_exit.Bind(wx.EVT_BUTTON, self.close)
+        button_exit.SetBackgroundColour(wx.Colour(106, 30, 0)) # 0, 90, 106 was wx.Colour(128, 0, 128)
+        button_exit.SetForegroundColour((240, 240, 240))
+
         button_sizer.Add(button1, pos=(1, 0))
         # button_sizer.Add(button2, pos=(2, 0))
         button_sizer.Add(button3, pos=(2, 0))
         button_sizer.Add(button4, pos=(3, 0))
-        menu_sizer.Add(menu_title, 0, wx.CENTER)
-        menu_sizer.Add(button_sizer, 0, wx.CENTER)
+        button_sizer.Add(button_exit, pos=(9, 0))
+
+        menu_sizer.Add(menu_title, 0, wx.LEFT)
+        menu_sizer.Add(button_sizer, 0, wx.LEFT)
 
         calendar_sizer = self.setupCalend()
         sentence_sizer = self.setupSentence()
@@ -349,6 +360,9 @@ class Welcome_win(wx.Frame):
 
         self.calend_select = set_days
 
+    def close(self, event):
+        self.Destroy()
+
 class Evaluation_win(wx.Frame):
 
     def __init__(self, info, parent, title):
@@ -359,8 +373,12 @@ class Evaluation_win(wx.Frame):
         self.font_text_title = wx.Font(24, wx.DEFAULT, wx.NORMAL, wx.FONTWEIGHT_BOLD, False, 'Arial')
         self.info = info
         self.width, self.height = wx.GetDisplaySize()
-        self.height -= 100
-        self.width -= 140
+        #self.height -= 100
+        #self.width -= 140
+        #self.height -= 25
+        #self.width -= 25
+
+
         self.sizer_w = 10
         self.sizer_h = 10
 
@@ -371,6 +389,7 @@ class Evaluation_win(wx.Frame):
 
         self.init_ui()
         self.Show()
+        self.Maximize(True)
         print 'Finished initializing evaluation window...'
 
     def init_ui(self):
@@ -383,9 +402,11 @@ class Evaluation_win(wx.Frame):
         button_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         menu_sizer = wx.BoxSizer(wx.VERTICAL)
         info_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        home_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
 
         # title
-        text = wx.StaticText(self.panel, label="LymphCoach Exercises Selection")
+        #text = wx.StaticText(self.panel, label="LymphCoach Exercises Selection")
+        text = wx.StaticText(self.panel, label="LymphCoach")
         text.SetFont(self.font_title)
         top_sizer.Add(text, 0, wx.CENTER)
 
@@ -422,20 +443,28 @@ class Evaluation_win(wx.Frame):
 
         button5 = wx.Button(self.panel, size=button_size, label="Exercise 5 : Shoulder Rolls")
         button5.SetFont(self.font)
-        button5.Bind(wx.EVT_BUTTON, self.open_exercise_6)
+        button5.Bind(wx.EVT_BUTTON, self.open_exercise_5)
 
         button6 = wx.Button(self.panel, size=button_size, label="Exercise 6 : Clasp and Spread")
         button6.SetFont(self.font)
-        button6.Bind(wx.EVT_BUTTON, self.open_exercise_7)
+        button6.Bind(wx.EVT_BUTTON, self.open_exercise_6)
 
+        #added a new button: home button
+        button_home = wx.Button(self.panel, label="Home")
+        button_home.SetFont(self.font)
+        button_home.Bind(wx.EVT_BUTTON, self.close)
+        button_home.SetBackgroundColour(wx.Colour(0, 90, 106))
+        button_home.SetForegroundColour((240, 240, 240))
 
- 
+        home_sizer.Add(button_home, pos=(1, 0))
+        
         button_sizer.Add(button1, pos=(1, 0))
         button_sizer.Add(button2, pos=(2, 0))
         button_sizer.Add(button3, pos=(3, 0))
         button_sizer.Add(button4, pos=(4, 0))
         button_sizer.Add(button5, pos=(5, 0))
         button_sizer.Add(button6, pos=(6, 0))
+        #button_sizer.Add(button_home, pos= (10 ,10))
 
         menu_sizer.Add(menu_title, 0, wx.CENTER)
         menu_sizer.Add(button_sizer, 0, wx.CENTER)
@@ -443,7 +472,8 @@ class Evaluation_win(wx.Frame):
         # calendar_sizer = self.setupCalend()
         # sentence_sizer = self.setupSentence()   
         info_sizer.Add(menu_sizer, pos=(1, 0))
-
+        
+        #info_sizer.Add(home_sizer, pos=(3, 6))
         # newline = wx.StaticLine(self.panel)
         # info_sizer.Add(newline, pos=(1, 2), span=(2, 2), flag=wx.EXPAND)
   
@@ -451,7 +481,11 @@ class Evaluation_win(wx.Frame):
         top_sizer.Add(line_sizer, 0, wx.CENTER)
         top_sizer.Add(title_sizer, 0, wx.CENTER)
         top_sizer.Add(info_sizer, 0, wx.CENTER)
+
+        top_sizer.Add(home_sizer, 0, wx.ALIGN_CENTER)  #works fine with center
+
         combine.Add(top_sizer, pos=(2, 0))
+        #combine.Add(top_sizer, pos=(7, 7))
         self.panel.SetSizer(combine)
         print ('Finishing initializing UI for Evaluation.')
 
@@ -484,9 +518,9 @@ class Evaluation_win(wx.Frame):
         if_record = self.check_recording(event)
         self.open_bodygame(exe_num=6, recording = if_record)
 
-    def open_exercise_7(self, event):
-        if_record = self.check_recording(event)
-        self.open_bodygame(exe_num=7, recording = if_record)
+    #def open_exercise_7(self, event):
+    #    if_record = self.check_recording(event)
+    #    self.open_bodygame(exe_num=7, recording = if_record)
 
     def check_recording(self, event):
         message = 'Do you want to record the following exercise? The exercise will start after selection.'
@@ -494,19 +528,19 @@ class Evaluation_win(wx.Frame):
         result = dlg.ShowModal() == wx.ID_YES
         dlg.Destroy()
         return result
+
+    def close(self, event):
+        self.Destroy()
         
 class Instrcution_win(wx.Frame):
 
     def __init__(self, parent, title):
         self.init_text()
-
+        #self.home_button_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.width, self.height = wx.GetDisplaySize()
         ratio = self.height / 600.0
         self.player_width = 640 * ratio
         self.player_height = 360 * ratio
-        self.height -= 100
-        # self.width = 1100
-        # self.height = self.player_height * 1.5 + 45
 
         self.sizer_w = 5
         self.sizer_h = 5
@@ -517,6 +551,7 @@ class Instrcution_win(wx.Frame):
         self.SetIcon(ico)
         self.init_ui()
         self.Show()
+        self.Maximize(True)
 
     def init_ui(self):
         self.panel = wx.Panel(self)
@@ -527,35 +562,55 @@ class Instrcution_win(wx.Frame):
         self.font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.player = MoviePanel(self.panel, (self.player_width, self.player_height))
 
-        self.text = wx.TextCtrl(self.panel, size=(self.player_width, self.player_height/2), style=wx.TE_MULTILINE|wx.TE_READONLY)
-        self.text.SetFont(self.font)
+        self.width, self.height = wx.GetDisplaySize()
+        #self.text = wx.TextCtrl(self.panel, size=(self.player_width, self.player_height/2), style=wx.TE_MULTILINE|wx.TE_READONLY)
+        self.text = wx.TextCtrl(self.panel, size=(self.player_width, self.height - self.player_height), style=wx.TE_MULTILINE|wx.TE_READONLY)
+        self.text.SetFont(self.font) #font set here
         self.text.SetBackgroundColour((255, 255, 255))
         # self.text.SetBackgroundColour((179, 236, 255))
 
-        button1 = wx.Button(self.panel, label="Home")
-        button1.Bind(wx.EVT_BUTTON, self.close)
+        
+        #button_font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        button_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        button_home = wx.Button(self.panel, label="Home")
+        #button_home = wx.Button(self.panel, -1, label="Home", size=(100,50))
+        button_home.SetFont(button_font)#changed the font here.
+        button_home.SetBackgroundColour(wx.Colour(0, 90, 106))
+        button_home.SetForegroundColour((240, 240, 240))
+        button_home.Bind(wx.EVT_BUTTON, self.close)
+        #home_sizer = wx.BoxSizer(wx.VERTICAL)
+        #home_sizer.Add(button_home, flag= wx.LEFT | wx.BOTTOM)
+        home_sizer = wx.GridBagSizer(10, 10) # was self.sizer_w, self.sizer_h
+        home_sizer.Add(button_home,  pos=(10, 3))
 
         button_print = wx.Button(self.panel, id=wx.ID_PRINT, label="")
         button_print.SetFocus()
         self.Bind(wx.EVT_BUTTON, self.OnBtnPrint, button_print)
 
         exer = [self.str['exe'][i] for i in range(1, 7)]
-        self.lst = wx.ListBox(self.panel, size=(350, self.height+100 - 25 - 45), choices=exer, style=wx.LB_SINGLE)
+        #self.lst = wx.ListBox(self.panel, size=(350, self.height+100 - 25 - 45), choices=exer, style=wx.LB_SINGLE)
+
+        self.lst = wx.ListBox(self.panel, size=(350, -1), choices=exer, style=wx.LB_SINGLE)
+        lst_font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial') #set font of the listbx
+        self.lst.SetFont(lst_font)#changed the font here.
         self.lst.SetBackgroundColour((230, 230, 230))
         self.lst.SetSelection(0)
 
         box2.Add(self.lst, 0, wx.EXPAND)
-        box2.Add(button1, 0, wx.EXPAND)
+        box2.Add(home_sizer, 1, wx.EXPAND | wx.BOTTOM)
+        #box2.Add(button_home, 0, wx.LEFT | wx.BOTTOM )
         box3.Add(self.player, 0, wx.EXPAND)
 
         text_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
-        text_sizer.Add(button_print, (0, 4))
+        text_sizer.Add(button_print, (1, 4))   ## was 0, 4
         text_sizer.Add(self.text, (0, 0), span=(4, 0))  # for .avi .mpg video files
+        #text_sizer.Add(button_home, (3, 4))
+
 
         # box3.Add(self.text, 0, wx.LEFT)
         box3.Add(text_sizer, 0, wx.LEFT)
 
-        box.Add(box2, 0,wx.EXPAND)
+        box.Add(box2, 0, wx.EXPAND | wx.LEFT | wx.BOTTOM)
         box.Add(box3, 1, wx.EXPAND)
         # box.Add(button_print, 2, wx.RIGHT)
         self.panel.SetSizer(box)
@@ -734,32 +789,50 @@ class MoviePanel(wx.Panel):
     def __init__(self, parent, size, id=-1):
         #self.log = log
         wx.Panel.__init__(self, parent, id, style=wx.TAB_TRAVERSAL|wx.CLIP_CHILDREN)
-
         self.sizer_w = 5
         self.sizer_h = 5
 
         # Create some controls
         self.mc = wx.media.MediaCtrl(self, size=size, style=wx.SIMPLE_BORDER)
-        self.playButton = wx.Button(self, -1, "Play", size=(100,40))
+
+        button_font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+    
+        self.playButton = wx.Button(self, -1, "Play", size=(120,50)) ############# test button
+        self.playButton.SetFont(button_font)#changed the font here.
+        self.playButton.SetBackgroundColour(wx.Colour(106, 83, 0))
+        self.playButton.SetForegroundColour((240, 240, 240))
         self.Bind(wx.EVT_BUTTON, self.onPlay, self.playButton)
 
-        self.pauseButton = wx.Button(self, -1, "Pause", size=(100,40))
+        self.pauseButton = wx.Button(self, -1, "Pause", size=(120,50))
+        self.pauseButton.SetFont(button_font)
+        self.pauseButton.SetBackgroundColour(wx.Colour(106, 30, 0))
+        self.pauseButton.SetForegroundColour((240, 240, 240))
         self.Bind(wx.EVT_BUTTON, self.onPause, self.pauseButton)
 
-        self.stopButton = wx.Button(self, -1, "Stop", size=(100,40))
+        self.stopButton = wx.Button(self, -1, "Stop", size=(120,50))
+        self.stopButton.SetFont(button_font)
+        self.stopButton.SetBackgroundColour(wx.Colour(57, 1, 94))
+        self.stopButton.SetForegroundColour((240, 240, 240))
         self.Bind(wx.EVT_BUTTON, self.onStop, self.stopButton)
 
-        self.slider = wx.Slider(self, -1, 0, 0, 10)
-        self.slider.SetMinSize((100, -1))
+        #self.slider = wx.Slider(self, -1, 0, 0, 10)
+        self.slider = wx.Slider(self, -1, 0, 0, 10, size=(120,-1), style=wx.SL_HORIZONTAL ) 
+        #self.slider.SetMinSize((100, -1))
         self.Bind(wx.EVT_SLIDER, self.OnSeek, self.slider)
+
+        #add new home button
+        #self.button_home = wx.Button(self, -1, "Home", size=(120,50))
+        #self.button_home.SetFont(button_font)
+        #self.button_home.Bind(wx.EVT_BUTTON, self.close)
 
         # setup the button/label layout using a sizer
         sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         # sizer.Add(loadButton, (1,1))
-        sizer.Add(self.playButton, (2, 4))
-        sizer.Add(self.pauseButton, (3, 4))
-        sizer.Add(self.stopButton, (4, 4))
-        sizer.Add(self.slider, (5, 4))
+        #sizer.Add(self.button_home, (1, 1))
+        sizer.Add(self.playButton, (1, 4))  # was 2,4
+        sizer.Add(self.pauseButton, (2, 4))  # was 3, 4
+        sizer.Add(self.stopButton, (3, 4))  # was 4 , 4
+        sizer.Add(self.slider, (4, 4))  # was 5,4
         sizer.Add(self.mc, (0, 0), span=(6, 0))  # for .avi .mpg video files
         self.SetSizer(sizer)
 
@@ -807,7 +880,7 @@ class History_view(wx.Frame):
     def __init__(self, parent, info, path, title='history log'):
 
         self.width, self.height = wx.GetDisplaySize()
-        self.height -= 100
+        #self.height -= 100
         self.sizer_w = 5
         self.sizer_h = 5
         self.sub_width = 330
@@ -833,11 +906,12 @@ class History_view(wx.Frame):
         self.color_correct = (0.41, 0.75, 0.07, 0.6)
         # self.color_line = ['#0096BF', '#005A73', '#BFA600', '#736400', '#ffae25', '#af7900', '#d957b4', '#75005b']
         self.color_line = [(174./255, 1, 0, 0.6), (139./255, 204./255, 0, 0.6), (87./255, 127./255, 0, 0.6), (99./255, 127./255, 38./255, 0.6)]
-        self.font = {'family': 'serif', 'color':  '#000000', 'weight': 'normal', 'size': 10}
+        self.font = {'family': 'serif', 'color':  '#000000', 'weight': 'normal', 'size': 16}
         self.Show()
+        self.Maximize(True)
 
     def init_ui(self):
-        self.font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False)
+        self.font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False) # was 15
         try:
             log_xl = pd.ExcelFile(self.path)
         except:
@@ -854,17 +928,17 @@ class History_view(wx.Frame):
 
         if self.info.isPat:
             info_text = 'Patient:' + \
-                        '\nName: ' + self.info.name.title() + \
+                        '\n\nName: ' + self.info.name.title() + \
                         '\nGender: ' + self.info.gender.title() + \
                         '\nID: ' + self.info.id
         else:
             info_text = 'Clinician:' + \
-                        '\nName: ' + self.info.name.title() + \
+                        '\n\nName: ' + self.info.name.title() + \
                         '\nGender: ' + self.info.gender.title()
 
         info = wx.StaticText(self.panel, wx.ID_ANY, label=info_text)
         info.SetFont(self.font)
-        box1.Add(info, pos=(1, 2))
+        box1.Add(info, pos=(0, 0)) # was 1,2
 
         ex_choices = log_xl.sheet_names
         self.choice = wx.Choice(self.panel, choices=ex_choices)
@@ -872,7 +946,7 @@ class History_view(wx.Frame):
         # default selection: exercise 1
         self.choice.SetSelection(0)
         self.choice.Bind(wx.EVT_CHOICE, self.update_choice)
-        box1.Add(self.choice, pos=(2, 2))
+        box1.Add(self.choice, pos=(2, 0),span=(0, int(self.sub_width / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM ) # there was no expand
 
         # provide list of patients to review
         if self.info.isCli:
@@ -886,18 +960,31 @@ class History_view(wx.Frame):
             # box1.Add(self.score, pos=(4, 2))
 
         line = wx.StaticLine(self.panel)
-        box1.Add(line, pos=(5, 0), span=(0, int(self.sub_width / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM)
+        box1.Add(line, pos=(3, 0), span=(0, int(self.sub_width / self.sizer_w / 4)), flag=wx.EXPAND|wx.BOTTOM) # position was 5,0
 
-        button1 = wx.Button(self.panel, label="Home")
-        button1.Bind(wx.EVT_BUTTON, self.close)
+        ###### make home button standard
+        button_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        button_home = wx.Button(self.panel, label="Home")
+        #button_home = wx.Button(self.panel, -1, label="Home", size=(100,50))
+        button_home.SetFont(button_font)#changed the font here.
+        button_home.SetBackgroundColour(wx.Colour(0, 90, 106))
+        button_home.SetForegroundColour((240, 240, 240))
+        button_home.Bind(wx.EVT_BUTTON, self.close)
+        
+        button_home.Bind(wx.EVT_BUTTON, self.close)
 
         box2.Add(box1, 0)
-        self.lst = wx.ListBox(self.panel, size=(self.sub_width, self.height - 230), choices=[], style=wx.LB_SINGLE)
+        self.lst = wx.ListBox(self.panel, size=(350, self.height - 230 -100), choices=[], style=wx.LB_SINGLE) # was size=(self.sub_width, self.height - 230)
+       
         self.lst.SetFont(self.font)
         self.lst.SetBackgroundColour((230, 230, 230))
         self.Bind(wx.EVT_LISTBOX, self.update_figure, self.lst)
         box2.Add(self.lst, 0, wx.EXPAND)
-        box2.Add(button1, 0, wx.EXPAND)
+
+        home_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
+        home_sizer.Add(button_home,  pos=(1, 0))
+        box2.Add(home_sizer, 0)
+        #box2.Add(button_home, 0) # wwas with wx.EXPAND
         box3.Add(box2, 0, wx.EXPAND)
 
         self.figure = Figure()

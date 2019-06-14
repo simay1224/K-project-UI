@@ -24,9 +24,14 @@ class Analysis(object):
         self.exer[2] = Exer2()
         self.exer[3] = Exer3()
         self.exer[4] = Exer4()
+        #self.exer[5] = Exer5()
+        #self.exer[6] = Exer6()
+        #self.exer[7] = Exer7()
+
+        #hiding the exercise 5
         self.exer[5] = Exer5()
         self.exer[6] = Exer6()
-        self.exer[7] = Exer7()
+
         #
         self.dtw = Dynamic_time_warping()
         self.brth = Breath_status()
@@ -97,10 +102,14 @@ class Analysis(object):
             mean_angle = np.mean(exer.angle)
         else:
             mean_angle = np.mean(exer.angle[-10:])
+            #print("differences")
+            #print(joints[self.kpm.LElbow_y-offeset] - joints[self.kpm.LWrist_y-offeset])
+            #print(joints[self.kpm.LShld_y-offeset] - joints[self.kpm.LWrist_y-offeset])
         if mean_angle >= th:
+            #print('\n\n')
             if (joints[self.kpm.SpineMid_y-offeset] > joints[self.kpm.LWrist_y-offeset] and
                 (joints[self.kpm.LElbow_y-offeset] - joints[self.kpm.LWrist_y-offeset]) > 80 and
-                (joints[self.kpm.LShld_y-offeset] - joints[self.kpm.LWrist_y-offeset]) > 100):
+                (joints[self.kpm.LShld_y-offeset] - joints[self.kpm.LWrist_y-offeset]) > 100): # was 80 and 100
                 return 'down'
             elif joints[self.kpm.LWrist_y-offeset] > joints[self.kpm.Head_y-offeset]:
                 return 'up'
@@ -149,8 +158,11 @@ class Analysis(object):
         if exeno == 1:
             if self.exer[1].cntdown <= 0:
                 if self.kp.kinect:
-                    stus = self.handpos(self.exer[1], reconJ21)
-                if stus != 'down':
+                    stus = self.handpos(self.exer[1], reconJ21) # originally there was no threshold
+                print(stus)
+                if stus != 'down': # was stus != 'down'
+                    #if stus == 'belly':
+                    #    self.cnt = 0
                     if len(self.jointslist) == 0:  # store joints information
                         self.jointslist = reconJ21
                     else:
@@ -164,11 +176,13 @@ class Analysis(object):
                         if not self.do_once:
                             self.brth.breath_analyze()
                             self.do_once = True
+                            #if self.cnt > 5:
                             self._done = True
                             if self.brth.cnt < 4:
                                 self.brth.err.append('Make sure you do 4 repetitions.')
                                 self.brth.errsum.append('Make sure you do 4 repetitions.')
                             print('================= exer END ======================')
+                            #self.cnt += 1
                 # self.eval_common(surface, exeno, kp)
                 # === eval string update ===
                 if self.evalstr == '':
@@ -239,7 +253,10 @@ class Analysis(object):
                     if not self.do_once:
                         self.brth.breath_analyze()
                         hopen, hclose = self.hs.hstus_ana()
-                        self.brth.brth_hand_sync(hopen, hclose)
+                        if len(hopen) == 0 or len(hclose)==0:
+                            pass
+                        else:
+                            self.brth.brth_hand_sync(hopen, hclose)
                         self.do_once = True
                         self._done = True
                         if self.brth.cnt < 4:
@@ -333,7 +350,9 @@ class Analysis(object):
                     evalinst.blit_text(surface, exeno, kp, '%s to go !!' %str(4-self.horzp.cnt),
                                         4, color=self.c_togo)
                 self.repcnt = self.horzp.cnt
-
+        
+        #COMMENTING OUT THE REACH TO SKY 
+            '''
         elif exeno == 5:
             if self.kp.kinect:
                 stus = self.handpos(self.exer[5], reconJ)
@@ -371,11 +390,12 @@ class Analysis(object):
                     evalinst.blit_text(surface, exeno, kp, 'Please bend to your right', 2, color=self.c_normal)
                 evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.swing.cnt/2)), 4, color=self.c_togo)
             self.repcnt = self.swing.cnt/2
-
-        elif exeno == 6:
-            if self.exer[6].cntdown <= 0:
+            '''
+        #elif exeno == 6:
+        elif exeno == 5:
+            if self.exer[5].cntdown <= 0:
                 if self.kp.kinect:
-                    stus = self.handpos(self.exer[6], reconJ)
+                    stus = self.handpos(self.exer[5], reconJ)
                 if stus == 'belly':
                     self.cnt = 0
                     if self.kp.kinect:
@@ -410,19 +430,20 @@ class Analysis(object):
                     evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.shld.cnt)), 4, color=self.c_togo)
                 self.repcnt = self.shld.cnt
             else:
-                evalinst.blit_text(surface, self.exer[6].no, kp,
-                                  ('Starting after %.2f second' % (self.exer[6].cntdown/30.)), 2,
+                evalinst.blit_text(surface, self.exer[5].no, kp,
+                                  ('Starting after %.2f second' % (self.exer[5].cntdown/30.)), 2,
                                   color=self.c_normal)
-                self.exer[6].cntdown -= 1
+                self.exer[5].cntdown -= 1
 
-        elif exeno == 7:
-            if self.exer[7].cntdown <= 0:
+        #elif exeno == 7:
+        elif exeno == 6:
+            if self.exer[6].cntdown <= 0:
                 if self.kp.kinect:
-                    stus = self.handpos(self.exer[7], reconJ)
+                    stus = self.handpos(self.exer[6], reconJ)
                     print (stus)
                 if stus == 'down':
                     if self.clsp.do:
-                        if self.cnt > 90:
+                        if self.cnt > 90: # was 90
                             self._done = True
                             if self.clsp.cnt < 4:
                                 self.clsp.err.append('Make sure you do 4 repetitions.')
@@ -453,7 +474,7 @@ class Analysis(object):
                     evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.clsp.cnt)), 4, color=self.c_togo)
                 self.repcnt = self.clsp.cnt
             else:
-                evalinst.blit_text(surface, self.exer[7].no, kp,
-                                  ('Starting after %.2f second' % (self.exer[7].cntdown/30.)), 2,
+                evalinst.blit_text(surface, self.exer[6].no, kp,
+                                  ('Starting after %.2f second' % (self.exer[6].cntdown/30.)), 2,
                                   color=self.c_normal)
-                self.exer[7].cntdown -= 1
+                self.exer[6].cntdown -= 1

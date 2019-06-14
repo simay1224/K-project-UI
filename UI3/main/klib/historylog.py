@@ -11,22 +11,32 @@ class Historylog(object):
         #2 : Over The Head Pumping
         #3 : Push Down Pumping
         #4 : Horizontal Pumping
-        #5 : Reach to the Sky
+        #5 : Reach to the Sky  ############THIS WILL BE HIDDEN
         #6 : Shoulder Rolls
         #7 : Clasp and Spread
     """
 
     def __init__(self):
-        self.excelPath = "./output/log.xlsx"
+        # HIDING THE EXERCISE 5: reach to sky
+        #self.excelPath = "./output/log.xlsx"
+        self.excelPath = "./output/log_without_exercise5_reach_to_sky.xlsx"
         self.order = [0,1,2,2,3,4,5]
+        #self.exercises = ["",
+        #                    "1. Muscle Tighting Deep Breathi",
+        #                    "2. Over The Head Pumping",
+        #                    "3. Push Down Pumping",
+        #                    "4. Horizontal Pumping",
+        #                    "5. Reach to the Sky",
+        #                    "6. Shoulder Rolls",
+        #                    "7. Clasp and Spread"]
+
         self.exercises = ["",
                             "1. Muscle Tighting Deep Breathi",
                             "2. Over The Head Pumping",
                             "3. Push Down Pumping",
                             "4. Horizontal Pumping",
-                            "5. Reach to the Sky",
-                            "6. Shoulder Rolls",
-                            "7. Clasp and Spread"]
+                            "5. Shoulder Rolls",
+                            "6. Clasp and Spread"]
         # record feature
         common = ["name", "age", "gender", "time"]
         backup = ["errmsg"]
@@ -75,9 +85,12 @@ class Historylog(object):
         self.colname[2] = common + brth + hs + backup
         self.colname[3] = common + exer3 + backup
         self.colname[4] = common + exer4 + backup
-        self.colname[5] = common + swing + backup
-        self.colname[6] = common + shld + backup
-        self.colname[7] = common + clsp + backup
+        #self.colname[5] = common + swing + backup  # hide reach to sky
+        #self.colname[6] = common + shld + backup
+        #self.colname[7] = common + clsp + backup
+        
+        self.colname[5] = common + shld + backup
+        self.colname[6] = common + clsp + backup
 
         # ideal number
         self.icol = {}
@@ -85,9 +98,12 @@ class Historylog(object):
         self.icol[2] = icommon + ibrth + ihs + ibackup
         self.icol[3] = icommon + iexer3 + ibackup
         self.icol[4] = icommon + iexer4 + ibackup
-        self.icol[5] = icommon + iswing + ibackup
-        self.icol[6] = icommon + ishld + ibackup
-        self.icol[7] = icommon + iclsp + ibackup
+        #self.icol[5] = icommon + iswing + ibackup  # hide reach to sky
+        #self.icol[6] = icommon + ishld + ibackup
+        #self.icol[7] = icommon + iclsp + ibackup
+
+        self.icol[5] = icommon + ishld + ibackup
+        self.icol[6] = icommon + iclsp + ibackup
 
     def newlog(self, sheetnum=7):
         """ if there is not log.xlsx exist, create one with sheetnum sheets

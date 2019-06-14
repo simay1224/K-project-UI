@@ -9,7 +9,7 @@ class Msgbox(wx.Frame):
         self.font_title = wx.Font(36, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Lucida Handwriting')
 
         self.width, self.height = wx.GetDisplaySize()
-        self.height -= 100
+        #self.height -= 100
         self.sizer_w = 10
         self.sizer_h = 10
 
@@ -30,6 +30,7 @@ class Msgbox(wx.Frame):
         self.init_ui()
         self.Centre()
         self.Show()
+        self.Maximize(True)
 
     def init_ui(self):
         self.panel = wx.Panel(self)
@@ -140,9 +141,13 @@ class Msgbox(wx.Frame):
         button1.Bind(wx.EVT_BUTTON, self.ok)
 
         button2 = wx.Button(self.panel, size=(200, 50), label="Cancel")
-        sizer.Add(button2, pos=(2, 5), span=(0, 0), flag=wx.RIGHT, border=10)
+        button2.SetBackgroundColour(wx.Colour(0, 90, 106)) # was wx.Colour(128, 0, 128)
+        button2.SetForegroundColour((240, 240, 240))
+        sizer.Add(button2, pos=(3, 0), span=(0, 0), flag=wx.LEFT, border=10)
         button2.SetFont(self.font_button)
         button2.Bind(wx.EVT_BUTTON, self.cancel)
+
+
 
         infoSizer.Add(patiSizer, pos=(1, 0), span=(0, 0), flag=wx.LEFT)
         line = wx.StaticLine(self.panel, -1, size=(1, self.height / 5), style=wx.LI_VERTICAL)

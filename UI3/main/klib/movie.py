@@ -11,6 +11,11 @@ class Movie(object):
 
             if self.kp.kinect:
                 pygame.mixer.quit()
+                #we have to skip the video 5
+                #if filename ==5:
+                 #   filename ==6
+                #elif filename == 6:
+                 #   filename ==7
                 self._movie = pygame.movie.Movie('./data/video/ex'+str(filename)+'.mpg')
                 self.w, self.h = [size for size in self._movie.get_size()]
                 self.mscreen = pygame.Surface((self.kp.vid_w/2, self.kp.vid_h/2)).convert()

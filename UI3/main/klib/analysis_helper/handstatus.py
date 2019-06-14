@@ -104,7 +104,10 @@ class Hand_status(object):
         rh_close   = np.where(hand_pulse[:, 1] == -1)[0]
         # open test
         pair = self.find_pair_within(lh_open, rh_open)
-        if len(lh_open) != len(rh_open):
+        print("pair")
+        print(pair)
+
+        if len(lh_open) != len(rh_open) and pair: # was if len(lh_open) != len(rh_open):
             foo = np.array(pair)
             res = list(set(foo[:,0])-set(foo[:,1]))
             if len(lh_open) > len(rh_open):
@@ -119,8 +122,12 @@ class Hand_status(object):
             print('hand open '+str(len(lh_open))+' times')
         # close test
         pair = self.find_pair_within(lh_open, rh_open)
-        if len(lh_close) != len(rh_close):
+        if len(lh_close) != len(rh_close) and pair:
+            print("pair1")
+            print(pair)
             foo = np.array(pair)
+            #print("\n\n\n\n","foo:",foo,"\n\n\n\n")
+
             res = list(set(foo[:,0])-set(foo[:,1]))
             if len(lh_close) > len(rh_close):
                 string = 'right hand'

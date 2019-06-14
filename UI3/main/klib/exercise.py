@@ -23,7 +23,7 @@ class Exer1(Exercise):
         # default parameters
         self.no = 1
         self.angle = []
-        self.cntdown = 60
+        self.cntdown = 60 * 2 #originally was 60
         self.limbjoints = True
         # order
         self.order = {}
@@ -117,7 +117,8 @@ class Exer4(object):
                                  0., 0., 0., 3., 3., 3., 9., 9., 9.,
                                  0., 0., 0.])
         self.jweight = self.jweight/sum(self.jweight)*1.5
-
+# hide Exer5- reach to sky
+    '''
 class Exer5(Exercise):
     """ reach to the sky
     """
@@ -132,8 +133,10 @@ class Exer5(Exercise):
                                  3., 3., 3., 3., 3., 3., 3., 3., 3.,
                                  3., 3., 3.])
         self.jweight = self.jweight/sum(self.jweight)*1.5
+    '''
 
-class Exer6(Exercise):
+#class Exer6(Exercise):
+class Exer5(Exercise):
     """ shoulder roll
     """
     def __init__(self):
@@ -150,7 +153,8 @@ class Exer6(Exercise):
         self.jweight = self.jweight/sum(self.jweight)*1.5
 
 
-class Exer7(Exercise):
+#class Exer7(Exercise):
+class Exer6(Exercise):
     """ clasp and spread
     """
     def __init__(self):

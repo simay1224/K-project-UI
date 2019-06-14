@@ -139,6 +139,9 @@ class Breath_status(object):
         else:
             # raise ImportError('Doing too fast !! please redo again !!')
             self.evalstr = 'Doing too fast !! please redo again !!\n'
+            
+        #if not self.brth_diff:
+        #    self.brth_diff.append(0)
     def brth_hand_sync(self, lhopen, lhclose):
         """calculate breathe and hand open/close relation
         """
