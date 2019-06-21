@@ -30,6 +30,8 @@ class Shld_state(object):
         self.errsum  = []
         self.evalstr = ''
         self.eval    = ''
+        #ongoing cycle or not
+        self.ongoing_cycle = True
 
     def findtops(self, bdimg, shld, bdidx):
         """ find the shoulder top.
@@ -38,7 +40,7 @@ class Shld_state(object):
         """
         return np.where(bdimg[:shld[1], shld[0]] != bdidx)[0][::-1][0]+1
 
-    def findminmax(self, data, rng=50, start=0, ignore=10, dtype='height'): # original value: rng=50
+    def findminmax(self, data, rng=30, start=0, ignore=10, dtype='height'): # original value: rng=50
         """ find local min & max.
         """
         foo = argrelextrema(gf(data, 5), np.less_equal, order=rng)[0]
@@ -87,7 +89,7 @@ class Shld_state(object):
         #if y[0] and y[1]:
         #    height_check = self.chk_height(y[0], y[1])
         #    if height_check:
-        if y[0].size != 0 and y[1].size !=0: #theres at least up and down movement
+        if (y[0].size != 0 or y[1].size !=0) or y[0].size>1 or y[1].size>1 or  z[0].size > 0 or z[1].size > 0  : #theres at least up and down movement
             if z[2].size != 0 and z[3].size != 0 : 
                 depth_chk = self.chkdepth(z[2], z[3]) # was self.chkdepth(z[2], z[3])
                 if depth_chk:
@@ -141,9 +143,11 @@ class Shld_state(object):
         self.type = self.findcycle(y, z)
 
         if self.type == 1:
+            #   ongoing cycle or not
+            self.ongoing_cycle = False
             if z[2].size != 0 and z[3].size != 0:
                 self.dep_diff.append(z[2][0]-z[3][0])
-            self.cnt += self.type  # cycle number
+            self.cnt += 1 # cycle number
             if self.eval == '':
                 self.evalstr = 'Repitition done: Well done.'
             else:
@@ -151,16 +155,20 @@ class Shld_state(object):
                 self.eval = ''
             self.type = 0
         elif self.type == 2:
+            self.ongoing_cycle = False
             if z[2].size != 0 and z[3].size != 0:
                 self.dep_diff.append(z[2][0]-z[3][0])
             # print('simple up and down')
-            self.evalstr = 'Rotate deeper !!\n'
-            self.eval = 'Rotate deeper !!\n'
+            self.cnt += 1 #still  a count
+            self.evalstr = 'Rotate deeper !\n'
+            self.eval = 'Rotate deeper !\n'
             self.ngcnt += 1
             self.err.append('At the '+self.cnvt.ordinal(self.ngcnt+self.cnt)+ 'time try, roll your shoulders widely.')
             self.errsum.append('Roll your shoulders widely.')
             self.type = 0
-        else:
+
+        else: # if no cycle
+            self.ongoing_cycle = True
             self.evalstr = ''
         #if not self.dep_diff:
             #we have to append dep_diff anyway, ebcause it gives error
@@ -178,7 +186,7 @@ class Shld_state(object):
         self.ldlist.append(depth[lshld[1], lshld[0]])
         # self.rylist.append(rshld[1])
         # self.rdlist.append(depth[rshld[1], rshld[0]])
-        if (self.fcnt >= 50) and (self.fcnt%20 == 0):
+        if (self.fcnt >= 50) and (self.fcnt%20 == 0): # was if (self.fcnt >= 50) and (self.fcnt%20 == 0)
             print("lylist= ", self.lylist)
             print("ldlist = ", self.ldlist)
             self.statechk(self.lylist, self.ldlist)

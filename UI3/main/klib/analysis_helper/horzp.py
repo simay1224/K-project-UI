@@ -28,6 +28,8 @@ class Horzp(object):
         self.errsum  = []
         self.evalstr = ''
         self.eval    = ''
+        #boolean for ongoing cycle
+        self.ongoing_cycle= True
 
     def joint_angle(self, joints, idx=[4, 5, 6], y_vec=np.array([0, -1, 0]) ,offset=0):
         """ finding the angle between 3 joints.
@@ -48,11 +50,12 @@ class Horzp(object):
         if self.cnt >= 4:
             return
         dist = abs(joints[18]-joints[27])
+        self.ongoing_cycle= True
         if dist > 700:
             if self.cflag:
                 self.cflag = False
                 if self.cnt > 0:
-                    if self.Lcangle[self.cnt] < 80 or self.Rcangle[self.cnt] < 80:
+                    if self.Lcangle[self.cnt] < 70 or self.Rcangle[self.cnt] < 70: # was 80
                         self.evalstr = 'Please keep your arms horizontally.\n'
                         self.eval = 'Please keep your arms horizontally.\n'
                         self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not horizontal.')
@@ -73,6 +76,7 @@ class Horzp(object):
                 self.Min_dist = 300
                 self.tflag = True
                 self.cnt += 1
+                self.ongoing_cycle= False
         elif dist < 300:
             if self.tflag:
                 self.tflag = False

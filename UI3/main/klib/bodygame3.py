@@ -171,6 +171,8 @@ class BodyGameRuntime(object):
         else:
             self.ori = (int(self._screen.get_width()*self.kp.video_LB/1920.), int(self._screen.get_height()*self.kp.video1_UB/1080.))
 
+        # count for process finish analysis
+        #self.pa_count = 0
         # Frame count
         self.fcnt = 0
         # error message for patient
@@ -419,19 +421,46 @@ class BodyGameRuntime(object):
     def process_analysis(self):
         print("\n\nprocess analysis:")
         print(self.ana.evalstr)
-        if self.ana.evalstr != '':
-            if 'well' in (self.ana.evalstr).lower():
+        #if self.ana.evalstr != '':########!!!!!!!!!!!!
+        #print("shld ongoing cycle:", self.ana.shld.ongoing_cycle)
+        print("ana ongoing cycle:", self.ana.ongoing_cycle)
+        if self.ana.ongoing_cycle== False: # was if self.ana.shld.ongoing_cycle == False or
+            if 'well' in (self.ana.evalstr).lower(): #if well exists in immediate feedback
                 print("does it say well done?")
-                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_well)
+                
+                self.ana.screen_message = self.ana.evalstr
+                print("here screen message is",self.ana.screen_message )
+                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,  self.ana.screen_message, 3, color=self.kp.c_eval_well)
                 if len(self.evalhis) < min(self.ana.repcnt, 4):
                     self.evalhis.append(True)
+                
+            
             else:
                 print("no it does not")
-                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.evalstr, 3, color=self.kp.c_eval_err)
+                self.ana.screen_message = self.ana.evalstr
+                print("here screen message is",self.ana.screen_message )
+                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.screen_message, 3, color=self.kp.c_eval_err)
                 if len(self.evalhis) < min(self.ana.repcnt, 4):
                     self.evalhis.append(False)
+
+            self.ana.ongoing_cycle = True
+            #self.ana.screen_message = ''
+            self.fcnt  = 0
+            self.ana.evalstr = ''
+
+            if self.exeno == 5:
+                self.ana.shld.ongoing_cycle = True
+
+        else:
+            print("we are in the cycle")
+            #then display the screen message for 2 seconds
+            if  self.ana.screen_message == '':
+                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, None, 3, color=self.kp.c_eval_err)
+            else:
+                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, self.ana.screen_message, 3, color=self.kp.c_eval_err)
         print(self.ana.repcnt)
         print(self.evalhis)
+        self.ana.ongoing_cycle = True  #just added this, lets cee
 
     def process_finish_analysis(self):
         if not self.kp.finish:
@@ -458,10 +487,10 @@ class BodyGameRuntime(object):
         if self.errsums == '':
             if len(self.evalhis) != 0:
                 self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                    'Overall evaluation:\n\nPerfect !!', 3, color=self.kp.c_togo)
+                                    'Overall evaluation:\nPerfect !!', 3, color=self.kp.c_togo, fsize=80)
         else:
             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                'Overall evaluation:\n\n- '+self.errsums, 3, color=self.kp.c_togo)
+                                'Overall evaluation:\n- '+self.errsums, 3, color=self.kp.c_togo, fsize=80)
 
 # the main menu after each exercise
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
@@ -613,12 +642,32 @@ class BodyGameRuntime(object):
                         #                     self.ana.hs.htext(body.hand_left_state, body.hand_right_state), 4 ,\
                         #                     (255, 130, 45, 255))
 
-                        if self.ana.evalstr != '':
+                        #if self.ana.evalstr != '':
                             # How long the evaluation show up
+                        #    self.fcnt += 1
+                        #    if self.fcnt > 60: # was 60
+                        #        self.ana.evalstr = ''
+                        #        self.fcnt  = 0
+                        
+                        print("screen message is")
+                        print(self.ana.screen_message)
+
+                        #determine the duration that screen message will be on screen
+                        if self.exeno ==6 or self.exeno ==4: 
+                            screen_duration = 120
+                        else:
+                            screen_duration = 90
+
+
+                        if self.ana.screen_message != '':
                             self.fcnt += 1
-                            if self.fcnt > 60:
-                                self.ana.evalstr = ''
+                            if self.fcnt > screen_duration : # was 60
+                                self.ana.screen_message = ''
                                 self.fcnt  = 0
+                        #elif not self.ana.ongoing_cycle:
+                        #    self.ana.screen_message = ''
+                        #    self.fcnt  = 0
+
 
                     # draw skel
                     self.skel.draw_body(joints, jps, pygame.color.THECOLORS["yellow"], self._frame_surface, 8)
@@ -642,6 +691,9 @@ class BodyGameRuntime(object):
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                                         self.exeinst.str['name'][self.exeno], 1)# 1 is location
         if not self.ana._done:
+            #if self.pa_count %50 == 0:
+                #self.ana.evalstr = ''
+                #self.process_analysis()
             self.process_analysis()
         else:
             self.process_finish_analysis()

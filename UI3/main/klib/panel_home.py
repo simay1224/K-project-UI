@@ -72,9 +72,9 @@ class Welcome_win(wx.Frame):
         line_sizer.Add(line, pos=(0, 0), span=(2, int(self.width/self.sizer_w/2)), flag=wx.EXPAND|wx.BOTTOM)
 
         if self.info.isPat:
-            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fname + '! How\'s your day!')
+            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fname + '! How\'s your day?')
         elif self.info.isCli:
-            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fcname + '! How\'s your day!')
+            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fcname + '! How\'s your day?')
         text1.SetFont(self.font)
         title_sizer.Add(text1, pos=(1, 0))
 
@@ -414,9 +414,9 @@ class Evaluation_win(wx.Frame):
         line_sizer.Add(line, pos=(0, 0), span=(2, int(self.width/self.sizer_w/2)), flag=wx.EXPAND|wx.BOTTOM)
 
         if self.info.isPat:
-            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fname + '! How\'s your day!')
+            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fname + '! How\'s your day?')
         elif self.info.isCli:
-            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fcname + '! How\'s your day!')
+            text1 = wx.StaticText(self.panel, label='Hi ' + self.info.fcname + '! How\'s your day?')
         text1.SetFont(self.font)
         title_sizer.Add(text1, pos=(1, 0))
 

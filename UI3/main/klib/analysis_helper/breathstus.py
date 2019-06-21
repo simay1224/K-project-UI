@@ -37,6 +37,8 @@ class Breath_status(object):
         self.errsum  = []
         self.evalstr = ''
         self.eval    = ''
+        #boolean for ongoing cycle
+        self.ongoing_cycle= True
 
     # def bodystraight(self, joints, th=20):
     #     """ check whether body is straight or not
@@ -162,6 +164,8 @@ class Breath_status(object):
             hand_trunc_open = hand_trunc[::2, :]
 
         hand_chk = np.ones(len(hand_trunc))
+        print("hand check")
+        print(hand_chk)
         cnt = 0
         for idx, i in enumerate(self.breath_in):
             loc = np.where((i >= hand_trunc_close[:, 0]) & (i <= hand_trunc_close[:, 1]))[0]
@@ -218,7 +222,7 @@ class Breath_status(object):
         return seq
 
     def detect_brth(self, rng=10, scale=3):
-
+        self.ongoing_cycle= True
         if self.brth_out_flag:
             self.min_ary = self.updata_minmax(self.min_ary, 'min')
             self.max_ary = self.local_minmax(self.max_ary, self.min_ary, self.min_ary[-1, 1]+10, 'max', scale=scale)
@@ -226,6 +230,7 @@ class Breath_status(object):
                 # print ('find one max  ' +str(self.max_ary[-1, 0]))
                 self.brth_out_flag = False
                 self.cnt += 1
+                self.ongoing_cycle= False
                 if self.eval == '':
                     self.evalstr = 'Repitition done: Well done.'
                 else:

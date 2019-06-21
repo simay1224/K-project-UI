@@ -39,13 +39,14 @@ class Kparam(object):
         self.c_guide     = (0, 90, 106, 255)  #was (0, 90, 115, 255)
         self.c_eval_well = (106, 57, 0, 0)  # was (19, 144, 178, 0)
         self.c_eval_err  = (106, 4, 0, 255) #was (230, 115, 0, 255)
+        self.c_stop = (200,4,10,255)
         self.c_togo      = (106, 4, 10, 255) # was (255, 20, 100, 255), now iti smaroon
         # style
         self.s_normal = 'montserrat'
         self.s_emp = 'montserrat'
-        self.eval_fs_title = 100
+        self.eval_fs_title = 80 # was 100
         self.eval_fs_guide = 80
-        self.eval_fs_msg = 70
+        self.eval_fs_msg = 90  #make it bigger, was 70
         self.eval_fs_cnt = 100
         self.inst_size = 40
 

@@ -49,13 +49,17 @@ class Analysis(object):
         self.do_once = False
         self._done = False
         self.jointslist = np.array([])
-        self.evalstr = ''
+        self.evalstr = ''  #will be immediate feedback or each frame
         # default color
         self.kp = Kparam()
         self.c_togo     = self.kp.c_togo
         self.c_handdown = self.kp.c_guide
         self.c_normal   = self.kp.c_eval_well
         self.c_err      = self.kp.c_eval_err
+        self.c_stop     = self.kp.c_stop
+        #
+        self.ongoing_cycle = True
+        self.screen_message = ''
 
     def getcoord(self, data, order=[1, 4, 8, 20]):
         """ get the coordinate of the chest region
@@ -185,22 +189,32 @@ class Analysis(object):
                             #self.cnt += 1
                 # self.eval_common(surface, exeno, kp)
                 # === eval string update ===
-                if self.evalstr == '':
-                    self.evalstr = self.brth.evalstr
-                    self.brth.evalstr = ''
+                #if self.evalstr == '':
+                #    self.evalstr = self.brth.evalstr
+                #    self.brth.evalstr = ''
+                self.evalstr = self.brth.evalstr  #evalstr gets updated immediately
+                if self.screen_message == '': #and self.shld.ongoing_cycle:
+                    self.screen_message = self.brth.evalstr # screen message gets the display message
+                self.brth.evalstr = ''
+                # update ongoing cycle
+                self.ongoing_cycle = self.brth.ongoing_cycle
                 # === eval information ===
                 if self.brth.cnt > 4:
                     # evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 repetitions', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2 ,color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Done! Please push down your arms', 2 ,color=self.c_stop) # was c_err
                     self.brth.err.append('Only need to do 4 repetitions')
                     self.brth.errsum.append('Only need to do 4 repetitions')
                 elif self.brth.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2, color=self.c_handdown)
+                    evalinst.blit_text(surface, exeno, kp, 'Done! Please push down your arms', 2, color=self.c_stop)
                 else:
                     if self.brth.brth_out_flag:
-                        evalinst.blit_text(surface, exeno, kp, 'Breathe out', 2, color=self.c_normal)
+                        if self.screen_message == '':
+                            self.screen_message = 'Breathe out'
+                        #evalinst.blit_text(surface, exeno, kp, 'Breathe out', 2, color=self.c_normal)
                     else:
-                        evalinst.blit_text(surface, exeno, kp, 'Breathe in', 2, color=self.c_normal)
+                        if self.screen_message == '':
+                            self.screen_message = 'Breathe in'
+                        #evalinst.blit_text(surface, exeno, kp, 'Breathe in', 2, color=self.c_normal)
                     evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.brth.cnt)),
                                        4, color=self.c_togo)
                 self.repcnt = self.brth.cnt
@@ -224,28 +238,40 @@ class Analysis(object):
                     if 'stand' not in self.evalstr:
                         self.bodystraight(reconJ)
                 # === eval string update ===
-                if self.evalstr == '':
-                    self.evalstr = self.brth.evalstr
-                    self.brth.evalstr = ''
+                #if self.evalstr == '':
+                #    self.evalstr = self.brth.evalstr
+                #    self.brth.evalstr = ''
+                self.evalstr = self.brth.evalstr  #evalstr gets updated immediately
+                if self.screen_message == '': #and self.shld.ongoing_cycle:
+                    self.screen_message = self.brth.evalstr # screen message gets the display message
+                self.brth.evalstr = ''
+                # update ongoing cycle
+                self.ongoing_cycle = self.brth.ongoing_cycle
                 # === eval information ===
                 if self.brth.cnt > 4:
                     # evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 repetitions', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2, True, color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Done! Please push down your arms', 2, True, color=self.c_stop)
                     self.brth.err.append('Only need to do 4 repetitions.')
                     self.brth.errsum.append('Only need to do 4 repetitions.')
                 elif self.brth.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2, True, color=self.c_handdown)
+                    evalinst.blit_text(surface, exeno, kp, 'Done! Please push down your arms', 2, True, color=self.c_stop)
                 else:
                     if stus == 'upnotstraight':
-                        evalinst.blit_text(surface, exeno, kp, 'Please make sure that your arms are straight.', 2, True, color=self.c_err)
+                        if self.screen_message == '':
+                            self.screen_message = 'Please make sure that your arms are straight.'
+                        #evalinst.blit_text(surface, exeno, kp, 'Please make sure that your arms are straight.', 2, True, color=self.c_err)
                         self.brth.err.append('Please make sure that your arms are straight at %s repetition.'
                                               % self.cnvt.ordinal(self.brth.cnt+1))
                         self.brth.errsum.append('Please make sure that your arms are straight when breathing.')
                     else:
                         if not self.brth.brth_out_flag:
-                            evalinst.blit_text(surface, exeno, kp, 'Breathe in and close your hands.', 2, True, color=self.c_normal)
+                            if self.screen_message == '':
+                                self.screen_message = 'Breathe in and close your hands.'
+                            #evalinst.blit_text(surface, exeno, kp, 'Breathe in and close your hands.', 2, True, color=self.c_normal)
                         else:
-                            evalinst.blit_text(surface, exeno, kp, 'Breathe out and open your hands.', 2, True, color=self.c_normal)
+                            if self.screen_message == '':
+                                self.screen_message = 'Breathe out and open your hands.'
+                            #evalinst.blit_text(surface, exeno, kp, 'Breathe out and open your hands.', 2, True, color=self.c_normal)
                     evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.brth.cnt)), 4, color=self.c_togo)
                 self.repcnt = self.brth.cnt
             elif stus == 'down':
@@ -264,7 +290,8 @@ class Analysis(object):
                             self.brth.errsum.append('Make sure you do 4 repetitions.')
                         print('================= exer END ======================')
                 else:
-                    evalinst.blit_text(surface, exeno, kp, 'Please raise yours arms.', 2, color=self.c_normal)
+                    #pass
+                    evalinst.blit_text(surface, exeno, kp, 'Please raise your arms.', 2, color=self.c_normal)
 
         elif exeno == 3:
             if self.kp.kinect:
@@ -286,23 +313,36 @@ class Analysis(object):
                 if 'stand' not in self.evalstr:
                     if self.kp.kinect:
                         self.bodystraight(reconJ)
-                if self.evalstr == '':
-                    self.evalstr = self.pushdp.evalstr
-                    self.pushdp.evalstr = ''
+                #if self.evalstr == '':
+                #    self.evalstr = self.pushdp.evalstr
+                #    self.pushdp.evalstr = ''
+                self.evalstr = self.pushdp.evalstr  #evalstr gets updated immediately
+                if self.screen_message == '': #and self.shld.ongoing_cycle:
+                    self.screen_message = self.pushdp.evalstr # screen message gets the display message
+                self.pushdp.evalstr = ''
+                # === cycle control boolean update ===
+                self.ongoing_cycle = self.pushdp.ongoing_cycle
                 if self.pushdp.cnt > 4:
                     # evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 repetitions', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2, color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Done! Please push down your arms', 2, color=self.c_stop)
                     self.pushdp.err.append('Only need to do 4 repetitions.')
                     self.pushdp.errsum.append('Only need to do 4 repetitions.')
                 elif self.pushdp.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2, color=self.c_handdown)
+                    evalinst.blit_text(surface, exeno, kp, 'Done! Please push down your arms', 2, color=self.c_stop)
                 else:
                     if stus == 'up':
-                        evalinst.blit_text(surface, exeno, kp, 'Push down you arms', 2, color=self.c_normal)
+                        if self.screen_message == '':
+                            self.screen_message = 'Push down you arms'
+                        #evalinst.blit_text(surface, exeno, kp, 'Push down you arms', 2, color=self.c_normal)
                     elif stus == 'upnotstraight':
-                        evalinst.blit_text(surface, exeno, kp, 'Please straighten your arms', 2, color=self.c_err)
+                        if self.screen_message == '':
+                            self.screen_message = 'Please straighten your arms'
+                        #evalinst.blit_text(surface, exeno, kp, 'Please straighten your arms', 2, color=self.c_err)
                     elif stus == 'vshape':
-                        evalinst.blit_text(surface, exeno, kp, 'Raise up your arms', 2, color=self.c_normal)
+                        if self.screen_message == '':
+                            self.screen_message = 'Raise up your arms'
+                        #evalinst.blit_text(surface, exeno, kp, 'Raise up your arms', 2, color=self.c_normal)
+                    #
                     evalinst.blit_text(surface, exeno, kp, '%s to go !!' %str(4-self.pushdp.cnt),
                                         4, color=self.c_togo)
                 self.repcnt = self.pushdp.cnt
@@ -323,34 +363,62 @@ class Analysis(object):
                         self.horzp.err.append('Make sure you do 4 repetitions.')
                         self.horzp.errsum.append('Make sure you do 4 repetitions.')
                     print('================= exer END ======================')
-                else:
-                    evalinst.blit_text(surface, exeno, kp, 'Please raise yours arms.', 2, color=self.c_normal)
+                #else:
+                    #stuck op in the screen
+                #    self.permenanent_msg = 'Start with your arms horizontal.'
+                #    evalinst.blit_text(surface, exeno, kp, self.permenanent_msg , 2, color=self.c_err)
+                    #evalinst.blit_text(surface, exeno, kp, 'Please raise yours arms.', 2, color=self.c_normal)
             if self.horzp.do:
-                if self.evalstr == '':
-                    self.evalstr = self.horzp.evalstr
-                    self.horzp.evalstr = ''
+                self.evalstr = self.horzp.evalstr  #evalstr gets updated immediately
+                if self.screen_message == '': #and self.shld.ongoing_cycle:
+                    self.screen_message = self.horzp.evalstr # screen message gets the display message
+                self.horzp.evalstr = ''
+                # === cycle control boolean update ===
+                self.ongoing_cycle = self.horzp.ongoing_cycle
+                #if self.evalstr == '':
+                #    self.evalstr = self.horzp.evalstr
+                #    self.horzp.evalstr = ''
                 if self.horzp.cnt > 4:
                     # evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 repetitions', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2, color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Done! Please push down your arms', 2, color=self.c_stop)
                     self.horzp.err.append('Only need to do 4 repetitions.')
                     self.horzp.errsum.append('Only need to do 4 repetitions.')
                 elif self.horzp.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2, color=self.c_handdown)
+                    evalinst.blit_text(surface, exeno, kp, 'Done! Please push down your arms', 2, color=self.c_stop)
                 else:
                     if stus == None and self.repcnt < 4 :
-                        evalinst.blit_text(surface, exeno, kp, 'Please keep your arms horizontally.', 2, color=self.c_err)
+                        pass
+                        #if self.screen_message == '':
+                        #    self.screen_message = 'Please keep your arms horizontally.'
+                        #    evalinst.blit_text(surface, exeno, kp, self.screen_message, 2, color=self.c_err)
+
+                        #pass
                         # self.horzp.evalstr = 'Please keep your arms horizontally.'
                         # self.horzp.eval = 'Please keep your arms horizontally.'
-                        self.horzp.err.append('The '+self.cnvt.ordinal(self.repcnt+1)+ ' time try, please keep your arms horizontally.')
-                        self.horzp.errsum.append('Please keep your arms horizontally.')
+                        #self.horzp.err.append('The '+self.cnvt.ordinal(self.repcnt+1)+ ' time try, please keep your arms horizontally.')
+                        #self.horzp.errsum.append('Please keep your arms horizontally.')
                     elif self.horzp.state == 'T-pose':
-                        evalinst.blit_text(surface, exeno, kp, 'Please close your arms to your chest', 2, color=self.c_normal)
+                        if self.screen_message == '':
+                            self.screen_message = 'Please close your arms to your chest'
+                            #evalinst.blit_text(surface, exeno, kp, self.screen_message, 2, color=self.c_normal) # was region 2
                     elif self.horzp.state == 'chest':
-                        evalinst.blit_text(surface, exeno, kp, 'Please open your arms to T-pose', 2, color=self.c_normal)
+                        if self.screen_message == '':
+                            self.screen_message = 'Please open your arms to T-pose'
+                            #evalinst.blit_text(surface, exeno, kp, self.screen_message, 2, color=self.c_normal) # # was region 2
+                    
+                    #stuck op in the screen
+                    #self.permenanent_msg = 'Start with your arms horizontal.'
+                    #evalinst.blit_text(surface, exeno, kp, self.permenanent_msg , 2, color=self.c_err)
+                    
+                    #down screen 
                     evalinst.blit_text(surface, exeno, kp, '%s to go !!' %str(4-self.horzp.cnt),
                                         4, color=self.c_togo)
                 self.repcnt = self.horzp.cnt
         
+            else:
+                #stuck op in the screen
+                self.permenanent_msg = 'Start with your arms horizontal.'
+                evalinst.blit_text(surface, exeno, kp, self.permenanent_msg , 2, color=self.c_err)
         #COMMENTING OUT THE REACH TO SKY 
             '''
         elif exeno == 5:
@@ -411,22 +479,28 @@ class Analysis(object):
                             print('================= exer END ======================')
                         self.cnt += 1
                 # === eval string update ===
-                if self.evalstr == '':
-                    self.evalstr = self.shld.evalstr
-                    self.shld.evalstr = ''
+                #if self.evalstr == '':
+                #if self.shld.ongoing_cycle : 
+                self.evalstr = self.shld.evalstr  #evalstr gets updated immediately
+                if self.screen_message == '': #and self.shld.ongoing_cycle:
+                    self.screen_message = self.shld.evalstr # screen message gets the display message
+                self.shld.evalstr = ''
+                # === cycle control boolean update ===
+                self.ongoing_cycle = self.shld.ongoing_cycle
+
                 # === eval information ===
                 if self.shld.cnt > 4:
                     # evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 repetitions', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2, color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Done! Please push down your arms', 2, color=self.c_stop)
                     self.shld.err.append('Only need to do 4 repetitions')
                     self.shld.errsum.append('Only need to do 4 repetitions')
                     self._done = True
                 elif self.shld.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2, color=self.c_handdown)
+                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2, color=self.c_stop)
                     self._done = True
 
                 else:
-                    evalinst.blit_text(surface, exeno, kp, 'Start rotating your shoulders', 2, color=self.c_normal)
+                    evalinst.blit_text(surface, exeno, kp, 'Keep your hands on your abdomen ', 2, color=self.c_normal)
                     evalinst.blit_text(surface, exeno, kp, ('%s to go !!' % (4-self.shld.cnt)), 4, color=self.c_togo)
                 self.repcnt = self.shld.cnt
             else:
@@ -437,6 +511,7 @@ class Analysis(object):
 
         #elif exeno == 7:
         elif exeno == 6:
+            #self.ongoing_cycle = False
             if self.exer[6].cntdown <= 0:
                 if self.kp.kinect:
                     stus = self.handpos(self.exer[6], reconJ)
@@ -455,17 +530,26 @@ class Analysis(object):
                     if self.kp.kinect:
                         self.clsp.run(reconJ)
                 # === eval string update ===
-                if self.evalstr == '':
-                    self.evalstr = self.clsp.evalstr
-                    self.clsp.evalstr = ''
+                #if self.evalstr == '':
+                #    self.evalstr = self.clsp.evalstr
+                #    self.clsp.evalstr = ''
+
+                self.evalstr = self.clsp.evalstr # immdiate
+                if self.screen_message == '': #and self.shld.ongoing_cycle:
+                    self.screen_message =  self.clsp.evalstr # screen message gets the display message
+                self.clsp.evalstr = ''
+                # === cycle control boolean update ===
+                self.ongoing_cycle = self.clsp.ongoing_cycle
+                print("cycle control boolean update, ", self.ongoing_cycle )
+
                 # === eval information ===
                 if self.clsp.cnt > 4:
                     # evalinst.blit_text(surface, exeno, kp, 'Only need to do 4 repetitions', 3, color=self.c_err)
-                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2, color=self.c_err)
+                    evalinst.blit_text(surface, exeno, kp, 'Done! Please push down your arms', 2, color=self.c_stop)
                     self.clsp.err.append('Only need to do 4 repetitions')
                     self.clsp.errsum.append('Only need to do 4 repetitions')
                 elif self.clsp.cnt == 4:
-                    evalinst.blit_text(surface, exeno, kp, 'Please push down your arms', 2, color=self.c_handdown)
+                    evalinst.blit_text(surface, exeno, kp, 'Done! Please push down your arms', 2, color=self.c_stop)
                 else:
                     if self.clsp.mode == 'clasp':
                         evalinst.blit_text(surface, exeno, kp, 'Start to clasp', 2, color=self.c_normal)

@@ -212,9 +212,9 @@ class Msgbox(wx.Frame):
         else:
             if self.isPat:
                 error += 'Patient Log in:\n'
-                if len(self.lname) == 0 or len(self.fname) == 0:
-                    error += '\tplease complete your name\n'
-                    error_flag = True
+                #if len(self.lname) == 0 or len(self.fname) == 0:
+                #    error += '\tplease complete your name\n'
+                #    error_flag = True
                 # id could be non-integer
                 if self.id == '':
                     error += '\tplease enter your id\n'

@@ -28,6 +28,8 @@ class Pushdp(object):
         self.evalstr = ''
         self.eval    = ''
 
+        self.ongoing_cycle= True
+
     def joint_angle(self, joints, idx=[4, 5, 6], y_vec=np.array([0, 1, 0]) ,offset=0):
         """ finding the angle between 3 joints.
             default joints are left shld, elbow, wrist.
@@ -54,6 +56,7 @@ class Pushdp(object):
             return
 
         wrist_y = joints[19]
+        self.ongoing_cycle= True
         if stus == 'up':
             if self.cflag:
                 self.cflag = False
@@ -75,6 +78,7 @@ class Pushdp(object):
                 self.flag = False
                 self.Min_wrist_y = 10**6
                 self.tflag = True
+                self.ongoing_cycle= False
                 self.cnt += 1
         elif stus == 'vshape':
             if self.tflag:

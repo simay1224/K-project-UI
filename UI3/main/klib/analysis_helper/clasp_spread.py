@@ -30,6 +30,8 @@ class Clasp_spread(object):
         self.errsum  = []
         self.evalstr = ''
         self.eval    = ''
+                #ongoing cycle
+        self.ongoing_cycle = True
 
     def state_update(self, joints, kpm):
         """ update accoding to each frame data
@@ -63,11 +65,13 @@ class Clasp_spread(object):
     def clasp(self, joints, kpm, spread_th=60, elbow_th=75):
         """ arms clasp state
         """
+        self.ongoing_cycle = True
         if self.clasp_cnt == self.hold:
             self.elbowstus['clasp'] = False
             if not self.first:
                 self.holdtime.append(self.spread_time/30.)
                 self.cnt += 1
+                self.ongoing_cycle = False
                 print ('count: %s' %self.cnt)
                 if not self.elbowstus['spread']:
                     if self.spread_time < spread_th:

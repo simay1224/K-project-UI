@@ -237,6 +237,7 @@ class Evaluation(object):
            ratio and the region number. According to the size of the surface, the text
            will auto change line also auto change size
         """
+        #print(text, type(text))
         color = self.kp.c_guide if color is None else color
 
         if fsize != 0:
@@ -264,13 +265,20 @@ class Evaluation(object):
             words = self.words[exeno]
         else:
             words = [word.split(' ') for word in text.splitlines()]
-        if region != 0:
+        if region != 0 and len(words)>0: #original: if region != 0:
             (x, y) = self.position(surface, region)
             x_ori, y_ori = x, y
-            word_surface = self.font.render(word, 0, color)
+            #print(words, type(words))
+            #print(' '.join(words[0]))
+            word_surface = self.font.render(' '.join(words[0]), 0, color)
+            #word_surface = self.font.render(word, 0, color)
             word_width, word_height = word_surface.get_size()
+            go_up = 200
             if region==3:
                 y += word_height
+                y -=go_up/2 + 20
+            if region ==2:
+                y -=  45
         else:  # customize position
             (x, y) = pos
             x_ori, y_ori = x, y
