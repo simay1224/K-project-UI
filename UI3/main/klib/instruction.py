@@ -70,7 +70,7 @@ class Exeinst(object):
         self.str['exe'][6] = 'Exercise 6 : Clasp and Spread'\
                              '\n  '\
                              '\n1. Raise and clasp your arms till the belly position.'\
-                             '\n2. Raise clasped hands toward to your forehead and keep elbows together.'\
+                             '\n2. Raise clasped hands towards your forehead and keep elbows together.'\
                              '\n3. Slide your heands to the back of your head and spread the elbows open wide.'\
                              '\n4. Back to the belly position.'\
                              '\n5. Repeat 4 times.'\
@@ -86,10 +86,10 @@ class Exeinst(object):
                                 '\n3. Breathe as deep as you can.'
         self.str['note'][3] = '\nTips :'\
                                 '\n1. When you raise up your hands, make sure that your hand, elbow and shoulder are straight.'\
-                                '\n2. When bending the elbow, hand-elbow-shoulder should be "V-shape" not "L-shape"'\
+                                '\n2. When bending the elbow, hand-elbow-shoulder should be "V-shape" not "L-shape".'\
 
         self.str['note'][4] = '\nTips :'\
-                                '\n1. When doing "T-pose", make sure that your hand, elbow and shoulder are straight'\
+                                '\n1. When doing "T-pose", make sure that your hand, elbow and shoulder are straight.'\
                                 '\n2. When closing hands, make sure that your hand, and shoulder are in the same height.'\
 
         #self.str['note'][5] = '\nTips :'\
@@ -102,7 +102,7 @@ class Exeinst(object):
         self.str['note'][6] = '\nTips :'\
                                 '\n1. When raising the arms to the forehead, keeping two elbows as close as possible.'\
                                 '\n2. When the hands is in the back of your head, spread the elnows open as wide as possible.'\
-                                '\n3. Keep your body staight.'
+                                '\n3. Keep your body straight.'
 
         self.words['exe'][1] = [word.split(' ') for word in self.str['exe'][1].splitlines()]
         self.words['exe'][2] = [word.split(' ') for word in self.str['exe'][2].splitlines()]

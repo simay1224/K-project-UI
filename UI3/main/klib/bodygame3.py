@@ -37,13 +37,18 @@ from .instruction import Exeinst
 from .historylog  import Historylog
 from .analysis_helper.handstatus  import Hand_status
 
-fps = 30
+fps = 30 #was originally 30
 limbidx = np.array([4, 5, 6, 8, 9, 10, 20])
+x_screen = 0
+y_screen = 0
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x_screen,y_screen)
 
 class BodyGameRuntime(object):
 
     def __init__(self, info, exe_num=3, if_recording=False):
+        print("$"*50)
         pygame.init()
+        print('py game is INITIALIZED!')
         # Used to manage how fast the screen updates
         self._clock = pygame.time.Clock()
         # Set the width and height of the screen [width, height]
@@ -54,11 +59,16 @@ class BodyGameRuntime(object):
         self.height = 1080
         # print(self.width, self.height)
         #self._screen = pygame.display.set_mode((self.width, self.height),  pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32) #ORIGINAL ONE
-        self._screen = pygame.display.set_mode((0,0),  pygame.FULLSCREEN, 32)
+        #non-orginal set up:
+        #self._screen = pygame.display.set_mode((0,0), pygame.NOFRAME , 32)
+        self._screen = pygame.display.set_mode((0, 0),  pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32) 
+        
+        #self._screen = pygame.display.set_mode((0,0),  pygame.FULLSCREEN, 32)
+        
         #self._screen = pygame.display.set_mode((self.width, self.height),  pygame.HWSURFACE | pygame.DOUBLEBUF  | pygame.RESIZABLE, 32)
         #background color:
         self.background_color = (230,230,230)
-        self._screen.fill(self.background_color)
+        #self._screen.fill(self.background_color)
 
         self._frame_surface = pygame.Surface((self.width, self.height), 0, 32).convert()  # kinect surface
         self.bk_frame_surface = pygame.Surface((self.width, self.height), 0, 32).convert()  #background surface
@@ -89,8 +99,9 @@ class BodyGameRuntime(object):
                             PyKinectV2.FrameSourceTypes_Depth | PyKinectV2.FrameSourceTypes_BodyIndex)
             # Extract bk image of scene
             if self._kinect.has_new_color_frame():
-                frame = self._kinect.get_last_color_frame().reshape([self.height, self.width, 4])[:, :, :3]
-                bkimg = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+                frame = self._kinect.get_last_color_frame().reshape([self.height, self.width, 4])[:, :, :3] # can be None
+                if frame is not None:
+                    bkimg = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
                 print ('Extract bg .....')
             else:
                 print ('Failed to extract .....')
@@ -100,9 +111,19 @@ class BodyGameRuntime(object):
             self.bkidx = 11
 
         self.readbackground()
-
+        print('background read')
         self.if_recording = if_recording
+        
+        #data flow boolean to control data flow. controlled by buttons
+        #self.data_flow= False
+        self.exercise_initialized = False
+        self.paused = False
+        self.stopped = False
+        self.exercise_start_wait = 0 
 
+        #true when pressed escape 
+        self.escaped = False
+        print 'finished initalizing'
 
 
 
@@ -192,10 +213,13 @@ class BodyGameRuntime(object):
         self.exeinst = Exeinst() # exercise intruction
         self.log = Historylog()
 
+        #self._bodies =None
+
     def reset(self, clean=False):
         if self.kp.kinect:
             self.movie.stop(True)
             del self.movie
+        #self._bodies = None
         self.init_param(clean)
 
     def press_event(self, press):
@@ -204,15 +228,37 @@ class BodyGameRuntime(object):
         """
         if press[pygame.K_ESCAPE]:
             self.kp._done = True
+            print('inside escape')
+            print(self.kp._done)
             if self.kp.kinect:
                 self.movie.stop()
+            self.escaped = True
             pygame.quit()
 
-        if press[pygame.K_q]:
+
+        if press[pygame.K_q]:  # to stop the movie
+            self.ana._done =True
+            #self.kp._done = True
+            #if self.kp.kinect:
+            #    self.movie.stop()
+            #pygame.quit()
+
+        if press[pygame.K_s]:  # to finish the exercise
             self.kp._done = True
+            self.exercise_initialized = False
+            #if self.kp.kinect:
+            #    self.movie.stop()
+
+        if press[pygame.K_w]:  # to pause the movie
+            #self.kp._done = True
             if self.kp.kinect:
-                self.movie.stop()
-            pygame.quit()
+                self.movie.pause()
+
+
+        if press[pygame.K_a]:  # to play the movie
+            #self.kp._done = True
+            if self.kp.kinect:
+                self.movie.play()
 
 
         if press[pygame.K_h]:  # use 'h' to open, 'ctrl+h' to close finger detection
@@ -285,11 +331,11 @@ class BodyGameRuntime(object):
         # if press[pygame.K_s]:  # use 's' to smaller the scale
         #     self.kp.scale = max(self.kp.scale/1.1, 1)
 
-        if press[pygame.K_w]: # use 'w' to change background image
-            self.bkidx += 1
-            if self.bkidx >= len(self.bklist):
-                self.bkidx -= len(self.bklist)
-            self.readbackground()
+        #if press[pygame.K_w]: # use 'w' to change background image
+        #    self.bkidx += 1
+        #    if self.bkidx >= len(self.bklist):
+        #        self.bkidx -= len(self.bklist)
+        #    self.readbackground()
 
         if press[pygame.K_z]:  # use 'z' to lower the ratio of avatar to color frame
                                # 'ctrl+z' to larger the ratio of avatar to color frame
@@ -306,6 +352,7 @@ class BodyGameRuntime(object):
 
         # Switch avator and kinect
         if press[pygame.K_0]:  # use '0' to change the scene type
+            self.exercise_initialized = False
             print('scene change')
             if self.kp.scene_type == 2:
                self.kp.scene_type = 1
@@ -313,28 +360,34 @@ class BodyGameRuntime(object):
                self.kp.scene_type += 1
 
         if press[pygame.K_1]:  # use '1' to change to execise 1
+            self.exercise_initialized = False
             self.exeno = 1
             print('====  Doing exercise 1 ====')
             self.reset()
         if press[pygame.K_2]:  # use '2' to change to execise 2
+            self.exercise_initialized = False
             self.exeno = 2
             print('====  Doing exercise 2 ====')
             self.reset()
         if press[pygame.K_3]:  # use '3' to change to execise 3
+            self.exercise_initialized = False
             self.exeno = 3
             print('====  Doing exercise 3 ====')
             self.reset()
         if press[pygame.K_4]:  # use '4' to change to execise 4
+            self.exercise_initialized = False
             self.exeno = 4
             print('====  Doing exercise 4 ====')
             self.reset()
         if press[pygame.K_5]:  # use '5' to change to execise 5
             #we are skipping 5 so exeno =5 would go to exercise 6 in the backend
+            self.exercise_initialized = False
             self.exeno = 5
 
             print('====  Doing exercise 5 ====')
             self.reset()
         if press[pygame.K_6]:  # use '6' to change to execise 6
+            self.exercise_initialized = False
             self.exeno = 6
             print('====  Doing exercise 6 ====')
             self.reset()
@@ -345,6 +398,7 @@ class BodyGameRuntime(object):
            # self.reset()
 
         if press[pygame.K_SPACE]:
+            self.exercise_initialized = False
             #if self.exeno == 7:
             if self.exeno == 6:
                 self.exeno = 1
@@ -368,20 +422,100 @@ class BodyGameRuntime(object):
             wait_key_cnt[0] += 1
         if(pygame.key.get_focused() and wait_key_cnt[0] >= 3):
             press = pygame.key.get_pressed()
+            #print('press:', press)
             self.press_event(press)
             wait_key_cnt[0] = 0
+        if not self.escaped or True:
+            # === Main event loop ===
+            for event in pygame.event.get():  # User did something
+                if event.type == pygame.QUIT:  # If user clicked close
+                    self.kp._done = True  # Flag that we are done so we exit this loop
+                    if self.kp.kinect:
+                        print("is problem here")
+                        self.movie.stop()
+                        print("no")
+                    self.exercise_initialized = False
+                    pygame.quit()
+                    #exit()
+                    
+                elif event.type == pygame.VIDEORESIZE:  # window resized
+                    print('&^&^&'*200)
+                    print("\n\n\nevent.type == pygame.VIDEORESIZE")
+                    #self._screen = pygame.display.set_mode((0,0),  pygame.FULLSCREEN, 32)
+                    self._screen = pygame.display.set_mode(event.dict['size'],pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.RESIZABLE, 32)
+                    #self._screen = pygame.display.set_mode(event.dict['size'],
+                    #               pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
 
-        # === Main event loop ===
-        for event in pygame.event.get():  # User did something
-            if event.type == pygame.QUIT:  # If user clicked close
-                self.kp._done = True  # Flag that we are done so we exit this loop
-                if self.kp.kinect:
-                    self.movie.stop()
-                pygame.quit()
-                
-            elif event.type == pygame.VIDEORESIZE:  # window resized
-                self._screen = pygame.display.set_mode(event.dict['size'],
-                               pygame.HWSURFACE | pygame.DOUBLEBUF | pygame.RESIZABLE, 32)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_x = pygame.mouse.get_pos()[0]
+                    mouse_y  = pygame.mouse.get_pos()[1]
+                    #button 1 pressed
+                    print("%"*50)
+                    print('\n', mouse_x , mouse_y)
+                    ideal_left_button1  = 900
+                    ideal_right_button1  = ideal_left_button1 + 200 
+                    ideal_left_button2  = ideal_right_button1 + 10
+                    ideal_right_button2 = ideal_left_button2 + 200
+                    ideal_left_button3  = ideal_right_button2 + 10
+                    ideal_right_button3 = ideal_left_button3 + 200
+
+                    ideal_button_top = 40
+                    ideal_button_bottom = 80
+
+                    #button functionalities
+                    if not  self.ana._done:
+                        if self.exercise_initialized: #exercise already started, function pause and stop only
+                            if mouse_x >= ideal_left_button2 and mouse_x <= ideal_right_button2 :
+                                if mouse_y >= ideal_button_top  and mouse_y <= ideal_button_bottom:
+                                    #PAUSE/CONTINUE BUTTON FUNCTIONALITY
+                                    if not self.paused:
+                                        self.paused = True
+                                        self.ana.paused = True
+                                    else:
+                                        self.paused= False
+                                        self.ana.paused = False
+                                    self.movie.pause()
+                        
+                            elif mouse_x >= ideal_left_button3 and mouse_x <= ideal_right_button3:
+                                if mouse_y >= ideal_button_top  and mouse_y <= ideal_button_bottom:
+                                    #STOP BUTTON FUNCTIONALITY
+                                    #self.data_flow= False
+                                    self.stopped = True
+                                    self.movie.stop()
+                                    self.ana._done =True
+                                    #self.movie.stop()
+
+
+                        else: #the exercise did not start yet, function start only
+                            #START BUTTON FUNCTIONALITY
+                            if mouse_x >= ideal_left_button1  and mouse_x <= ideal_right_button1:
+                                if mouse_y >= ideal_button_top  and mouse_y <= ideal_button_bottom:
+                                    #self.data_flow= True
+                                    self.ana.exercise_initialized = True
+                                    self.exercise_initialized = True
+                                    self.movie.play()
+
+                            '''
+                    if mouse_x >= ideal_left_button1  and mouse_x <= ideal_right_button1:
+                        if mouse_y >= ideal_button_top  and mouse_y <= ideal_button_bottom:
+                            #self.data_flow= True
+                            self.exercise_initialized = True
+                            self.movie.play()
+                            
+                    elif mouse_x >= ideal_left_button2 and mouse_x <= ideal_right_button2 :
+                        if mouse_y >= ideal_button_top  and mouse_y <= ideal_button_bottom:
+                            self.movie.pause()
+                    
+                    elif mouse_x >= ideal_left_button3 and mouse_x <= ideal_right_button3:
+                        if mouse_y >= ideal_button_top  and mouse_y <= ideal_button_bottom:
+                            #self.data_flow= False
+                            self.movie.stop()
+                            self.ana._done =True
+                            #self.movie.stop()
+                            '''
+                    
+                    
+                    
 
     def find_closest_id(self):
         closest_ID = -1
@@ -421,10 +555,13 @@ class BodyGameRuntime(object):
     def process_analysis(self):
         print("\n\nprocess analysis:")
         print(self.ana.evalstr)
+        #print('@@@@@@@@@@@@@@@'*25)
+        print(self.ana.dtw.idxlist)
+        #print('----------------'*25)
         #if self.ana.evalstr != '':########!!!!!!!!!!!!
         #print("shld ongoing cycle:", self.ana.shld.ongoing_cycle)
         print("ana ongoing cycle:", self.ana.ongoing_cycle)
-        if self.ana.ongoing_cycle== False: # was if self.ana.shld.ongoing_cycle == False or
+        if self.ana.ongoing_cycle == False : # was if self.ana.shld.ongoing_cycle == False or
             if 'well' in (self.ana.evalstr).lower(): #if well exists in immediate feedback
                 print("does it say well done?")
                 
@@ -433,8 +570,7 @@ class BodyGameRuntime(object):
                 self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,  self.ana.screen_message, 3, color=self.kp.c_eval_well)
                 if len(self.evalhis) < min(self.ana.repcnt, 4):
                     self.evalhis.append(True)
-                
-            
+                      
             else:
                 print("no it does not")
                 self.ana.screen_message = self.ana.evalstr
@@ -463,6 +599,7 @@ class BodyGameRuntime(object):
         self.ana.ongoing_cycle = True  #just added this, lets cee
 
     def process_finish_analysis(self):
+        print('process finish analaysis called')
         if not self.kp.finish:
             errs = [self.ana.brth.err, self.ana.hs.err, self.ana.horzp.err, self.ana.pushdp.err,\
                     self.ana.shld.err, self.ana.clsp.err, self.ana.swing.err]  # append err msg here
@@ -471,26 +608,45 @@ class BodyGameRuntime(object):
                             self.ana.swing.errsum))
             dolist = [self.ana.brth.do, self.ana.hs.do, self.ana.horzp.do, self.ana.pushdp.do,\
                       self.ana.shld.do, self.ana.clsp.do, self.ana.swing.do]
+            print("in process finish analysis. lets run eval ")
             exelog = self.eval.run(self.exeno, self.ana)
+            print("after running eval ")
 
             self.eval.errmsg(errs, dolist)
             self.eval.cmphist(self.log, self.info, self.exeno, self.kp.now, exelog)
             self.log.writein(self.info, self.exeno, self.kp.now, exelog, errs)
-
+            print('@@@@@@@@@@@@@@@'*50)
             print(self.ana.dtw.idxlist)
+            print('----------------'*50)
             self.kp.finish = True
             while len(self.evalhis) < 4:
+                print("\nevalhis appended false \n")
                 self.evalhis.append(False)
 
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp, \
                             'Exercise ' + str(self.exeno) + ' is done', 2)
         if self.errsums == '':
+            self.ana.screen_message = ''
             if len(self.evalhis) != 0:
-                self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                    'Overall evaluation:\nPerfect !!', 3, color=self.kp.c_togo, fsize=80)
+                if self.ana.exercise_started:
+                    if self.ana.repcnt== 4:
+                        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                    'Overall evaluation:\nPerfect !!', 3, color=self.kp.c_togo, fsize=80) #font size is 80
+                    
+                    elif self.ana.repcnt >  4:
+                        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                    'Overall evaluation:\nOnly need to do 4 repetitions.', 3, color=self.kp.c_togo, fsize=70) #font size is 80
+                    
+                    else:  #self.ana.repcnt < 4
+                        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                    'Make sure you do 4 repetitions.', 3, color=self.kp.c_togo, fsize=70) #font size is 80
+                else:
+                    self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                                    'Overall evaluation:\nNo repetition done', 3, color=self.kp.c_togo, fsize=70) #font size is 80
         else:
+            self.ana.screen_message = ''
             self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                'Overall evaluation:\n- '+self.errsums, 3, color=self.kp.c_togo, fsize=80)
+                                'Overall evaluation:\n- '+self.errsums, 3, color=self.kp.c_togo, fsize=70) # font size was 80
 
 # the main menu after each exercise
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
@@ -506,6 +662,7 @@ class BodyGameRuntime(object):
             else:
                 self.exeno += 1
             print('Next exercise ..................')
+            self.exercise_initialized = False
             self.reset()
 
 
@@ -522,18 +679,41 @@ class BodyGameRuntime(object):
 
         target_surface.unlock()
 
+    #def text_objects(self, text, color):
+    #    smallfont = pygame.font.SysFont(self.kp.s_normal, self.kp.inst_size)
+    #    textSurface = smallfont.render(text, True, color)
+    #    return textSurface, textSurface.get_rect()
+
+    #draws text to button
+    def text_to_button(self, msg, buttonx, buttony, buttonwidth, buttonheight, size = "small"):
+        color = (240, 240, 240) # text color= (240, 240, 240)
+        text_font = pygame.font.SysFont(self.kp.s_normal, self.kp.inst_size) #self.kp.inst_size
+        textSurface = text_font.render(msg, True, color)
+        textRect = textSurface.get_rect()
+        #textSurf, textRect = self.text_objects(msg,color)
+        textRect.center = ((buttonx+(buttonwidth/2)), buttony+(buttonheight/2))
+        #print("center is", textRect.center)
+        self.bk_frame_surface.blit(textSurface, textRect) #_screen
 
     def run(self):
+        print 'def run'
         # Removing key jitter
         wait_key_cnt = [3]
 
         # s = pygame.image.tostring(self._screen, 'RGB')
-
+        #self._bodies  =None
         while not self.kp._done:
+            print 'p'
             self.process_pygame(wait_key_cnt)
+            print 'r'
+            #if not self.escaped:
             self.run_body_game()
+            print (self.kp._done)
 
+        print(" "*10, "DONE"*100)
+        print(self.kp._done)
         # end of the system
+        #if not self.escaped:
         if self.kp.kinect:
             self.movie.stop(True)   # close avatar
             self._kinect.close()    # close kinect sensor
@@ -545,7 +725,11 @@ class BodyGameRuntime(object):
             self.dataset.close()
         except:
             pass
+        #self.data_flow =False
+        #self._bodies  =None
+        print('pygame quit?')
         pygame.quit()  # quit
+        print('yes')
 
 
     def run_body_game(self):
@@ -556,25 +740,35 @@ class BodyGameRuntime(object):
         # initialize background frame
         self.draw_color_frame(self.bkimg, self.bk_frame_surface)
 
-        if self.kp.kinect:
+        if self.kp.kinect: 
+            # was if self.kp.kinect:
             # self.bk_frame_surface.fill(255,50,50)
             # === extract data from kinect ===
             if self._kinect.has_new_color_frame():
                 print 'Got new frame!'
-                frame = self._kinect.get_last_color_frame()
-                self.draw_color_frame(frame, self._frame_surface)
-                frame = frame.reshape(self.height, self.width, 4)[:, :, :3]
+                frame = self._kinect.get_last_color_frame() #can be None
+                #! change
+                if frame is not None:
+                    self.draw_color_frame(frame, self._frame_surface)
+                    frame = frame.reshape(self.height, self.width, 4)[:, :, :3]
             if self._kinect.has_new_body_frame():
-                self._bodies = self._kinect.get_last_body_frame()
+                self._bodies = self._kinect.get_last_body_frame() # can be None
                 timestamp = datetime.datetime.now()
             if self._kinect.has_new_body_index_frame():
-                bodyidx = self._kinect.get_last_body_index_frame()
-                bodyidx = bodyidx.reshape((424, 512))
+                bodyidx = self._kinect.get_last_body_index_frame() # can be None
+                #! change
+                if bodyidx is not None:
+                    bodyidx = bodyidx.reshape((424, 512))
             if self._kinect.has_new_depth_frame():
-                dframe, oridframe = self._kinect.get_last_depth_frame()
-                dframe = dframe.reshape((424, 512))
+                dframe, oridframe = self._kinect.get_last_depth_frame() # can be None
+                #! changed
+                if dframe is not None:
+                    dframe = dframe.reshape((424, 512))
 
             # === when user is detected ===
+            print('-'*10)
+            #print('self bodies is None:')
+            #print(self._bodies is None)
             if self._bodies is not None:
                 closest_ID = self.find_closest_id()
 
@@ -587,7 +781,8 @@ class BodyGameRuntime(object):
                     djps = self._kinect.body_joints_to_depth_space(joints)  # joint points in depth domain
                     # pdb.set_trace()
                     # === fingers detection ===
-                    if self.kp.handmode:  # finger detect and draw
+                    if self.kp.handmode and frame is not None:  # finger detect and draw
+                    #! added frame is not none here
                         self.fextr.run(frame, bkimg, body, bddic, jps, pygame.color.THECOLORS["yellow"], self._frame_surface)
 
                     # === joint reliability ===
@@ -596,7 +791,7 @@ class BodyGameRuntime(object):
                     # self.skel.draw_Rel_joints(jps, Rel, self._frame_surface)
 
                     # === dtw analyze & denoising process ===
-                    if not self.ana._done:
+                    if not self.ana._done and self.exercise_initialized and not self.ana.paused:
                         # Modified joint array (change struture from pykinect to np)
                         modJary = self.h_mod.human_mod_pts(joints, False)  # modJary is 11*3 array
                         modJary = modJary.flatten().reshape(-1, 33)  # change shape to 1*33 array
@@ -634,6 +829,11 @@ class BodyGameRuntime(object):
                         #     reconJ = modJary
 
                         # === analyze ===
+                        #! change
+                        #if dframe is None:
+                        #    self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
+                        #             self.eval, self.kp, body, [], djps)
+                        #else:
                         self.ana.run(self.exeno, reconJ[0], self.bk_frame_surface,\
                                      self.eval, self.kp, body, dframe, djps)
 
@@ -676,26 +876,79 @@ class BodyGameRuntime(object):
 
                 self.kp.framecnt += 1  # frame no
             else:
-                self.io.typetext(self._frame_surface, 'kinect does not connect!!', (20, 100))
+                self.io.typetext(self._frame_surface, 'kinect does not connect!!---', (20, 100))
 
         # if self.kp.kinect == False:
         else:
-            if not self.ana._done:
+            if not self.ana._done and self.exercise_initialized and not self.ana.paused:
                 # === analyze ===
                 # reconJ, body, dframe, djps: all from kinect
                 self.ana.run(self.exeno, None, self.bk_frame_surface, self.eval, self.kp, None, None, None)
             self.kp.framecnt += 1  # frame no
-            self.io.typetext(self._frame_surface, 'kinect does not connect!!', (20, 100))
+            self.io.typetext(self._frame_surface, 'kinect does not connect!! !!', (20, 100))
 
         # draw text
         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                                         self.exeinst.str['name'][self.exeno], 1)# 1 is location
+
+        #draw buttons
         if not self.ana._done:
+            if self.exercise_initialized: #exercise alread started, display pause and stop only
+                #button1 = start
+                #pygame.draw.rect(self.bk_frame_surface , self.kp.c_button_play  , pygame.Rect(self.kp.button_left1, self.kp.button_top, self.kp.button_w , self.kp.button_h ))     
+                #button2 = pause
+                pygame.draw.rect(self.bk_frame_surface , self.kp.c_button_pause , pygame.Rect(self.kp.button_left2, self.kp.button_top, self.kp.button_w  , self.kp.button_h) )
+                #button3 = stop
+                pygame.draw.rect(self.bk_frame_surface , self.kp.c_button_stop  , pygame.Rect(self.kp.button_left3  , self.kp.button_top, self.kp.button_w  , self.kp.button_h) )
+            
+                #draw text on buttons
+                
+                #self.text_to_button("start", self.kp.button_left1, self.kp.button_top, self.kp.button_w , self.kp.button_h ) #900, 40
+                if self.paused:
+                    self.text_to_button("continue",  self.kp.button_left2, self.kp.button_top, self.kp.button_w  , self.kp.button_h) #1110, 40
+                else:
+                    self.text_to_button("pause",  self.kp.button_left2, self.kp.button_top, self.kp.button_w  , self.kp.button_h) #1110, 40
+                self.text_to_button("stop",  self.kp.button_left3, self.kp.button_top, self.kp.button_w  , self.kp.button_h) #1320, 40
+            
+            else:#exercise did not start yet, display start only
+                #button1 = start
+                pygame.draw.rect(self.bk_frame_surface , self.kp.c_button_play  , pygame.Rect(self.kp.button_left1, self.kp.button_top, self.kp.button_w , self.kp.button_h ))     
+                #button2 = pause
+                #pygame.draw.rect(self.bk_frame_surface , self.kp.c_button_pause , pygame.Rect(self.kp.button_left2, self.kp.button_top, self.kp.button_w  , self.kp.button_h) )
+                #button3 = stop
+                #pygame.draw.rect(self.bk_frame_surface , self.kp.c_button_stop  , pygame.Rect(self.kp.button_left3  , self.kp.button_top, self.kp.button_w  , self.kp.button_h) )
+            
+                #draw text on buttons
+                
+                self.text_to_button("start", self.kp.button_left1, self.kp.button_top, self.kp.button_w , self.kp.button_h ) #900, 40
+                #self.text_to_button("pause",  self.kp.button_left2, self.kp.button_top, self.kp.button_w  , self.kp.button_h) #1110, 40
+                #self.text_to_button("stop",  self.kp.button_left3, self.kp.button_top, self.kp.button_w  , self.kp.button_h) #1320, 40
+            
+
+
+        if not self.ana._done:
+            #if exercise did not start after 30 seconds, quit the window
+            #if not self.exercise_initialized and self.exercise_start_wait == 30*3:
+            #    self.kp._done = True  # Flag that we are done so we exit this loop
+            #    if self.kp.kinect:
+            #        self.movie.stop()
+            #    pygame.quit()
+
+            if not self.ana.paused and self.exercise_initialized:
             #if self.pa_count %50 == 0:
                 #self.ana.evalstr = ''
                 #self.process_analysis()
-            self.process_analysis()
+                self.process_analysis()
         else:
+            #self.process_analysis()
+            if 'well' in (self.ana.evalstr).lower(): #one last check for last repetition
+                print("there was well")
+                if len(self.evalhis) < min(self.ana.repcnt, 4):
+                    self.evalhis.append(True)
+            else:
+                print("there was no well")
+                if len(self.evalhis) < min(self.ana.repcnt, 4):
+                    self.evalhis.append(False)
             self.process_finish_analysis()
 
         # drawing surfaces
@@ -707,8 +960,11 @@ class BodyGameRuntime(object):
                 self.cimgs.create_dataset('img_'+repr(self.kp.fno).zfill(4), data = frame)
             else:
                 print 'Color frames unfound... frame number:', self.kp.fno
-            self.bdimgs.create_dataset('bd_' + repr(self.kp.fno).zfill(4), data=np.dstack((bodyidx, bodyidx, bodyidx)))
-            self.dimgs.create_dataset('d_' + repr(self.kp.fno).zfill(4), data=np.dstack((dframe, dframe, dframe)))
+            #! change
+            if bodyidx is not None:
+                self.bdimgs.create_dataset('bd_' + repr(self.kp.fno).zfill(4), data=np.dstack((bodyidx, bodyidx, bodyidx)))
+            if dframe is not None:
+                self.dimgs.create_dataset('d_' + repr(self.kp.fno).zfill(4), data=np.dstack((dframe, dframe, dframe)))
             if 'joints' in locals():
                 # pdb.set_trace() 
                 colorspace_joint = [[jps[i].x, jps[i].y] for i in self.joints_name]
@@ -740,7 +996,6 @@ class BodyGameRuntime(object):
             # if self.kp.kinect:
             self.movie.draw(self._screen, self.kp.scale, self.kp.pre_scale, self.kp.scene_type)
             self.kp.pre_scale = self.kp.scale
-
             # if scale != self.kp.scale:
             #     self.kp.pre_scale = self.kp.scale
             #     self.kp.scale = scale
@@ -786,5 +1041,14 @@ class BodyGameRuntime(object):
         #hwnd = win32gui.GetForegroundWindow()
         #win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
 
+        #if exercise did not start after 30 seconds, quit the window
+        #if not self.exercise_initialized and self.exercise_start_wait == 30*3:
+        #    self.kp._done = True  # Flag that we are done so we exit this loop
+            #if self.kp.kinect:
+            #    self.movie.stop()
+            #pygame.quit()
         # limit frames per second
         self._clock.tick(fps)
+        #print("DONE WITH CLOCK")
+        #self.exercise_start_wait += 1
+        #print(self.exercise_start_wait)

@@ -32,6 +32,7 @@ class Shld_state(object):
         self.eval    = ''
         #ongoing cycle or not
         self.ongoing_cycle = True
+        self.twoslist = []
 
     def findtops(self, bdimg, shld, bdidx):
         """ find the shoulder top.
@@ -91,24 +92,50 @@ class Shld_state(object):
         #    if height_check:
         if (y[0].size != 0 or y[1].size !=0) or y[0].size>1 or y[1].size>1 or  z[0].size > 0 or z[1].size > 0  : #theres at least up and down movement
             if z[2].size != 0 and z[3].size != 0 : 
+            # if peak and val exists for z
                 depth_chk = self.chkdepth(z[2], z[3]) # was self.chkdepth(z[2], z[3])
-                if depth_chk:
-                    print("returns 1")
-                    self.eval = ''
-                    return 1 # shlder roll sucess
-                else:
-                    print("returns 2")
-                    return 2 # up-and-down
-            elif max(len(z[0]), len(z[1])) -  min(len(z[0]), len(z[1])) > 1: #two peaks or two valls happen
+                #if depth_chk:
+                print("returns 1")
+                self.twoslist.append('thold')
+                self.eval = ''
+                return 1 # shlder roll sucess
+                #else:
+                #    print("returns 2 becasue out of treshold") # we will accept up and down as success
+                #    self.twoslist.append('thold')
+                #    return 0 # up-and-down, this was originally 2
+            elif max(len(z[0]), len(z[1])) -  min(len(z[0]), len(z[1])) >= 1: #two peaks or two valls happen
+            # if two peaks or two valls happen for z
                 print("returns 1 because two peaks or valls")
                 self.eval = ''
                 return 1 # shlder roll sucess
-            else:
-                print("returns 2")
-                return 2 # up-and-down
 
+            elif y[0].size != 0 and y[1].size !=0:
+                #print('y difference is' ,y[0][0]-y[1][0]) 
+                print("returns 2 because peak and val exists in y")
+                self.twoslist.append('y')  ###it falls here frewuently, might wana omit hteis whole condition
+                self.twoslist.append(y[0][0]-y[1][0])
+                return 1
+
+            elif max(len(y[0]), len(y[1])) -  min(len(y[0]), len(y[1])) >= 1:
+                print("returns 2 because two peaks or two ys exist in y")
+                self.twoslist.append('p')
+                return 1
+            #elif y[0].size != 0 and len(z[0]) !=0:
+            #    print('returns 2 becasue of tests')
+            #    self.twoslist.append('t')
+            #    return 2
+            else:
+                self.twoslist.append('zero')
+                print("returns 0 because of else statements")
+                self.twoslist.append('e')
+                self.twoslist.append(y[0].size != 0) 
+                self.twoslist.append(y[1].size != 0) 
+                self.twoslist.append(len(z[0]) !=0) 
+                self.twoslist.append(len(z[1]) !=0) 
+                return 0 # up-and-down, used to return 2 
         else:
             print("returns 0")
+            self.twoslist.append('no data')
             return 0  #shoulder roll fail
 
         #if (max(len(y[0]), len(y[1]), len(z[0]), len(z[1])) \
@@ -186,8 +213,9 @@ class Shld_state(object):
         self.ldlist.append(depth[lshld[1], lshld[0]])
         # self.rylist.append(rshld[1])
         # self.rdlist.append(depth[rshld[1], rshld[0]])
-        if (self.fcnt >= 50) and (self.fcnt%20 == 0): # was if (self.fcnt >= 50) and (self.fcnt%20 == 0)
-            print("lylist= ", self.lylist)
-            print("ldlist = ", self.ldlist)
+        if (self.fcnt >= 50) and (self.fcnt%50 == 0): # was if (self.fcnt >= 50) and (self.fcnt%20 == 0)
+            #print("lylist= ", self.lylist)
+            #print("ldlist = ", self.ldlist)
+            print('*#*'*20)
             self.statechk(self.lylist, self.ldlist)
             #self.statechk(rylist, rdlist)

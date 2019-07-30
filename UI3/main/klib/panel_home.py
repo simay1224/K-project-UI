@@ -132,6 +132,7 @@ class Welcome_win(wx.Frame):
 
     def open_bodygame(self, event):
         self.game = bodygame3.BodyGameRuntime(self.info)
+        print 'will be running now'
         self.game.run()
 
     def open_evaluation(self, event):
@@ -491,8 +492,11 @@ class Evaluation_win(wx.Frame):
 
 
     def open_bodygame(self, exe_num, recording):
+        print('ini')
         self.game = bodygame3.BodyGameRuntime(self.info, exe_num, recording)
+        print('runi')
         self.game.run()
+        print('ran altready')
 
     def open_exercise_1(self, event):
         if_record = self.check_recording(event)
@@ -559,7 +563,7 @@ class Instrcution_win(wx.Frame):
         box2 = wx.BoxSizer(wx.VERTICAL)
         box3 = wx.BoxSizer(wx.VERTICAL)
 
-        self.font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial') # was 16
         self.player = MoviePanel(self.panel, (self.player_width, self.player_height))
 
         self.width, self.height = wx.GetDisplaySize()
@@ -591,7 +595,7 @@ class Instrcution_win(wx.Frame):
         #self.lst = wx.ListBox(self.panel, size=(350, self.height+100 - 25 - 45), choices=exer, style=wx.LB_SINGLE)
 
         self.lst = wx.ListBox(self.panel, size=(350, -1), choices=exer, style=wx.LB_SINGLE)
-        lst_font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial') #set font of the listbx
+        lst_font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial') #was 16
         self.lst.SetFont(lst_font)#changed the font here.
         self.lst.SetBackgroundColour((230, 230, 230))
         self.lst.SetSelection(0)
@@ -625,7 +629,7 @@ class Instrcution_win(wx.Frame):
 
     def init_text(self):
         self.str = collections.defaultdict(dict)
-        self.str['exe'][1] = 'Exercise 1 : Muscle Tighting Deep Breathing'
+        self.str['exe'][1] = 'Exercise 1 : Muscle Tightening Deep Breathing'
         self.str['exe'][2] = 'Exercise 2 : Over The Head Pumping'
         self.str['exe'][3] = 'Exercise 3 : Push Down Pumping'
         self.str['exe'][4] = 'Exercise 4 : Horizontal Pumping'
@@ -640,7 +644,7 @@ class Instrcution_win(wx.Frame):
                              '\n4. Put down your hands.'
 
         self.str['ins'][2] = '\n  '\
-                             '\n1. Raise your harms up and hold there.'\
+                             '\n1. Raise your arms up and hold there.'\
                              '\n2. Wait until the sign shows "start breathe in/out."'\
                              '\n3. Do deep breathing 4 times.' \
                              '\n4. Put down your arms.'
@@ -655,7 +659,7 @@ class Instrcution_win(wx.Frame):
         self.str['ins'][4] = '\n  '\
                              '\n1. Raise your arms up till "T-pose."'\
                              '\n2. Move arms slowly to the chest.'\
-                             '\n3. Back to "T-pose".'\
+                             '\n3. Back to "T-pose."'\
                              '\n4. Repeat this 4 times.'\
                              '\n5. Put down your arms.'
 
@@ -674,7 +678,7 @@ class Instrcution_win(wx.Frame):
 
         self.str['ins'][6] = '\n  '\
                              '\n1. Raise and clasp your hands to the abdomen.'\
-                             '\n2. Raise clasped hands toward to your forehead and keep elbows together.'\
+                             '\n2. Raise clasped hands towards your forehead and keep elbows together.'\
                              '\n3. Slide your hands to the back of your head and spread the elbows open wide.'\
                              '\n4. Back to the abdomen.'\
                              '\n5. Repeat 4 times.'\
@@ -689,10 +693,10 @@ class Instrcution_win(wx.Frame):
                                 '\n3. Breathe as deep as you can.'
         self.str['note'][3] = 'Tips :'\
                                 '\n1. When you raise your arms, make sure that your hand, elbow, and shoulder are straight.'\
-                                '\n2. When you bend your elbow, hand - elbow - shoulder should be "V-shape" not "L-shape"'\
+                                '\n2. When you bend your elbow, hand - elbow - shoulder should be "V-shape" not "L-shape."'\
 
         self.str['note'][4] = 'Tips :'\
-                                '\n1. When you do the "T-pose", make sure that your hand, elbow, and shoulder are straight'\
+                                '\n1. When you do the "T-pose", make sure that your hand, elbow, and shoulder are straight.'\
                                 '\n2. When you close your hands, make sure that your hand and shoulder are in the same height.'\
 
         # self.str['note'][5] = 'Tips :'\
@@ -700,12 +704,12 @@ class Instrcution_win(wx.Frame):
         #                         '\n2. Keep your body staight'
 
         self.str['note'][5] = 'Tips :'\
-                                '\n1. Try to rotate your shoulders in a full circle'
+                                '\n1. Try to rotate your shoulders in a full circle.'
 
         self.str['note'][6] = 'Tips :'\
                                 '\n1. When you raise your arms to the forehead, keep two elbows as close as possible.'\
                                 '\n2. When your hands are in the back, spread the elbows open as wide as possible.'\
-                                '\n3. Keep your body staight.'
+                                '\n3. Keep your body straight.'
 
     def onListBox(self, event):
         self.text.Clear()

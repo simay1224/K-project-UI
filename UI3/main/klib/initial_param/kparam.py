@@ -8,6 +8,8 @@ class Kparam(object):
     def __init__(self, exeno='', username=''):
         self.kinect = True
         if sys.platform == "darwin":
+            print('D '*100, 'ARWIN')
+        
             self.kinect = False
 
         self.bdjoints   = []
@@ -71,6 +73,24 @@ class Kparam(object):
         self.vid_h_t = 462  # video height for taining mode
         self.video1_UB = 110  # video1 upper bound
         self.video2_UB = 560  # video2 upper bound
+        #button details
+        self.button_w = 200
+        self.button_h = 60
+        self.button_left1 = self.video_LB
+        self.button_dst = 50 #distance between each button
+        self.button_left2 = self.button_left1 +  self.button_w + self.button_dst
+        self.button_left3 = self.button_left2 +  self.button_w + self.button_dst
+        self.button_top = 40
+
+        self.button_right1 = self.button_left1 +self.button_w 
+        self.button_right2 = self.button_left2 +self.button_w 
+        self.button_right3 = self.button_left3 +self.button_w 
+
+        self.button_bottom = self.button_top + self.button_h 
+
+        self.c_button_play = (106, 83, 0)
+        self.c_button_pause = (106, 30, 0)
+        self.c_button_stop = (57, 1, 94)
         # eval sections
         self.eval_sec1 = 110
         self.eval_sec2 = 330 -50# was 330

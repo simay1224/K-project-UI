@@ -87,7 +87,8 @@ class Clasp_spread(object):
                 else:
                     self.evalstr = 'Repitition done.\n'+self.eval
                     self.eval = ''
-        if np.abs(joints[kpm.LElbow_x]-joints[kpm.RElbow_x]) < 75:
+        print("clasp value is", np.abs(joints[kpm.LElbow_x]-joints[kpm.RElbow_x]))
+        if np.abs(joints[kpm.LElbow_x]-joints[kpm.RElbow_x]) < 210:  # was 75
             self.elbowstus['clasp'] = True
 
     def spread(self, joints, kpm, spread_th=30):

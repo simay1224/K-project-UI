@@ -23,7 +23,7 @@ class Exer1(Exercise):
         # default parameters
         self.no = 1
         self.angle = []
-        self.cntdown = 60 * 2 #originally was 60
+        self.cntdown = 60  #originally was 60
         self.limbjoints = True
         # order
         self.order = {}

@@ -66,11 +66,12 @@ class Evaluation(object):
             fig.savefig('output/Exer%s_bio_1.jpg' % repr(exeno))
             plt.close(fig)
 
-    def breath_hand_plot(self, ana, exeno, scale=5):
+    def breath_hand_plot(self, ana, exeno, scale=5): 
         fig = plt.figure(1)
         ax = fig.add_subplot(111)
-        ax.plot(ana.hs.hstate[:, 0]*15, color='b')
-        ax.plot(ana.hs.hstate[:, 1]*15-20, color='r')
+        if ana.hs.hstate.size != 0:
+            ax.plot(ana.hs.hstate[:, 0]*15, color='b')
+            ax.plot(ana.hs.hstate[:, 1]*15-20, color='r')
         ax.plot(gf(ana.brth.breath_list, scale), color='g')
         if len(ana.brth.ngframe) != 0:
             for i in ana.brth.ngframe:

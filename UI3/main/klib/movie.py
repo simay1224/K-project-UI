@@ -16,11 +16,19 @@ class Movie(object):
                  #   filename ==6
                 #elif filename == 6:
                  #   filename ==7
+                #self._movie = pygame.movie.Movie('./data/video/ex'+str(filename)+'.mpg')
+                #if filename ==1:
+                #    print('^'*100)
+                #    print('filename is 1')
+                #    self._movie = pygame.movie.Movie('./data/video/ex'+str(filename)+'.mp4')
+                #else:
                 self._movie = pygame.movie.Movie('./data/video/ex'+str(filename)+'.mpg')
+
                 self.w, self.h = [size for size in self._movie.get_size()]
+                print('width and height is', self.w, self.h)
                 self.mscreen = pygame.Surface((self.kp.vid_w/2, self.kp.vid_h/2)).convert()
                 self._movie.set_display(self.mscreen, pygame.Rect(0, 0, self.kp.vid_w/2, self.kp.vid_h/2))
-                self._movie.play()
+                #self._movie.play()
             else:
                 self.w, self.h = width, height
                 self._movie = np.zeros((self.w, self.h, 3))
@@ -34,6 +42,17 @@ class Movie(object):
         if delete:
             del self._movie
             pygame.mixer.init()
+
+    def pause(self):
+        if not self.kp.kinect:
+            return
+        self._movie.pause()
+
+    def play(self):
+        if not self.kp.kinect:
+            return
+        self._movie.play()
+
 
     def rewind(self):
         if not self.kp.kinect:
