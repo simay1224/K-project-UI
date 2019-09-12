@@ -29,8 +29,9 @@ class Msgbox(wx.Frame):
 
         self.init_ui()
         self.Centre()
-        self.Show()
-        self.Maximize(True)
+        #self.Show()
+        #self.Maximize(True)
+        self.ShowFullScreen(True)
 
     def init_ui(self):
         self.panel = wx.Panel(self)

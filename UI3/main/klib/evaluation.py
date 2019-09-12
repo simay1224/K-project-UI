@@ -17,7 +17,7 @@ class Evaluation(object):
         self.font_size = 80
 
         self.exercises = ["",
-                    "1. Muscle Tighting Deep Breathi",
+                    "1. Muscle Tightening Breathing",
                     "2. Over The Head Pumping",
                     "3. Push Down Pumping",
                     "4. Horizontal Pumping",
@@ -25,7 +25,7 @@ class Evaluation(object):
                     "6. Clasp and Spread"]
         #remove the reach to the sky.
         #self.exercises = ["",
-        #            "1. Muscle Tighting Deep Breathi",
+        #            "1. Muscle Tightening Deep Breathi",
         #            "2. Over The Head Pumping",
         #            "3. Push Down Pumping",
         #            "4. Horizontal Pumping",

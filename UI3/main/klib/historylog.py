@@ -7,7 +7,7 @@ class Historylog(object):
     """ save the user's data from furture analysis and comparision.
         different exercises will be record in different sheets
         so far, we have 7 exercises as following.
-        #1 : Muscle Tighting Deep Breathing
+        #1 : Muscle Tightening Breathing
         #2 : Over The Head Pumping
         #3 : Push Down Pumping
         #4 : Horizontal Pumping
@@ -19,10 +19,10 @@ class Historylog(object):
     def __init__(self):
         # HIDING THE EXERCISE 5: reach to sky
         #self.excelPath = "./output/log.xlsx"
-        self.excelPath = "./output/log_without_exercise5_reach_to_sky.xlsx"
+        self.excelPath = "./output/log.xlsx"
         self.order = [0,1,2,2,3,4,5]
         #self.exercises = ["",
-        #                    "1. Muscle Tighting Deep Breathi",
+        #                    "1. Muscle Tightening Deep Breathi",
         #                    "2. Over The Head Pumping",
         #                    "3. Push Down Pumping",
         #                    "4. Horizontal Pumping",
@@ -31,7 +31,7 @@ class Historylog(object):
         #                    "7. Clasp and Spread"]
 
         self.exercises = ["",
-                            "1. Muscle Tighting Deep Breathi",
+                            "1. Muscle Tightening Breathing",
                             "2. Over The Head Pumping",
                             "3. Push Down Pumping",
                             "4. Horizontal Pumping",

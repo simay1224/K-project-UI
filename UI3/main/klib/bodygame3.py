@@ -2,6 +2,7 @@
 import ctypes, os, datetime, glob
 import pygame, sys, copy
 import win32gui, win32con
+import imageio
 
 if sys.platform == "win32":
     import h5py
@@ -280,6 +281,7 @@ class BodyGameRuntime(object):
         #         self.kp.model_draw = True''
 
         if press[pygame.K_r]:  # use 'r' to start video recording
+            print('starting to record')
             if press[pygame.K_LCTRL] or press[pygame.K_RCTRL]:
                 print('Stop recording .....')
                 self.kp.vid_rcd = False
@@ -629,15 +631,15 @@ class BodyGameRuntime(object):
             self.ana.screen_message = ''
             if len(self.evalhis) != 0:
                 if self.ana.exercise_started:
-                    if self.ana.repcnt== 4:
+                    if self.ana.repcnt>= 4:
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                                     'Overall evaluation:\nPerfect !!', 3, color=self.kp.c_togo, fsize=80) #font size is 80
                     
-                    elif self.ana.repcnt >  4:
-                        self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
-                                    'Overall evaluation:\nOnly need to do 4 repetitions.', 3, color=self.kp.c_togo, fsize=70) #font size is 80
+                    #elif self.ana.repcnt >  4:
+                    #    self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                    #                'Overall evaluation:\nOnly need to do 4 repetitions.', 3, color=self.kp.c_togo, fsize=70) #font size is 80
                     
-                    else:  #self.ana.repcnt < 4
+                    elif self.ana.repcnt < 4:
                         self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
                                     'Make sure you do 4 repetitions.', 3, color=self.kp.c_togo, fsize=70) #font size is 80
                 else:
@@ -902,7 +904,6 @@ class BodyGameRuntime(object):
                 pygame.draw.rect(self.bk_frame_surface , self.kp.c_button_stop  , pygame.Rect(self.kp.button_left3  , self.kp.button_top, self.kp.button_w  , self.kp.button_h) )
             
                 #draw text on buttons
-                
                 #self.text_to_button("start", self.kp.button_left1, self.kp.button_top, self.kp.button_w , self.kp.button_h ) #900, 40
                 if self.paused:
                     self.text_to_button("continue",  self.kp.button_left2, self.kp.button_top, self.kp.button_w  , self.kp.button_h) #1110, 40
@@ -923,8 +924,11 @@ class BodyGameRuntime(object):
                 self.text_to_button("start", self.kp.button_left1, self.kp.button_top, self.kp.button_w , self.kp.button_h ) #900, 40
                 #self.text_to_button("pause",  self.kp.button_left2, self.kp.button_top, self.kp.button_w  , self.kp.button_h) #1110, 40
                 #self.text_to_button("stop",  self.kp.button_left3, self.kp.button_top, self.kp.button_w  , self.kp.button_h) #1320, 40
-            
 
+                #draw tips
+                #self.eval.blit_text(self.bk_frame_surface, self.exeno, self.kp,\
+                #                        self.exeinst.str['notes'][self.exeno], 3, fsize = 70 )
+                #print(self.exeinst.str['notes'][self.exeno])
 
         if not self.ana._done:
             #if exercise did not start after 30 seconds, quit the window
@@ -954,23 +958,37 @@ class BodyGameRuntime(object):
         # drawing surfaces
         if self.kp.vid_rcd:  # video recoding text
             print 'Recording ', self.kp.fno
-            self.io.typetext(self._frame_surface, 'Video Recording', (1580, 20), (255, 0, 0))
+            self.io.typetext(self._frame_surface, 'Good!', (1580, 20), (255, 0, 0))
             # pdb.set_trace()
             if 'frame' in locals():
                 self.cimgs.create_dataset('img_'+repr(self.kp.fno).zfill(4), data = frame)
+                print('frame size', frame.shape)
+                #imageio.mimwrite('0output_filename.mp4', frame , fps = 30)
             else:
                 print 'Color frames unfound... frame number:', self.kp.fno
             #! change
+            #uncomment original ones
             if bodyidx is not None:
+                print('+=+'*50)
                 self.bdimgs.create_dataset('bd_' + repr(self.kp.fno).zfill(4), data=np.dstack((bodyidx, bodyidx, bodyidx)))
+                #imageio.mimwrite('0bodyind.mp4', np.dstack((bodyidx, bodyidx, bodyidx)) , fps = 30)
+                print('body idx size', np.dstack((bodyidx, bodyidx, bodyidx)).shape)
             if dframe is not None:
+                print('+=+'*50)
                 self.dimgs.create_dataset('d_' + repr(self.kp.fno).zfill(4), data=np.dstack((dframe, dframe, dframe)))
+                #imageio.mimwrite('0dimg.mp4', np.dstack((dframe, dframe, dframe)) , fps = 30)
+                print('dframe size', np.dstack((dframe, dframe, dframe)).shape)
             if 'joints' in locals():
                 # pdb.set_trace() 
+                print('+=+'*50)
                 colorspace_joint = [[jps[i].x, jps[i].y] for i in self.joints_name]
                 depthspace_joint = [[djps[i].x, djps[i].y] for i in self.joints_name]
                 self.color_joints.create_dataset('c_joints_'+repr(self.kp.fno).zfill(4), data=colorspace_joint)
                 self.depth_joints.create_dataset('d_joints_'+repr(self.kp.fno).zfill(4), data=depthspace_joint)
+                #imageio.mimwrite('0output_filename.mp4', np.dstack((dframe, dframe, dframe)) , fps = 30)
+                #imageio.mimwrite('0output_filename.mp4', np.dstack((dframe, dframe, dframe)) , fps = 30)
+                print('colorspace_joint', len(colorspace_joint[0]))
+                print('depthspace_joint', len(depthspace_joint[1]))
             else:
                 print 'Joints unfound! frame number:', self.kp.fno
             self.kp.fno += 1

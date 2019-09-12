@@ -34,7 +34,7 @@ class Welcome_win(wx.Frame):
         self.game = None
         #self.path = './output/log.xlsx'
         #changing the path in order to hide the exercise5: reach to sky
-        self.path = './output/log_without_exercise5_reach_to_sky.xlsx'
+        self.path = './output/log.xlsx'
 
         self.width, self.height = wx.GetDisplaySize()
         #self.height = 100
@@ -47,8 +47,9 @@ class Welcome_win(wx.Frame):
         self.SetIcon(ico)
 
         self.init_ui()
-        self.Show()
-        self.Maximize(True)
+        #self.Show()
+        #self.Maximize(True)
+        self.ShowFullScreen(True)
         print 'Finished initializing welcome window...'
 
     def init_ui(self):
@@ -389,8 +390,9 @@ class Evaluation_win(wx.Frame):
         self.SetIcon(ico)
 
         self.init_ui()
-        self.Show()
-        self.Maximize(True)
+        #self.Show()
+        #self.Maximize(True)
+        self.ShowFullScreen(True)
         print 'Finished initializing evaluation window...'
 
     def init_ui(self):
@@ -425,8 +427,9 @@ class Evaluation_win(wx.Frame):
 
         menu_title = wx.StaticText(self.panel, label="Exercises")
         menu_title.SetFont(self.font_text_title)
+        #button_font = self.font
 
-        button1 = wx.Button(self.panel, size=button_size, label="Exercise 1 : Muscle Tighting Deep Breathing")
+        button1 = wx.Button(self.panel, size=button_size, label="Exercise 1 : Muscle Tightening Breathing")
         button1.SetFont(self.font)
         button1.Bind(wx.EVT_BUTTON, self.open_exercise_1)
 
@@ -543,8 +546,11 @@ class Instrcution_win(wx.Frame):
         #self.home_button_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.width, self.height = wx.GetDisplaySize()
         ratio = self.height / 600.0
-        self.player_width = 640 * ratio
-        self.player_height = 360 * ratio
+        extra = 1.10
+        #self.player_width = 640 * ratio
+        #self.player_height = 360 * ratio
+        self.player_width = 640 * ratio * extra
+        self.player_height = 360 * ratio * extra
 
         self.sizer_w = 5
         self.sizer_h = 5
@@ -554,16 +560,19 @@ class Instrcution_win(wx.Frame):
         ico = wx.Icon('./data/imgs/others/logo.png', wx.BITMAP_TYPE_PNG, isz[0], isz[1])
         self.SetIcon(ico)
         self.init_ui()
-        self.Show()
-        self.Maximize(True)
+        #self.Show()
+        #self.Maximize(True)
+        self.ShowFullScreen(True)
 
     def init_ui(self):
         self.panel = wx.Panel(self)
         box = wx.BoxSizer(wx.HORIZONTAL)
         box2 = wx.BoxSizer(wx.VERTICAL)
-        box3 = wx.BoxSizer(wx.VERTICAL)
+        box3 = wx.BoxSizer(wx.HORIZONTAL)
+        box_sub = wx.BoxSizer(wx.VERTICAL)
+        box_sub2 = wx.BoxSizer(wx.VERTICAL)
 
-        self.font = wx.Font(14, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial') # was 16
+        self.font = wx.Font(13, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial') # was 16
         self.player = MoviePanel(self.panel, (self.player_width, self.player_height))
 
         self.width, self.height = wx.GetDisplaySize()
@@ -585,7 +594,7 @@ class Instrcution_win(wx.Frame):
         #home_sizer = wx.BoxSizer(wx.VERTICAL)
         #home_sizer.Add(button_home, flag= wx.LEFT | wx.BOTTOM)
         home_sizer = wx.GridBagSizer(10, 10) # was self.sizer_w, self.sizer_h
-        home_sizer.Add(button_home,  pos=(10, 3))
+        #home_sizer.Add(button_home,  pos=(10, 3))
 
         button_print = wx.Button(self.panel, id=wx.ID_PRINT, label="")
         button_print.SetFocus()
@@ -594,26 +603,38 @@ class Instrcution_win(wx.Frame):
         exer = [self.str['exe'][i] for i in range(1, 7)]
         #self.lst = wx.ListBox(self.panel, size=(350, self.height+100 - 25 - 45), choices=exer, style=wx.LB_SINGLE)
 
-        self.lst = wx.ListBox(self.panel, size=(350, -1), choices=exer, style=wx.LB_SINGLE)
+        self.lst = wx.ListBox(self.panel, size=(450, -1), choices=exer, style=wx.LB_SINGLE) # was size=(350, -1)
         lst_font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial') #was 16
         self.lst.SetFont(lst_font)#changed the font here.
         self.lst.SetBackgroundColour((230, 230, 230))
         self.lst.SetSelection(0)
 
-        box2.Add(self.lst, 0, wx.EXPAND)
-        box2.Add(home_sizer, 1, wx.EXPAND | wx.BOTTOM)
+        #box2.Add(self.lst, 0, wx.EXPAND)
+        #box2.Add(home_sizer, 1, wx.EXPAND | wx.BOTTOM)
         #box2.Add(button_home, 0, wx.LEFT | wx.BOTTOM )
-        box3.Add(self.player, 0, wx.EXPAND)
+        #box3.Add(self.player, 0, wx.EXPAND)
 
         text_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
-        text_sizer.Add(button_print, (1, 4))   ## was 0, 4
+        text_sizer.Add(button_print, (0, 1))   ## was 0, 4
+        text_sizer.Add(button_home,  pos=(3, 1))
         text_sizer.Add(self.text, (0, 0), span=(4, 0))  # for .avi .mpg video files
         #text_sizer.Add(button_home, (3, 4))
 
 
         # box3.Add(self.text, 0, wx.LEFT)
-        box3.Add(text_sizer, 0, wx.LEFT)
+        #box3.Add(text_sizer, 0, wx.LEFT)
+        #box_sub.Add(text_sizer, 0, wx.LEFT)
+        box_sub.Add(self.player, 0, wx.LEFT)
+        #box_sub.Add(self.lst, 0, wx.EXPAND)
+        box_sub.Add(text_sizer, 0, wx.LEFT)
+        #box3.Add(box_sub, 0, wx.LEFT)
+        box3.Add(box_sub, 0, wx.EXPAND)
+        #box3.Add(self.lst, 0, wx.LEFT)
+        box_sub2.Add(self.lst, 1,  wx.EXPAND )
+        #box_sub2.Add(home_sizer, 1, wx.EXPAND | wx.BOTTOM)
+        box3.Add(box_sub2, 0, wx.EXPAND)
 
+        #box3.Add(home_sizer, 1, wx.EXPAND | wx.BOTTOM)
         box.Add(box2, 0, wx.EXPAND | wx.LEFT | wx.BOTTOM)
         box.Add(box3, 1, wx.EXPAND)
         # box.Add(button_print, 2, wx.RIGHT)
@@ -629,7 +650,7 @@ class Instrcution_win(wx.Frame):
 
     def init_text(self):
         self.str = collections.defaultdict(dict)
-        self.str['exe'][1] = 'Exercise 1 : Muscle Tightening Deep Breathing'
+        self.str['exe'][1] = 'Exercise 1 : Muscle Tightening Breathing'
         self.str['exe'][2] = 'Exercise 2 : Over The Head Pumping'
         self.str['exe'][3] = 'Exercise 3 : Push Down Pumping'
         self.str['exe'][4] = 'Exercise 4 : Horizontal Pumping'
@@ -786,6 +807,7 @@ class Instrcution_win(wx.Frame):
 
 
     def close(self, event):
+        #self.player.mc.Stop()
         self.Destroy()
 
 
@@ -833,10 +855,10 @@ class MoviePanel(wx.Panel):
         sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         # sizer.Add(loadButton, (1,1))
         #sizer.Add(self.button_home, (1, 1))
-        sizer.Add(self.playButton, (1, 4))  # was 2,4
-        sizer.Add(self.pauseButton, (2, 4))  # was 3, 4
-        sizer.Add(self.stopButton, (3, 4))  # was 4 , 4
-        sizer.Add(self.slider, (4, 4))  # was 5,4
+        sizer.Add(self.playButton, (1, 1))  # was 2,4
+        sizer.Add(self.pauseButton, (2, 1))  # was 3, 4
+        sizer.Add(self.stopButton, (3, 1))  # was 4 , 4
+        sizer.Add(self.slider, (4, 1))  # was 5,4
         sizer.Add(self.mc, (0, 0), span=(6, 0))  # for .avi .mpg video files
         self.SetSizer(sizer)
 
@@ -879,6 +901,9 @@ class MoviePanel(wx.Panel):
         self.timer.Stop()
         del self.timer
 
+    def close(self, event):
+        #self.player.mc.Stop()
+        self.Destroy()
 
 class History_view(wx.Frame):
     def __init__(self, parent, info, path, title='history log'):
@@ -911,8 +936,9 @@ class History_view(wx.Frame):
         # self.color_line = ['#0096BF', '#005A73', '#BFA600', '#736400', '#ffae25', '#af7900', '#d957b4', '#75005b']
         self.color_line = [(174./255, 1, 0, 0.6), (139./255, 204./255, 0, 0.6), (87./255, 127./255, 0, 0.6), (99./255, 127./255, 38./255, 0.6)]
         self.font = {'family': 'serif', 'color':  '#000000', 'weight': 'normal', 'size': 16}
-        self.Show()
-        self.Maximize(True)
+        #self.Show()
+        #self.Maximize(True)
+        self.ShowFullScreen(True)
 
     def init_ui(self):
         self.font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False) # was 15
@@ -978,7 +1004,7 @@ class History_view(wx.Frame):
         button_home.Bind(wx.EVT_BUTTON, self.close)
 
         box2.Add(box1, 0)
-        self.lst = wx.ListBox(self.panel, size=(350, self.height - 230 -100), choices=[], style=wx.LB_SINGLE) # was size=(self.sub_width, self.height - 230)
+        self.lst = wx.ListBox(self.panel, size=(450, self.height - 230 -100), choices=[], style=wx.LB_SINGLE) # was size=(self.sub_width, self.height - 230)
        
         self.lst.SetFont(self.font)
         self.lst.SetBackgroundColour((230, 230, 230))

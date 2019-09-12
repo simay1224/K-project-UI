@@ -245,12 +245,12 @@ class Breath_status(object):
                 self.ongoing_cycle= False
                 if self.eval == '':
                     if self.cnt <4:
-                        self.evalstr = 'Repitition done: Well done.\n\nBreathe in'
+                        self.evalstr = 'Repitition done: Well done.\n\nBreathe in while opening your chest'
                     else:
                         self.evalstr = 'Repitition done: Well done.'
                 else:
                     if self.cnt <4:
-                        self.evalstr = 'Repitition done.\n'+ self.eval +'\n\nBreathe in'
+                        self.evalstr = 'Repitition done.\n'+ self.eval +'\n\nBreathe in while opening your chest'
                     else:
                         self.evalstr = 'Repitition done.\n'+ self.eval
                     self.eval = ''
@@ -265,10 +265,10 @@ class Breath_status(object):
                 self.ana_ary.append([self.min_ary[-1, 0], 0, self.min_ary[-1, 1]])
                 print("breathe difference is", np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1]) )
                 if np.abs (self.max_ary[-1, 1] - self.min_ary[-1, 1]) < 25:# was 30, then tried 18
-                    self.evalstr = 'Please breathe deeper.\n'
-                    self.eval = 'Please breathe deeper.\n'
+                    self.evalstr = 'Please breathe deeper. Open your chest while breathing in \n'
+                    self.eval = 'Please breathe deeper. Open your chest while breathing in\n'
                     self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, is not deep enough.')
-                    self.errsum.append('Breathing is not deep enough.')
+                    self.errsum.append('Breathing is not deep enough. Please open your chest while breathing in')
         self.max_len = self.max_ary.shape[0]
         self.min_len = self.min_ary.shape[0]
 
