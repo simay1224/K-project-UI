@@ -1,4 +1,8 @@
-# K_project
+# K_project - The project I worked on in 2019 Summer 
+
+## All the commits I did directly to the project https://github.com/Skycocoo/K-project-UI , so please see my latest commits there.
+
+
 
 ### Installation
 
