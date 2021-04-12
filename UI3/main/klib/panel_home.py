@@ -34,7 +34,7 @@ class Welcome_win(wx.Frame):
         self.game = None
         #self.path = './output/log.xlsx'
         #changing the path in order to hide the exercise5: reach to sky
-        self.path = './output/log_without_exercise5_reach_to_sky.xlsx'
+        self.path = './output/log.xlsx'
 
         self.width, self.height = wx.GetDisplaySize()
         #self.height = 100
@@ -47,8 +47,9 @@ class Welcome_win(wx.Frame):
         self.SetIcon(ico)
 
         self.init_ui()
-        self.Show()
-        self.Maximize(True)
+        #self.Show()
+        #self.Maximize(True)
+        self.ShowFullScreen(True)
         print 'Finished initializing welcome window...'
 
     def init_ui(self):
@@ -132,6 +133,7 @@ class Welcome_win(wx.Frame):
 
     def open_bodygame(self, event):
         self.game = bodygame3.BodyGameRuntime(self.info)
+        print 'will be running now'
         self.game.run()
 
     def open_evaluation(self, event):
@@ -388,8 +390,9 @@ class Evaluation_win(wx.Frame):
         self.SetIcon(ico)
 
         self.init_ui()
-        self.Show()
-        self.Maximize(True)
+        #self.Show()
+        #self.Maximize(True)
+        self.ShowFullScreen(True)
         print 'Finished initializing evaluation window...'
 
     def init_ui(self):
@@ -424,8 +427,9 @@ class Evaluation_win(wx.Frame):
 
         menu_title = wx.StaticText(self.panel, label="Exercises")
         menu_title.SetFont(self.font_text_title)
+        #button_font = self.font
 
-        button1 = wx.Button(self.panel, size=button_size, label="Exercise 1 : Muscle Tighting Deep Breathing")
+        button1 = wx.Button(self.panel, size=button_size, label="Exercise 1 : Muscle Tightening Breathing")
         button1.SetFont(self.font)
         button1.Bind(wx.EVT_BUTTON, self.open_exercise_1)
 
@@ -491,8 +495,11 @@ class Evaluation_win(wx.Frame):
 
 
     def open_bodygame(self, exe_num, recording):
+        print('ini')
         self.game = bodygame3.BodyGameRuntime(self.info, exe_num, recording)
+        print('runi')
         self.game.run()
+        print('ran altready')
 
     def open_exercise_1(self, event):
         if_record = self.check_recording(event)
@@ -539,8 +546,11 @@ class Instrcution_win(wx.Frame):
         #self.home_button_font = wx.Font(18, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
         self.width, self.height = wx.GetDisplaySize()
         ratio = self.height / 600.0
-        self.player_width = 640 * ratio
-        self.player_height = 360 * ratio
+        extra = 1.10
+        #self.player_width = 640 * ratio
+        #self.player_height = 360 * ratio
+        self.player_width = 640 * ratio * extra
+        self.player_height = 360 * ratio * extra
 
         self.sizer_w = 5
         self.sizer_h = 5
@@ -550,16 +560,19 @@ class Instrcution_win(wx.Frame):
         ico = wx.Icon('./data/imgs/others/logo.png', wx.BITMAP_TYPE_PNG, isz[0], isz[1])
         self.SetIcon(ico)
         self.init_ui()
-        self.Show()
-        self.Maximize(True)
+        #self.Show()
+        #self.Maximize(True)
+        self.ShowFullScreen(True)
 
     def init_ui(self):
         self.panel = wx.Panel(self)
         box = wx.BoxSizer(wx.HORIZONTAL)
         box2 = wx.BoxSizer(wx.VERTICAL)
-        box3 = wx.BoxSizer(wx.VERTICAL)
+        box3 = wx.BoxSizer(wx.HORIZONTAL)
+        box_sub = wx.BoxSizer(wx.VERTICAL)
+        box_sub2 = wx.BoxSizer(wx.VERTICAL)
 
-        self.font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial')
+        self.font = wx.Font(13, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial') # was 16
         self.player = MoviePanel(self.panel, (self.player_width, self.player_height))
 
         self.width, self.height = wx.GetDisplaySize()
@@ -581,7 +594,7 @@ class Instrcution_win(wx.Frame):
         #home_sizer = wx.BoxSizer(wx.VERTICAL)
         #home_sizer.Add(button_home, flag= wx.LEFT | wx.BOTTOM)
         home_sizer = wx.GridBagSizer(10, 10) # was self.sizer_w, self.sizer_h
-        home_sizer.Add(button_home,  pos=(10, 3))
+        #home_sizer.Add(button_home,  pos=(10, 3))
 
         button_print = wx.Button(self.panel, id=wx.ID_PRINT, label="")
         button_print.SetFocus()
@@ -590,26 +603,38 @@ class Instrcution_win(wx.Frame):
         exer = [self.str['exe'][i] for i in range(1, 7)]
         #self.lst = wx.ListBox(self.panel, size=(350, self.height+100 - 25 - 45), choices=exer, style=wx.LB_SINGLE)
 
-        self.lst = wx.ListBox(self.panel, size=(350, -1), choices=exer, style=wx.LB_SINGLE)
-        lst_font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial') #set font of the listbx
+        self.lst = wx.ListBox(self.panel, size=(450, -1), choices=exer, style=wx.LB_SINGLE) # was size=(350, -1)
+        lst_font = wx.Font(15, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, 'Arial') #was 16
         self.lst.SetFont(lst_font)#changed the font here.
         self.lst.SetBackgroundColour((230, 230, 230))
         self.lst.SetSelection(0)
 
-        box2.Add(self.lst, 0, wx.EXPAND)
-        box2.Add(home_sizer, 1, wx.EXPAND | wx.BOTTOM)
+        #box2.Add(self.lst, 0, wx.EXPAND)
+        #box2.Add(home_sizer, 1, wx.EXPAND | wx.BOTTOM)
         #box2.Add(button_home, 0, wx.LEFT | wx.BOTTOM )
-        box3.Add(self.player, 0, wx.EXPAND)
+        #box3.Add(self.player, 0, wx.EXPAND)
 
         text_sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
-        text_sizer.Add(button_print, (1, 4))   ## was 0, 4
+        text_sizer.Add(button_print, (0, 1))   ## was 0, 4
+        text_sizer.Add(button_home,  pos=(3, 1))
         text_sizer.Add(self.text, (0, 0), span=(4, 0))  # for .avi .mpg video files
         #text_sizer.Add(button_home, (3, 4))
 
 
         # box3.Add(self.text, 0, wx.LEFT)
-        box3.Add(text_sizer, 0, wx.LEFT)
+        #box3.Add(text_sizer, 0, wx.LEFT)
+        #box_sub.Add(text_sizer, 0, wx.LEFT)
+        box_sub.Add(self.player, 0, wx.LEFT)
+        #box_sub.Add(self.lst, 0, wx.EXPAND)
+        box_sub.Add(text_sizer, 0, wx.LEFT)
+        #box3.Add(box_sub, 0, wx.LEFT)
+        box3.Add(box_sub, 0, wx.EXPAND)
+        #box3.Add(self.lst, 0, wx.LEFT)
+        box_sub2.Add(self.lst, 1,  wx.EXPAND )
+        #box_sub2.Add(home_sizer, 1, wx.EXPAND | wx.BOTTOM)
+        box3.Add(box_sub2, 0, wx.EXPAND)
 
+        #box3.Add(home_sizer, 1, wx.EXPAND | wx.BOTTOM)
         box.Add(box2, 0, wx.EXPAND | wx.LEFT | wx.BOTTOM)
         box.Add(box3, 1, wx.EXPAND)
         # box.Add(button_print, 2, wx.RIGHT)
@@ -625,7 +650,7 @@ class Instrcution_win(wx.Frame):
 
     def init_text(self):
         self.str = collections.defaultdict(dict)
-        self.str['exe'][1] = 'Exercise 1 : Muscle Tighting Deep Breathing'
+        self.str['exe'][1] = 'Exercise 1 : Muscle Tightening Breathing'
         self.str['exe'][2] = 'Exercise 2 : Over The Head Pumping'
         self.str['exe'][3] = 'Exercise 3 : Push Down Pumping'
         self.str['exe'][4] = 'Exercise 4 : Horizontal Pumping'
@@ -640,7 +665,7 @@ class Instrcution_win(wx.Frame):
                              '\n4. Put down your hands.'
 
         self.str['ins'][2] = '\n  '\
-                             '\n1. Raise your harms up and hold there.'\
+                             '\n1. Raise your arms up and hold there.'\
                              '\n2. Wait until the sign shows "start breathe in/out."'\
                              '\n3. Do deep breathing 4 times.' \
                              '\n4. Put down your arms.'
@@ -655,7 +680,7 @@ class Instrcution_win(wx.Frame):
         self.str['ins'][4] = '\n  '\
                              '\n1. Raise your arms up till "T-pose."'\
                              '\n2. Move arms slowly to the chest.'\
-                             '\n3. Back to "T-pose".'\
+                             '\n3. Back to "T-pose."'\
                              '\n4. Repeat this 4 times.'\
                              '\n5. Put down your arms.'
 
@@ -674,7 +699,7 @@ class Instrcution_win(wx.Frame):
 
         self.str['ins'][6] = '\n  '\
                              '\n1. Raise and clasp your hands to the abdomen.'\
-                             '\n2. Raise clasped hands toward to your forehead and keep elbows together.'\
+                             '\n2. Raise clasped hands towards your forehead and keep elbows together.'\
                              '\n3. Slide your hands to the back of your head and spread the elbows open wide.'\
                              '\n4. Back to the abdomen.'\
                              '\n5. Repeat 4 times.'\
@@ -689,10 +714,10 @@ class Instrcution_win(wx.Frame):
                                 '\n3. Breathe as deep as you can.'
         self.str['note'][3] = 'Tips :'\
                                 '\n1. When you raise your arms, make sure that your hand, elbow, and shoulder are straight.'\
-                                '\n2. When you bend your elbow, hand - elbow - shoulder should be "V-shape" not "L-shape"'\
+                                '\n2. When you bend your elbow, hand - elbow - shoulder should be "V-shape" not "L-shape."'\
 
         self.str['note'][4] = 'Tips :'\
-                                '\n1. When you do the "T-pose", make sure that your hand, elbow, and shoulder are straight'\
+                                '\n1. When you do the "T-pose", make sure that your hand, elbow, and shoulder are straight.'\
                                 '\n2. When you close your hands, make sure that your hand and shoulder are in the same height.'\
 
         # self.str['note'][5] = 'Tips :'\
@@ -700,12 +725,12 @@ class Instrcution_win(wx.Frame):
         #                         '\n2. Keep your body staight'
 
         self.str['note'][5] = 'Tips :'\
-                                '\n1. Try to rotate your shoulders in a full circle'
+                                '\n1. Try to rotate your shoulders in a full circle.'
 
         self.str['note'][6] = 'Tips :'\
                                 '\n1. When you raise your arms to the forehead, keep two elbows as close as possible.'\
                                 '\n2. When your hands are in the back, spread the elbows open as wide as possible.'\
-                                '\n3. Keep your body staight.'
+                                '\n3. Keep your body straight.'
 
     def onListBox(self, event):
         self.text.Clear()
@@ -782,6 +807,7 @@ class Instrcution_win(wx.Frame):
 
 
     def close(self, event):
+        #self.player.mc.Stop()
         self.Destroy()
 
 
@@ -829,19 +855,21 @@ class MoviePanel(wx.Panel):
         sizer = wx.GridBagSizer(self.sizer_w, self.sizer_h)
         # sizer.Add(loadButton, (1,1))
         #sizer.Add(self.button_home, (1, 1))
-        sizer.Add(self.playButton, (1, 4))  # was 2,4
-        sizer.Add(self.pauseButton, (2, 4))  # was 3, 4
-        sizer.Add(self.stopButton, (3, 4))  # was 4 , 4
-        sizer.Add(self.slider, (4, 4))  # was 5,4
+        sizer.Add(self.playButton, (1, 1))  # was 2,4
+        sizer.Add(self.pauseButton, (2, 1))  # was 3, 4
+        sizer.Add(self.stopButton, (3, 1))  # was 4 , 4
+        sizer.Add(self.slider, (4, 1))  # was 5,4
         sizer.Add(self.mc, (0, 0), span=(6, 0))  # for .avi .mpg video files
         self.SetSizer(sizer)
 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.OnTimer)
         self.timer.Start(100)
+        print("movie panel initialized done")
 
 
     def doLoadFile(self, path):
+        print("0"*6)
         if not self.mc.Load(path):
             wx.MessageBox("Unable to load %s: Unsupported format?" % path, "ERROR", wx.ICON_ERROR | wx.OK)
             self.playButton.Disable()
@@ -850,31 +878,49 @@ class MoviePanel(wx.Panel):
             self.slider.SetRange(0, self.mc.Length())
             self.playButton.Enable()
             # self.mc.Play()#ITS TO PROBLEM, WHY IT DOESNT PLAY HERE?#
+        print("1"*6)
 
     def onPlay(self, evt):
+        print("2"*6)
         self.mc.Play()
         self.GetSizer().Layout()
         self.slider.SetRange(0, self.mc.Length())
+        print("3"*6)
 
     def onPause(self, evt):
+        print("4"*6)
         self.mc.Pause()
+        print("5"*6)
 
     def onStop(self, evt):
+        print("6"*6)
         self.mc.Stop()
+        print("7"*6)
 
     def OnSeek(self, evt):
+        print("8"*6)
         offset = self.slider.GetValue()
         self.mc.Seek(offset)
+        print("9"*6)
 
     def OnTimer(self, evt):
+        print("10 "*6)
         offset = self.mc.Tell()
         # update value of slider
         self.slider.SetValue(offset)
+        print("11 "*6)
 
     def ShutdownDemo(self):
+        print("12 "*6)
         self.timer.Stop()
         del self.timer
+        print("13 "*6)
 
+    def close(self, event):
+        print("14"*6)
+        #self.player.mc.Stop()
+        self.Destroy()
+        print("15 "*6)
 
 class History_view(wx.Frame):
     def __init__(self, parent, info, path, title='history log'):
@@ -907,8 +953,9 @@ class History_view(wx.Frame):
         # self.color_line = ['#0096BF', '#005A73', '#BFA600', '#736400', '#ffae25', '#af7900', '#d957b4', '#75005b']
         self.color_line = [(174./255, 1, 0, 0.6), (139./255, 204./255, 0, 0.6), (87./255, 127./255, 0, 0.6), (99./255, 127./255, 38./255, 0.6)]
         self.font = {'family': 'serif', 'color':  '#000000', 'weight': 'normal', 'size': 16}
-        self.Show()
-        self.Maximize(True)
+        #self.Show()
+        #self.Maximize(True)
+        self.ShowFullScreen(True)
 
     def init_ui(self):
         self.font = wx.Font(16, wx.DEFAULT, wx.NORMAL, wx.NORMAL, False) # was 15
@@ -974,7 +1021,7 @@ class History_view(wx.Frame):
         button_home.Bind(wx.EVT_BUTTON, self.close)
 
         box2.Add(box1, 0)
-        self.lst = wx.ListBox(self.panel, size=(350, self.height - 230 -100), choices=[], style=wx.LB_SINGLE) # was size=(self.sub_width, self.height - 230)
+        self.lst = wx.ListBox(self.panel, size=(450, self.height - 230 -100), choices=[], style=wx.LB_SINGLE) # was size=(self.sub_width, self.height - 230)
        
         self.lst.SetFont(self.font)
         self.lst.SetBackgroundColour((230, 230, 230))

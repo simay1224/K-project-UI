@@ -49,13 +49,15 @@ class Horzp(object):
     def run(self, joints):
         if self.cnt >= 4:
             return
-        dist = abs(joints[18]-joints[27])
+        dist = abs(joints[18]-joints[27]) # difference between x coordinates of two wrists
         self.ongoing_cycle= True
-        if dist > 700:
+        #print('*()*'*80)
+        #print("dist is ",dist)
+        if dist > 700: # was originally 700
             if self.cflag:
                 self.cflag = False
                 if self.cnt > 0:
-                    if self.Lcangle[self.cnt] < 70 or self.Rcangle[self.cnt] < 70: # was 80
+                    if self.Lcangle[self.cnt] < 56 or self.Rcangle[self.cnt] < 56: # was 80, then tried 56
                         self.evalstr = 'Please keep your arms horizontally.\n'
                         self.eval = 'Please keep your arms horizontally.\n'
                         self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not horizontal.')
@@ -77,10 +79,10 @@ class Horzp(object):
                 self.tflag = True
                 self.cnt += 1
                 self.ongoing_cycle= False
-        elif dist < 300:
+        elif dist < 350: #was originally 300
             if self.tflag:
                 self.tflag = False
-                if self.Ltangle[self.cnt] < 80 or self.Rtangle[self.cnt] < 80:
+                if self.Ltangle[self.cnt] < 56 or self.Rtangle[self.cnt] < 56: # was originally 80, then tried 56
                     self.evalstr = 'Please keep your arms horizontally.\n'
                     self.eval = 'Please keep your arms horizontally.\n'
                     self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not horizontal.')
@@ -100,3 +102,4 @@ class Horzp(object):
                 self.cflag = True
                 self.state = 'chest'
                 self.Max_dist = 700
+        print("state is", self.state)

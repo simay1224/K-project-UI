@@ -119,7 +119,7 @@ class PyKinectRuntime(object):
             self._infrared_frame_data = ctypes.cast(self._infrared_frame_data_type(), ctypes.POINTER(ctypes.c_ushort))
             self._infrared_frame_reader = self._infrared_source.OpenReader()
             self._infrared_frame_arrived_event = self._infrared_frame_reader.SubscribeFrameArrived()
-            self._handles[self._waitHandleCount] = self._infrared_frame_arrived_event
+            self._handles[self._waitHandleCount] = self._infrarewindd_frame_arrived_event
             self._waitHandleCount += 1
             
         if(self.frame_source_types & FrameSourceTypes_Depth):
@@ -321,7 +321,8 @@ class PyKinectRuntime(object):
         
 
     def kinect_frame_thread(self):
-        while 1:    
+        while 1:
+            if ctypes != None:    
                 wait = ctypes.windll.kernel32.WaitForMultipleObjects(self._waitHandleCount, self._handles, False, PyKinectV2._INFINITE)
                
                 if wait == 0: 

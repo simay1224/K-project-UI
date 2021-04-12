@@ -61,7 +61,7 @@ class Pushdp(object):
             if self.cflag:
                 self.cflag = False
                 if self.cnt > 0:
-                    if self.Lcangle[self.cnt] > 50 or self.Rcangle[self.cnt] >50:
+                    if self.Lcangle[self.cnt] > 100 or self.Rcangle[self.cnt] > 100: # was 50 , 50
                         self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, arms are not pulled low enough.')
                         self.errsum.append('Arms are not pulled low enough.')
             if self.Max_wrist_y < wrist_y:
@@ -83,7 +83,7 @@ class Pushdp(object):
         elif stus == 'vshape':
             if self.tflag:
                 self.tflag = False
-                if self.Ltangle[self.cnt] < 160 or self.Rtangle[self.cnt] < 160:
+                if self.Ltangle[self.cnt] < 85 or self.Rtangle[self.cnt] < 85: #was 160, 160
                     self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, please keep your arms straight.')
                     self.errsum.append('Please keep your arms straight.')
             if self.Min_wrist_y > wrist_y:

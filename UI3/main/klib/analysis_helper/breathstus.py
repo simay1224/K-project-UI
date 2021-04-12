@@ -105,16 +105,22 @@ class Breath_status(object):
         b_in = []
         b_out = []
         delidx = []
+        
+        print("^"*100)
 
         if len(self.breath) != 0:
             for i, j in zip(self.breath[:-1], self.breath[1:]):
                 try:
+                    print('0'*10)
                     breath_diff = self.breath_list[j]-self.breath_list[i]
                 except:
+                    print('1'*10)
                     break
                 self.brth_diff.append(abs(breath_diff))
-                if abs(breath_diff) > 10:  # really breath in/out
+                if abs(breath_diff) > 15:  # really breath in/out, was originally 10
+                    print('2'*10)
                     if abs(breath_diff) < 30:  # not deep breath
+                        print('3'*10)
                         if breath_diff > 0:  # breath out
                             print('breathe out from frame '+str(i)+' to frame '+str(j)+
                                   ' <== breathing is not deep enough')
@@ -126,19 +132,25 @@ class Breath_status(object):
                             b_in.append(j-i)
                             self.ngframe.append((i+j)/2)
                     else:
+                        print('4'*10)
                         if breath_diff > 0:  # breath out
+                            print('5'*10)
                             print('breathe out from frame '+str(i)+' to frame '+str(j))
                             b_out.append(j-i)
                         else:  # breath in
+                            print('6'*10)
                             print('breathe in from frame '+str(i)+' to frame '+str(j))
                             b_in.append(j-i)
                 else:
+                    print('7'*10)
                     delidx.append(np.argwhere(self.breath == j)[0][0])
             if len(delidx) > 0:
+                print('8'*10)
                 self.breath = np.delete(self.breath, np.array(delidx))
             print('\naverage breathe out freq is: '+str(np.round(30./np.mean(b_out), 2))+' Hz')
             print('\naverage breathe in freq is: '+str(np.round(30./np.mean(b_in), 2))+' Hz')
         else:
+            print('9'*10)
             # raise ImportError('Doing too fast !! please redo again !!')
             self.evalstr = 'Doing too fast !! please redo again !!\n'
             
@@ -181,7 +193,7 @@ class Breath_status(object):
             loc = np.where((i >= hand_trunc_open[:, 0]) & (i <= hand_trunc_open[:, 1]))[0]
             if len(loc) == 1:
                 cnt += 1
-                if (2*loc) < len(hand_trunc):
+                if (2*loc+1) < len(hand_trunc): # was if (2*loc) < len(hand_trunc):
                     hand_chk[2*loc+1] = 0
             elif len(loc) == 0:
                 pass
@@ -232,9 +244,15 @@ class Breath_status(object):
                 self.cnt += 1
                 self.ongoing_cycle= False
                 if self.eval == '':
-                    self.evalstr = 'Repitition done: Well done.'
+                    if self.cnt <4:
+                        self.evalstr = 'Repitition done: Well done.\n\nBreathe in while opening your chest'
+                    else:
+                        self.evalstr = 'Repitition done: Well done.'
                 else:
-                    self.evalstr = 'Repitition done.\n'+ self.eval
+                    if self.cnt <4:
+                        self.evalstr = 'Repitition done.\n'+ self.eval +'\n\nBreathe in while opening your chest'
+                    else:
+                        self.evalstr = 'Repitition done.\n'+ self.eval
                     self.eval = ''
                 self.ana_ary.append([self.max_ary[-1, 0], 1, self.max_ary[-1, 1]])
         # detect brth in
@@ -245,11 +263,12 @@ class Breath_status(object):
                 # print ('find one min ' +str(self.min_ary[-1, 0]))
                 self.brth_out_flag = True
                 self.ana_ary.append([self.min_ary[-1, 0], 0, self.min_ary[-1, 1]])
-                if np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1]) < 30:
-                    self.evalstr = 'Please breathe deeper.\n'
-                    self.eval = 'Please breathe deeper.\n'
+                print("breathe difference is", np.abs(self.max_ary[-1, 1] - self.min_ary[-1, 1]) )
+                if np.abs (self.max_ary[-1, 1] - self.min_ary[-1, 1]) < 25:# was 30, then tried 18
+                    self.evalstr = 'Please breathe deeper. Open your chest while breathing in \n'
+                    self.eval = 'Please breathe deeper. Open your chest while breathing in\n'
                     self.err.append('At the '+self.cnvt.ordinal(self.cnt+1)+ ' time try, is not deep enough.')
-                    self.errsum.append('Breathing is not deep enough.')
+                    self.errsum.append('Breathing is not deep enough. Please open your chest while breathing in')
         self.max_len = self.max_ary.shape[0]
         self.min_len = self.min_ary.shape[0]
 
